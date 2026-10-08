@@ -13,12 +13,21 @@
 <meta property="og:title" content="Calculadora de IMC: Índice de Massa Corporal e Tabela">
 <meta property="og:description" content="Calcule seu IMC (índice de massa corporal) com a classificação da OMS e descubra a faixa de peso considerada normal para a sua altura.">
 <meta property="og:url" content="https://contacertabr.com.br/imc/">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://contacertabr.com.br/og/imc.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:alt" content="Calculadora de IMC: Índice de massa corporal e faixa de peso.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Calculadora de IMC: Índice de Massa Corporal e Tabela">
+<meta name="twitter:description" content="Calcule seu IMC (índice de massa corporal) com a classificação da OMS e descubra a faixa de peso considerada normal para a sua altura.">
+<meta name="twitter:image" content="https://contacertabr.com.br/og/imc.jpg">
 <meta name="theme-color" content="#0b6e4f">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/style.css">
 <!-- ADSENSE (cabeçalho): após aprovação, defina adsenseClient em site.config.mjs e rode o build; o script oficial entra aqui automaticamente. Não cole IDs de teste. -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculadora de IMC","url":"https://contacertabr.com.br/imc/","description":"Calcule seu IMC (índice de massa corporal) com a classificação da OMS e descubra a faixa de peso considerada normal para a sua altura.","applicationCategory":"HealthApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-08"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculadora de IMC","url":"https://contacertabr.com.br/imc/","description":"Calcule seu IMC (índice de massa corporal) com a classificação da OMS e descubra a faixa de peso considerada normal para a sua altura.","applicationCategory":"HealthApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-08","image":"https://contacertabr.com.br/og/imc.jpg","publisher":{"@id":"https://contacertabr.com.br/#organizacao"},"isPartOf":{"@id":"https://contacertabr.com.br/#site"},"citation":[{"@type":"CreativeWork","name":"Organização Mundial da Saúde — Obesity and overweight","url":"https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight"},{"@type":"CreativeWork","name":"Ministério da Saúde — Biblioteca Virtual em Saúde: IMC","url":"https://bvsms.saude.gov.br/"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"IMC de 25 já é sobrepeso?","acceptedAnswer":{"@type":"Answer","text":"Sim, pela classificação da OMS o sobrepeso começa em 25. Valores próximos do limite merecem atenção, mas devem ser avaliados junto com cintura, composição corporal e histórico de saúde."}},{"@type":"Question","name":"Qual o IMC ideal?","acceptedAnswer":{"@type":"Answer","text":"Para adultos, entre 18,5 e 24,9, segundo a OMS. Dentro dessa faixa, o valor ideal varia de pessoa para pessoa."}},{"@type":"Question","name":"O IMC é diferente para homens e mulheres?","acceptedAnswer":{"@type":"Answer","text":"Não. Para adultos, a fórmula e a tabela são as mesmas. A composição corporal, porém, costuma ser diferente, e por isso outros indicadores complementam a avaliação."}},{"@type":"Question","name":"Posso usar a calculadora para crianças?","acceptedAnswer":{"@type":"Answer","text":"Não. Para menores de 20 anos, o IMC deve ser comparado com curvas de crescimento por idade e sexo, usadas pelo pediatra."}},{"@type":"Question","name":"Os dados que digito ficam salvos?","acceptedAnswer":{"@type":"Answer","text":"Não. O cálculo é feito no seu navegador e nada é enviado ou armazenado."}}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://contacertabr.com.br/"},{"@type":"ListItem","position":2,"name":"Calculadora de IMC","item":"https://contacertabr.com.br/imc/"}]}</script>
 </head>
@@ -31,6 +40,7 @@
 <article>
 <h1>Calculadora de IMC</h1>
 <p class="lead">Informe peso e altura para calcular o índice de massa corporal e ver em que faixa da classificação da Organização Mundial da Saúde você está.</p>
+<p class="meta">Grátis, sem cadastro · Tabelas oficiais conferidas em <time datetime="2026-10-08">08/10/2026</time> · <a href="#fontes-t">Ver fontes</a></p>
 <section class="calc" aria-labelledby="titulo-calc">
 <h2 id="titulo-calc" class="vh">Calculadora</h2>
 <form data-calc="imc" novalidate>
@@ -43,6 +53,14 @@
 </section>
 <!-- ADSENSE: bloco "após a calculadora". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
 <div class="texto">
+
+<section class="resposta" aria-labelledby="resposta-t">
+<h2 id="resposta-t">Resposta rápida</h2>
+<p><strong>IMC = peso (kg) ÷ altura (m)².</strong> Para adultos, a Organização Mundial da Saúde classifica: abaixo de 18,5, abaixo do peso; de 18,5 a 24,9, peso normal; de 25 a 29,9, sobrepeso; 30 ou mais, obesidade (graus I, II e III a partir de 30, 35 e 40).</p>
+<p>Exemplo: 70 kg e 1,75 m dão IMC de <strong>22,86</strong> (peso normal). A faixa de peso normal para essa altura vai de 56,7 kg a 76,3 kg.</p>
+</section>
+<h2>Como usar a calculadora</h2>
+<ol class="passos"><li>Digite o peso em quilos.</li><li>Digite a altura em centímetros ou em metros.</li><li>Clique em <strong>Calcular</strong> para ver o IMC, a classificação da OMS e a faixa de peso normal para a sua altura.</li></ol>
 
 <h2>Como o IMC é calculado</h2>
 <p>O índice de massa corporal relaciona peso e altura: <strong>IMC = peso (kg) ÷ altura (m)²</strong>. Uma pessoa de 80 kg e 1,78 m tem IMC = 80 ÷ (1,78 × 1,78) = 80 ÷ 3,1684 ≈ 25,25.</p>
@@ -101,7 +119,7 @@
 <footer class="rodape"><div class="caixa">
 <p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p>
 <nav aria-label="Institucional"><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
-<p class="mini">Tabelas oficiais conferidas em 08/10/2026.</p>
+<p class="mini">Tabelas oficiais conferidas em <time datetime="2026-10-08">08/10/2026</time>. <a href="/sobre/">Como verificamos as fontes</a>.</p>
 </div></footer>
 </body>
 </html>

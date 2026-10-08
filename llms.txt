@@ -1,0 +1,54 @@
+# Conta Certa
+
+> Conta Certa (https://contacertabr.com.br) reúne 18 calculadoras gratuitas em português do Brasil para salário, direitos trabalhistas (CLT), impostos, MEI, investimentos, financiamentos e contas do dia a dia. Os cálculos usam as tabelas oficiais vigentes em 2026, citam a norma de origem e rodam no navegador do usuário, sem cadastro e sem envio de dados.
+
+Tabelas conferidas em 08/10/2026. Principais valores usados em 2026:
+
+- Salário mínimo: R$ 1.621,00 (Decreto nº 12.797, de 23/12/2025).
+- INSS do empregado: alíquotas progressivas de 7,5% a 14% até o teto de R$ 8.475,55 (Portaria Interministerial MPS/MF nº 13, de 09/01/2026).
+- IRRF: tabela progressiva mensal com desconto simplificado de R$ 607,20, dedução de R$ 189,59 por dependente e redução da Lei 15.270/2025, que zera o imposto até R$ 5.000,00 de rendimento mensal e reduz gradualmente até R$ 7.350,00.
+- DAS MEI: INSS de R$ 81,05 mais ICMS de R$ 1,00 e/ou ISS de R$ 5,00; limite anual de R$ 81.000,00.
+- Seguro-desemprego: parcela entre R$ 1.621,00 e R$ 2.518,65 (Ministério do Trabalho e Emprego — Portal FAT, 13/01/2026).
+
+Os resultados são estimativas e não substituem contador, advogado trabalhista ou profissional de saúde. Cada página tem resposta rápida, passo a passo, exemplos, perguntas frequentes e links para as fontes oficiais (Planalto, Receita Federal, INSS, Ministério do Trabalho e Banco Central).
+
+## Trabalho e salário
+
+- [Calculadora de salário líquido 2026](https://contacertabr.com.br/salario-liquido/): Calcule seu salário líquido 2026 com a nova isenção de IR até R$ 5.000, tabela do INSS atualizada, dependentes, pensão e vale-transporte. Grátis e passo a passo.
+- [Calculadora de rescisão trabalhista](https://contacertabr.com.br/rescisao/): Simule sua rescisão trabalhista 2026: saldo de salário, aviso prévio proporcional, 13º, férias + 1/3 e multa de 40% do FGTS. Demissão, pedido de demissão e acordo.
+- [Calculadora de 13º salário](https://contacertabr.com.br/decimo-terceiro/): Calcule o 13º salário 2026: valor proporcional aos meses trabalhados, 1ª parcela sem descontos e 2ª parcela com INSS e IR (isenção até R$ 5.000).
+- [Calculadora de férias](https://contacertabr.com.br/ferias/): Calcule o valor das férias 2026 com 1/3 constitucional, venda de 10 dias (abono pecuniário), INSS e IR. Veja exemplos e prazos de pagamento.
+- [Calculadora de FGTS](https://contacertabr.com.br/fgts/): Estime o saldo do FGTS pelos depósitos de 8% ao mês com rendimento de 3% ao ano, e calcule a multa de 40% ou 20% e o valor do saque na demissão.
+- [Calculadora de horas extras](https://contacertabr.com.br/horas-extras/): Calcule o valor das horas extras a 50% e 100%, com o divisor da jornada e o reflexo no descanso semanal remunerado (DSR). Exemplos passo a passo.
+- [Calculadora de seguro-desemprego 2026](https://contacertabr.com.br/seguro-desemprego/): Calcule o valor e o número de parcelas do seguro-desemprego 2026 pela tabela oficial do MTE: piso de R$ 1.621 e teto de R$ 2.518,65.
+
+## Finanças e investimentos
+
+- [Calculadora de juros compostos](https://contacertabr.com.br/juros-compostos/): Simule juros compostos com valor inicial, aportes mensais e taxa mensal ou anual. Veja o valor final, os juros ganhos e a evolução ano a ano.
+- [Simulador de financiamento SAC e Price](https://contacertabr.com.br/financiamento/): Simule financiamento de imóvel ou veículo nas tabelas SAC e Price: primeira e última parcela, total de juros e tabela de amortização completa.
+- [Calculadora de investimentos: CDB x poupança x Tesouro Selic](https://contacertabr.com.br/investimentos/): Compare CDB, LCI/LCA, Tesouro Selic e poupança com a Selic de 13,75%: rendimento bruto, IR pela tabela regressiva e valor líquido no prazo escolhido.
+
+## Impostos e MEI
+
+- [Calculadora de imposto de renda 2026 (IRRF mensal)](https://contacertabr.com.br/imposto-de-renda/): Calcule o IR retido na fonte em 2026 com a nova isenção até R$ 5.000 e a redução até R$ 7.350 (Lei 15.270/2025), dependentes e desconto simplificado.
+- [Calculadora DAS MEI 2026](https://contacertabr.com.br/das-mei/): Veja o valor do DAS MEI 2026 (R$ 82,05, R$ 86,05 ou R$ 87,05), o total anual e se o seu faturamento cabe no limite de R$ 81 mil do MEI.
+- [Calculadora de INSS 2026](https://contacertabr.com.br/inss/): Calcule a contribuição ao INSS 2026 com a tabela progressiva oficial (7,5% a 14%, teto R$ 8.475,55) ou como autônomo, facultativo e MEI (20%, 11% ou 5%).
+
+## Matemática
+
+- [Calculadora de porcentagem](https://contacertabr.com.br/porcentagem/): Calcule porcentagem de um valor, quanto um número representa em %, variação percentual, aumento e desconto. Com fórmulas e exemplos práticos.
+- [Calculadora de regra de três](https://contacertabr.com.br/regra-de-tres/): Resolva regra de três simples direta e inversa online. Entenda a diferença entre grandezas proporcionais e inversamente proporcionais com exemplos.
+- [Conversor de medidas](https://contacertabr.com.br/conversor-de-medidas/): Converta medidas de comprimento, peso, volume, área, velocidade e temperatura, incluindo milha, libra, alqueire paulista e Fahrenheit para Celsius.
+
+## Saúde e dia a dia
+
+- [Calculadora de IMC](https://contacertabr.com.br/imc/): Calcule seu IMC (índice de massa corporal) com a classificação da OMS e descubra a faixa de peso considerada normal para a sua altura.
+- [Calculadora de idade exata](https://contacertabr.com.br/idade/): Calcule a idade exata em anos, meses e dias a partir da data de nascimento, com total em meses, dias e semanas e a contagem até o próximo aniversário.
+
+## Sobre o site
+
+- [Sobre e metodologia](https://contacertabr.com.br/sobre/): quem mantém o site, como as fontes são verificadas e como as tabelas são atualizadas.
+- [Contato](https://contacertabr.com.br/contato/): correções de tabelas e sugestões.
+- [Política de privacidade](https://contacertabr.com.br/privacidade/)
+- [Termos de uso](https://contacertabr.com.br/termos/)
+- [Mapa do site](https://contacertabr.com.br/sitemap.xml)
