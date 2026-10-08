@@ -12,6 +12,13 @@ Tabelas conferidas em 08/10/2026. Principais valores usados em 2026:
 
 Os resultados são estimativas e não substituem contador, advogado trabalhista ou profissional de saúde. Cada página tem resposta rápida, passo a passo, exemplos, perguntas frequentes e links para as fontes oficiais (Planalto, Receita Federal, INSS, Ministério do Trabalho e Banco Central).
 
+## Tabelas oficiais
+
+- [Tabela do INSS 2026](https://contacertabr.com.br/tabela-inss-2026/): Tabela do INSS 2026 para empregado: faixas de 7,5% a 14%, teto, contribuição máxima e planos de autônomo de 20%, 11% e 5%. Fonte oficial.
+- [Tabela do imposto de renda 2026](https://contacertabr.com.br/tabela-ir-2026/): Tabela do imposto de renda 2026: faixas do IRRF, dedução por dependente, desconto simplificado e isenção efetiva até R$ 5.000,00 pela Lei 15.270/2025.
+- [Salário mínimo 2026](https://contacertabr.com.br/salario-minimo-2026/): O salário mínimo de 2026 é R$ 1.621,00, vigente desde 01/01/2026 (Decreto nº 12.797, de 23/12/2025). Veja o efeito no INSS, no seguro-desemprego e no DAS do MEI.
+- [Tabela do seguro-desemprego 2026](https://contacertabr.com.br/tabela-seguro-desemprego-2026/): Tabela do seguro-desemprego 2026, vigente desde 11/01/2026: 80% da média até R$ 2.222,17, faixa intermediária e teto de R$ 2.518,65.
+
 ## Trabalho e salário
 
 - [Calculadora de salário líquido 2026](https://contacertabr.com.br/salario-liquido/): Calcule seu salário líquido 2026 com a nova isenção de IR até R$ 5.000, tabela do INSS atualizada, dependentes, pensão e vale-transporte. Grátis e passo a passo.
