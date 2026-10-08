@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora CDB x Poupança x Tesouro Selic x LCI (2026)</title>
+<meta name="description" content="Compare CDB, LCI/LCA, Tesouro Selic e poupança com a Selic de 13,75%: rendimento bruto, IR pela tabela regressiva e valor líquido no prazo escolhido.">
+<link rel="canonical" href="https://contacertabr.com.br/investimentos/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Conta Certa">
+<meta property="og:title" content="Calculadora CDB x Poupança x Tesouro Selic x LCI (2026)">
+<meta property="og:description" content="Compare CDB, LCI/LCA, Tesouro Selic e poupança com a Selic de 13,75%: rendimento bruto, IR pela tabela regressiva e valor líquido no prazo escolhido.">
+<meta property="og:url" content="https://contacertabr.com.br/investimentos/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0b6e4f">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+<!-- ADSENSE (cabeçalho): após aprovação, defina adsenseClient em site.config.mjs e rode o build; o script oficial entra aqui automaticamente. Não cole IDs de teste. -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculadora de investimentos: CDB x poupança x Tesouro Selic","url":"https://contacertabr.com.br/investimentos/","description":"Compare CDB, LCI/LCA, Tesouro Selic e poupança com a Selic de 13,75%: rendimento bruto, IR pela tabela regressiva e valor líquido no prazo escolhido.","applicationCategory":"FinanceApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-08"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"A poupança ainda vale a pena em 2026?","acceptedAnswer":{"@type":"Answer","text":"Com a Selic acima de 8,5%, a poupança rende 0,5% ao mês + TR, abaixo de um CDB de 100% do CDI ou do Tesouro Selic mesmo depois do IR, na maioria dos prazos. Sua vantagem é a simplicidade e a isenção."}},{"@type":"Question","name":"O que é CDI?","acceptedAnswer":{"@type":"Answer","text":"É a taxa média dos empréstimos de um dia entre bancos. Fica muito próxima da Selic, em geral cerca de 0,10 ponto percentual abaixo."}},{"@type":"Question","name":"O imposto é cobrado todo ano?","acceptedAnswer":{"@type":"Answer","text":"Em CDB, Tesouro e LCI/LCA, não: o IR é retido só no resgate ou vencimento. Já em fundos de investimento há o come-cotas semestral."}},{"@type":"Question","name":"Os valores padrão são atualizados?","acceptedAnswer":{"@type":"Answer","text":"Os campos já vêm com a Selic, uma estimativa do CDI e a TR recente, com data de conferência indicada abaixo. Você pode editar para simular outros cenários."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://contacertabr.com.br/"},{"@type":"ListItem","position":2,"name":"Calculadora de investimentos: CDB x poupança x Tesouro Selic","item":"https://contacertabr.com.br/investimentos/"}]}</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo"><div class="caixa"><a class="marca" href="/"><span aria-hidden="true">＝</span> Conta Certa</a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#outras">Outras</a></nav></div></header>
+<main id="conteudo" class="caixa">
+
+<nav class="migalhas" aria-label="Você está em"><a href="/">Início</a> › <span aria-current="page">Calculadora de investimentos: CDB x poupança x Tesouro Selic</span></nav>
+<article>
+<h1>Calculadora de investimentos: CDB x poupança x Tesouro Selic</h1>
+<p class="lead">Compare quanto rende o mesmo valor em CDB, LCI/LCA, Tesouro Selic e poupança, já descontando o imposto de renda de cada aplicação.</p>
+<section class="calc" aria-labelledby="titulo-calc">
+<h2 id="titulo-calc" class="vh">Calculadora</h2>
+<form data-calc="investimentos" novalidate>
+<div class="grade-campos"><div class="campo"><label for="f-valor">Valor investido</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="number" inputmode="decimal" id="f-valor" name="valor" step="0.01" min="0" value="10000"></div></div>
+<div class="campo"><label for="f-dias">Prazo em dias corridos</label><div class="entrada"><input type="number" inputmode="decimal" id="f-dias" name="dias" step="1" min="30" value="730" aria-describedby="f-dias-ajuda"></div><small id="f-dias-ajuda">365 = 1 ano; 730 = 2 anos.</small></div>
+<div class="campo"><label for="f-cdi">CDI ao ano</label><div class="entrada"><input type="number" inputmode="decimal" id="f-cdi" name="cdi" step="any" value="" data-indicador="cdi"><span class="suf" aria-hidden="true">%</span></div></div>
+<div class="campo"><label for="f-selic">Selic ao ano</label><div class="entrada"><input type="number" inputmode="decimal" id="f-selic" name="selic" step="any" value="" data-indicador="selic"><span class="suf" aria-hidden="true">%</span></div></div>
+<div class="campo"><label for="f-pctCdb">CDB rende quantos % do CDI</label><div class="entrada"><input type="number" inputmode="decimal" id="f-pctCdb" name="pctCdb" step="any" value="100"><span class="suf" aria-hidden="true">%</span></div></div>
+<div class="campo"><label for="f-pctLci">LCI/LCA rende quantos % do CDI</label><div class="entrada"><input type="number" inputmode="decimal" id="f-pctLci" name="pctLci" step="any" value="90"><span class="suf" aria-hidden="true">%</span></div></div>
+<div class="campo"><label for="f-tr">TR mensal (poupança)</label><div class="entrada"><input type="number" inputmode="decimal" id="f-tr" name="tr" step="any" value="" data-indicador="trMensal"><span class="suf" aria-hidden="true">%</span></div></div></div>
+<button type="submit">Calcular</button>
+</form>
+<div id="resultado" class="resultado" aria-live="polite" tabindex="-1"><noscript><p class="erro">Ative o JavaScript para usar a calculadora.</p></noscript></div>
+<p class="aviso" role="note"><strong>Resultado estimativo.</strong> Simulação com taxas constantes durante todo o prazo, em dias corridos (base 365). Na prática, CDI e Selic mudam, e os bancos usam dias úteis. Não considera IOF, taxa de custódia da B3 nem risco de crédito.</p>
+</section>
+<!-- ADSENSE: bloco "após a calculadora". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<div class="texto">
+
+<h2>Como cada aplicação rende</h2>
+<ul>
+<li><strong>CDB:</strong> título emitido por bancos, normalmente atrelado a um percentual do CDI. Tem imposto de renda e é coberto pelo FGC até R$ 250 mil por CPF e instituição.</li>
+<li><strong>LCI e LCA:</strong> letras de crédito imobiliário e do agronegócio, também com FGC, mas <strong>isentas de IR</strong> para pessoa física. Por isso costumam pagar um percentual menor do CDI e exigem prazo mínimo de carência.</li>
+<li><strong>Tesouro Selic:</strong> título público que acompanha a Selic, com liquidez diária e o menor risco do país. Tem IR e taxa de custódia da B3.</li>
+<li><strong>Poupança:</strong> isenta de IR e com FGC. Com a Selic acima de 8,5% ao ano, rende 0,5% ao mês + TR; com Selic igual ou menor, rende 70% da Selic + TR. Só credita rendimento no "aniversário" mensal do depósito.</li>
+</ul>
+<h2>Imposto de renda: tabela regressiva</h2>
+<table><thead><tr><th>Prazo da aplicação</th><th>Alíquota sobre o rendimento</th></tr></thead><tbody>
+<tr><td>Até 180 dias</td><td>22,5%</td></tr><tr><td>De 181 a 360 dias</td><td>20%</td></tr><tr><td>De 361 a 720 dias</td><td>17,5%</td></tr><tr><td>Acima de 720 dias</td><td>15%</td></tr>
+</tbody></table>
+<p>O imposto incide só sobre o ganho, não sobre o valor aplicado, e é retido no resgate. Resgates com menos de 30 dias também pagam IOF regressivo, ignorado nesta simulação. A proposta de alíquota única de 2025 (MP 1.303) perdeu a validade sem virar lei, e a tabela regressiva continua valendo em 2026.</p>
+<h2>Exemplo com a Selic de outubro de 2026</h2>
+<p>R$ 10.000,00 por 2 anos (730 dias), com Selic de 13,75%, CDI de 13,65% e TR de 0,17% ao mês:</p>
+<table><thead><tr><th>Aplicação</th><th>Valor final líquido</th></tr></thead><tbody>
+<tr><td>LCI/LCA 90% do CDI</td><td>R$ 12.607,92</td></tr>
+<tr><td>Tesouro Selic</td><td>R$ 12.498,20</td></tr>
+<tr><td>CDB 100% do CDI</td><td>R$ 12.478,87</td></tr>
+<tr><td>Poupança</td><td>R$ 11.738,20</td></tr>
+</tbody></table>
+<p>Como o prazo passa de 720 dias, CDB e Tesouro pagam 15% de IR. A LCI a 90% do CDI vence porque é isenta: para empatar com ela, um CDB precisaria render cerca de 106% do CDI nesse prazo (90% ÷ 0,85). Em prazos curtos, com IR de 22,5%, a vantagem da isenção é ainda maior.</p>
+<h2>Como comparar com a "taxa equivalente"</h2>
+<p>Para comparar uma aplicação isenta com uma tributada, divida o percentual da isenta por (1 − alíquota do IR). Uma LCA de 85% do CDI equivale a um CDB de 100% do CDI se o prazo for de 2 anos ou mais (85 ÷ 0,85), e a um CDB de cerca de 109,7% em prazos de até 180 dias (85 ÷ 0,775).</p>
+<h2>Antes de investir</h2>
+<ul>
+<li><strong>Reserva de emergência:</strong> priorize liquidez diária (Tesouro Selic ou CDB com liquidez diária).</li>
+<li><strong>FGC:</strong> respeite o limite de R$ 250 mil por instituição e CPF, com teto global de R$ 1 milhão a cada 4 anos.</li>
+<li><strong>Carência:</strong> LCI e LCA têm prazo mínimo de resgate. Não aplique dinheiro de que pode precisar antes disso.</li>
+<li><strong>Taxas:</strong> a custódia do Tesouro e eventuais taxas de corretagem reduzem o retorno.</li>
+</ul>
+</div>
+<!-- AFILIADOS: Possível parceria: corretoras/bancos digitais com CDB e Tesouro Direto (programa de afiliados). Inserir aqui um bloco com link de afiliado (rel="sponsored nofollow") e aviso "Este link pode gerar comissão" após aprovar o programa. -->
+<!-- ADSENSE: bloco "meio do conteúdo". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<section class="faq" aria-labelledby="faq-t"><h2 id="faq-t">Perguntas frequentes</h2>
+<details><summary>A poupança ainda vale a pena em 2026?</summary><div><p>Com a Selic acima de 8,5%, a poupança rende 0,5% ao mês + TR, abaixo de um CDB de 100% do CDI ou do Tesouro Selic mesmo depois do IR, na maioria dos prazos. Sua vantagem é a simplicidade e a isenção.</p></div></details>
+<details><summary>O que é CDI?</summary><div><p>É a taxa média dos empréstimos de um dia entre bancos. Fica muito próxima da Selic, em geral cerca de 0,10 ponto percentual abaixo.</p></div></details>
+<details><summary>O imposto é cobrado todo ano?</summary><div><p>Em CDB, Tesouro e LCI/LCA, não: o IR é retido só no resgate ou vencimento. Já em fundos de investimento há o come-cotas semestral.</p></div></details>
+<details><summary>Os valores padrão são atualizados?</summary><div><p>Os campos já vêm com a Selic, uma estimativa do CDI e a TR recente, com data de conferência indicada abaixo. Você pode editar para simular outros cenários.</p></div></details>
+</section>
+<section class="fontes" aria-labelledby="fontes-t"><h2 id="fontes-t">Fontes oficiais e atualização</h2>
+<ul><li><a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" rel="noopener" target="_blank">Receita Federal — Tributação de 2026 (aplicações de renda fixa)</a></li><li><a href="https://www.bcb.gov.br/controleinflacao/historicotaxasjuros" rel="noopener" target="_blank">Banco Central do Brasil — Comunicado nº 45.963, de 16/09/2026</a></li><li><a href="https://www.bcb.gov.br/estatisticas/remuneradepositospoupanca" rel="noopener" target="_blank">Banco Central do Brasil — remuneração dos depósitos de poupança</a></li><li><a href="https://www.fgc.org.br/" rel="noopener" target="_blank">Fundo Garantidor de Créditos (FGC)</a></li></ul>
+<p>Valores e regras conferidos em <time datetime="2026-10-08">08/10/2026</time>.</p>
+</section>
+<section class="relacionadas" aria-labelledby="rel-t"><h2 id="rel-t">Calculadoras relacionadas</h2>
+<ul class="cards"><li><a href="/juros-compostos/"><strong>Juros compostos</strong><span>Simule aportes mensais e veja o patrimônio crescer.</span></a></li><li><a href="/financiamento/"><strong>Financiamento SAC e Price</strong><span>Parcelas, juros totais e tabela de amortização.</span></a></li><li><a href="/imposto-de-renda/"><strong>Imposto de renda (IRRF)</strong><span>IR na fonte com isenção até R$ 5.000.</span></a></li><li><a href="/porcentagem/"><strong>Porcentagem</strong><span>X% de um valor, variação, aumento e desconto.</span></a></li><li><a href="/fgts/"><strong>FGTS</strong><span>Depósitos mensais, saldo estimado e multa de 40%.</span></a></li></ul>
+</section>
+</article>
+<script type="module" src="/assets/js/ui.js"></script>
+<link rel="modulepreload" href="/assets/js/calc.js">
+</main>
+<footer class="rodape"><div class="caixa">
+<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p>
+<nav aria-label="Institucional"><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+<p class="mini">Tabelas oficiais conferidas em 08/10/2026.</p>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de Financiamento: Tabela SAC x Price</title>
+<meta name="description" content="Simule financiamento de imóvel ou veículo nas tabelas SAC e Price: primeira e última parcela, total de juros e tabela de amortização completa.">
+<link rel="canonical" href="https://contacertabr.com.br/financiamento/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Conta Certa">
+<meta property="og:title" content="Simulador de Financiamento: Tabela SAC x Price">
+<meta property="og:description" content="Simule financiamento de imóvel ou veículo nas tabelas SAC e Price: primeira e última parcela, total de juros e tabela de amortização completa.">
+<meta property="og:url" content="https://contacertabr.com.br/financiamento/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0b6e4f">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+<!-- ADSENSE (cabeçalho): após aprovação, defina adsenseClient em site.config.mjs e rode o build; o script oficial entra aqui automaticamente. Não cole IDs de teste. -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Simulador de financiamento SAC e Price","url":"https://contacertabr.com.br/financiamento/","description":"Simule financiamento de imóvel ou veículo nas tabelas SAC e Price: primeira e última parcela, total de juros e tabela de amortização completa.","applicationCategory":"FinanceApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-08"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"O que é melhor, SAC ou Price?","acceptedAnswer":{"@type":"Answer","text":"Se a primeira parcela do SAC cabe no orçamento, ele costuma sair mais barato. A Price serve para quem precisa de parcela inicial menor e previsível."}},{"@type":"Question","name":"Por que minha parcela no banco é maior que na simulação?","acceptedAnswer":{"@type":"Answer","text":"Porque o banco inclui seguros obrigatórios (morte e invalidez, danos físicos), taxa de administração e, em muitos contratos, a correção do saldo pela TR ou pelo IPCA."}},{"@type":"Question","name":"Vale a pena amortizar o financiamento?","acceptedAnswer":{"@type":"Answer","text":"Em geral, sim, quando a taxa do financiamento é maior que o rendimento líquido que você conseguiria investindo o mesmo dinheiro. Compare usando as calculadoras de juros e investimentos."}},{"@type":"Question","name":"Qual o prazo máximo de financiamento imobiliário?","acceptedAnswer":{"@type":"Answer","text":"Os bancos costumam oferecer até 420 meses (35 anos), respeitando a idade máxima do comprador somada ao prazo, normalmente perto de 80 anos e 6 meses."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://contacertabr.com.br/"},{"@type":"ListItem","position":2,"name":"Simulador de financiamento SAC e Price","item":"https://contacertabr.com.br/financiamento/"}]}</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo"><div class="caixa"><a class="marca" href="/"><span aria-hidden="true">＝</span> Conta Certa</a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#outras">Outras</a></nav></div></header>
+<main id="conteudo" class="caixa">
+
+<nav class="migalhas" aria-label="Você está em"><a href="/">Início</a> › <span aria-current="page">Simulador de financiamento SAC e Price</span></nav>
+<article>
+<h1>Simulador de financiamento SAC e Price</h1>
+<p class="lead">Compare parcelas e juros totais de um financiamento nas tabelas SAC e Price, com a tabela de amortização mês a mês.</p>
+<section class="calc" aria-labelledby="titulo-calc">
+<h2 id="titulo-calc" class="vh">Calculadora</h2>
+<form data-calc="financiamento" novalidate>
+<div class="grade-campos"><div class="campo"><label for="f-valor">Valor financiado</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="number" inputmode="decimal" id="f-valor" name="valor" step="0.01" min="0" value="300000"></div></div>
+<div class="campo"><label for="f-taxa">Taxa de juros</label><div class="entrada"><input type="number" inputmode="decimal" id="f-taxa" name="taxa" step="any" min="0" value="11"><span class="suf" aria-hidden="true">%</span></div></div>
+<div class="campo"><label for="f-periodo">A taxa é</label><select id="f-periodo" name="periodo" data-padrao="anual"><option value="anual" selected>Ao ano</option><option value="mensal">Ao mês</option></select></div>
+<div class="campo"><label for="f-meses">Prazo em meses</label><div class="entrada"><input type="number" inputmode="decimal" id="f-meses" name="meses" step="1" min="1" max="600" value="360"></div></div>
+<div class="campo"><label for="f-sistema">Sistema de amortização</label><select id="f-sistema" name="sistema" data-padrao="sac"><option value="sac" selected>SAC (parcelas decrescentes)</option><option value="price">Price (parcelas fixas)</option></select></div></div>
+<button type="submit">Calcular</button>
+</form>
+<div id="resultado" class="resultado" aria-live="polite" tabindex="-1"><noscript><p class="erro">Ative o JavaScript para usar a calculadora.</p></noscript></div>
+<p class="aviso" role="note"><strong>Resultado estimativo.</strong> Simulação sem seguros obrigatórios (MIP e DFI), tarifas, IOF nem correção do saldo pela TR ou IPCA. A proposta do banco informa o Custo Efetivo Total (CET), que é o número a comparar.</p>
+</section>
+<!-- ADSENSE: bloco "após a calculadora". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<div class="texto">
+
+<h2>SAC ou Price: qual a diferença</h2>
+<p>Os dois sistemas cobram a mesma taxa de juros, mas devolvem o dinheiro ao banco em ritmos diferentes:</p>
+<ul>
+<li><strong>SAC (Sistema de Amortização Constante):</strong> a parte que abate a dívida é igual todo mês (valor ÷ prazo). Como os juros incidem sobre um saldo cada vez menor, a parcela começa mais alta e cai ao longo do tempo. Paga-se menos juros no total.</li>
+<li><strong>Price (Sistema Francês):</strong> a parcela é fixa. No começo, quase toda a parcela é juros e a dívida cai devagar. A primeira parcela é menor que no SAC, mas o total de juros é maior.</li>
+</ul>
+<h2>Fórmulas</h2>
+<p>Price: <strong>PMT = PV × i ÷ [1 − (1 + i)<sup>−n</sup>]</strong>. SAC: amortização = PV ÷ n; parcela = amortização + saldo devedor × i.</p>
+<p>Taxas anuais são convertidas para a mensal equivalente: (1 + taxa anual)<sup>1/12</sup> − 1. Uma taxa de 11% ao ano equivale a cerca de 0,8735% ao mês.</p>
+<h2>Exemplo: imóvel de R$ 300 mil em 30 anos</h2>
+<table><thead><tr><th>Sistema</th><th>1ª parcela</th><th>Última parcela</th><th>Total de juros</th></tr></thead><tbody>
+<tr><td>SAC</td><td>R$ 3.453,71</td><td>R$ 840,61</td><td>R$ 472.978,26</td></tr>
+<tr><td>Price</td><td>R$ 2.740,07</td><td>R$ 2.740,07</td><td>R$ 686.426,00</td></tr>
+</tbody></table>
+<p>Taxa de 11% ao ano, 360 meses, sem seguros e sem correção. No SAC, a economia de juros passa de R$ 213 mil, mas a primeira parcela é R$ 713,64 maior. Os bancos costumam exigir que a parcela inicial não passe de cerca de 30% da renda familiar, o que torna o SAC mais exigente na aprovação.</p>
+<h2>Exemplo: veículo de R$ 50 mil em 48 meses</h2>
+<p>A 1,8% ao mês, a parcela fixa da Price é de R$ 1.564,47, com R$ 25.094,37 de juros. No SAC, a primeira parcela é R$ 1.941,67 e a última, R$ 1.060,42, com R$ 22.050,00 de juros. Na prática, financiamentos de veículos no Brasil quase sempre usam Price.</p>
+<h2>Como pagar menos juros</h2>
+<ul>
+<li><strong>Dê uma entrada maior:</strong> cada real a menos financiado deixa de pagar juros por anos.</li>
+<li><strong>Amortize antecipadamente:</strong> o Código de Defesa do Consumidor garante a redução proporcional dos juros na quitação antecipada. Escolha reduzir o prazo para economizar mais, ou reduzir a parcela para aliviar o orçamento.</li>
+<li><strong>Use o FGTS:</strong> no Sistema Financeiro da Habitação, o saldo pode ser usado na entrada e para amortizar a cada 2 anos.</li>
+<li><strong>Compare o CET:</strong> seguros e tarifas podem fazer uma taxa nominal menor sair mais cara.</li>
+<li><strong>Portabilidade:</strong> é possível levar a dívida para outro banco com taxa menor, sem custo de transferência.</li>
+</ul>
+<h2>Documentos e custos além das parcelas</h2>
+<p>No financiamento imobiliário, reserve dinheiro para o ITBI (imposto municipal de transmissão, geralmente de 2% a 3% do valor do imóvel), o registro em cartório, a avaliação do imóvel pelo banco e a entrada, que costuma ser de pelo menos 20% a 30%. Em veículos, considere IPVA, seguro e emplacamento. Somar esses valores evita que um financiamento aprovado aperte o orçamento logo no primeiro mês.</p>
+</div>
+<!-- AFILIADOS: Possível parceria: comparador de crédito imobiliário/consórcio ou banco com programa de indicação. Inserir aqui um bloco com link de afiliado (rel="sponsored nofollow") e aviso "Este link pode gerar comissão" após aprovar o programa. -->
+<!-- ADSENSE: bloco "meio do conteúdo". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<section class="faq" aria-labelledby="faq-t"><h2 id="faq-t">Perguntas frequentes</h2>
+<details><summary>O que é melhor, SAC ou Price?</summary><div><p>Se a primeira parcela do SAC cabe no orçamento, ele costuma sair mais barato. A Price serve para quem precisa de parcela inicial menor e previsível.</p></div></details>
+<details><summary>Por que minha parcela no banco é maior que na simulação?</summary><div><p>Porque o banco inclui seguros obrigatórios (morte e invalidez, danos físicos), taxa de administração e, em muitos contratos, a correção do saldo pela TR ou pelo IPCA.</p></div></details>
+<details><summary>Vale a pena amortizar o financiamento?</summary><div><p>Em geral, sim, quando a taxa do financiamento é maior que o rendimento líquido que você conseguiria investindo o mesmo dinheiro. Compare usando as calculadoras de juros e investimentos.</p></div></details>
+<details><summary>Qual o prazo máximo de financiamento imobiliário?</summary><div><p>Os bancos costumam oferecer até 420 meses (35 anos), respeitando a idade máxima do comprador somada ao prazo, normalmente perto de 80 anos e 6 meses.</p></div></details>
+</section>
+<section class="fontes" aria-labelledby="fontes-t"><h2 id="fontes-t">Fontes oficiais e atualização</h2>
+<ul><li><a href="https://www3.bcb.gov.br/CALCIDADAO/publico/exibirFormFinanciamentoPrestacoesFixas.do?method=exibirFormFinanciamentoPrestacoesFixas" rel="noopener" target="_blank">Banco Central do Brasil — Calculadora do Cidadão (financiamento com prestações fixas)</a></li><li><a href="https://www.bcb.gov.br/meubc/faqs/p/o-que-e-o-custo-efetivo-total-cet" rel="noopener" target="_blank">Banco Central do Brasil — Custo Efetivo Total (CET)</a></li></ul>
+<p>Valores e regras conferidos em <time datetime="2026-10-08">08/10/2026</time>.</p>
+</section>
+<section class="relacionadas" aria-labelledby="rel-t"><h2 id="rel-t">Calculadoras relacionadas</h2>
+<ul class="cards"><li><a href="/juros-compostos/"><strong>Juros compostos</strong><span>Simule aportes mensais e veja o patrimônio crescer.</span></a></li><li><a href="/investimentos/"><strong>CDB x poupança x Tesouro</strong><span>Compare renda fixa já com o imposto de renda.</span></a></li><li><a href="/fgts/"><strong>FGTS</strong><span>Depósitos mensais, saldo estimado e multa de 40%.</span></a></li><li><a href="/porcentagem/"><strong>Porcentagem</strong><span>X% de um valor, variação, aumento e desconto.</span></a></li><li><a href="/salario-liquido/"><strong>Salário líquido</strong><span>Descubra quanto cai na conta após INSS e IR.</span></a></li></ul>
+</section>
+</article>
+<script type="module" src="/assets/js/ui.js"></script>
+<link rel="modulepreload" href="/assets/js/calc.js">
+</main>
+<footer class="rodape"><div class="caixa">
+<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p>
+<nav aria-label="Institucional"><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+<p class="mini">Tabelas oficiais conferidas em 08/10/2026.</p>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora de Juros Compostos com Aportes Mensais</title>
+<meta name="description" content="Simule juros compostos com valor inicial, aportes mensais e taxa mensal ou anual. Veja o valor final, os juros ganhos e a evolução ano a ano.">
+<link rel="canonical" href="https://contacertabr.com.br/juros-compostos/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Conta Certa">
+<meta property="og:title" content="Calculadora de Juros Compostos com Aportes Mensais">
+<meta property="og:description" content="Simule juros compostos com valor inicial, aportes mensais e taxa mensal ou anual. Veja o valor final, os juros ganhos e a evolução ano a ano.">
+<meta property="og:url" content="https://contacertabr.com.br/juros-compostos/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0b6e4f">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+<!-- ADSENSE (cabeçalho): após aprovação, defina adsenseClient em site.config.mjs e rode o build; o script oficial entra aqui automaticamente. Não cole IDs de teste. -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculadora de juros compostos","url":"https://contacertabr.com.br/juros-compostos/","description":"Simule juros compostos com valor inicial, aportes mensais e taxa mensal ou anual. Veja o valor final, os juros ganhos e a evolução ano a ano.","applicationCategory":"FinanceApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-08"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Qual a diferença entre taxa mensal e anual?","acceptedAnswer":{"@type":"Answer","text":"No regime composto, 1% ao mês equivale a cerca de 12,68% ao ano, e não 12%. Escolha corretamente o período da taxa no formulário; a calculadora faz a conversão."}},{"@type":"Question","name":"Os aportes são feitos no início ou no fim do mês?","acceptedAnswer":{"@type":"Answer","text":"A calculadora considera aportes no fim de cada mês, padrão das calculadoras financeiras. Aportes no início renderiam um mês a mais cada."}},{"@type":"Question","name":"A simulação desconta imposto de renda?","acceptedAnswer":{"@type":"Answer","text":"Não. É um cálculo bruto. Para comparar investimentos com o IR da tabela regressiva, use a calculadora de CDB x poupança."}},{"@type":"Question","name":"Que taxa devo usar?","acceptedAnswer":{"@type":"Answer","text":"Use a taxa esperada da aplicação. Como referência, a Selic estava em 13,75% ao ano em outubro de 2026. Para planejamento de longo prazo, prefira taxas reais (acima da inflação), mais conservadoras."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://contacertabr.com.br/"},{"@type":"ListItem","position":2,"name":"Calculadora de juros compostos","item":"https://contacertabr.com.br/juros-compostos/"}]}</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo"><div class="caixa"><a class="marca" href="/"><span aria-hidden="true">＝</span> Conta Certa</a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#outras">Outras</a></nav></div></header>
+<main id="conteudo" class="caixa">
+
+<nav class="migalhas" aria-label="Você está em"><a href="/">Início</a> › <span aria-current="page">Calculadora de juros compostos</span></nav>
+<article>
+<h1>Calculadora de juros compostos</h1>
+<p class="lead">Simule quanto um investimento rende com juros sobre juros, somando um valor inicial e aportes todos os meses.</p>
+<section class="calc" aria-labelledby="titulo-calc">
+<h2 id="titulo-calc" class="vh">Calculadora</h2>
+<form data-calc="juros-compostos" novalidate>
+<div class="grade-campos"><div class="campo"><label for="f-inicial">Valor inicial</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="number" inputmode="decimal" id="f-inicial" name="inicial" step="0.01" min="0" value="10000"></div></div>
+<div class="campo"><label for="f-aporte">Aporte mensal</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="number" inputmode="decimal" id="f-aporte" name="aporte" step="0.01" min="0" value="500"></div></div>
+<div class="campo"><label for="f-taxa">Taxa de juros</label><div class="entrada"><input type="number" inputmode="decimal" id="f-taxa" name="taxa" step="any" min="0" value="1"><span class="suf" aria-hidden="true">%</span></div></div>
+<div class="campo"><label for="f-periodo">A taxa é</label><select id="f-periodo" name="periodo" data-padrao="mensal"><option value="mensal" selected>Ao mês</option><option value="anual">Ao ano</option></select></div>
+<div class="campo"><label for="f-meses">Prazo em meses</label><div class="entrada"><input type="number" inputmode="decimal" id="f-meses" name="meses" step="1" min="1" value="120"></div></div></div>
+<button type="submit">Calcular</button>
+</form>
+<div id="resultado" class="resultado" aria-live="polite" tabindex="-1"><noscript><p class="erro">Ative o JavaScript para usar a calculadora.</p></noscript></div>
+<p class="aviso" role="note"><strong>Resultado estimativo.</strong> Simulação matemática, sem impostos, taxas ou inflação. Rentabilidade passada não garante rentabilidade futura.</p>
+</section>
+<!-- ADSENSE: bloco "após a calculadora". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<div class="texto">
+
+<h2>O que são juros compostos</h2>
+<p>Nos juros compostos, os juros de cada período são somados ao capital e passam a render também. É o famoso "juros sobre juros". Com o tempo, a curva de crescimento se acelera: nos primeiros anos quase todo o saldo vem do que você depositou, mas nos últimos a maior parte vem dos juros.</p>
+<h2>Fórmulas usadas</h2>
+<p>Sem aportes: <strong>M = C × (1 + i)<sup>n</sup></strong>, em que M é o montante, C o capital inicial, i a taxa por período e n o número de períodos.</p>
+<p>Com aportes mensais iguais no fim de cada mês: <strong>M = C × (1 + i)<sup>n</sup> + A × [(1 + i)<sup>n</sup> − 1] ÷ i</strong>, em que A é o aporte.</p>
+<p>Se a taxa for anual, a calculadora a converte para a taxa mensal equivalente: <strong>i<sub>mensal</sub> = (1 + i<sub>anual</sub>)<sup>1/12</sup> − 1</strong>. Por exemplo, 12% ao ano equivalem a cerca de 0,9489% ao mês, e não a 1%.</p>
+<h2>Exemplos</h2>
+<h3>R$ 10.000 + R$ 500 por mês a 1% ao mês por 10 anos</h3>
+<p>Você investe R$ 70.000,00 no total (R$ 10.000,00 iniciais e 120 aportes de R$ 500,00). O valor final chega a R$ 148.023,21: R$ 78.023,21 são juros, mais do que todo o dinheiro depositado.</p>
+<h3>R$ 300 por mês a 10% ao ano por 30 anos</h3>
+<p>Sem valor inicial, os 360 aportes somam R$ 108.000,00. Com juros compostos, o saldo chega a R$ 618.852,99. É o exemplo clássico de como o prazo pesa mais que o valor do aporte.</p>
+<h3>R$ 5.000 parados a 12% ao ano por 5 anos</h3>
+<p>Sem novos depósitos, o montante chega a R$ 8.811,71, um ganho de R$ 3.811,71.</p>
+<h2>Juros simples x juros compostos</h2>
+<p>Nos juros simples, o juro de cada período incide sempre sobre o valor inicial. R$ 1.000,00 a 10% ao ano por 2 anos rendem R$ 200,00 no regime simples e R$ 210,00 no composto. A diferença parece pequena no começo, mas cresce exponencialmente com o tempo. Quase todas as aplicações financeiras e dívidas no Brasil usam juros compostos, inclusive o rotativo do cartão de crédito, que joga a mesma força contra você.</p>
+<h2>Como usar o resultado</h2>
+<ul>
+<li><strong>Desconte o imposto:</strong> em CDB e Tesouro Direto, o IR vai de 22,5% a 15% sobre o rendimento, conforme o prazo. Use a calculadora de investimentos para comparar aplicações já com IR.</li>
+<li><strong>Considere a inflação:</strong> para saber o poder de compra futuro, use uma taxa real (rentabilidade menos inflação esperada).</li>
+<li><strong>Regra de 72:</strong> divida 72 pela taxa anual para estimar em quantos anos o dinheiro dobra. A 8% ao ano, cerca de 9 anos.</li>
+<li><strong>Constância vence intensidade:</strong> aportes regulares e prazo longo costumam importar mais do que buscar a maior taxa.</li>
+</ul>
+<h2>Juros compostos também valem para dívidas</h2>
+<p>A mesma fórmula explica por que dívidas caras crescem tão rápido. Uma fatura de R$ 1.000,00 no rotativo do cartão a 10% ao mês vira cerca de R$ 3.138,43 em 12 meses se nada for pago. Por isso, antes de investir, quite dívidas com juros maiores do que o rendimento que você conseguiria obter.</p>
+</div>
+<!-- AFILIADOS: Possível parceria: corretora ou banco digital (abertura de conta). Inserir aqui um bloco com link de afiliado (rel="sponsored nofollow") e aviso "Este link pode gerar comissão" após aprovar o programa. -->
+<!-- ADSENSE: bloco "meio do conteúdo". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<section class="faq" aria-labelledby="faq-t"><h2 id="faq-t">Perguntas frequentes</h2>
+<details><summary>Qual a diferença entre taxa mensal e anual?</summary><div><p>No regime composto, 1% ao mês equivale a cerca de 12,68% ao ano, e não 12%. Escolha corretamente o período da taxa no formulário; a calculadora faz a conversão.</p></div></details>
+<details><summary>Os aportes são feitos no início ou no fim do mês?</summary><div><p>A calculadora considera aportes no fim de cada mês, padrão das calculadoras financeiras. Aportes no início renderiam um mês a mais cada.</p></div></details>
+<details><summary>A simulação desconta imposto de renda?</summary><div><p>Não. É um cálculo bruto. Para comparar investimentos com o IR da tabela regressiva, use a calculadora de CDB x poupança.</p></div></details>
+<details><summary>Que taxa devo usar?</summary><div><p>Use a taxa esperada da aplicação. Como referência, a Selic estava em 13,75% ao ano em outubro de 2026. Para planejamento de longo prazo, prefira taxas reais (acima da inflação), mais conservadoras.</p></div></details>
+</section>
+<section class="fontes" aria-labelledby="fontes-t"><h2 id="fontes-t">Fontes oficiais e atualização</h2>
+<ul><li><a href="https://www3.bcb.gov.br/CALCIDADAO/publico/exibirFormFinanciamentoPrestacoesFixas.do?method=exibirFormFinanciamentoPrestacoesFixas" rel="noopener" target="_blank">Banco Central do Brasil — Calculadora do Cidadão</a></li><li><a href="https://www.bcb.gov.br/controleinflacao/historicotaxasjuros" rel="noopener" target="_blank">Banco Central do Brasil — histórico das taxas de juros (Selic)</a></li></ul>
+<p>Valores e regras conferidos em <time datetime="2026-10-08">08/10/2026</time>.</p>
+</section>
+<section class="relacionadas" aria-labelledby="rel-t"><h2 id="rel-t">Calculadoras relacionadas</h2>
+<ul class="cards"><li><a href="/investimentos/"><strong>CDB x poupança x Tesouro</strong><span>Compare renda fixa já com o imposto de renda.</span></a></li><li><a href="/financiamento/"><strong>Financiamento SAC e Price</strong><span>Parcelas, juros totais e tabela de amortização.</span></a></li><li><a href="/porcentagem/"><strong>Porcentagem</strong><span>X% de um valor, variação, aumento e desconto.</span></a></li><li><a href="/fgts/"><strong>FGTS</strong><span>Depósitos mensais, saldo estimado e multa de 40%.</span></a></li><li><a href="/regra-de-tres/"><strong>Regra de três</strong><span>Simples, direta ou inversa, com explicação.</span></a></li></ul>
+</section>
+</article>
+<script type="module" src="/assets/js/ui.js"></script>
+<link rel="modulepreload" href="/assets/js/calc.js">
+</main>
+<footer class="rodape"><div class="caixa">
+<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p>
+<nav aria-label="Institucional"><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+<p class="mini">Tabelas oficiais conferidas em 08/10/2026.</p>
+</div></footer>
+</body>
+</html>

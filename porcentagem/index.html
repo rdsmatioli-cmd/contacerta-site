@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora de Porcentagem Online: Desconto, Aumento e %</title>
+<meta name="description" content="Calcule porcentagem de um valor, quanto um número representa em %, variação percentual, aumento e desconto. Com fórmulas e exemplos práticos.">
+<link rel="canonical" href="https://contacertabr.com.br/porcentagem/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Conta Certa">
+<meta property="og:title" content="Calculadora de Porcentagem Online: Desconto, Aumento e %">
+<meta property="og:description" content="Calcule porcentagem de um valor, quanto um número representa em %, variação percentual, aumento e desconto. Com fórmulas e exemplos práticos.">
+<meta property="og:url" content="https://contacertabr.com.br/porcentagem/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0b6e4f">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+<!-- ADSENSE (cabeçalho): após aprovação, defina adsenseClient em site.config.mjs e rode o build; o script oficial entra aqui automaticamente. Não cole IDs de teste. -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculadora de porcentagem","url":"https://contacertabr.com.br/porcentagem/","description":"Calcule porcentagem de um valor, quanto um número representa em %, variação percentual, aumento e desconto. Com fórmulas e exemplos práticos.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-08"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Como calcular 30% de um valor?","acceptedAnswer":{"@type":"Answer","text":"Multiplique o valor por 0,30. Exemplo: 30% de R$ 250 = 250 × 0,3 = R$ 75."}},{"@type":"Question","name":"Como descobrir o valor original antes do desconto?","acceptedAnswer":{"@type":"Answer","text":"Divida o preço com desconto por (1 − desconto). Um produto que custa R$ 90 após 10% de desconto custava 90 ÷ 0,9 = R$ 100."}},{"@type":"Question","name":"Como calcular a porcentagem de aumento de salário?","acceptedAnswer":{"@type":"Answer","text":"Use a variação percentual: (salário novo − salário antigo) ÷ salário antigo × 100."}},{"@type":"Question","name":"Qual a diferença entre ponto percentual e porcentagem?","acceptedAnswer":{"@type":"Answer","text":"Ponto percentual é a diferença simples entre duas taxas. Porcentagem é a variação relativa entre elas. De 10% para 12% há alta de 2 pontos percentuais, ou de 20%."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://contacertabr.com.br/"},{"@type":"ListItem","position":2,"name":"Calculadora de porcentagem","item":"https://contacertabr.com.br/porcentagem/"}]}</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo"><div class="caixa"><a class="marca" href="/"><span aria-hidden="true">＝</span> Conta Certa</a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#outras">Outras</a></nav></div></header>
+<main id="conteudo" class="caixa">
+
+<nav class="migalhas" aria-label="Você está em"><a href="/">Início</a> › <span aria-current="page">Calculadora de porcentagem</span></nav>
+<article>
+<h1>Calculadora de porcentagem</h1>
+<p class="lead">Resolva as contas de porcentagem mais comuns em um só lugar: quanto é X% de um valor, quantos por cento um número representa, variação, aumento e desconto.</p>
+<section class="calc" aria-labelledby="titulo-calc">
+<h2 id="titulo-calc" class="vh">Calculadora</h2>
+<form data-calc="porcentagem" novalidate>
+<div class="grade-campos"><div class="campo"><label for="f-p1">1) Quanto é (%)</label><div class="entrada"><input type="number" inputmode="decimal" id="f-p1" name="p1" step="any" value="15"><span class="suf" aria-hidden="true">%</span></div></div>
+<div class="campo"><label for="f-v1">... de (valor)</label><div class="entrada"><input type="number" inputmode="decimal" id="f-v1" name="v1" step="any" value="200"></div></div>
+<div class="campo"><label for="f-x2">2) O valor</label><div class="entrada"><input type="number" inputmode="decimal" id="f-x2" name="x2" step="any" value="450"></div></div>
+<div class="campo"><label for="f-v2">... é quantos % de</label><div class="entrada"><input type="number" inputmode="decimal" id="f-v2" name="v2" step="any" value="3000"></div></div>
+<div class="campo"><label for="f-a3">3) Variação: valor inicial</label><div class="entrada"><input type="number" inputmode="decimal" id="f-a3" name="a3" step="any" value="2500"></div></div>
+<div class="campo"><label for="f-b3">... valor final</label><div class="entrada"><input type="number" inputmode="decimal" id="f-b3" name="b3" step="any" value="2800"></div></div>
+<div class="campo"><label for="f-v4">4) Valor para aumento/desconto</label><div class="entrada"><input type="number" inputmode="decimal" id="f-v4" name="v4" step="any" value="150"></div></div>
+<div class="campo"><label for="f-p4">... percentual</label><div class="entrada"><input type="number" inputmode="decimal" id="f-p4" name="p4" step="any" value="10"><span class="suf" aria-hidden="true">%</span></div></div></div>
+<button type="submit">Calcular</button>
+</form>
+<div id="resultado" class="resultado" aria-live="polite" tabindex="-1"><noscript><p class="erro">Ative o JavaScript para usar a calculadora.</p></noscript></div>
+<p class="aviso" role="note"><strong>Resultado estimativo.</strong> Resultados arredondados para até 6 casas decimais.</p>
+</section>
+<!-- ADSENSE: bloco "após a calculadora". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<div class="texto">
+
+<h2>O que é porcentagem</h2>
+<p>Porcentagem é uma fração de denominador 100. Dizer 15% é o mesmo que dizer 15/100, ou 0,15. Por isso, para calcular uma porcentagem basta multiplicar o valor pelo número decimal correspondente.</p>
+<h2>As quatro contas mais usadas</h2>
+<h3>1. Quanto é X% de um valor</h3>
+<p><strong>Resultado = valor × X ÷ 100.</strong> Exemplo: 15% de 200 = 200 × 0,15 = 30. Serve para calcular gorjeta, comissão, juros simples de um mês ou a entrada de uma compra.</p>
+<h3>2. Quantos por cento um valor representa de outro</h3>
+<p><strong>% = parte ÷ total × 100.</strong> Exemplo: R$ 450 de aluguel em uma renda de R$ 3.000 representam 450 ÷ 3.000 × 100 = 15% do orçamento.</p>
+<h3>3. Variação percentual (aumento ou queda)</h3>
+<p><strong>Variação = (valor final − valor inicial) ÷ valor inicial × 100.</strong> Exemplo: um salário que passou de R$ 2.500 para R$ 2.800 teve aumento de 12%. Se o resultado for negativo, houve queda. É assim que se calcula reajuste, inflação acumulada de um produto ou valorização de uma ação.</p>
+<h3>4. Aplicar aumento ou desconto</h3>
+<p><strong>Com aumento: valor × (1 + X ÷ 100). Com desconto: valor × (1 − X ÷ 100).</strong> Exemplo: R$ 150 com 10% de desconto = 150 × 0,90 = R$ 135; com 10% de aumento = 150 × 1,10 = R$ 165.</p>
+<h2>Armadilhas comuns</h2>
+<ul>
+<li><strong>Aumento e desconto do mesmo percentual não se anulam.</strong> Um produto de R$ 100 que sobe 10% vai a R$ 110; se depois cair 10%, fica em R$ 99. Isso acontece porque o segundo percentual incide sobre uma base diferente.</li>
+<li><strong>Descontos sucessivos não se somam.</strong> 20% + 10% de desconto equivalem a 28% (0,8 × 0,9 = 0,72), e não a 30%.</li>
+<li><strong>Ponto percentual x porcentagem.</strong> Se a Selic passa de 14% para 13,75%, ela caiu 0,25 ponto percentual, o que corresponde a uma queda de cerca de 1,79% na taxa.</li>
+<li><strong>Para desfazer um aumento, divida.</strong> Um preço de R$ 1.621 que já inclui reajuste de 6,79% tinha valor anterior de 1.621 ÷ 1,0679 ≈ R$ 1.518. Foi exatamente o reajuste do salário mínimo de 2025 para 2026.</li>
+</ul>
+<h2>Como calcular de cabeça</h2>
+<ul>
+<li>10% de qualquer valor: mova a vírgula uma casa para a esquerda (10% de 384 = 38,4).</li>
+<li>5%: metade de 10%. 20%: o dobro de 10%. 25%: um quarto do valor. 50%: metade.</li>
+<li>1%: mova a vírgula duas casas (1% de 384 = 3,84). Some ou multiplique para chegar a outros percentuais: 15% = 10% + 5%.</li>
+</ul>
+<h2>Onde a porcentagem aparece no dia a dia</h2>
+<p>Juros do cartão e do cheque especial, reajuste de aluguel pelo IGP-M ou IPCA, descontos da Black Friday, alíquotas de INSS e imposto de renda, rendimento de investimentos como "100% do CDI" e taxas de maquininhas de cartão são todos expressos em porcentagem. Dominar essas quatro contas ajuda a comparar ofertas e a perceber quando um desconto é menor do que parece.</p>
+<h2>Porcentagem acumulada</h2>
+<p>Para acumular percentuais de vários meses, multiplique os fatores em vez de somar as taxas. Três reajustes mensais de 1% resultam em 1,01 × 1,01 × 1,01 = 1,0303, ou 3,03% no período, e não 3%.</p>
+</div>
+
+<!-- ADSENSE: bloco "meio do conteúdo". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<section class="faq" aria-labelledby="faq-t"><h2 id="faq-t">Perguntas frequentes</h2>
+<details><summary>Como calcular 30% de um valor?</summary><div><p>Multiplique o valor por 0,30. Exemplo: 30% de R$ 250 = 250 × 0,3 = R$ 75.</p></div></details>
+<details><summary>Como descobrir o valor original antes do desconto?</summary><div><p>Divida o preço com desconto por (1 − desconto). Um produto que custa R$ 90 após 10% de desconto custava 90 ÷ 0,9 = R$ 100.</p></div></details>
+<details><summary>Como calcular a porcentagem de aumento de salário?</summary><div><p>Use a variação percentual: (salário novo − salário antigo) ÷ salário antigo × 100.</p></div></details>
+<details><summary>Qual a diferença entre ponto percentual e porcentagem?</summary><div><p>Ponto percentual é a diferença simples entre duas taxas. Porcentagem é a variação relativa entre elas. De 10% para 12% há alta de 2 pontos percentuais, ou de 20%.</p></div></details>
+</section>
+<section class="fontes" aria-labelledby="fontes-t"><h2 id="fontes-t">Fontes oficiais e atualização</h2>
+<ul><li><a href="https://educa.ibge.gov.br/" rel="noopener" target="_blank">IBGE Educa — conceitos de estatística e porcentagem</a></li></ul>
+<p>Valores e regras conferidos em <time datetime="2026-10-08">08/10/2026</time>.</p>
+</section>
+<section class="relacionadas" aria-labelledby="rel-t"><h2 id="rel-t">Calculadoras relacionadas</h2>
+<ul class="cards"><li><a href="/regra-de-tres/"><strong>Regra de três</strong><span>Simples, direta ou inversa, com explicação.</span></a></li><li><a href="/juros-compostos/"><strong>Juros compostos</strong><span>Simule aportes mensais e veja o patrimônio crescer.</span></a></li><li><a href="/investimentos/"><strong>CDB x poupança x Tesouro</strong><span>Compare renda fixa já com o imposto de renda.</span></a></li><li><a href="/conversor-de-medidas/"><strong>Conversor de medidas</strong><span>Metros, quilos, litros, alqueires e temperatura.</span></a></li><li><a href="/salario-liquido/"><strong>Salário líquido</strong><span>Descubra quanto cai na conta após INSS e IR.</span></a></li></ul>
+</section>
+</article>
+<script type="module" src="/assets/js/ui.js"></script>
+<link rel="modulepreload" href="/assets/js/calc.js">
+</main>
+<footer class="rodape"><div class="caixa">
+<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p>
+<nav aria-label="Institucional"><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+<p class="mini">Tabelas oficiais conferidas em 08/10/2026.</p>
+</div></footer>
+</body>
+</html>

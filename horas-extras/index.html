@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora de Horas Extras: 50%, 100% e Reflexo no DSR</title>
+<meta name="description" content="Calcule o valor das horas extras a 50% e 100%, com o divisor da jornada e o reflexo no descanso semanal remunerado (DSR). Exemplos passo a passo.">
+<link rel="canonical" href="https://contacertabr.com.br/horas-extras/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Conta Certa">
+<meta property="og:title" content="Calculadora de Horas Extras: 50%, 100% e Reflexo no DSR">
+<meta property="og:description" content="Calcule o valor das horas extras a 50% e 100%, com o divisor da jornada e o reflexo no descanso semanal remunerado (DSR). Exemplos passo a passo.">
+<meta property="og:url" content="https://contacertabr.com.br/horas-extras/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0b6e4f">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+<!-- ADSENSE (cabeçalho): após aprovação, defina adsenseClient em site.config.mjs e rode o build; o script oficial entra aqui automaticamente. Não cole IDs de teste. -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculadora de horas extras","url":"https://contacertabr.com.br/horas-extras/","description":"Calcule o valor das horas extras a 50% e 100%, com o divisor da jornada e o reflexo no descanso semanal remunerado (DSR). Exemplos passo a passo.","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-08"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Qual o divisor para quem trabalha 44 horas por semana?","acceptedAnswer":{"@type":"Answer","text":"220. A conta é 44 horas ÷ 6 dias × 30 dias. Para 40 horas semanais o divisor é 200 e para 36 horas, 180."}},{"@type":"Question","name":"Hora extra no sábado é 50% ou 100%?","acceptedAnswer":{"@type":"Answer","text":"Se o sábado é dia útil não trabalhado pela escala, em geral é 50%. Se a convenção coletiva prever outro percentual, vale o mais favorável. Domingos e feriados sem folga compensatória costumam ser pagos a 100%."}},{"@type":"Question","name":"Hora extra tem desconto de INSS e IR?","acceptedAnswer":{"@type":"Answer","text":"Sim. Ela soma ao salário do mês e entra na base de INSS, IR e FGTS. Use a calculadora de salário líquido com o total para ver o efeito no líquido."}},{"@type":"Question","name":"A empresa pode pagar hora extra só com folga?","acceptedAnswer":{"@type":"Answer","text":"Sim, por banco de horas previsto em acordo individual escrito (compensação em até 6 meses) ou acordo/convenção coletiva (até 1 ano). Horas não compensadas no prazo devem ser pagas com adicional."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://contacertabr.com.br/"},{"@type":"ListItem","position":2,"name":"Calculadora de horas extras","item":"https://contacertabr.com.br/horas-extras/"}]}</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo"><div class="caixa"><a class="marca" href="/"><span aria-hidden="true">＝</span> Conta Certa</a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#outras">Outras</a></nav></div></header>
+<main id="conteudo" class="caixa">
+
+<nav class="migalhas" aria-label="Você está em"><a href="/">Início</a> › <span aria-current="page">Calculadora de horas extras</span></nav>
+<article>
+<h1>Calculadora de horas extras</h1>
+<p class="lead">Descubra quanto valem suas horas extras com adicional de 50% ou 100% e quanto elas acrescentam ao descanso semanal remunerado.</p>
+<section class="calc" aria-labelledby="titulo-calc">
+<h2 id="titulo-calc" class="vh">Calculadora</h2>
+<form data-calc="horas-extras" novalidate>
+<div class="grade-campos"><div class="campo"><label for="f-salario">Salário bruto mensal</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="number" inputmode="decimal" id="f-salario" name="salario" step="0.01" min="0" value="3300"></div></div>
+<div class="campo"><label for="f-jornada">Divisor da jornada mensal (horas)</label><div class="entrada"><input type="number" inputmode="decimal" id="f-jornada" name="jornada" step="1" min="1" value="220" aria-describedby="f-jornada-ajuda"></div><small id="f-jornada-ajuda">220 para 44 h/semana, 200 para 40 h, 180 para 36 h.</small></div>
+<div class="campo"><label for="f-h50">Horas extras a 50% (dias úteis)</label><div class="entrada"><input type="number" inputmode="decimal" id="f-h50" name="h50" step="any" min="0" value="12"></div></div>
+<div class="campo"><label for="f-h100">Horas extras a 100% (domingos e feriados)</label><div class="entrada"><input type="number" inputmode="decimal" id="f-h100" name="h100" step="any" min="0" value="4"></div></div>
+<div class="campo"><label for="f-diasUteis">Dias úteis no mês</label><div class="entrada"><input type="number" inputmode="decimal" id="f-diasUteis" name="diasUteis" step="1" min="0" value="25" aria-describedby="f-diasUteis-ajuda"></div><small id="f-diasUteis-ajuda">Inclua os sábados se forem dias de trabalho previstos.</small></div>
+<div class="campo"><label for="f-domingos">Domingos e feriados no mês</label><div class="entrada"><input type="number" inputmode="decimal" id="f-domingos" name="domingos" step="1" min="0" value="5"></div></div></div>
+<button type="submit">Calcular</button>
+</form>
+<div id="resultado" class="resultado" aria-live="polite" tabindex="-1"><noscript><p class="erro">Ative o JavaScript para usar a calculadora.</p></noscript></div>
+<p class="aviso" role="note"><strong>Resultado estimativo.</strong> Estimativa bruta, antes de INSS e IR. Convenções coletivas podem prever adicionais maiores, outro divisor ou regras próprias de banco de horas.</p>
+</section>
+<!-- ADSENSE: bloco "após a calculadora". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<div class="texto">
+
+<h2>Como calcular a hora extra</h2>
+<p>A Constituição garante adicional de pelo menos 50% sobre a hora normal para o trabalho além da jornada (art. 7º, XVI). O cálculo tem três passos:</p>
+<ol>
+<li><strong>Valor da hora normal:</strong> salário ÷ divisor da jornada. Para 44 horas semanais, o divisor é 220; para 40 horas, 200; para 36 horas, 180.</li>
+<li><strong>Valor da hora extra:</strong> hora normal × 1,5 (50%) ou × 2 (100%).</li>
+<li><strong>Total:</strong> valor da hora extra × quantidade de horas feitas no mês.</li>
+</ol>
+<p>Em domingos e feriados trabalhados sem folga compensatória, a jurisprudência do TST (Súmula 146) determina pagamento em dobro, por isso é comum usar 100%. Muitas convenções coletivas também fixam 100% para essas horas ou adicionais maiores que 50% para os dias úteis.</p>
+<h2>Reflexo no DSR</h2>
+<p>Horas extras habituais aumentam o descanso semanal remunerado (Lei 605/1949 e Súmula 172 do TST). A fórmula mais usada é:</p>
+<p><strong>DSR = (total de horas extras ÷ dias úteis do mês) × domingos e feriados do mês.</strong></p>
+<p>Esse reflexo é pago junto com o salário e entra na base do INSS, do FGTS e do imposto de renda.</p>
+<h2>Exemplo passo a passo</h2>
+<p>Marcos ganha R$ 3.300,00 com jornada de 44 horas. Em um mês com 25 dias úteis e 5 domingos e feriados, fez 12 horas extras em dias úteis e 4 horas em um feriado.</p>
+<ul>
+<li>Hora normal: R$ 3.300,00 ÷ 220 = R$ 15,00.</li>
+<li>12 horas a 50%: 12 × R$ 22,50 = R$ 270,00.</li>
+<li>4 horas a 100%: 4 × R$ 30,00 = R$ 120,00.</li>
+<li>DSR: R$ 390,00 ÷ 25 × 5 = R$ 78,00.</li>
+</ul>
+<p>Total bruto a receber: R$ 468,00 a mais no mês.</p>
+<h3>Outro exemplo, sem DSR</h3>
+<p>Com salário de R$ 2.640,00 e 20 horas extras a 50%, a hora normal vale R$ 12,00, a extra vale R$ 18,00 e o total é R$ 360,00.</p>
+<h2>Limites e regras importantes</h2>
+<ul>
+<li>O limite legal é de <strong>2 horas extras por dia</strong> (art. 59 da CLT), salvo situações de força maior ou serviços inadiáveis.</li>
+<li><strong>Banco de horas:</strong> a compensação pode substituir o pagamento. No acordo individual escrito, a compensação deve ocorrer em até 6 meses; no acordo coletivo, em até 1 ano.</li>
+<li><strong>Cargos de confiança</strong> e trabalhadores externos sem controle de jornada podem não ter direito a horas extras (art. 62 da CLT).</li>
+<li><strong>Trabalho noturno</strong> (22h às 5h, para trabalhadores urbanos) tem adicional de pelo menos 20% e hora reduzida de 52 minutos e 30 segundos. Hora extra noturna acumula os dois adicionais.</li>
+</ul>
+<h2>Horas extras entram em outras verbas</h2>
+<p>Quando habituais, as horas extras integram a média usada para calcular férias, 13º salário, aviso prévio e FGTS. Por isso, vale anotar mês a mês as horas feitas e conferir o cartão de ponto com o holerite.</p>
+</div>
+
+<!-- ADSENSE: bloco "meio do conteúdo". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<section class="faq" aria-labelledby="faq-t"><h2 id="faq-t">Perguntas frequentes</h2>
+<details><summary>Qual o divisor para quem trabalha 44 horas por semana?</summary><div><p>220. A conta é 44 horas ÷ 6 dias × 30 dias. Para 40 horas semanais o divisor é 200 e para 36 horas, 180.</p></div></details>
+<details><summary>Hora extra no sábado é 50% ou 100%?</summary><div><p>Se o sábado é dia útil não trabalhado pela escala, em geral é 50%. Se a convenção coletiva prever outro percentual, vale o mais favorável. Domingos e feriados sem folga compensatória costumam ser pagos a 100%.</p></div></details>
+<details><summary>Hora extra tem desconto de INSS e IR?</summary><div><p>Sim. Ela soma ao salário do mês e entra na base de INSS, IR e FGTS. Use a calculadora de salário líquido com o total para ver o efeito no líquido.</p></div></details>
+<details><summary>A empresa pode pagar hora extra só com folga?</summary><div><p>Sim, por banco de horas previsto em acordo individual escrito (compensação em até 6 meses) ou acordo/convenção coletiva (até 1 ano). Horas não compensadas no prazo devem ser pagas com adicional.</p></div></details>
+</section>
+<section class="fontes" aria-labelledby="fontes-t"><h2 id="fontes-t">Fontes oficiais e atualização</h2>
+<ul><li><a href="https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm" rel="noopener" target="_blank">CLT — arts. 59, 62 e 73 (jornada, horas extras e trabalho noturno)</a></li><li><a href="https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm" rel="noopener" target="_blank">Constituição Federal — art. 7º, XVI</a></li><li><a href="https://www.planalto.gov.br/ccivil_03/leis/l0605.htm" rel="noopener" target="_blank">Lei nº 605/1949 — repouso semanal remunerado</a></li></ul>
+<p>Valores e regras conferidos em <time datetime="2026-10-08">08/10/2026</time>.</p>
+</section>
+<section class="relacionadas" aria-labelledby="rel-t"><h2 id="rel-t">Calculadoras relacionadas</h2>
+<ul class="cards"><li><a href="/salario-liquido/"><strong>Salário líquido</strong><span>Descubra quanto cai na conta após INSS e IR.</span></a></li><li><a href="/ferias/"><strong>Férias</strong><span>Férias + 1/3, venda de 10 dias e descontos.</span></a></li><li><a href="/decimo-terceiro/"><strong>13º salário</strong><span>Valor da 1ª e da 2ª parcela, com descontos.</span></a></li><li><a href="/rescisao/"><strong>Rescisão trabalhista</strong><span>Verbas rescisórias, aviso prévio e multa do FGTS.</span></a></li><li><a href="/porcentagem/"><strong>Porcentagem</strong><span>X% de um valor, variação, aumento e desconto.</span></a></li></ul>
+</section>
+</article>
+<script type="module" src="/assets/js/ui.js"></script>
+<link rel="modulepreload" href="/assets/js/calc.js">
+</main>
+<footer class="rodape"><div class="caixa">
+<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p>
+<nav aria-label="Institucional"><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+<p class="mini">Tabelas oficiais conferidas em 08/10/2026.</p>
+</div></footer>
+</body>
+</html>

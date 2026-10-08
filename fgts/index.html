@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora FGTS 2026: Saldo, Depósitos e Multa de 40%</title>
+<meta name="description" content="Estime o saldo do FGTS pelos depósitos de 8% ao mês com rendimento de 3% ao ano, e calcule a multa de 40% ou 20% e o valor do saque na demissão.">
+<link rel="canonical" href="https://contacertabr.com.br/fgts/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Conta Certa">
+<meta property="og:title" content="Calculadora FGTS 2026: Saldo, Depósitos e Multa de 40%">
+<meta property="og:description" content="Estime o saldo do FGTS pelos depósitos de 8% ao mês com rendimento de 3% ao ano, e calcule a multa de 40% ou 20% e o valor do saque na demissão.">
+<meta property="og:url" content="https://contacertabr.com.br/fgts/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0b6e4f">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+<!-- ADSENSE (cabeçalho): após aprovação, defina adsenseClient em site.config.mjs e rode o build; o script oficial entra aqui automaticamente. Não cole IDs de teste. -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculadora de FGTS","url":"https://contacertabr.com.br/fgts/","description":"Estime o saldo do FGTS pelos depósitos de 8% ao mês com rendimento de 3% ao ano, e calcule a multa de 40% ou 20% e o valor do saque na demissão.","applicationCategory":"FinanceApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-08"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Como consultar o saldo do FGTS?","acceptedAnswer":{"@type":"Answer","text":"Pelo aplicativo FGTS, da Caixa, com login gov.br. O extrato mostra cada depósito, os créditos de juros e a distribuição de lucros por conta vinculada."}},{"@type":"Question","name":"O FGTS é descontado do meu salário?","acceptedAnswer":{"@type":"Answer","text":"Não. O FGTS é pago pelo empregador, além do salário. Ele aparece no holerite apenas como informação."}},{"@type":"Question","name":"A multa de 40% é calculada sobre o saldo atual?","acceptedAnswer":{"@type":"Answer","text":"Sobre o total depositado durante aquele contrato, com correção, mesmo que você tenha feito saques autorizados (como para a casa própria) no meio do caminho."}},{"@type":"Question","name":"Quem pede demissão perde o FGTS?","acceptedAnswer":{"@type":"Answer","text":"Não perde, apenas não pode sacar naquele momento. O saldo continua rendendo e pode ser sacado em outras hipóteses, como compra de imóvel ou aposentadoria."}},{"@type":"Question","name":"Quanto rende o FGTS?","acceptedAnswer":{"@type":"Answer","text":"TR + 3% ao ano, mais a distribuição anual de lucros. Pela decisão do STF na ADI 5090, a remuneração anual deve ser pelo menos igual ao IPCA."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://contacertabr.com.br/"},{"@type":"ListItem","position":2,"name":"Calculadora de FGTS","item":"https://contacertabr.com.br/fgts/"}]}</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo"><div class="caixa"><a class="marca" href="/"><span aria-hidden="true">＝</span> Conta Certa</a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#outras">Outras</a></nav></div></header>
+<main id="conteudo" class="caixa">
+
+<nav class="migalhas" aria-label="Você está em"><a href="/">Início</a> › <span aria-current="page">Calculadora de FGTS</span></nav>
+<article>
+<h1>Calculadora de FGTS</h1>
+<p class="lead">Estime quanto o empregador deposita no seu FGTS, o saldo acumulado e quanto você saca com a multa rescisória.</p>
+<section class="calc" aria-labelledby="titulo-calc">
+<h2 id="titulo-calc" class="vh">Calculadora</h2>
+<form data-calc="fgts" novalidate>
+<div class="grade-campos"><div class="campo"><label for="f-salario">Salário bruto mensal</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="number" inputmode="decimal" id="f-salario" name="salario" step="0.01" min="0" value="3500"></div></div>
+<div class="campo"><label for="f-meses">Meses de contrato</label><div class="entrada"><input type="number" inputmode="decimal" id="f-meses" name="meses" step="1" min="1" value="36"></div></div>
+<div class="campo"><label for="f-saldo">Saldo que já existe na conta (opcional)</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="number" inputmode="decimal" id="f-saldo" name="saldo" step="0.01" min="0" value="0"></div></div>
+<div class="campo"><label for="f-tipo">Situação na saída</label><select id="f-tipo" name="tipo" data-padrao="semJustaCausa"><option value="semJustaCausa" selected>Demissão sem justa causa (multa 40%)</option><option value="acordo">Acordo (multa 20%, saque de 80%)</option><option value="outro">Pedido de demissão ou justa causa (sem saque)</option></select></div>
+<div class="campo check"><input type="checkbox" id="f-rendimento" name="rendimento" checked aria-describedby="f-rendimento-ajuda"><label for="f-rendimento">Incluir rendimento de 3% ao ano</label><small id="f-rendimento-ajuda">Não inclui TR nem distribuição de lucros.</small></div>
+<div class="campo check"><input type="checkbox" id="f-aprendiz" name="aprendiz"><label for="f-aprendiz">Jovem aprendiz (depósito de 2%)</label></div></div>
+<button type="submit">Calcular</button>
+</form>
+<div id="resultado" class="resultado" aria-live="polite" tabindex="-1"><noscript><p class="erro">Ative o JavaScript para usar a calculadora.</p></noscript></div>
+<p class="aviso" role="note"><strong>Resultado estimativo.</strong> Estimativa com salário constante. O saldo real depende de reajustes, horas extras, 13º, férias, TR e da distribuição anual de lucros do FGTS. Consulte o extrato oficial no app FGTS.</p>
+</section>
+<!-- ADSENSE: bloco "após a calculadora". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<div class="texto">
+
+<h2>Quanto o empregador deposita</h2>
+<p>Todo mês, a empresa deve depositar na conta vinculada do trabalhador <strong>8% da remuneração</strong> (2% para jovem aprendiz), sem descontar nada do salário (art. 15 da Lei 8.036/1990). A base inclui salário, horas extras, adicionais, comissões, 13º e férias gozadas com 1/3. Para um salário de R$ 3.500,00, o depósito é de R$ 280,00 por mês.</p>
+<h2>Como o saldo rende</h2>
+<p>O FGTS é corrigido pela Taxa Referencial (TR) mais juros de 3% ao ano, capitalizados mensalmente. Além disso, o Conselho Curador distribui parte do lucro do fundo todos os anos. Desde a decisão do STF de 2024 (ADI 5090), a remuneração total precisa ao menos igualar a inflação medida pelo IPCA. A calculadora usa só os 3% ao ano, por isso tende a subestimar um pouco o saldo.</p>
+<h2>Multa rescisória</h2>
+<ul>
+<li><strong>Demissão sem justa causa:</strong> multa de 40% sobre todos os depósitos do contrato, corrigidos. O trabalhador saca o saldo inteiro e a multa.</li>
+<li><strong>Acordo (art. 484-A da CLT):</strong> multa de 20% e saque de até 80% do saldo.</li>
+<li><strong>Pedido de demissão e justa causa:</strong> sem multa e sem saque; o dinheiro continua rendendo na conta.</li>
+</ul>
+<h2>Exemplo</h2>
+<p>Com salário de R$ 3.500,00 durante 36 meses, o total depositado é R$ 10.080,00. Com 3% ao ano, o saldo estimado chega a R$ 10.527,46. Numa demissão sem justa causa, a multa de 40% é de R$ 4.210,98 e o valor total disponível para saque fica em R$ 14.738,44.</p>
+<h2>Quando você pode sacar</h2>
+<ul>
+<li>Demissão sem justa causa, acordo (80%) ou fim de contrato por prazo determinado.</li>
+<li>Compra da casa própria ou amortização de financiamento habitacional pelo SFH.</li>
+<li>Aposentadoria, idade a partir de 70 anos e doenças graves previstas em lei.</li>
+<li>Saque-aniversário, se você optar por essa modalidade.</li>
+<li>Calamidade pública reconhecida pelo governo na região onde mora.</li>
+</ul>
+<h3>Atenção ao saque-aniversário</h3>
+<p>Quem adere ao saque-aniversário recebe uma parte do saldo todo ano, no mês do aniversário, mas, se for demitido, saca apenas a multa de 40%, e não o saldo. Para voltar ao saque-rescisão é preciso pedir a mudança e aguardar uma carência de 25 meses.</p>
+<h2>Como conferir os depósitos</h2>
+<p>Baixe o aplicativo oficial FGTS, da Caixa, e confira mês a mês se a empresa depositou. A falta de depósito é motivo para reclamação no Ministério do Trabalho e até para rescisão indireta, em que o empregado sai com os mesmos direitos de uma demissão sem justa causa.</p>
+<h2>Erros comuns ao estimar o FGTS</h2>
+<ul>
+<li><strong>Esquecer o 13º e as férias:</strong> sobre eles também há depósito de 8%. Num ano completo, isso equivale a cerca de 13,3 depósitos, e não 12.</li>
+<li><strong>Calcular a multa sobre o saldo após saques:</strong> a multa considera todos os depósitos do contrato, mesmo que parte já tenha sido sacada para a casa própria.</li>
+<li><strong>Misturar contas:</strong> cada contrato de trabalho gera uma conta vinculada diferente. A multa só incide sobre a conta do contrato encerrado.</li>
+</ul>
+</div>
+
+<!-- ADSENSE: bloco "meio do conteúdo". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<section class="faq" aria-labelledby="faq-t"><h2 id="faq-t">Perguntas frequentes</h2>
+<details><summary>Como consultar o saldo do FGTS?</summary><div><p>Pelo aplicativo FGTS, da Caixa, com login gov.br. O extrato mostra cada depósito, os créditos de juros e a distribuição de lucros por conta vinculada.</p></div></details>
+<details><summary>O FGTS é descontado do meu salário?</summary><div><p>Não. O FGTS é pago pelo empregador, além do salário. Ele aparece no holerite apenas como informação.</p></div></details>
+<details><summary>A multa de 40% é calculada sobre o saldo atual?</summary><div><p>Sobre o total depositado durante aquele contrato, com correção, mesmo que você tenha feito saques autorizados (como para a casa própria) no meio do caminho.</p></div></details>
+<details><summary>Quem pede demissão perde o FGTS?</summary><div><p>Não perde, apenas não pode sacar naquele momento. O saldo continua rendendo e pode ser sacado em outras hipóteses, como compra de imóvel ou aposentadoria.</p></div></details>
+<details><summary>Quanto rende o FGTS?</summary><div><p>TR + 3% ao ano, mais a distribuição anual de lucros. Pela decisão do STF na ADI 5090, a remuneração anual deve ser pelo menos igual ao IPCA.</p></div></details>
+</section>
+<section class="fontes" aria-labelledby="fontes-t"><h2 id="fontes-t">Fontes oficiais e atualização</h2>
+<ul><li><a href="https://www.planalto.gov.br/ccivil_03/leis/l8036consol.htm" rel="noopener" target="_blank">Lei nº 8.036/1990 (arts. 13, 15 e 18)</a></li><li><a href="https://www.caixa.gov.br/beneficios-trabalhador/fgts/Paginas/default.aspx" rel="noopener" target="_blank">Caixa — FGTS do trabalhador</a></li></ul>
+<p>Valores e regras conferidos em <time datetime="2026-10-08">08/10/2026</time>.</p>
+</section>
+<section class="relacionadas" aria-labelledby="rel-t"><h2 id="rel-t">Calculadoras relacionadas</h2>
+<ul class="cards"><li><a href="/rescisao/"><strong>Rescisão trabalhista</strong><span>Verbas rescisórias, aviso prévio e multa do FGTS.</span></a></li><li><a href="/seguro-desemprego/"><strong>Seguro-desemprego</strong><span>Valor e número de parcelas pela tabela 2026.</span></a></li><li><a href="/salario-liquido/"><strong>Salário líquido</strong><span>Descubra quanto cai na conta após INSS e IR.</span></a></li><li><a href="/financiamento/"><strong>Financiamento SAC e Price</strong><span>Parcelas, juros totais e tabela de amortização.</span></a></li><li><a href="/juros-compostos/"><strong>Juros compostos</strong><span>Simule aportes mensais e veja o patrimônio crescer.</span></a></li></ul>
+</section>
+</article>
+<script type="module" src="/assets/js/ui.js"></script>
+<link rel="modulepreload" href="/assets/js/calc.js">
+</main>
+<footer class="rodape"><div class="caixa">
+<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p>
+<nav aria-label="Institucional"><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+<p class="mini">Tabelas oficiais conferidas em 08/10/2026.</p>
+</div></footer>
+</body>
+</html>

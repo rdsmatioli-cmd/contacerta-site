@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora de IMC: Índice de Massa Corporal e Tabela</title>
+<meta name="description" content="Calcule seu IMC (índice de massa corporal) com a classificação da OMS e descubra a faixa de peso considerada normal para a sua altura.">
+<link rel="canonical" href="https://contacertabr.com.br/imc/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Conta Certa">
+<meta property="og:title" content="Calculadora de IMC: Índice de Massa Corporal e Tabela">
+<meta property="og:description" content="Calcule seu IMC (índice de massa corporal) com a classificação da OMS e descubra a faixa de peso considerada normal para a sua altura.">
+<meta property="og:url" content="https://contacertabr.com.br/imc/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0b6e4f">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+<!-- ADSENSE (cabeçalho): após aprovação, defina adsenseClient em site.config.mjs e rode o build; o script oficial entra aqui automaticamente. Não cole IDs de teste. -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculadora de IMC","url":"https://contacertabr.com.br/imc/","description":"Calcule seu IMC (índice de massa corporal) com a classificação da OMS e descubra a faixa de peso considerada normal para a sua altura.","applicationCategory":"HealthApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-08"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"IMC de 25 já é sobrepeso?","acceptedAnswer":{"@type":"Answer","text":"Sim, pela classificação da OMS o sobrepeso começa em 25. Valores próximos do limite merecem atenção, mas devem ser avaliados junto com cintura, composição corporal e histórico de saúde."}},{"@type":"Question","name":"Qual o IMC ideal?","acceptedAnswer":{"@type":"Answer","text":"Para adultos, entre 18,5 e 24,9, segundo a OMS. Dentro dessa faixa, o valor ideal varia de pessoa para pessoa."}},{"@type":"Question","name":"O IMC é diferente para homens e mulheres?","acceptedAnswer":{"@type":"Answer","text":"Não. Para adultos, a fórmula e a tabela são as mesmas. A composição corporal, porém, costuma ser diferente, e por isso outros indicadores complementam a avaliação."}},{"@type":"Question","name":"Posso usar a calculadora para crianças?","acceptedAnswer":{"@type":"Answer","text":"Não. Para menores de 20 anos, o IMC deve ser comparado com curvas de crescimento por idade e sexo, usadas pelo pediatra."}},{"@type":"Question","name":"Os dados que digito ficam salvos?","acceptedAnswer":{"@type":"Answer","text":"Não. O cálculo é feito no seu navegador e nada é enviado ou armazenado."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://contacertabr.com.br/"},{"@type":"ListItem","position":2,"name":"Calculadora de IMC","item":"https://contacertabr.com.br/imc/"}]}</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo"><div class="caixa"><a class="marca" href="/"><span aria-hidden="true">＝</span> Conta Certa</a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#outras">Outras</a></nav></div></header>
+<main id="conteudo" class="caixa">
+
+<nav class="migalhas" aria-label="Você está em"><a href="/">Início</a> › <span aria-current="page">Calculadora de IMC</span></nav>
+<article>
+<h1>Calculadora de IMC</h1>
+<p class="lead">Informe peso e altura para calcular o índice de massa corporal e ver em que faixa da classificação da Organização Mundial da Saúde você está.</p>
+<section class="calc" aria-labelledby="titulo-calc">
+<h2 id="titulo-calc" class="vh">Calculadora</h2>
+<form data-calc="imc" novalidate>
+<div class="grade-campos"><div class="campo"><label for="f-peso">Peso</label><div class="entrada"><input type="number" inputmode="decimal" id="f-peso" name="peso" step="any" min="1" value="80"><span class="suf" aria-hidden="true">kg</span></div></div>
+<div class="campo"><label for="f-altura">Altura</label><div class="entrada"><input type="number" inputmode="decimal" id="f-altura" name="altura" step="any" min="0.5" value="1.78" aria-describedby="f-altura-ajuda"><span class="suf" aria-hidden="true">m</span></div><small id="f-altura-ajuda">Em metros (1,78) ou centímetros (178).</small></div></div>
+<button type="submit">Calcular</button>
+</form>
+<div id="resultado" class="resultado" aria-live="polite" tabindex="-1"><noscript><p class="erro">Ative o JavaScript para usar a calculadora.</p></noscript></div>
+<p class="aviso" role="note"><strong>Resultado estimativo.</strong> O IMC é um indicador de triagem para adultos e não substitui avaliação médica ou nutricional. Não se aplica a crianças, adolescentes, gestantes e idosos sem ajustes.</p>
+</section>
+<!-- ADSENSE: bloco "após a calculadora". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<div class="texto">
+
+<h2>Como o IMC é calculado</h2>
+<p>O índice de massa corporal relaciona peso e altura: <strong>IMC = peso (kg) ÷ altura (m)²</strong>. Uma pessoa de 80 kg e 1,78 m tem IMC = 80 ÷ (1,78 × 1,78) = 80 ÷ 3,1684 ≈ 25,25.</p>
+<h2>Tabela de classificação para adultos (OMS)</h2>
+<table><thead><tr><th>IMC</th><th>Classificação</th></tr></thead><tbody>
+<tr><td>Menor que 18,5</td><td>Abaixo do peso</td></tr>
+<tr><td>18,5 a 24,9</td><td>Peso normal</td></tr>
+<tr><td>25 a 29,9</td><td>Sobrepeso</td></tr>
+<tr><td>30 a 34,9</td><td>Obesidade grau I</td></tr>
+<tr><td>35 a 39,9</td><td>Obesidade grau II</td></tr>
+<tr><td>40 ou mais</td><td>Obesidade grau III</td></tr>
+</tbody></table>
+<p>No exemplo acima, 25,25 fica na faixa de sobrepeso, logo acima do limite. Para 1,78 m, a faixa de peso normal vai de cerca de 58,6 kg a 78,9 kg. Já uma pessoa de 62 kg e 1,65 m tem IMC de 22,77, dentro da faixa normal, que nessa altura vai de 50,4 kg a 67,8 kg.</p>
+<h2>Limitações do IMC</h2>
+<p>O IMC é simples e útil para estudos populacionais e triagem, mas não mede composição corporal. Por isso:</p>
+<ul>
+<li><strong>Atletas e pessoas musculosas</strong> podem ter IMC alto sem excesso de gordura.</li>
+<li><strong>Idosos</strong> perdem massa muscular; muitos profissionais usam pontos de corte diferentes para pessoas com 60 anos ou mais.</li>
+<li><strong>Crianças e adolescentes</strong> são avaliados por curvas de IMC por idade e sexo, não pela tabela de adultos.</li>
+<li><strong>Gestantes</strong> seguem curvas próprias de ganho de peso.</li>
+<li>O IMC não indica <strong>onde</strong> a gordura está. Gordura abdominal tem maior relação com risco cardiovascular.</li>
+</ul>
+<h2>Outros indicadores úteis</h2>
+<ul>
+<li><strong>Circunferência da cintura:</strong> valores acima de cerca de 80 cm para mulheres e 94 cm para homens indicam risco aumentado, segundo referências da OMS.</li>
+<li><strong>Relação cintura-altura:</strong> manter a cintura menor que metade da altura é uma meta prática.</li>
+<li><strong>Percentual de gordura:</strong> medido por bioimpedância, dobras cutâneas ou exames de imagem.</li>
+</ul>
+<h2>O que fazer com o resultado</h2>
+<p>Use o IMC como ponto de partida para conversar com um médico ou nutricionista, principalmente se estiver fora da faixa normal. Mudanças sustentáveis na alimentação, atividade física regular, sono adequado e acompanhamento profissional costumam funcionar melhor que dietas restritivas. O Sistema Único de Saúde oferece acompanhamento nutricional na atenção primária, nas unidades básicas de saúde.</p>
+<h2>Curiosidade</h2>
+<p>A fórmula foi proposta no século XIX pelo matemático belga Adolphe Quetelet, por isso também é chamada de índice de Quetelet. Ela passou a ser usada amplamente como indicador de obesidade a partir da década de 1970.</p>
+<h2>IMC e risco à saúde</h2>
+<p>Estudos populacionais associam IMC elevado a maior risco de diabetes tipo 2, hipertensão, doenças cardiovasculares, apneia do sono e alguns tipos de câncer. O IMC muito baixo também preocupa, porque pode indicar desnutrição, perda de massa muscular e deficiências nutricionais. Em ambos os casos, o número é um sinal de alerta, não um diagnóstico: exames clínicos e laboratoriais é que confirmam a situação.</p>
+</div>
+
+<!-- ADSENSE: bloco "meio do conteúdo". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
+<section class="faq" aria-labelledby="faq-t"><h2 id="faq-t">Perguntas frequentes</h2>
+<details><summary>IMC de 25 já é sobrepeso?</summary><div><p>Sim, pela classificação da OMS o sobrepeso começa em 25. Valores próximos do limite merecem atenção, mas devem ser avaliados junto com cintura, composição corporal e histórico de saúde.</p></div></details>
+<details><summary>Qual o IMC ideal?</summary><div><p>Para adultos, entre 18,5 e 24,9, segundo a OMS. Dentro dessa faixa, o valor ideal varia de pessoa para pessoa.</p></div></details>
+<details><summary>O IMC é diferente para homens e mulheres?</summary><div><p>Não. Para adultos, a fórmula e a tabela são as mesmas. A composição corporal, porém, costuma ser diferente, e por isso outros indicadores complementam a avaliação.</p></div></details>
+<details><summary>Posso usar a calculadora para crianças?</summary><div><p>Não. Para menores de 20 anos, o IMC deve ser comparado com curvas de crescimento por idade e sexo, usadas pelo pediatra.</p></div></details>
+<details><summary>Os dados que digito ficam salvos?</summary><div><p>Não. O cálculo é feito no seu navegador e nada é enviado ou armazenado.</p></div></details>
+</section>
+<section class="fontes" aria-labelledby="fontes-t"><h2 id="fontes-t">Fontes oficiais e atualização</h2>
+<ul><li><a href="https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight" rel="noopener" target="_blank">Organização Mundial da Saúde — Obesity and overweight</a></li><li><a href="https://bvsms.saude.gov.br/" rel="noopener" target="_blank">Ministério da Saúde — Biblioteca Virtual em Saúde: IMC</a></li></ul>
+<p>Valores e regras conferidos em <time datetime="2026-10-08">08/10/2026</time>.</p>
+</section>
+<section class="relacionadas" aria-labelledby="rel-t"><h2 id="rel-t">Calculadoras relacionadas</h2>
+<ul class="cards"><li><a href="/idade/"><strong>Idade exata</strong><span>Anos, meses e dias entre duas datas.</span></a></li><li><a href="/conversor-de-medidas/"><strong>Conversor de medidas</strong><span>Metros, quilos, litros, alqueires e temperatura.</span></a></li><li><a href="/porcentagem/"><strong>Porcentagem</strong><span>X% de um valor, variação, aumento e desconto.</span></a></li><li><a href="/regra-de-tres/"><strong>Regra de três</strong><span>Simples, direta ou inversa, com explicação.</span></a></li><li><a href="/salario-liquido/"><strong>Salário líquido</strong><span>Descubra quanto cai na conta após INSS e IR.</span></a></li></ul>
+</section>
+</article>
+<script type="module" src="/assets/js/ui.js"></script>
+<link rel="modulepreload" href="/assets/js/calc.js">
+</main>
+<footer class="rodape"><div class="caixa">
+<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p>
+<nav aria-label="Institucional"><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+<p class="mini">Tabelas oficiais conferidas em 08/10/2026.</p>
+</div></footer>
+</body>
+</html>
