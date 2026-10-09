@@ -22,9 +22,11 @@
 <meta name="twitter:title" content="Calculadora de Adicional Noturno 2026: 20%, Hora Reduzida e DSR">
 <meta name="twitter:description" content="Calcule o adicional noturno de 20% (urbano) ou 25% (rural), com a hora noturna reduzida de 52min30s e o reflexo no DSR. Regras da CLT e exemplos.">
 <meta name="twitter:image" content="https://contacertabr.com.br/og/adicional-noturno.jpg">
-<meta name="theme-color" content="#0b6e4f">
+<meta name="theme-color" content="#f5f7f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a1210" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/style.css">
 <!-- ADSENSE (cabeçalho): após aprovação, defina adsenseClient em site.config.mjs e rode o build; o script oficial entra aqui automaticamente. Não cole IDs de teste. -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculadora de adicional noturno","url":"https://contacertabr.com.br/adicional-noturno/","description":"Calcule o adicional noturno de 20% (urbano) ou 25% (rural), com a hora noturna reduzida de 52min30s e o reflexo no DSR. Regras da CLT e exemplos.","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-08","image":"https://contacertabr.com.br/og/adicional-noturno.jpg","publisher":{"@id":"https://contacertabr.com.br/#organizacao"},"isPartOf":{"@id":"https://contacertabr.com.br/#site"},"citation":[{"@type":"CreativeWork","name":"CLT — art. 73 (trabalho noturno)","url":"https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm"},{"@type":"CreativeWork","name":"Lei nº 5.889/1973 — art. 7º (trabalho rural noturno)","url":"https://www.planalto.gov.br/ccivil_03/leis/l5889.htm"},{"@type":"CreativeWork","name":"Constituição Federal — art. 7º, IX","url":"https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm"}]}</script>
@@ -33,17 +35,19 @@
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
-<header class="topo"><div class="caixa"><a class="marca" href="/"><span aria-hidden="true">＝</span> Conta Certa</a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#tabelas">Tabelas</a><a href="/#outras">Outras</a></nav></div></header>
+<svg class="sprite" aria-hidden="true" focusable="false"><symbol id="i-carteira" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H17v3"/><path d="M3 7.5V17a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H5.5A2.5 2.5 0 0 1 3 7.5"/><circle cx="16" cy="13.5" r="1.3"/></symbol><symbol id="i-lua" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol><symbol id="i-documento" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M9.5 13.5l2 2 3.5-3.5"/></symbol><symbol id="i-relogio" viewBox="0 0 24 24"><circle cx="10.5" cy="13.5" r="7.5"/><path d="M10.5 10v3.5l2.5 1.8"/><path d="M19.5 2.5v5M17 5h5"/></symbol><symbol id="i-seta" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></symbol><symbol id="i-presente" viewBox="0 0 24 24"><rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7M12 8v12"/><path d="M12 8C10.5 4.5 7 4 7 6.2 7 8 12 8 12 8zM12 8c1.5-3.5 5-4 5-1.8C17 8 12 8 12 8z"/></symbol><symbol id="i-pessoas" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6.5 6.5 0 0 1 3.5 6"/></symbol></svg>
+<header class="topo"><div class="caixa"><a class="marca" href="/" aria-label="Conta Certa: página inicial"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="16" fill="#0b2b20"/><path d="M16 24h32M16 40h14" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><path d="M37 39.5l4.5 4.5L50 35" fill="none" stroke="#c5f25c" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Conta <b>Certa</b></span></a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#tabelas">Tabelas</a><a href="/#outras">Outras</a></nav><a class="topo-cta" href="/salario-liquido/" aria-label="Calculadora de salário líquido"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-carteira"/></svg><span>Salário líquido</span></a></div></header>
 <main id="conteudo" class="caixa">
 
 <nav class="migalhas" aria-label="Você está em"><a href="/">Início</a> › <span aria-current="page">Calculadora de adicional noturno</span></nav>
-<article>
-<h1>Calculadora de adicional noturno</h1>
+<article class="pag-calc">
+<div class="cabeca"><span class="tile t-trabalho"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-lua"/></svg></span><div><p class="cat-pill t-trabalho">Trabalho e salário</p><h1>Calculadora de adicional noturno</h1></div></div>
 <p class="lead">Descubra quanto você deve receber a mais por trabalhar à noite, com a hora reduzida da CLT e o reflexo no descanso semanal remunerado.</p>
-<p class="meta">Grátis, sem cadastro · Tabelas oficiais conferidas em <time datetime="2026-10-08">08/10/2026</time> · <a href="#fontes-t">Ver fontes</a></p>
+<p class="meta"><span><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Grátis, sem cadastro</span></span> <span class="sep">·</span> <span><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-documento"/></svg><span>Tabelas oficiais conferidas em <time datetime="2026-10-08">08/10/2026</time></span></span> <span class="sep">·</span> <a href="#fontes-t">Ver fontes</a></p>
 <section class="calc" aria-labelledby="titulo-calc">
 <h2 id="titulo-calc" class="vh">Calculadora</h2>
-<form data-calc="adicional-noturno" novalidate>
+<form class="calc-form" data-calc="adicional-noturno" novalidate>
+<p class="calc-rot" aria-hidden="true">Preencha os dados</p>
 <div class="grade-campos"><div class="campo"><label for="f-salario">Salário bruto mensal</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="number" inputmode="decimal" id="f-salario" name="salario" step="0.01" min="0" value="2200"></div></div>
 <div class="campo"><label for="f-jornada">Divisor da jornada mensal (horas)</label><div class="entrada"><input type="number" inputmode="decimal" id="f-jornada" name="jornada" step="1" min="1" value="220" aria-describedby="f-jornada-ajuda"></div><small id="f-jornada-ajuda">220 para 44 h/semana, 200 para 40 h, 180 para 36 h.</small></div>
 <div class="campo"><label for="f-horas">Horas trabalhadas no período noturno no mês (relógio)</label><div class="entrada"><input type="number" inputmode="decimal" id="f-horas" name="horas" step="any" min="0" value="154" aria-describedby="f-horas-ajuda"></div><small id="f-horas-ajuda">Urbano: entre 22h e 5h. Ex.: 7 horas por noite × 22 noites = 154 h.</small></div>
@@ -53,8 +57,11 @@
 <div class="campo"><label for="f-domingos">Domingos e feriados no mês</label><div class="entrada"><input type="number" inputmode="decimal" id="f-domingos" name="domingos" step="1" min="0" value="5"></div></div></div>
 <button type="submit">Calcular</button>
 </form>
+<div class="calc-saida">
+<p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>
 <div id="resultado" class="resultado" aria-live="polite" tabindex="-1"><noscript><p class="erro">Ative o JavaScript para usar a calculadora.</p></noscript></div>
 <p class="aviso" role="note"><strong>Resultado estimativo.</strong> Estimativa bruta, antes de INSS e IR. Convenções coletivas podem prever percentual maior, outro divisor ou regras próprias para escalas como 12x36.</p>
+</div>
 </section>
 <!-- ADSENSE: bloco "após a calculadora". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
 <div class="texto">
@@ -107,15 +114,20 @@
 <p>Valores e regras conferidos em <time datetime="2026-10-08">08/10/2026</time>.</p>
 </section>
 <section class="relacionadas" aria-labelledby="rel-t"><h2 id="rel-t">Calculadoras relacionadas</h2>
-<ul class="cards"><li><a href="/horas-extras/"><strong>Horas extras</strong><span>Valor da hora extra a 50% e 100% com DSR.</span></a></li><li><a href="/salario-liquido/"><strong>Salário líquido</strong><span>Descubra quanto cai na conta após INSS e IR.</span></a></li><li><a href="/ferias/"><strong>Férias</strong><span>Férias + 1/3, venda de 10 dias e descontos.</span></a></li><li><a href="/decimo-terceiro/"><strong>13º salário</strong><span>Valor da 1ª e da 2ª parcela, com descontos.</span></a></li><li><a href="/custo-funcionario/"><strong>Custo de funcionário</strong><span>Quanto um empregado CLT custa para a empresa em 2026.</span></a></li></ul>
+<ul class="cards"><li><a class="card" href="/horas-extras/"><span class="tile t-trabalho"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-relogio"/></svg></span><span class="card-txt"><strong>Horas extras</strong><span>Valor da hora extra a 50% e 100% com DSR.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/salario-liquido/"><span class="tile t-trabalho"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-carteira"/></svg></span><span class="card-txt"><strong>Salário líquido</strong><span>Descubra quanto cai na conta após INSS e IR.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/ferias/"><span class="tile t-trabalho"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-sol"/></svg></span><span class="card-txt"><strong>Férias</strong><span>Férias + 1/3, venda de 10 dias e descontos.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/decimo-terceiro/"><span class="tile t-trabalho"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-presente"/></svg></span><span class="card-txt"><strong>13º salário</strong><span>Valor da 1ª e da 2ª parcela, com descontos.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/custo-funcionario/"><span class="tile t-impostos"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-pessoas"/></svg></span><span class="card-txt"><strong>Custo de funcionário</strong><span>Quanto um empregado CLT custa para a empresa em 2026.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li></ul>
 </section>
 </article>
 <script type="module" src="/assets/js/ui.js"></script>
 <link rel="modulepreload" href="/assets/js/calc.js">
 </main>
 <footer class="rodape"><div class="caixa">
-<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p>
-<nav aria-label="Institucional"><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+<div class="rod-grade">
+<div class="rod-marca"><a class="marca" href="/" aria-label="Conta Certa: página inicial"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="16" fill="#0b2b20"/><path d="M16 24h32M16 40h14" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><path d="M37 39.5l4.5 4.5L50 35" fill="none" stroke="#c5f25c" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Conta <b>Certa</b></span></a>
+<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p></div>
+<nav aria-label="Calculadoras mais usadas"><h2>Mais usadas</h2><a href="/salario-liquido/">Salário líquido</a><a href="/rescisao/">Rescisão trabalhista</a><a href="/decimo-terceiro/">13º salário</a><a href="/ferias/">Férias</a><a href="/imposto-de-renda/">Imposto de renda (IRRF)</a><a href="/das-mei/">DAS MEI 2026</a></nav>
+<nav aria-label="Tabelas oficiais 2026"><h2>Tabelas 2026</h2><a href="/tabela-inss-2026/">Tabela INSS 2026</a><a href="/tabela-ir-2026/">Tabela IR 2026</a><a href="/salario-minimo-2026/">Salário mínimo 2026</a><a href="/tabela-seguro-desemprego-2026/">Tabela seguro-desemprego 2026</a></nav>
+<nav aria-label="Institucional"><h2>Institucional</h2><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+</div>
 <p class="mini">Tabelas oficiais conferidas em <time datetime="2026-10-08">08/10/2026</time>. <a href="/sobre/">Como verificamos as fontes</a>.</p>
 </div></footer><script>(function(){try{if(navigator.doNotTrack==='1'||location.hostname!=='contacertabr.com.br')return;var b='https://abacus.jasoncameron.dev/hit/contacertabr.com.br/',d=new Date().toISOString().slice(0,10).replace(/-/g,''),p=(location.pathname.replace(/^\/|\/$/g,'').replace(/[^A-Za-z0-9_.-]/g,'-')||'home').slice(0,60);['total','d-'+d,'p-'+p].forEach(function(k){fetch(b+k,{keepalive:true}).catch(function(){})})}catch(e){}})();</script>
 </body>

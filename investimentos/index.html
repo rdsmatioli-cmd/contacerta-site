@@ -22,9 +22,11 @@
 <meta name="twitter:title" content="Calculadora CDB x Poupança x Tesouro Selic x LCI (2026)">
 <meta name="twitter:description" content="Compare CDB, LCI/LCA, Tesouro Selic e poupança com a Selic de 13,75%: rendimento bruto, IR pela tabela regressiva e valor líquido no prazo escolhido.">
 <meta name="twitter:image" content="https://contacertabr.com.br/og/investimentos.jpg">
-<meta name="theme-color" content="#0b6e4f">
+<meta name="theme-color" content="#f5f7f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a1210" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/style.css">
 <!-- ADSENSE (cabeçalho): após aprovação, defina adsenseClient em site.config.mjs e rode o build; o script oficial entra aqui automaticamente. Não cole IDs de teste. -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculadora de investimentos: CDB x poupança x Tesouro Selic","url":"https://contacertabr.com.br/investimentos/","description":"Compare CDB, LCI/LCA, Tesouro Selic e poupança com a Selic de 13,75%: rendimento bruto, IR pela tabela regressiva e valor líquido no prazo escolhido.","applicationCategory":"FinanceApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-08","image":"https://contacertabr.com.br/og/investimentos.jpg","publisher":{"@id":"https://contacertabr.com.br/#organizacao"},"isPartOf":{"@id":"https://contacertabr.com.br/#site"},"citation":[{"@type":"CreativeWork","name":"Receita Federal — Tributação de 2026 (aplicações de renda fixa)","url":"https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026"},{"@type":"CreativeWork","name":"Banco Central do Brasil — Comunicado nº 45.963, de 16/09/2026","url":"https://www.bcb.gov.br/controleinflacao/historicotaxasjuros"},{"@type":"CreativeWork","name":"Banco Central do Brasil — remuneração dos depósitos de poupança","url":"https://www.bcb.gov.br/estatisticas/remuneradepositospoupanca"},{"@type":"CreativeWork","name":"Fundo Garantidor de Créditos (FGC)","url":"https://www.fgc.org.br/"}]}</script>
@@ -33,17 +35,19 @@
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
-<header class="topo"><div class="caixa"><a class="marca" href="/"><span aria-hidden="true">＝</span> Conta Certa</a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#tabelas">Tabelas</a><a href="/#outras">Outras</a></nav></div></header>
+<svg class="sprite" aria-hidden="true" focusable="false"><symbol id="i-carteira" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H17v3"/><path d="M3 7.5V17a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H5.5A2.5 2.5 0 0 1 3 7.5"/><circle cx="16" cy="13.5" r="1.3"/></symbol><symbol id="i-barras" viewBox="0 0 24 24"><path d="M4 20h16"/><rect x="5.5" y="12" width="3" height="6" rx=".8"/><rect x="10.5" y="8" width="3" height="10" rx=".8"/><rect x="15.5" y="4" width="3" height="14" rx=".8"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol><symbol id="i-documento" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M9.5 13.5l2 2 3.5-3.5"/></symbol><symbol id="i-alta" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol><symbol id="i-seta" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-casa" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></symbol><symbol id="i-recibo" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></symbol><symbol id="i-porcento" viewBox="0 0 24 24"><path d="M19 5 5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></symbol><symbol id="i-cofre" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="15" rx="2"/><circle cx="12" cy="11.5" r="3.5"/><path d="M12 8v1M12 14v1M7 19v1.5M17 19v1.5"/></symbol></svg>
+<header class="topo"><div class="caixa"><a class="marca" href="/" aria-label="Conta Certa: página inicial"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="16" fill="#0b2b20"/><path d="M16 24h32M16 40h14" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><path d="M37 39.5l4.5 4.5L50 35" fill="none" stroke="#c5f25c" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Conta <b>Certa</b></span></a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#tabelas">Tabelas</a><a href="/#outras">Outras</a></nav><a class="topo-cta" href="/salario-liquido/" aria-label="Calculadora de salário líquido"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-carteira"/></svg><span>Salário líquido</span></a></div></header>
 <main id="conteudo" class="caixa">
 
 <nav class="migalhas" aria-label="Você está em"><a href="/">Início</a> › <span aria-current="page">Calculadora de investimentos: CDB x poupança x Tesouro Selic</span></nav>
-<article>
-<h1>Calculadora de investimentos: CDB x poupança x Tesouro Selic</h1>
+<article class="pag-calc">
+<div class="cabeca"><span class="tile t-financas"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-barras"/></svg></span><div><p class="cat-pill t-financas">Finanças e investimentos</p><h1>Calculadora de investimentos: CDB x poupança x Tesouro Selic</h1></div></div>
 <p class="lead">Compare quanto rende o mesmo valor em CDB, LCI/LCA, Tesouro Selic e poupança, já descontando o imposto de renda de cada aplicação.</p>
-<p class="meta">Grátis, sem cadastro · Tabelas oficiais conferidas em <time datetime="2026-10-08">08/10/2026</time> · <a href="#fontes-t">Ver fontes</a></p>
+<p class="meta"><span><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Grátis, sem cadastro</span></span> <span class="sep">·</span> <span><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-documento"/></svg><span>Tabelas oficiais conferidas em <time datetime="2026-10-08">08/10/2026</time></span></span> <span class="sep">·</span> <a href="#fontes-t">Ver fontes</a></p>
 <section class="calc" aria-labelledby="titulo-calc">
 <h2 id="titulo-calc" class="vh">Calculadora</h2>
-<form data-calc="investimentos" novalidate>
+<form class="calc-form" data-calc="investimentos" novalidate>
+<p class="calc-rot" aria-hidden="true">Preencha os dados</p>
 <div class="grade-campos"><div class="campo"><label for="f-valor">Valor investido</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="number" inputmode="decimal" id="f-valor" name="valor" step="0.01" min="0" value="10000"></div></div>
 <div class="campo"><label for="f-dias">Prazo em dias corridos</label><div class="entrada"><input type="number" inputmode="decimal" id="f-dias" name="dias" step="1" min="30" value="730" aria-describedby="f-dias-ajuda"></div><small id="f-dias-ajuda">365 = 1 ano; 730 = 2 anos.</small></div>
 <div class="campo"><label for="f-cdi">CDI ao ano</label><div class="entrada"><input type="number" inputmode="decimal" id="f-cdi" name="cdi" step="any" value="" data-indicador="cdi"><span class="suf" aria-hidden="true">%</span></div></div>
@@ -53,8 +57,11 @@
 <div class="campo"><label for="f-tr">TR mensal (poupança)</label><div class="entrada"><input type="number" inputmode="decimal" id="f-tr" name="tr" step="any" value="" data-indicador="trMensal"><span class="suf" aria-hidden="true">%</span></div></div></div>
 <button type="submit">Calcular</button>
 </form>
+<div class="calc-saida">
+<p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>
 <div id="resultado" class="resultado" aria-live="polite" tabindex="-1"><noscript><p class="erro">Ative o JavaScript para usar a calculadora.</p></noscript></div>
 <p class="aviso" role="note"><strong>Resultado estimativo.</strong> Simulação com taxas constantes durante todo o prazo, em dias corridos (base 365). Na prática, CDI e Selic mudam, e os bancos usam dias úteis. Não considera IOF, taxa de custódia da B3 nem risco de crédito.</p>
+</div>
 </section>
 <!-- ADSENSE: bloco "após a calculadora". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
 <div class="texto">
@@ -114,15 +121,20 @@
 <p>Valores e regras conferidos em <time datetime="2026-10-08">08/10/2026</time>.</p>
 </section>
 <section class="relacionadas" aria-labelledby="rel-t"><h2 id="rel-t">Calculadoras relacionadas</h2>
-<ul class="cards"><li><a href="/juros-compostos/"><strong>Juros compostos</strong><span>Simule aportes mensais e veja o patrimônio crescer.</span></a></li><li><a href="/financiamento/"><strong>Financiamento SAC e Price</strong><span>Parcelas, juros totais e tabela de amortização.</span></a></li><li><a href="/imposto-de-renda/"><strong>Imposto de renda (IRRF)</strong><span>IR na fonte com isenção até R$ 5.000.</span></a></li><li><a href="/porcentagem/"><strong>Porcentagem</strong><span>X% de um valor, variação, aumento e desconto.</span></a></li><li><a href="/fgts/"><strong>FGTS</strong><span>Depósitos mensais, saldo estimado e multa de 40%.</span></a></li></ul>
+<ul class="cards"><li><a class="card" href="/juros-compostos/"><span class="tile t-financas"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-alta"/></svg></span><span class="card-txt"><strong>Juros compostos</strong><span>Simule aportes mensais e veja o patrimônio crescer.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/financiamento/"><span class="tile t-financas"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-casa"/></svg></span><span class="card-txt"><strong>Financiamento SAC e Price</strong><span>Parcelas, juros totais e tabela de amortização.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/imposto-de-renda/"><span class="tile t-impostos"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-recibo"/></svg></span><span class="card-txt"><strong>Imposto de renda (IRRF)</strong><span>IR na fonte com isenção até R$ 5.000.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/porcentagem/"><span class="tile t-matematica"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-porcento"/></svg></span><span class="card-txt"><strong>Porcentagem</strong><span>X% de um valor, variação, aumento e desconto.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/fgts/"><span class="tile t-trabalho"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-cofre"/></svg></span><span class="card-txt"><strong>FGTS</strong><span>Depósitos mensais, saldo estimado e multa de 40%.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li></ul>
 </section>
 </article>
 <script type="module" src="/assets/js/ui.js"></script>
 <link rel="modulepreload" href="/assets/js/calc.js">
 </main>
 <footer class="rodape"><div class="caixa">
-<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p>
-<nav aria-label="Institucional"><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+<div class="rod-grade">
+<div class="rod-marca"><a class="marca" href="/" aria-label="Conta Certa: página inicial"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="16" fill="#0b2b20"/><path d="M16 24h32M16 40h14" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><path d="M37 39.5l4.5 4.5L50 35" fill="none" stroke="#c5f25c" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Conta <b>Certa</b></span></a>
+<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p></div>
+<nav aria-label="Calculadoras mais usadas"><h2>Mais usadas</h2><a href="/salario-liquido/">Salário líquido</a><a href="/rescisao/">Rescisão trabalhista</a><a href="/decimo-terceiro/">13º salário</a><a href="/ferias/">Férias</a><a href="/imposto-de-renda/">Imposto de renda (IRRF)</a><a href="/das-mei/">DAS MEI 2026</a></nav>
+<nav aria-label="Tabelas oficiais 2026"><h2>Tabelas 2026</h2><a href="/tabela-inss-2026/">Tabela INSS 2026</a><a href="/tabela-ir-2026/">Tabela IR 2026</a><a href="/salario-minimo-2026/">Salário mínimo 2026</a><a href="/tabela-seguro-desemprego-2026/">Tabela seguro-desemprego 2026</a></nav>
+<nav aria-label="Institucional"><h2>Institucional</h2><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+</div>
 <p class="mini">Tabelas oficiais conferidas em <time datetime="2026-10-08">08/10/2026</time>. <a href="/sobre/">Como verificamos as fontes</a>.</p>
 </div></footer><script>(function(){try{if(navigator.doNotTrack==='1'||location.hostname!=='contacertabr.com.br')return;var b='https://abacus.jasoncameron.dev/hit/contacertabr.com.br/',d=new Date().toISOString().slice(0,10).replace(/-/g,''),p=(location.pathname.replace(/^\/|\/$/g,'').replace(/[^A-Za-z0-9_.-]/g,'-')||'home').slice(0,60);['total','d-'+d,'p-'+p].forEach(function(k){fetch(b+k,{keepalive:true}).catch(function(){})})}catch(e){}})();</script>
 </body>

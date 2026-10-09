@@ -22,9 +22,11 @@
 <meta name="twitter:title" content="Calculadora FGTS 2026: Saldo, Depósitos e Multa de 40%">
 <meta name="twitter:description" content="Estime o saldo do FGTS pelos depósitos de 8% ao mês com rendimento de 3% ao ano, e calcule a multa de 40% ou 20% e o valor do saque na demissão.">
 <meta name="twitter:image" content="https://contacertabr.com.br/og/fgts.jpg">
-<meta name="theme-color" content="#0b6e4f">
+<meta name="theme-color" content="#f5f7f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a1210" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/style.css">
 <!-- ADSENSE (cabeçalho): após aprovação, defina adsenseClient em site.config.mjs e rode o build; o script oficial entra aqui automaticamente. Não cole IDs de teste. -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculadora de FGTS","url":"https://contacertabr.com.br/fgts/","description":"Estime o saldo do FGTS pelos depósitos de 8% ao mês com rendimento de 3% ao ano, e calcule a multa de 40% ou 20% e o valor do saque na demissão.","applicationCategory":"FinanceApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-08","image":"https://contacertabr.com.br/og/fgts.jpg","publisher":{"@id":"https://contacertabr.com.br/#organizacao"},"isPartOf":{"@id":"https://contacertabr.com.br/#site"},"citation":[{"@type":"CreativeWork","name":"Lei nº 8.036/1990 (arts. 13, 15 e 18)","url":"https://www.planalto.gov.br/ccivil_03/leis/l8036consol.htm"},{"@type":"CreativeWork","name":"Caixa — FGTS do trabalhador","url":"https://www.caixa.gov.br/beneficios-trabalhador/fgts/Paginas/default.aspx"}]}</script>
@@ -33,17 +35,19 @@
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
-<header class="topo"><div class="caixa"><a class="marca" href="/"><span aria-hidden="true">＝</span> Conta Certa</a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#tabelas">Tabelas</a><a href="/#outras">Outras</a></nav></div></header>
+<svg class="sprite" aria-hidden="true" focusable="false"><symbol id="i-carteira" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H17v3"/><path d="M3 7.5V17a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H5.5A2.5 2.5 0 0 1 3 7.5"/><circle cx="16" cy="13.5" r="1.3"/></symbol><symbol id="i-cofre" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="15" rx="2"/><circle cx="12" cy="11.5" r="3.5"/><path d="M12 8v1M12 14v1M7 19v1.5M17 19v1.5"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol><symbol id="i-documento" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M9.5 13.5l2 2 3.5-3.5"/></symbol><symbol id="i-saida" viewBox="0 0 24 24"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 16l4-4-4-4"/><path d="M19 12H9"/></symbol><symbol id="i-seta" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-guarda" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 18 0z"/><path d="M12 12v6.5a2 2 0 0 1-4 0"/><path d="M12 3v.01"/></symbol><symbol id="i-casa" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></symbol><symbol id="i-alta" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol></svg>
+<header class="topo"><div class="caixa"><a class="marca" href="/" aria-label="Conta Certa: página inicial"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="16" fill="#0b2b20"/><path d="M16 24h32M16 40h14" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><path d="M37 39.5l4.5 4.5L50 35" fill="none" stroke="#c5f25c" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Conta <b>Certa</b></span></a><nav aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#tabelas">Tabelas</a><a href="/#outras">Outras</a></nav><a class="topo-cta" href="/salario-liquido/" aria-label="Calculadora de salário líquido"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-carteira"/></svg><span>Salário líquido</span></a></div></header>
 <main id="conteudo" class="caixa">
 
 <nav class="migalhas" aria-label="Você está em"><a href="/">Início</a> › <span aria-current="page">Calculadora de FGTS</span></nav>
-<article>
-<h1>Calculadora de FGTS</h1>
+<article class="pag-calc">
+<div class="cabeca"><span class="tile t-trabalho"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-cofre"/></svg></span><div><p class="cat-pill t-trabalho">Trabalho e salário</p><h1>Calculadora de FGTS</h1></div></div>
 <p class="lead">Estime quanto o empregador deposita no seu FGTS, o saldo acumulado e quanto você saca com a multa rescisória.</p>
-<p class="meta">Grátis, sem cadastro · Tabelas oficiais conferidas em <time datetime="2026-10-08">08/10/2026</time> · <a href="#fontes-t">Ver fontes</a></p>
+<p class="meta"><span><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Grátis, sem cadastro</span></span> <span class="sep">·</span> <span><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-documento"/></svg><span>Tabelas oficiais conferidas em <time datetime="2026-10-08">08/10/2026</time></span></span> <span class="sep">·</span> <a href="#fontes-t">Ver fontes</a></p>
 <section class="calc" aria-labelledby="titulo-calc">
 <h2 id="titulo-calc" class="vh">Calculadora</h2>
-<form data-calc="fgts" novalidate>
+<form class="calc-form" data-calc="fgts" novalidate>
+<p class="calc-rot" aria-hidden="true">Preencha os dados</p>
 <div class="grade-campos"><div class="campo"><label for="f-salario">Salário bruto mensal</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="number" inputmode="decimal" id="f-salario" name="salario" step="0.01" min="0" value="3500"></div></div>
 <div class="campo"><label for="f-meses">Meses de contrato</label><div class="entrada"><input type="number" inputmode="decimal" id="f-meses" name="meses" step="1" min="1" value="36"></div></div>
 <div class="campo"><label for="f-saldo">Saldo que já existe na conta (opcional)</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="number" inputmode="decimal" id="f-saldo" name="saldo" step="0.01" min="0" value="0"></div></div>
@@ -52,8 +56,11 @@
 <div class="campo check"><input type="checkbox" id="f-aprendiz" name="aprendiz"><label for="f-aprendiz">Jovem aprendiz (depósito de 2%)</label></div></div>
 <button type="submit">Calcular</button>
 </form>
+<div class="calc-saida">
+<p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>
 <div id="resultado" class="resultado" aria-live="polite" tabindex="-1"><noscript><p class="erro">Ative o JavaScript para usar a calculadora.</p></noscript></div>
 <p class="aviso" role="note"><strong>Resultado estimativo.</strong> Estimativa com salário constante. O saldo real depende de reajustes, horas extras, 13º, férias, TR e da distribuição anual de lucros do FGTS. Consulte o extrato oficial no app FGTS.</p>
+</div>
 </section>
 <!-- ADSENSE: bloco "após a calculadora". Após aprovação, cole aqui o <ins class="adsbygoogle" ...> gerado no painel (data-ad-client e data-ad-slot reais). Reserve altura mínima no CSS (.ad-slot) para evitar CLS. -->
 <div class="texto">
@@ -114,15 +121,20 @@
 <p>Valores e regras conferidos em <time datetime="2026-10-08">08/10/2026</time>.</p>
 </section>
 <section class="relacionadas" aria-labelledby="rel-t"><h2 id="rel-t">Calculadoras relacionadas</h2>
-<ul class="cards"><li><a href="/rescisao/"><strong>Rescisão trabalhista</strong><span>Verbas rescisórias, aviso prévio e multa do FGTS.</span></a></li><li><a href="/seguro-desemprego/"><strong>Seguro-desemprego</strong><span>Valor e número de parcelas pela tabela 2026.</span></a></li><li><a href="/salario-liquido/"><strong>Salário líquido</strong><span>Descubra quanto cai na conta após INSS e IR.</span></a></li><li><a href="/financiamento/"><strong>Financiamento SAC e Price</strong><span>Parcelas, juros totais e tabela de amortização.</span></a></li><li><a href="/juros-compostos/"><strong>Juros compostos</strong><span>Simule aportes mensais e veja o patrimônio crescer.</span></a></li></ul>
+<ul class="cards"><li><a class="card" href="/rescisao/"><span class="tile t-trabalho"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-saida"/></svg></span><span class="card-txt"><strong>Rescisão trabalhista</strong><span>Verbas rescisórias, aviso prévio e multa do FGTS.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/seguro-desemprego/"><span class="tile t-trabalho"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-guarda"/></svg></span><span class="card-txt"><strong>Seguro-desemprego</strong><span>Valor e número de parcelas pela tabela 2026.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/salario-liquido/"><span class="tile t-trabalho"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-carteira"/></svg></span><span class="card-txt"><strong>Salário líquido</strong><span>Descubra quanto cai na conta após INSS e IR.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/financiamento/"><span class="tile t-financas"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-casa"/></svg></span><span class="card-txt"><strong>Financiamento SAC e Price</strong><span>Parcelas, juros totais e tabela de amortização.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/juros-compostos/"><span class="tile t-financas"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-alta"/></svg></span><span class="card-txt"><strong>Juros compostos</strong><span>Simule aportes mensais e veja o patrimônio crescer.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li></ul>
 </section>
 </article>
 <script type="module" src="/assets/js/ui.js"></script>
 <link rel="modulepreload" href="/assets/js/calc.js">
 </main>
 <footer class="rodape"><div class="caixa">
-<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p>
-<nav aria-label="Institucional"><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+<div class="rod-grade">
+<div class="rod-marca"><a class="marca" href="/" aria-label="Conta Certa: página inicial"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="16" fill="#0b2b20"/><path d="M16 24h32M16 40h14" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><path d="M37 39.5l4.5 4.5L50 35" fill="none" stroke="#c5f25c" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Conta <b>Certa</b></span></a>
+<p><strong>Conta Certa</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p></div>
+<nav aria-label="Calculadoras mais usadas"><h2>Mais usadas</h2><a href="/salario-liquido/">Salário líquido</a><a href="/rescisao/">Rescisão trabalhista</a><a href="/decimo-terceiro/">13º salário</a><a href="/ferias/">Férias</a><a href="/imposto-de-renda/">Imposto de renda (IRRF)</a><a href="/das-mei/">DAS MEI 2026</a></nav>
+<nav aria-label="Tabelas oficiais 2026"><h2>Tabelas 2026</h2><a href="/tabela-inss-2026/">Tabela INSS 2026</a><a href="/tabela-ir-2026/">Tabela IR 2026</a><a href="/salario-minimo-2026/">Salário mínimo 2026</a><a href="/tabela-seguro-desemprego-2026/">Tabela seguro-desemprego 2026</a></nav>
+<nav aria-label="Institucional"><h2>Institucional</h2><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a></nav>
+</div>
 <p class="mini">Tabelas oficiais conferidas em <time datetime="2026-10-08">08/10/2026</time>. <a href="/sobre/">Como verificamos as fontes</a>.</p>
 </div></footer><script>(function(){try{if(navigator.doNotTrack==='1'||location.hostname!=='contacertabr.com.br')return;var b='https://abacus.jasoncameron.dev/hit/contacertabr.com.br/',d=new Date().toISOString().slice(0,10).replace(/-/g,''),p=(location.pathname.replace(/^\/|\/$/g,'').replace(/[^A-Za-z0-9_.-]/g,'-')||'home').slice(0,60);['total','d-'+d,'p-'+p].forEach(function(k){fetch(b+k,{keepalive:true}).catch(function(){})})}catch(e){}})();</script>
 </body>

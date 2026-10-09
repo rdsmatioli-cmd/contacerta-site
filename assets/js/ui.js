@@ -16,6 +16,14 @@ function tabela(linhas) {
     .join('')}</tbody></table>`;
 }
 const destaque = (rotulo, valor) => `<p class="destaque"><span>${rotulo}</span> <strong>${valor}</strong></p>`;
+// Barra de composição (visual) com legenda em texto; partes: [rótulo, valor, classe de cor c1..c5]
+function barra(partes) {
+  const ok = partes.filter((p) => p && p[1] > 0);
+  const total = ok.reduce((s, p) => s + p[1], 0);
+  if (!total || ok.length < 2) return '';
+  const pc = (v) => Math.round((v / total) * 1000) / 10;
+  return `<div class="barra" aria-hidden="true">${ok.map(([, v, c]) => `<i class="${c}" style="flex:${pc(v)} 1 0"></i>`).join('')}</div><ul class="legenda">${ok.map(([r, v, c]) => `<li class="${c}">${r} ${pc(v).toLocaleString('pt-BR')}%</li>`).join('')}</ul>`;
+}
 
 function ler(form) {
   const d = {};
@@ -33,7 +41,7 @@ const hoje = () => { const d = new Date(); return `${d.getFullYear()}-${String(d
 const CALCS = {
   'salario-liquido'(d) {
     const s = C.salarioLiquido({ bruto: d.bruto, dependentes: d.dependentes, pensao: d.pensao, outrosDescontos: d.outros, valeTransporte: d.vt });
-    return destaque('Salário líquido estimado', R(s.liquido)) + tabela([
+    return destaque('Salário líquido estimado', R(s.liquido)) + barra([['Líquido', s.liquido, 'c1'], ['INSS', s.inss, 'c2'], ['IRRF', s.irrf, 'c5'], ['Outros', s.descontos - s.inss - s.irrf, 'c3']]) + tabela([
       ['Salário bruto', R(s.bruto)],
       ['INSS', `− ${R(s.inss)}`],
       ['IRRF', `− ${R(s.irrf)}`],
@@ -67,7 +75,7 @@ const CALCS = {
   },
   'decimo-terceiro'(d) {
     const r = C.decimoTerceiro({ salario: d.salario, meses: d.meses, mediaVariaveis: d.media, dependentes: d.dependentes });
-    return destaque('13º líquido total', R(r.liquidoTotal)) + tabela([
+    return destaque('13º líquido total', R(r.liquidoTotal)) + barra([['Líquido', r.liquidoTotal, 'c1'], ['INSS', r.inss, 'c2'], ['IRRF', r.irrf, 'c5']]) + tabela([
       [`13º bruto (${r.meses}/12)`, R(r.bruto)],
       ['1ª parcela (até 30/11, sem descontos)', R(r.primeira), 'sub'],
       ['INSS (descontado na 2ª parcela)', `− ${R(r.inss)}`],
@@ -78,7 +86,7 @@ const CALCS = {
   },
   ferias(d) {
     const r = C.ferias({ salario: d.salario, mediaVariaveis: d.media, dias: d.dias, venderDias: d.vender, dependentes: d.dependentes });
-    return destaque('Férias líquidas estimadas', R(r.liquido)) + tabela([
+    return destaque('Férias líquidas estimadas', R(r.liquido)) + barra([['Líquido', r.liquido, 'c1'], ['INSS', r.inss, 'c2'], ['IRRF', r.irrf, 'c5']]) + tabela([
       [`Férias (${r.diasGozo} dias)`, R(r.valorFerias)],
       ['1/3 constitucional', R(r.terco)],
       r.diasAbono ? [`Abono pecuniário (${r.diasAbono} dias vendidos)`, R(r.abono)] : null,
@@ -152,7 +160,7 @@ const CALCS = {
   },
   'juros-compostos'(d) {
     const r = C.jurosCompostos({ inicial: d.inicial, aporte: d.aporte, taxa: d.taxa, periodo: d.periodo, meses: d.meses });
-    return destaque('Valor final', R(r.total)) + tabela([
+    return destaque('Valor final', R(r.total)) + barra([['Investido', r.investido, 'c4'], ['Juros', r.juros, 'c1']]) + tabela([
       ['Total investido', R(r.investido)],
       ['Juros ganhos', R(r.juros)],
       ['Taxa mensal equivalente', pct(r.taxaMensal, 4)],
@@ -164,7 +172,7 @@ const CALCS = {
     const outro = C.financiamento({ valor: d.valor, taxa: d.taxa, periodo: d.periodo, meses: d.meses, sistema: d.sistema === 'price' ? 'sac' : 'price' });
     const nome = d.sistema === 'price' ? 'Price' : 'SAC';
     const nomeOutro = d.sistema === 'price' ? 'SAC' : 'Price';
-    return destaque(`Primeira parcela (${nome})`, R(r.primeira)) + tabela([
+    return destaque(`Primeira parcela (${nome})`, R(r.primeira)) + barra([['Valor financiado', r.totalPago - r.totalJuros, 'c4'], ['Juros', r.totalJuros, 'c2']]) + tabela([
       ['Última parcela', R(r.ultima)],
       ['Total de juros', R(r.totalJuros)],
       ['Total pago', R(r.totalPago), 'total'],
@@ -239,7 +247,7 @@ const CALCS = {
   },
   'custo-funcionario'(d) {
     const r = C.custoFuncionario({ salario: d.salario, regime: d.regime, rat: d.rat, terceiros: d.terceiros, beneficios: d.beneficios, valeTransporte: d.vt, provisionarMulta: d.multa });
-    return destaque('Custo médio mensal para a empresa', R(r.mensal)) + tabela([
+    return destaque('Custo médio mensal para a empresa', R(r.mensal)) + barra([['Salários', r.salarios, 'c1'], ['13º e férias', r.decimo + r.terco, 'c4'], ['FGTS e INSS', r.fgts + (r.multa || 0) + r.inssPatronal, 'c2'], ['Benefícios', (r.vtEmpresa || 0) + (r.beneficios || 0), 'c3']]) + tabela([
       ['12 salários (um deles pago como férias)', R(r.salarios)],
       ['13º salário', R(r.decimo)],
       ['1/3 constitucional de férias', R(r.terco)],
