@@ -130,3 +130,8 @@ details>div>p:first-child{margin-top:0}
 .mini{font-size:.82rem}
 .meta{font-size:.9rem;color:var(--suave);margin:-.4em 0 0}
 .meta a{color:var(--suave)}
+.leia-tambem{margin:28px 0;padding:14px 18px;border:1px solid var(--borda);border-radius:var(--raio);background:var(--card);font-size:.92rem;color:var(--suave)}
+.leia-tambem h2{font-size:1rem;margin:0 0 6px;color:var(--texto)}
+.leia-tambem p{margin:0 0 8px}
+.leia-tambem ul{margin:0;padding-left:18px}
+.leia-tambem li{margin:4px 0}

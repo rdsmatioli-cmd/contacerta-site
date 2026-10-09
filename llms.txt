@@ -1,6 +1,6 @@
 # Conta Certa
 
-> Conta Certa (https://contacertabr.com.br) reúne 18 calculadoras gratuitas em português do Brasil para salário, direitos trabalhistas (CLT), impostos, MEI, investimentos, financiamentos e contas do dia a dia. Os cálculos usam as tabelas oficiais vigentes em 2026, citam a norma de origem e rodam no navegador do usuário, sem cadastro e sem envio de dados.
+> Conta Certa (https://contacertabr.com.br) reúne 23 calculadoras gratuitas em português do Brasil para salário, direitos trabalhistas (CLT), impostos, MEI, investimentos, financiamentos e contas do dia a dia. Os cálculos usam as tabelas oficiais vigentes em 2026, citam a norma de origem e rodam no navegador do usuário, sem cadastro e sem envio de dados.
 
 Tabelas conferidas em 08/10/2026. Principais valores usados em 2026:
 
@@ -27,19 +27,24 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 - [Calculadora de férias](https://contacertabr.com.br/ferias/): Calcule o valor das férias 2026 com 1/3 constitucional, venda de 10 dias (abono pecuniário), INSS e IR. Veja exemplos e prazos de pagamento.
 - [Calculadora de FGTS](https://contacertabr.com.br/fgts/): Estime o saldo do FGTS pelos depósitos de 8% ao mês com rendimento de 3% ao ano, e calcule a multa de 40% ou 20% e o valor do saque na demissão.
 - [Calculadora de horas extras](https://contacertabr.com.br/horas-extras/): Calcule o valor das horas extras a 50% e 100%, com o divisor da jornada e o reflexo no descanso semanal remunerado (DSR). Exemplos passo a passo.
+- [Calculadora de adicional noturno](https://contacertabr.com.br/adicional-noturno/): Calcule o adicional noturno de 20% (urbano) ou 25% (rural), com a hora noturna reduzida de 52min30s e o reflexo no DSR. Regras da CLT e exemplos.
 - [Calculadora de seguro-desemprego 2026](https://contacertabr.com.br/seguro-desemprego/): Calcule o valor e o número de parcelas do seguro-desemprego 2026 pela tabela oficial do MTE: piso de R$ 1.621 e teto de R$ 2.518,65.
+- [Calculadora de aviso prévio](https://contacertabr.com.br/aviso-previo/): Calcule quantos dias de aviso prévio você tem (30 + 3 por ano, até 90), o valor do aviso indenizado e a data final com a projeção. Lei 12.506/2011.
 
 ## Finanças e investimentos
 
 - [Calculadora de juros compostos](https://contacertabr.com.br/juros-compostos/): Simule juros compostos com valor inicial, aportes mensais e taxa mensal ou anual. Veja o valor final, os juros ganhos e a evolução ano a ano.
 - [Simulador de financiamento SAC e Price](https://contacertabr.com.br/financiamento/): Simule financiamento de imóvel ou veículo nas tabelas SAC e Price: primeira e última parcela, total de juros e tabela de amortização completa.
 - [Calculadora de investimentos: CDB x poupança x Tesouro Selic](https://contacertabr.com.br/investimentos/): Compare CDB, LCI/LCA, Tesouro Selic e poupança com a Selic de 13,75%: rendimento bruto, IR pela tabela regressiva e valor líquido no prazo escolhido.
+- [Calculadora: à vista ou parcelado?](https://contacertabr.com.br/parcelado-ou-a-vista/): Descubra os juros escondidos no parcelamento e se vale mais pagar à vista com desconto ou parcelar e deixar o dinheiro rendendo. Simulação grátis.
 
 ## Impostos e MEI
 
 - [Calculadora de imposto de renda 2026 (IRRF mensal)](https://contacertabr.com.br/imposto-de-renda/): Calcule o IR retido na fonte em 2026 com a nova isenção até R$ 5.000 e a redução até R$ 7.350 (Lei 15.270/2025), dependentes e desconto simplificado.
 - [Calculadora DAS MEI 2026](https://contacertabr.com.br/das-mei/): Veja o valor do DAS MEI 2026 (R$ 82,05, R$ 86,05 ou R$ 87,05), o total anual e se o seu faturamento cabe no limite de R$ 81 mil do MEI.
 - [Calculadora de INSS 2026](https://contacertabr.com.br/inss/): Calcule a contribuição ao INSS 2026 com a tabela progressiva oficial (7,5% a 14%, teto R$ 8.475,55) ou como autônomo, facultativo e MEI (20%, 11% ou 5%).
+- [Calculadora de custo de funcionário para a empresa](https://contacertabr.com.br/custo-funcionario/): Calcule quanto um funcionário CLT custa por mês e por ano: 13º, férias, FGTS, INSS patronal e benefícios, no Simples Nacional, Lucro Presumido ou MEI.
+- [Calculadora de markup e preço de venda](https://contacertabr.com.br/markup/): Calcule o preço de venda pelo markup: custo, despesas fixas, impostos, taxas de cartão, comissões e margem de lucro. Fórmula do Sebrae e exemplos.
 
 ## Matemática
 

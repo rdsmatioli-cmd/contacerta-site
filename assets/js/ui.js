@@ -211,6 +211,76 @@ const CALCS = {
       d.faturamento ? ['Situação do faturamento informado', sit] : null,
     ]);
   },
+  'adicional-noturno'(d) {
+    const r = C.adicionalNoturno({ salario: d.salario, jornadaMensal: d.jornada, horas: d.horas, tipo: d.tipo, percentual: d.percentual, diasUteis: d.diasUteis, domingosFeriados: d.domingos });
+    return destaque('Adicional noturno + DSR', R(r.total)) + tabela([
+      ['Valor da hora normal', R(r.valorHora)],
+      ['Valor da hora noturna (com adicional)', R(r.valorHoraNoturna)],
+      [`Horas trabalhadas no relógio`, `${n2.format(r.horasRelogio)} h`],
+      [d.tipo === 'rural' ? 'Horas consideradas (rural, sem hora reduzida)' : 'Horas noturnas consideradas (hora de 52min30s)', `${n2.format(r.horasConsideradas)} h`],
+      [`Adicional noturno (${pct(r.pct, 0)})`, R(r.adicional), 'sub'],
+      ['Reflexo no DSR', R(r.dsr)],
+      ['Total bruto a mais no mês', R(r.total), 'total'],
+    ]);
+  },
+  'aviso-previo'(d) {
+    const r = C.avisoPrevio({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo });
+    if (!r) return '<p class="erro">Confira as datas: o desligamento deve ser depois da admissão.</p>';
+    const fimBR = r.fimProjetado.split('-').reverse().join('/');
+    return destaque('Aviso prévio', `${r.dias} dias`) + tabela([
+      ['Anos completos de empresa', String(r.anos)],
+      ['Aviso pela Lei 12.506/2011 (30 + 3 por ano)', `${r.diasLei} dias`],
+      d.tipo === 'pedidoDemissao' ? ['No pedido de demissão (sem proporcional)', '30 dias'] : null,
+      d.tipo === 'acordo' ? ['No acordo (art. 484-A da CLT)', 'metade'] : null,
+      ['Valor de um dia de salário', R(r.diaria)],
+      [d.tipo === 'pedidoDemissao' ? 'Valor do aviso (desconto se não for cumprido)' : 'Valor do aviso indenizado', R(r.valor), 'total'],
+      d.tipo !== 'pedidoDemissao' ? ['Data final com a projeção do aviso', fimBR] : null,
+    ]);
+  },
+  'custo-funcionario'(d) {
+    const r = C.custoFuncionario({ salario: d.salario, regime: d.regime, rat: d.rat, terceiros: d.terceiros, beneficios: d.beneficios, valeTransporte: d.vt, provisionarMulta: d.multa });
+    return destaque('Custo médio mensal para a empresa', R(r.mensal)) + tabela([
+      ['12 salários (um deles pago como férias)', R(r.salarios)],
+      ['13º salário', R(r.decimo)],
+      ['1/3 constitucional de férias', R(r.terco)],
+      ['FGTS (8%)', R(r.fgts)],
+      r.multa ? ['Provisão da multa de 40% do FGTS', R(r.multa)] : null,
+      [r.aliqPatronal ? `INSS patronal e outras contribuições (${pct(r.aliqPatronal, 1)})` : 'INSS patronal (já incluído no DAS)', R(r.inssPatronal)],
+      r.vtEmpresa ? ['Vale-transporte pago pela empresa (11 meses)', R(r.vtEmpresa)] : null,
+      r.beneficios ? ['Benefícios (12 meses)', R(r.beneficios)] : null,
+      ['Custo anual total', R(r.anual), 'total'],
+      ['Custo médio por mês (÷ 12)', R(r.mensal), 'sub'],
+      ['Custo por mês efetivamente trabalhado (÷ 11)', R(r.porMesTrabalhado)],
+      ['Custo em relação ao salário', `${n2.format(r.fator)} vezes`],
+    ]);
+  },
+  markup(d) {
+    const r = C.markup({ custo: d.custo, despesasFixas: d.fixas, impostos: d.impostos, taxas: d.taxas, lucro: d.lucro });
+    if (!r) return '<p class="erro">A soma dos percentuais precisa ser menor que 100%. Reduza as despesas ou a margem de lucro.</p>';
+    return destaque('Preço de venda sugerido', R(r.preco)) + tabela([
+      ['Índice de markup (multiplicador)', n2.format(Math.round(r.indice * 10000) / 10000)],
+      ['Markup sobre o custo', pct(r.markupPct, 1)],
+      ['Custo do produto ou serviço', R(d.custo)],
+      ['Despesas fixas', R(r.vFixas)],
+      ['Impostos sobre a venda', R(r.vImpostos)],
+      ['Taxas e comissões', R(r.vTaxas)],
+      ['Lucro líquido por unidade', R(r.vLucro), 'sub'],
+      ['Preço de venda', R(r.preco), 'total'],
+    ]);
+  },
+  'parcelado-ou-a-vista'(d) {
+    const r = C.parceladoOuVista({ vista: d.vista, parcelas: d.parcelas, valorParcela: d.parcela, comEntrada: d.entrada, rendimentoAnual: d.rendimento });
+    const msg = { vista: 'Pagar à vista sai mais barato', parcelado: 'Parcelar e deixar o dinheiro rendendo sai mais barato', empate: 'Tanto faz: os dois caminhos custam o mesmo' }[r.melhor];
+    return destaque('Melhor opção', msg) + tabela([
+      ['Total parcelado', R(r.total)],
+      ['Desconto à vista em relação ao total', pct(r.descontoVista, 1)],
+      ['Juros embutidos (ao mês)', pct(r.taxaImplicita)],
+      ['Juros embutidos (ao ano)', pct(r.taxaImplicitaAnual)],
+      ['Rendimento do seu dinheiro (ao mês)', pct(r.rendimentoMensal)],
+      ['Valor das parcelas trazido a hoje', R(r.vp), 'sub'],
+      [r.vantagem >= 0 ? 'Economia ao parcelar' : 'Economia ao pagar à vista', R(Math.abs(r.vantagem)), 'total'],
+    ]) + '<p class="nota">O rendimento é bruto, sem imposto de renda. Se o dinheiro não fosse ficar aplicado, compare só os juros embutidos: qualquer taxa acima de zero significa que à vista é mais barato.</p>';
+  },
   'conversor-de-medidas'(d) {
     const v = C.converter(d.valor, d.categoria, d.de, d.para);
     return destaque('Resultado', Number.isFinite(v) ? `${n6.format(v)} ${esc(d.para)}` : '—');

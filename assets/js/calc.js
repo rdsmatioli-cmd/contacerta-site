@@ -133,6 +133,112 @@ export function horasExtras({ salario, jornadaMensal = 220, horas50 = 0, horas10
   return { valorHora: r2(valorHora), he50, he100, heOutro, totalHE, dsr, total: r2(totalHE + dsr) };
 }
 
+// ---------------------------------------------------------------- Adicional noturno
+/**
+ * Urbano (CLT art. 73): 22h–5h, adicional mínimo de 20% e hora noturna de 52min30s (fator 60/52,5).
+ * Rural (Lei 5.889/1973, art. 7º): 21h–5h (lavoura) ou 20h–4h (pecuária), adicional de 25%, sem hora reduzida.
+ */
+export function adicionalNoturno({ salario, jornadaMensal = 220, horas = 0, tipo = 'urbano', percentual, diasUteis = 0, domingosFeriados = 0 }) {
+  const rural = tipo === 'rural';
+  const pct = num(percentual, rural ? 25 : 20) / 100;
+  const valorHora = num(salario) / Math.max(1, num(jornadaMensal, 220));
+  const horasRelogio = num(horas);
+  const horasConsideradas = rural ? horasRelogio : (horasRelogio * 60) / 52.5;
+  const adicional = r2(valorHora * pct * horasConsideradas);
+  const dsr = num(diasUteis) > 0 ? r2((adicional / num(diasUteis)) * num(domingosFeriados)) : 0;
+  return { valorHora: r2(valorHora), horasRelogio, horasConsideradas: r2(horasConsideradas), pct, adicional, dsr, total: r2(adicional + dsr), valorHoraNoturna: r2(valorHora * (1 + pct)) };
+}
+
+// ---------------------------------------------------------------- Aviso prévio
+/** tipo: semJustaCausa | pedidoDemissao | acordo. Proporcionalidade da Lei 12.506/2011 só a favor do empregado. */
+export function avisoPrevio({ salario, admissao, desligamento, tipo = 'semJustaCausa' }) {
+  const dAdm = parseData(admissao);
+  const dDes = parseData(desligamento);
+  if (!(dDes >= dAdm)) return null;
+  const anos = anosCompletos(dAdm, dDes);
+  const diasLei = diasAvisoPrevio(dAdm, dDes);
+  const dias = tipo === 'pedidoDemissao' ? 30 : tipo === 'acordo' ? Math.floor(diasLei / 2) : diasLei;
+  const diaria = num(salario) / 30;
+  const valor = r2(diaria * dias);
+  const fim = addDias(dDes, dias).toISOString().slice(0, 10);
+  return { anos, diasLei, dias, valor, fimProjetado: fim, diaria: r2(diaria) };
+}
+
+// ---------------------------------------------------------------- Custo do funcionário
+/**
+ * Custo anual e mensal médio de um empregado CLT para a empresa.
+ * Base anual = 12 salários (um deles pago como férias) + 13º + 1/3 de férias.
+ * regime: simples (Anexos I, II, III e V: CPP dentro do DAS) | simplesIV | presumido (Lucro Presumido ou Real) | mei
+ */
+export function custoFuncionario({ salario, regime = 'simples', rat = 2, terceiros = 5.8, beneficios = 0, valeTransporte = 0, provisionarMulta = false }) {
+  const s = num(salario);
+  const salarios = r2(s * 12);
+  const decimo = r2(s);
+  const terco = r2(s / 3);
+  const base = r2(salarios + decimo + terco);
+  const fgts = r2(base * FGTS.aliquota);
+  const multa = provisionarMulta ? r2(fgts * FGTS.multaSemJustaCausa) : 0;
+  let aliqPatronal = 0;
+  if (regime === 'presumido') aliqPatronal = 0.2 + num(rat) / 100 + num(terceiros) / 100;
+  else if (regime === 'simplesIV') aliqPatronal = 0.2 + num(rat) / 100;
+  else if (regime === 'mei') aliqPatronal = 0.03;
+  const inssPatronal = r2(base * aliqPatronal);
+  const vtEmpresa = r2(Math.max(0, num(valeTransporte) - s * 0.06) * 11);
+  const benef = r2(num(beneficios) * 12);
+  const anual = r2(base + fgts + multa + inssPatronal + vtEmpresa + benef);
+  return {
+    salarios, decimo, terco, base, fgts, multa, aliqPatronal, inssPatronal, vtEmpresa, beneficios: benef, anual,
+    mensal: r2(anual / 12), porMesTrabalhado: r2(anual / 11), fator: s > 0 ? anual / 12 / s : 0,
+  };
+}
+
+// ---------------------------------------------------------------- Markup e preço de venda
+/** Markup divisor (Sebrae): preço = custo × 100 ÷ [100 − (despesas fixas + impostos + taxas/comissões + lucro)], tudo em % do preço. */
+export function markup({ custo, despesasFixas = 0, impostos = 0, taxas = 0, lucro = 0 }) {
+  const soma = num(despesasFixas) + num(impostos) + num(taxas) + num(lucro);
+  if (soma >= 100) return null;
+  const indice = 100 / (100 - soma);
+  const c = num(custo);
+  const preco = r2(c * indice);
+  return {
+    soma, indice, preco, markupPct: c > 0 ? (preco - c) / c : 0,
+    vFixas: r2(preco * num(despesasFixas) / 100), vImpostos: r2(preco * num(impostos) / 100),
+    vTaxas: r2(preco * num(taxas) / 100), vLucro: r2(preco * num(lucro) / 100),
+  };
+}
+
+// ---------------------------------------------------------------- À vista ou parcelado
+/** Valor presente de n parcelas iguais a uma taxa mensal i; comEntrada = 1ª parcela no ato. */
+export function valorPresenteParcelas(parcela, n, i, comEntrada = false) {
+  let vp = 0;
+  for (let k = 0; k < n; k++) vp += parcela / Math.pow(1 + i, k + (comEntrada ? 0 : 1));
+  return vp;
+}
+export function parceladoOuVista({ vista, parcelas, valorParcela, comEntrada = false, rendimentoAnual = 0 }) {
+  const V = num(vista);
+  const n = Math.max(1, Math.floor(num(parcelas, 1)));
+  const P = num(valorParcela);
+  const total = r2(P * n);
+  // taxa implícita: resolve V = VP(parcelas, i) por bisseção
+  let taxaImplicita = 0;
+  if (V > 0 && total > V && !(comEntrada && n === 1)) {
+    let lo = 0;
+    let hi = 1;
+    for (let k = 0; k < 200; k++) {
+      const mid = (lo + hi) / 2;
+      if (valorPresenteParcelas(P, n, mid, comEntrada) > V) lo = mid; else hi = mid;
+    }
+    taxaImplicita = (lo + hi) / 2;
+  }
+  const rend = taxaMensalDeAnual(rendimentoAnual);
+  const vp = r2(valorPresenteParcelas(P, n, rend, comEntrada));
+  const vantagem = r2(V - vp); // > 0: parcelar e aplicar o dinheiro sai mais barato
+  return {
+    total, taxaImplicita, taxaImplicitaAnual: Math.pow(1 + taxaImplicita, 12) - 1, descontoVista: total > 0 ? 1 - V / total : 0,
+    rendimentoMensal: rend, vp, vantagem, melhor: Math.abs(vantagem) < 0.005 ? 'empate' : vantagem > 0 ? 'parcelado' : 'vista',
+  };
+}
+
 // ---------------------------------------------------------------- Seguro-desemprego
 export function seguroDesemprego({ salarios = [], solicitacao = 1, mesesTrabalhados = 0 }) {
   const vals = salarios.map((s) => num(s)).filter((s) => s > 0);
