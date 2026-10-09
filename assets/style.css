@@ -312,8 +312,8 @@ details>div{color:var(--suave)}
 .leia-tambem p{margin:0 0 8px}
 .leia-tambem ul{margin:0;padding-left:18px}
 .leia-tambem li{margin:4px 0}
-.leia-tambem .afiliado-aviso,.rodape .afiliado-aviso{margin:10px 0 0;font-size:.82rem;line-height:1.45;color:var(--suave)}
-.rodape .afiliado-aviso{display:block;margin-top:6px;opacity:.9}
+.leia-tambem .afiliado-aviso{margin:10px 0 0;font-size:.82rem;line-height:1.45;color:var(--suave)}
+.rodape .afiliado-aviso{display:block;margin:10px 0 0;font-size:.82rem;line-height:1.45;color:#b9cec4;opacity:.9}
 
 /* Compatibilidade: se o build.mjs ainda não tiver o patch do redesign, a marcação antiga continua apresentável. */
 .marca>span[aria-hidden]{display:inline-block;width:34px;height:34px;flex:none;background:url(/favicon.svg) center/contain no-repeat;color:transparent;font-size:0;overflow:hidden}
