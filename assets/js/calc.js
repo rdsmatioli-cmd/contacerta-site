@@ -1,5 +1,5 @@
 // Funções puras de cálculo. Usadas pelo navegador (ui.js) e pelos testes (node --test).
-import { INSS, INSS_POR_ANO, IRRF_POR_DATA, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=790e268916';
+import { INSS, INSS_POR_ANO, IRRF_POR_DATA, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=75bd7fab5f';
 
 /** Arredonda para 2 casas (meio para cima), imune a ruído de ponto flutuante. */
 export function r2(x) {
@@ -455,7 +455,7 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
   return {
     diasNoMes, saldoSalario, diasAviso, diasProjecao, avisoIndenizado, avos13, avos13Anterior, avos13Atual, anoDes, anoFim, decimoAnterior, decimoAtual, decimo,
     avosFerias: avosF, feriasProp, feriasVenc, periodosVenc, periodosEmDobro, periodosProjecao, feriasVencSimples, dobraFeriasVenc, feriasProjecao, tercoFerias,
-    inssSaldo, inssSaldoSubstituida, irSaldo, inss13, inss13Anterior, inss13Atual, tabelasSubstituidas, ir13, ir13Base: ir13R.base, ir13Reducao: ir13R.reducao, irSaldoBase: irSaldoR.base, tabelaIrrf: { vigencia: irTab.tabela.vigencia, ano: irTab.ano, anoPagamento: irTab.anoPagamento, substituida: irTab.substituida }, descontoAviso, verbas, descontos, liquido: r2(verbas - descontos),
+    inssSaldo, inssSaldoSubstituida, irSaldo, inss13, inss13Anterior, inss13Atual, tabelasSubstituidas, ir13, ir13Base: ir13R.base, ir13Reducao: ir13R.reducao, irSaldoBase: irSaldoR.base, tabelaIrrf: { vigencia: irTab.tabela.vigencia, rotulo: irTab.tabela.rotulo, ano: irTab.ano, anoPagamento: irTab.anoPagamento, substituida: irTab.substituida }, descontoAviso, verbas, descontos, liquido: r2(verbas - descontos),
     multaFgts, saqueFgts: r2(num(saldoFgts) * saqueFgtsPct), fimProjetado: fimProjetado.toISOString().slice(0, 10),
   };
 }

@@ -31,6 +31,7 @@ export const INSS = {
 // Lei nº 11.482/2007, art. 1º, XI e XII (redação da Lei nº 15.191/2025). Sem redução da Lei 15.270 (vigente a partir de 2026).
 export const IRRF_2025_JAN_ABR = {
   vigencia: 'janeiro a abril/2025',
+  rotulo: 'janeiro a abril/2025',
   fonte: 'Receita Federal — Tributação de 2025 (Lei nº 11.482/2007, art. 1º, XI)',
   faixas: [
     { ate: 2259.2, aliquota: 0, deducao: 0 },
@@ -45,6 +46,7 @@ export const IRRF_2025_JAN_ABR = {
 };
 export const IRRF_2025 = {
   vigencia: 'maio a dezembro/2025',
+  rotulo: 'maio a dezembro/2025',
   fonte: 'Receita Federal — Tributação de 2025 (Lei nº 15.191/2025)',
   faixas: [
     { ate: 2428.8, aliquota: 0, deducao: 0 },
@@ -76,6 +78,7 @@ export const INSS_POR_ANO = { 2025: INSS_2025, 2026: INSS };
 // IRRF — tabela progressiva mensal + redução da Lei 15.270/2025
 export const IRRF = {
   vigencia: 'a partir de janeiro/2026',
+  rotulo: '2026 em diante', // usado na nota da rescisão: "tabela de 2026 em diante"
   fonte: 'Receita Federal — Tributação de 2026 (Lei nº 15.191/2025 e Lei nº 15.270/2025)',
   url: 'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026',
   faixas: [
