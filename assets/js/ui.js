@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=825856845b';
-import { INDICADORES } from './tabelas.js?v=825856845b';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=825856845b';
+import * as C from './calc.js?v=a93411cfb0';
+import { INDICADORES } from './tabelas.js?v=a93411cfb0';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=a93411cfb0';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -123,7 +123,7 @@ const CALCS = {
       [`Férias proporcionais (${r.avosFerias}/12)`, R(r.feriasProp)],
       r.feriasVencSimples ? [`Férias vencidas (${r.periodosVenc} ${r.periodosVenc === 1 ? 'período' : 'períodos'})`, R(r.feriasVencSimples)] : null,
       r.dobraFeriasVenc ? [`Dobra das férias vencidas fora do prazo (${r.periodosEmDobro} ${r.periodosEmDobro === 1 ? 'período' : 'períodos'}, art. 137 da CLT)`, R(r.dobraFeriasVenc)] : null,
-      r.feriasProjecao ? [`Férias integrais do período completado na projeção do aviso (${r.periodosProjecao} ${r.periodosProjecao === 1 ? 'período' : 'períodos'})`, R(r.feriasProjecao)] : null,
+      r.feriasProjecao ? [`Férias do período completado no aviso projetado (${r.periodosProjecao} ${r.periodosProjecao === 1 ? 'período' : 'períodos'})`, R(r.feriasProjecao)] : null,
       [r.dobraFeriasVenc ? '1/3 constitucional sobre férias (inclui a dobra)' : '1/3 constitucional sobre férias', R(r.tercoFerias)],
       ['Total bruto das verbas', R(r.verbas), 'sub'],
       ['INSS sobre saldo de salário', `− ${R(r.inssSaldo)}`],
