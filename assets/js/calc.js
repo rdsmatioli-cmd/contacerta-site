@@ -583,22 +583,28 @@ export function aliquotasAno(linha, { pisCofinsPct = 3.65, issPct = 5, cbsRefPct
 }
 
 // Simulador da transição: mantém a receita líquida de hoje e mostra preço e carga ano a ano.
-// Tributos antigos "por dentro" (no preço); CBS/IBS "por fora" (somados ao valor da operação).
-export function transicaoCbsIbs({ precoAtual, pisCofinsPct = 3.65, issPct = 5, cbsRefPct, ibsRefPct, dasPct = 0 }) {
+// Tributos antigos "por dentro" (no preço); CBS/IBS "por fora". Base de CBS/IBS = valor sem ICMS, ISS, PIS e Cofins
+// (ADCT, art. 133; LC 214/2025, art. 12, § 2º, V), ou seja, o líquido mantido.
+// issSobreCbsIbs (padrão true, conservador): o ISS/ICMS incide também sobre a CBS/IBS (tema não definido em lei; PLP 16/2025):
+//   cliente paga = líquido × (1 + CBS + IBS) ÷ (1 − antigos). false: nenhum integra a base do outro:
+//   cliente paga = líquido ÷ (1 − antigos) + líquido × (CBS + IBS). Revisão tributária de 10/10/2026, item 10.
+export function transicaoCbsIbs({ precoAtual, pisCofinsPct = 3.65, issPct = 5, cbsRefPct, ibsRefPct, dasPct = 0, issSobreCbsIbs = true }) {
   if (!(precoAtual > 0)) return null;
   const tHoje = pisCofinsPct / 100 + issPct / 100;
   const liquido = precoAtual * (1 - tHoje);
   const anos = TRANSICAO.map((l) => {
     const a = aliquotasAno(l, { pisCofinsPct, issPct, cbsRefPct, ibsRefPct });
-    // 2026: CBS/IBS de teste destacados, mas compensáveis/dispensados -> sem custo adicional.
+    // 2026: CBS/IBS de teste destacados, mas compensáveis/dispensados -> sem custo adicional (não se aplicam ao Simples).
     const novosEfetivos = l.testeCompensavel ? 0 : a.novos;
-    const valor = liquido / (1 - a.antigos); // valor da operação (base de CBS/IBS)
-    const totalCliente = valor * (1 + novosEfetivos);
+    const base = liquido; // base de CBS/IBS: sem ISS, ICMS, PIS e Cofins
+    const totalCliente = issSobreCbsIbs
+      ? liquido * (1 + novosEfetivos) / (1 - a.antigos)
+      : liquido / (1 - a.antigos) + liquido * novosEfetivos;
     const tributos = totalCliente - liquido;
-    return { ano: l.ano, fase: l.fase, ...a, novosEfetivos, valor: r2(valor), totalCliente: r2(totalCliente), tributos: r2(tributos), carga: tributos / totalCliente };
+    return { ano: l.ano, fase: l.fase, ...a, novosEfetivos, base: r2(base), cbsIbs: r2(base * novosEfetivos), totalCliente: r2(totalCliente), tributos: r2(tributos), carga: tributos / totalCliente };
   });
   const simples = dasPct > 0 ? { carga: dasPct / 100, tributos: r2(precoAtual * dasPct / 100) } : null;
-  return { liquido: r2(liquido), cargaHoje: tHoje, anos, simples };
+  return { liquido: r2(liquido), cargaHoje: tHoje, anos, simples, issSobreCbsIbs };
 }
 
 // Simples Nacional: ficar no DAS x apurar CBS/IBS por fora (opção "híbrida", LC 214/2025).
@@ -618,6 +624,54 @@ export function simplesHibrido({ receitaMensal, pctB2B = 100, dasPct, parcelaCbs
     creditoClientes: r2(b2b * novo),
   };
   return { ficar, hibrido: hib, diferencaImposto: r2(hib.imposto - ficar.imposto), diferencaCredito: r2(hib.creditoClientes - ficar.creditoClientes) };
+}
+
+// "Simples híbrido ou puro?" (revisões tributária e jurídica de 10/10/2026). Simulação para 2027-2028.
+// Regras: opção pelo regime regular de IBS/CBS (LC 214/2025, art. 41, §§ 3º a 5º; LC 123/2006, art. 13, §§ 9º a 11).
+// No puro, o cliente do regime regular se credita do montante de CBS/IBS devido no DAS (LC 214, art. 47, § 9º, II;
+// LC 123, art. 23, §§ 1º-A e 2º); no híbrido, do valor destacado, observadas as regras gerais (LC 214, arts. 47, 48 e 57).
+// Premissas (parâmetros, não regra legal):
+//  repasseB2B = false: mesmo valor total cobrado (valor da operação = receita ÷ (1 + t)); true: CBS/IBS somados ao preço
+//    para o B2B (que se credita) e valor total mantido só para o B2C.
+//  dasSobreValorSemCbsIbs = false (conservador): DAS do híbrido sobre a receita total recebida; true: sobre o valor sem CBS/IBS.
+//    A lei não exclui a CBS/IBS cobrada por fora da receita bruta do Simples (LC 123, art. 3º, § 1º, e art. 18, § 3º).
+//  custos iguais (receita × (1 − margem)); crédito das compras = compras × t (pode superestimar o híbrido: compras de
+//  fornecedor do Simples puro só dão crédito do devido no DAS); saldo credor não aproveitado (max 0) subestima o híbrido.
+export function simplesHibridoOuPuro({ receitaMensal, pctB2B = 0, margemPct = 0, dasPct, parcelaCbsIbsDasPct, cbsPct, ibsPct, comprasComCredito = 0, dasSobreValorSemCbsIbs = false, repasseB2B = false }) {
+  if (!(receitaMensal > 0) || !(dasPct > 0)) return null;
+  const t = (cbsPct + ibsPct) / 100;
+  const b2b = receitaMensal * Math.min(100, Math.max(0, pctB2B)) / 100;
+  const b2c = receitaMensal - b2b;
+  const custos = receitaMensal * (1 - margemPct / 100);
+  // Simples puro
+  const das = receitaMensal * dasPct / 100;
+  const parcela = das * parcelaCbsIbsDasPct / 100; // CBS/IBS devidos dentro do DAS
+  const lucroPuro = receitaMensal - custos - das;
+  const creditoClientesPuro = b2b / receitaMensal * parcela;
+  // Simples híbrido
+  const valor = repasseB2B ? b2b + b2c / (1 + t) : receitaMensal / (1 + t); // valor da operação (sem CBS/IBS)
+  const recebido = valor * (1 + t); // total cobrado dos clientes
+  const baseDas = dasSobreValorSemCbsIbs ? valor : recebido;
+  const dasHib = baseDas * dasPct / 100 * (1 - parcelaCbsIbsDasPct / 100);
+  const debito = valor * t;
+  const creditoCompras = comprasComCredito * t;
+  const cbsIbs = Math.max(0, debito - creditoCompras);
+  const lucroHib = recebido - custos - dasHib - cbsIbs;
+  const b2bValor = repasseB2B ? b2b : b2b / (1 + t); // valor da operação das vendas B2B
+  const creditoClientesHib = b2bValor * t;
+  const pagoB2B = b2bValor * (1 + t);
+  const diferencaLucro = lucroHib - lucroPuro;
+  // quanto o custo efetivo dos clientes B2B (pago − crédito) cai no híbrido em relação ao puro
+  const ganhoClientes = (b2b - creditoClientesPuro) - (pagoB2B - creditoClientesHib);
+  let recomendacao, motivo;
+  if (diferencaLucro >= 0) { recomendacao = 'hibrido'; motivo = 'lucro'; }
+  else if (ganhoClientes > -diferencaLucro) { recomendacao = 'hibrido-negociar'; motivo = 'clientes'; }
+  else { recomendacao = 'puro'; motivo = 'lucro'; }
+  return {
+    puro: { imposto: r2(das), lucro: r2(lucroPuro), margem: lucroPuro / receitaMensal, creditoClientes: r2(creditoClientesPuro) },
+    hibrido: { valorOperacao: r2(valor), recebido: r2(recebido), baseDas: r2(baseDas), das: r2(dasHib), cbsIbsAPagar: r2(cbsIbs), creditoCompras: r2(creditoCompras), imposto: r2(dasHib + cbsIbs), lucro: r2(lucroHib), margem: lucroHib / recebido, creditoClientes: r2(creditoClientesHib) },
+    diferencaLucro: r2(diferencaLucro), ganhoClientes: r2(ganhoClientes), recomendacao, motivo, aliquota: t, repasseB2B, dasSobreValorSemCbsIbs,
+  };
 }
 
 // Preço que mantém a receita líquida quando CBS/IBS passam a valer.

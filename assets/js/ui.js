@@ -36,6 +36,11 @@ function ler(form) {
   return d;
 }
 
+// Assinatura do resultado (molde "ferramenta gratuita com a marca no resultado") + botão de imprimir/salvar PDF.
+const dataBR = () => new Date().toLocaleDateString('pt-BR');
+const marcaResultado = () => `<div class="marca-res"><p>Simulação feita no <strong>Conta Certa</strong> (contacertabr.com.br) em ${dataBR()}. Estimativa com as premissas acima; não é cálculo oficial nem parecer tributário.</p><button type="button" class="imprimir" data-imprimir>Imprimir ou salvar em PDF</button></div>`;
+document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-imprimir]')) window.print(); });
+
 const hoje = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
 const CALCS = {
@@ -304,28 +309,50 @@ const CALCS = {
     ]);
   },
   'transicao-cbs-ibs'(d) {
-    const r = C.transicaoCbsIbs({ precoAtual: d.preco, pisCofinsPct: d.piscofins, issPct: d.iss, cbsRefPct: d.cbs, ibsRefPct: d.ibs, dasPct: d.das });
+    const issSobreCbsIbs = d.issbase !== 'nao';
+    const r = C.transicaoCbsIbs({ precoAtual: d.preco, pisCofinsPct: d.piscofins, issPct: d.iss, cbsRefPct: d.cbs, ibsRefPct: d.ibs, dasPct: d.das, issSobreCbsIbs });
     if (!r) return '<p class="erro">Informe um preço maior que zero.</p>';
     const final = r.anos[r.anos.length - 1];
-    const linhas = r.anos.map((a) => `<tr><th scope="row">${a.ano}</th><td>${a.fase}</td><td>${pct(a.antigos)}</td><td>${pct(a.novos)}${a.ano === 2026 ? '*' : ''}</td><td>${R(a.totalCliente)}</td><td>${pct(a.carga)}</td></tr>`).join('');
+    const linhas = r.anos.map((a) => `<tr><th scope="row">${a.ano}</th><td>${a.fase}</td><td>${pct(a.antigos)}</td><td>${pct(a.novos)}${a.ano === 2026 ? '*' : ''}${a.ano >= 2029 && a.ano <= 2032 ? '**' : ''}</td><td>${R(a.totalCliente)}</td><td>${pct(a.carga)}</td></tr>`).join('');
     return destaque('Carga sobre a venda em 2033 (estimativa)', `${pct(final.carga)} (hoje ${pct(r.cargaHoje)})`)
       + `<div class="tabela-rolar"><table class="res"><thead><tr><th scope="col">Ano</th><th scope="col">Fase</th><th scope="col">PIS/Cofins + ISS</th><th scope="col">CBS + IBS</th><th scope="col">Cliente paga</th><th scope="col">Carga</th></tr></thead><tbody>${linhas}</tbody></table></div>`
-      + `<p class="nota">Valor que fica com a empresa em todos os anos: ${R(r.liquido)}. *2026: CBS 0,9% e IBS 0,1% de teste, destacados mas compensáveis/dispensados, sem custo adicional.${r.simples ? ` No Simples, com DAS de ${pct(r.simples.carga)}, a carga segue a alíquota do DAS (${R(r.simples.tributos)} nesta venda), salvo opção pelo regime regular.` : ''} Alíquotas de referência são estimativas editáveis.</p>`;
+      + `<p class="nota">Valor que fica com a empresa em todos os anos: ${R(r.liquido)}, que também é a base de CBS/IBS (sem ISS, PIS e Cofins: LC 214/2025, art. 12, § 2º, V). ISS ${issSobreCbsIbs ? 'calculado também sobre a CBS/IBS (cenário conservador)' : 'calculado sem a CBS/IBS na base'}: o tema ainda não está definido em lei. *2026: CBS 0,9% e IBS 0,1% de teste, destacados mas compensáveis ou dispensados para quem cumpre as obrigações acessórias, sem custo adicional; não se aplicam ao Simples Nacional. **2029-2032: IBS aproximado como (1 − fração do ISS/ICMS restante) × alíquota final estimada; as alíquotas de referência de cada ano serão fixadas pelo Senado (LC 214/2025, arts. 361 a 364).${r.simples ? ` No Simples, com DAS de ${pct(r.simples.carga)}, a carga segue a alíquota do DAS informada (${R(r.simples.tributos)} nesta venda), salvo opção pelo regime regular; as tabelas do Simples mudam a partir de 2027 (LC 214/2025, art. 519).` : ''} Alíquotas de referência são estimativas editáveis: CBS ${n2.format(d.cbs)}% e IBS ${n2.format(d.ibs)}% nesta simulação.</p>` + marcaResultado();
   },
   'simples-hibrido'(d) {
-    const r = C.simplesHibrido({ receitaMensal: d.receita, pctB2B: d.b2b, dasPct: d.das, parcelaCbsIbsDasPct: d.parcela, cbsPct: d.cbs, ibsPct: d.ibs, comprasComCredito: d.compras });
-    if (!r) return '<p class="erro">Informe a receita mensal e a alíquota efetiva do DAS.</p>';
-    return destaque('Crédito a mais para seus clientes B2B no híbrido', `${R(r.diferencaCredito)}/mês`) + tabela([
-      ['<strong>Ficar 100% no DAS</strong>', ''],
-      ['Imposto da empresa', R(r.ficar.imposto)],
-      ['Crédito de CBS/IBS para clientes (estimativa)', R(r.ficar.creditoClientes)],
-      ['<strong>Apurar CBS/IBS por fora (híbrido)</strong>', ''],
-      ['DAS sem a parcela de CBS/IBS', R(r.hibrido.dasReduzido)],
-      ['CBS/IBS a pagar (débito − crédito das compras)', R(r.hibrido.cbsIbsAPagar)],
-      ['Imposto total da empresa', R(r.hibrido.imposto)],
-      ['Crédito integral para clientes B2B', R(r.hibrido.creditoClientes)],
-      ['Diferença de imposto (híbrido − DAS)', `${r.diferencaImposto >= 0 ? '+ ' : '− '}${R(Math.abs(r.diferencaImposto))}`, 'total'],
-    ]) + '<p class="nota">No híbrido, a CBS/IBS é cobrada por fora, no valor da nota; o cliente do regime regular recupera esse valor como crédito. Para consumidor final e clientes do Simples, o imposto extra pesa no preço.</p>';
+    const pctB2B = d.perfil === 'b2b' ? 100 : d.perfil === 'b2c' ? 0 : d.b2b;
+    const dasSobreValorSemCbsIbs = d.basedas === 'valor';
+    const repasseB2B = d.precohib === 'repasse';
+    const base = { receitaMensal: d.receita, pctB2B, margemPct: d.margem, dasPct: d.das, parcelaCbsIbsDasPct: d.parcela, cbsPct: d.cbs, ibsPct: d.ibs, comprasComCredito: d.compras, dasSobreValorSemCbsIbs };
+    const r = C.simplesHibridoOuPuro({ ...base, repasseB2B });
+    if (!r) return '<p class="erro">Informe o faturamento mensal e a alíquota efetiva do DAS.</p>';
+    const outro = C.simplesHibridoOuPuro({ ...base, repasseB2B: !repasseB2B });
+    const [mant, rep] = repasseB2B ? [outro, r] : [r, outro];
+    const posPrazo = hoje() > '2026-10-30';
+    const sinal = (v) => `${v >= 0 ? '+ ' : '− '}${R(Math.abs(v))}`;
+    const cen = repasseB2B ? 'com a CBS/IBS repassada ao B2B' : 'cobrando o mesmo valor total';
+    const rec = {
+      hibrido: ['Nesta simulação, o híbrido tende a render mais', `Nas premissas desta simulação (alíquotas de 2027-2028), ${cen}, o seu lucro estimado fica ${R(r.diferencaLucro)}/mês maior no híbrido, e o custo efetivo dos clientes B2B do regime regular muda em ${sinal(-r.ganhoClientes)}/mês. É uma estimativa: confirme com o seu contador antes de optar.`],
+      'hibrido-negociar': ['Nesta simulação, o híbrido só compensa se houver negociação de preço', `Mantendo o mesmo valor total, o seu lucro estimado cai ${R(-r.diferencaLucro)}/mês. Em compensação, o custo efetivo dos clientes B2B do regime regular pode cair até ${R(r.ganhoClientes)}/mês, se eles tiverem débitos para usar o crédito. Essa diferença pode abrir espaço para negociar preço com esses clientes, o que depende de acordo com cada um e do que prevê o contrato; sem negociação, o puro rende mais nesta simulação.`],
+      puro: ['Nesta simulação, o puro tende a ser melhor', `Nesta simulação (alíquotas de 2027-2028), ${cen}, no híbrido o seu lucro estimado cairia ${R(-r.diferencaLucro)}/mês${r.ganhoClientes > 0 ? `, mais do que a redução de custo que os clientes B2B teriam (${R(r.ganhoClientes)}/mês)` : ''}. Reavalie a cada janela semestral.`],
+    }[r.recomendacao];
+    const comp = `<div class="tabela-rolar"><table class="res comp"><thead><tr><td></td><th scope="col">Simples puro</th><th scope="col">Simples híbrido</th></tr></thead><tbody>
+<tr><th scope="row">Valor total cobrado dos clientes</th><td>${R(d.receita)}</td><td>${R(r.hibrido.recebido)}</td></tr>
+<tr><th scope="row">DAS</th><td>${R(r.puro.imposto)}</td><td>${R(r.hibrido.das)}</td></tr>
+<tr><th scope="row">CBS + IBS por fora (débito − crédito das compras)</th><td>—</td><td>${R(r.hibrido.cbsIbsAPagar)}</td></tr>
+<tr><th scope="row">Tributos da empresa</th><td>${R(r.puro.imposto)}</td><td>${R(r.hibrido.imposto)}</td></tr>
+<tr class="total"><th scope="row">Lucro estimado</th><td>${R(r.puro.lucro)} (${pct(r.puro.margem, 1)})</td><td>${R(r.hibrido.lucro)} (${pct(r.hibrido.margem, 1)})</td></tr>
+<tr><th scope="row">Crédito de CBS/IBS para clientes B2B</th><td>${R(r.puro.creditoClientes)}</td><td>${R(r.hibrido.creditoClientes)}</td></tr>
+</tbody></table></div>`;
+    const lado = `<div class="tabela-rolar"><table class="res comp"><caption>Híbrido nos dois cenários de preço</caption><thead><tr><td></td><th scope="col">Preço mantido</th><th scope="col">CBS/IBS repassado ao B2B</th></tr></thead><tbody>
+<tr><th scope="row">Lucro estimado no híbrido</th><td>${R(mant.hibrido.lucro)}</td><td>${R(rep.hibrido.lucro)}</td></tr>
+<tr><th scope="row">Diferença para o puro</th><td>${sinal(mant.diferencaLucro)}</td><td>${sinal(rep.diferencaLucro)}</td></tr>
+<tr><th scope="row">Crédito dos clientes B2B</th><td>${R(mant.hibrido.creditoClientes)}</td><td>${R(rep.hibrido.creditoClientes)}</td></tr>
+</tbody></table></div>`;
+    const prazo = posPrazo ? 'Próxima janela de opção: 1º a 31/03/2027, para valer de julho a dezembro de 2027.' : 'Prazo da opção para jan-jun/2027: 30/10/2026.';
+    return `<div class="recomenda rec-${r.recomendacao}"><p class="rec-rot">Indicação da simulação</p><p class="rec-tit">${rec[0]}</p><p>${rec[1]}</p></div>`
+      + destaque('Diferença de lucro (híbrido − puro)', `${sinal(r.diferencaLucro)}/mês`) + comp + lado
+      + `<p class="nota">Dados e premissas: faturamento de ${R(d.receita)}; margem de ${n2.format(d.margem)}%; DAS de ${n2.format(d.das)}%, com ${n2.format(d.parcela)}% de CBS/IBS na partilha; compras com crédito de ${R(d.compras)}; ${pctB2B}% das vendas para empresas do regime regular. Preço no híbrido: ${repasseB2B ? 'CBS/IBS repassados ao B2B, valor total mantido para o B2C' : 'mesmo valor total cobrado nas duas opções'}; CBS + IBS de ${pct(r.aliquota)} por fora (valor da operação ${R(r.hibrido.valorOperacao)}); DAS do híbrido calculado sobre ${dasSobreValorSemCbsIbs ? 'o valor sem CBS/IBS' : 'a receita total'} (ponto ainda não definido pela lei), sem a parcela de CBS/IBS; custos iguais (faturamento × (1 − margem)). Simulação para 2027-2028; a CBS de 2027 é estimativa até a fixação oficial. Crédito do cliente condicionado às regras gerais (LC 214/2025, arts. 47 e 48). Saldo credor das compras não aproveitado aqui (pode subestimar o híbrido). ${prazo}</p>`
+      + marcaResultado();
   },
   'preco-reforma-tributaria'(d) {
     const r = C.precoReforma({ precoAtual: d.preco, tributosAtuaisPct: d.atuais, tributosRestantesPct: d.restantes, cbsPct: d.cbs, ibsPct: d.ibs });

@@ -49,8 +49,8 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 
 ## Reforma Tributária
 
-- [Simulador da transição CBS e IBS 2026-2033](https://contacertabr.com.br/transicao-cbs-ibs/): Veja ano a ano, de 2026 a 2033, como PIS, Cofins e ISS dão lugar à CBS e ao IBS no preço de um serviço do Lucro Presumido, comparado ao Simples.
-- [Simples híbrido ou puro: simulador e prazo da opção](https://contacertabr.com.br/simples-hibrido/): Simples híbrido ou puro? Compare ficar 100% no DAS com apurar CBS e IBS por fora: imposto da empresa e crédito dos clientes B2B. Opção até 30/10/2026.
+- [Calculadora CBS e IBS 2026-2033: transição ano a ano](https://contacertabr.com.br/transicao-cbs-ibs/): Calculadora CBS e IBS grátis: alíquotas de teste de 2026 e cronograma até 2033, ano a ano, no preço do seu serviço. Resultado imprimível, com fontes.
+- [Simples híbrido ou puro: simulador e prazo da opção](https://contacertabr.com.br/simples-hibrido/): Simples híbrido vale a pena? Informe faturamento, clientes B2B ou B2C, margem e compras e veja qual opção a simulação indica: puro ou híbrido. Opção até 30/10/2026.
 - [Calculadora de preço na Reforma Tributária](https://contacertabr.com.br/preco-reforma-tributaria/): Calcule o novo preço que mantém a sua margem quando PIS e Cofins saem e entram CBS e IBS. Veja o total da nota e o custo para o cliente com crédito.
 - [Calculadora de crédito travado de CBS e IBS](https://contacertabr.com.br/credito-travado/): Na reforma, o crédito de CBS e IBS só fica disponível quando o fornecedor quita o tributo. Estime quanto crédito pode ficar travado e o custo dessa espera.
 - [Calendário da Reforma Tributária 2026-2033](https://contacertabr.com.br/calendario-reforma-tributaria/): Datas da Reforma Tributária: teste em 2026, prazo do Simples híbrido em 30/10/2026, CBS em 2027, transição de ICMS e ISS de 2029 a 2032 e modelo final em 2033.
