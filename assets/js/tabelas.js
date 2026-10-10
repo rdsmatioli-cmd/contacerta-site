@@ -1,7 +1,7 @@
 // Tabelas oficiais vigentes. Atualize aqui e rode `npm test` + `npm run build`.
 // Cada bloco cita a fonte oficial e a data em que o valor foi conferido.
 
-export const ATUALIZADO_EM = '2026-10-08';
+export const ATUALIZADO_EM = '2026-10-10';
 
 export const SALARIO_MINIMO = {
   valor: 1621.0,

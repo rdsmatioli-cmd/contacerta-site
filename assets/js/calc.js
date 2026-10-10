@@ -675,8 +675,8 @@ export function simplesHibridoOuPuro({ receitaMensal, pctB2B = 0, margemPct = 0,
 }
 
 // Preço que mantém a receita líquida quando CBS/IBS passam a valer (revisão tributária de 10/10/2026).
-// V_base = preço líquido sem ISS, ICMS e PIS/Cofins; a base de CBS/IBS nunca inclui o ISS (ADCT, art. 133; LC 214/2025, art. 12, § 2º, V).
-// ISS do ano = alíquota cheia × fator (2027-28 = 1; 2029 = 0,9; 2030 = 0,8; 2031 = 0,7; 2032 = 0,6; 2033 = 0) (ADCT, art. 128).
+// V_base = preço líquido sem ISS, ICMS e PIS/Cofins; a base de CBS/IBS não inclui o ISS (ADCT, art. 133; LC 214/2025, art. 12, § 2º, V).
+// ISS do ano = alíquota cheia × fator (2027-28 = 1; 2029 = 0,9; 2030 = 0,8; 2031 = 0,7; 2032 = 0,6; 2033 = 0) (ADCT, arts. 128 e 129).
 // issPorDentro = true (padrão, interpretação): Total = (V_base + CBS + IBS) ÷ (1 − ISS do ano); ISS = Total × ISS do ano.
 // false (alternativa, ISS por fora): Total = V_base × (1 + CBS + IBS + ISS do ano).
 export const FATOR_ISS_ANO = { 2027: 1, 2028: 1, 2029: 0.9, 2030: 0.8, 2031: 0.7, 2032: 0.6, 2033: 0 };
