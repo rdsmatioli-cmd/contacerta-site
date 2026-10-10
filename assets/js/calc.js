@@ -1,5 +1,5 @@
 // Funções puras de cálculo. Usadas pelo navegador (ui.js) e pelos testes (node --test).
-import { INSS, INSS_POR_ANO, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=b17e6229a5';
+import { INSS, INSS_POR_ANO, IRRF_POR_DATA, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=5d700f350a';
 
 /** Arredonda para 2 casas (meio para cima), imune a ruído de ponto flutuante. */
 export function r2(x) {
@@ -40,14 +40,15 @@ export function inssIndividual(salarioContribuicao, plano = 'normal') {
 }
 
 // ---------------------------------------------------------------- IRRF
-export function tabelaProgressiva(base) {
-  if (base <= 0) return { imposto: 0, faixa: IRRF.faixas[0] };
-  const faixa = IRRF.faixas.find((f) => base <= f.ate);
+export function tabelaProgressiva(base, T = IRRF) {
+  if (base <= 0) return { imposto: 0, faixa: T.faixas[0] };
+  const faixa = T.faixas.find((f) => base <= f.ate);
   return { imposto: r2(Math.max(0, base * faixa.aliquota - faixa.deducao)), faixa };
 }
 
-export function reducaoLei15270(rendimentos, imposto) {
-  const R = IRRF.reducao;
+export function reducaoLei15270(rendimentos, imposto, T = IRRF) {
+  const R = T.reducao;
+  if (!R) return 0;
   let red = 0;
   if (rendimentos <= R.isencaoAte) red = Math.min(R.limiteIsencao, imposto);
   else if (rendimentos <= R.faixaAte) red = r2(Math.max(0, R.a - R.b * rendimentos));
@@ -59,24 +60,35 @@ export function reducaoLei15270(rendimentos, imposto) {
  * Compara deduções legais (INSS + dependentes + pensão + outras) com o desconto simplificado
  * e usa a opção mais vantajosa, depois aplica a redução da Lei 15.270/2025.
  */
-export function irrfMensal({ rendimentos, inss = 0, dependentes = 0, pensao = 0, outrasDeducoes = 0 }) {
+/** Tabela de IRRF pela data de pagamento (regime de caixa); ano sem tabela usa a mais recente (substituida = true). */
+export function tabelaIrrfPorData(dataISO) {
+  const s = String(dataISO || '').slice(0, 10);
+  const ultima = IRRF_POR_DATA[IRRF_POR_DATA.length - 1];
+  const ano = Number(s.slice(0, 4));
+  if (!IRRF_POR_DATA.some((e) => e.ano === ano)) return { tabela: ultima.t, ano: ultima.ano, anoPagamento: ano, substituida: true };
+  const e = IRRF_POR_DATA.filter((x) => x.desde <= s).pop();
+  return { tabela: e.t, ano: e.ano, anoPagamento: ano, substituida: false };
+}
+
+export function irrfMensal({ rendimentos, inss = 0, dependentes = 0, pensao = 0, outrasDeducoes = 0, tabela = IRRF }) {
+  const T = tabela;
   rendimentos = Math.max(0, num(rendimentos));
-  const dedLegais = num(inss) + num(dependentes) * IRRF.deducaoDependente + num(pensao) + num(outrasDeducoes);
+  const dedLegais = num(inss) + num(dependentes) * T.deducaoDependente + num(pensao) + num(outrasDeducoes);
   const baseLegal = Math.max(0, rendimentos - dedLegais);
-  const baseSimpl = Math.max(0, rendimentos - IRRF.descontoSimplificado);
-  const tLegal = tabelaProgressiva(baseLegal);
-  const tSimpl = tabelaProgressiva(baseSimpl);
+  const baseSimpl = Math.max(0, rendimentos - T.descontoSimplificado);
+  const tLegal = tabelaProgressiva(baseLegal, T);
+  const tSimpl = tabelaProgressiva(baseSimpl, T);
   const usaSimplificado = tSimpl.imposto < tLegal.imposto;
   const escolhido = usaSimplificado ? tSimpl : tLegal;
   const impostoTabela = escolhido.imposto;
-  const reducao = reducaoLei15270(rendimentos, impostoTabela);
+  const reducao = reducaoLei15270(rendimentos, impostoTabela, T);
   const irrf = r2(impostoTabela - reducao);
   return {
     irrf,
     impostoTabela,
     reducao,
     base: r2(usaSimplificado ? baseSimpl : baseLegal),
-    deducoes: r2(usaSimplificado ? IRRF.descontoSimplificado : dedLegais),
+    deducoes: r2(usaSimplificado ? T.descontoSimplificado : dedLegais),
     usaSimplificado,
     aliquotaNominal: escolhido.faixa.aliquota,
     aliquotaEfetiva: rendimentos > 0 ? irrf / rendimentos : 0,
@@ -408,7 +420,10 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
 
   // Descontos estimados: INSS/IRRF sobre saldo de salário e, em separado, sobre o 13º.
   const inssSaldo = inssEmpregado(saldoSalario).inss;
-  const irSaldo = irrfMensal({ rendimentos: saldoSalario, inss: inssSaldo, dependentes }).irrf;
+  // IRRF pelo regime de caixa: tabela (e redução da Lei 15.270, só a partir de 2026) da data de pagamento = data real do desligamento.
+  const irTab = tabelaIrrfPorData(desligamento);
+  const irSaldoR = irrfMensal({ rendimentos: saldoSalario, inss: inssSaldo, dependentes, tabela: irTab.tabela });
+  const irSaldo = irSaldoR.irrf;
   // 13º de dois anos: INSS separado por ano, com a tabela e o teto de cada ano; IRRF sobre o total, deduzido o INSS do 13º.
   // Sem tabela do ano no site, usa a mais recente disponível (anoTabelaInss informa qual).
   const tabelaInss = (ano) => (INSS_POR_ANO[ano] ? { t: INSS_POR_ANO[ano], ano } : { t: INSS, ano: Math.max(...Object.keys(INSS_POR_ANO).map(Number)) });
@@ -425,7 +440,8 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
     inss13Atual = inssEmpregado(decimoAtual, tb.t).inss;
     inss13 = r2(inss13Anterior + inss13Atual);
   } else inss13 = inssEmpregado(decimo).inss;
-  const ir13 = irrfMensal({ rendimentos: decimo, inss: inss13, dependentes }).irrf;
+  const ir13R = irrfMensal({ rendimentos: decimo, inss: inss13, dependentes, tabela: irTab.tabela });
+  const ir13 = ir13R.irrf;
 
   const multaPct = tipo === 'semJustaCausa' ? 0.4 : tipo === 'acordo' ? 0.2 : 0;
   const multaFgts = r2(num(saldoFgts) * multaPct);
@@ -436,7 +452,7 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
   return {
     diasNoMes, saldoSalario, diasAviso, diasProjecao, avisoIndenizado, avos13, avos13Anterior, avos13Atual, anoDes, anoFim, decimoAnterior, decimoAtual, decimo,
     avosFerias: avosF, feriasProp, feriasVenc, periodosVenc, periodosEmDobro, periodosProjecao, feriasVencSimples, dobraFeriasVenc, feriasProjecao, tercoFerias,
-    inssSaldo, irSaldo, inss13, inss13Anterior, inss13Atual, tabelasSubstituidas, ir13, descontoAviso, verbas, descontos, liquido: r2(verbas - descontos),
+    inssSaldo, irSaldo, inss13, inss13Anterior, inss13Atual, tabelasSubstituidas, ir13, ir13Base: ir13R.base, ir13Reducao: ir13R.reducao, irSaldoBase: irSaldoR.base, tabelaIrrf: { vigencia: irTab.tabela.vigencia, ano: irTab.ano, anoPagamento: irTab.anoPagamento, substituida: irTab.substituida }, descontoAviso, verbas, descontos, liquido: r2(verbas - descontos),
     multaFgts, saqueFgts: r2(num(saldoFgts) * saqueFgtsPct), fimProjetado: fimProjetado.toISOString().slice(0, 10),
   };
 }

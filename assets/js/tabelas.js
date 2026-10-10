@@ -26,6 +26,38 @@ export const INSS = {
   individual: { normal: 0.2, simplificado: 0.11, baixaRendaMei: 0.05 },
 };
 
+// IRRF por data de pagamento (regime de caixa). Fonte: Receita Federal, "Tributação de 2025"
+// (https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2025);
+// Lei nº 11.482/2007, art. 1º, XI e XII (redação da Lei nº 15.191/2025). Sem redução da Lei 15.270 (vigente a partir de 2026).
+export const IRRF_2025_JAN_ABR = {
+  vigencia: 'janeiro a abril/2025',
+  fonte: 'Receita Federal — Tributação de 2025 (Lei nº 11.482/2007, art. 1º, XI)',
+  faixas: [
+    { ate: 2259.2, aliquota: 0, deducao: 0 },
+    { ate: 2826.65, aliquota: 0.075, deducao: 169.44 },
+    { ate: 3751.05, aliquota: 0.15, deducao: 381.44 },
+    { ate: 4664.68, aliquota: 0.225, deducao: 662.77 },
+    { ate: Infinity, aliquota: 0.275, deducao: 896.0 },
+  ],
+  deducaoDependente: 189.59,
+  descontoSimplificado: 564.8,
+  reducao: null,
+};
+export const IRRF_2025 = {
+  vigencia: 'maio a dezembro/2025',
+  fonte: 'Receita Federal — Tributação de 2025 (Lei nº 15.191/2025)',
+  faixas: [
+    { ate: 2428.8, aliquota: 0, deducao: 0 },
+    { ate: 2826.65, aliquota: 0.075, deducao: 182.16 },
+    { ate: 3751.05, aliquota: 0.15, deducao: 394.16 },
+    { ate: 4664.68, aliquota: 0.225, deducao: 675.49 },
+    { ate: Infinity, aliquota: 0.275, deducao: 908.73 },
+  ],
+  deducaoDependente: 189.59,
+  descontoSimplificado: 607.2,
+  reducao: null,
+};
+
 // INSS do empregado por ano (para o 13º que abrange dois anos pela projeção do aviso).
 // 2025: Portaria Interministerial MPS/MF nº 6, de 10/01/2025, Anexo II.
 export const INSS_2025 = {
@@ -115,3 +147,10 @@ export const FGTS = {
   multaAcordo: 0.2,
   jurosAnuais: 0.03,
 };
+
+// Tabelas de IRRF por início de vigência (data de pagamento). Anos fora da lista usam a mais recente.
+export const IRRF_POR_DATA = [
+  { desde: '2025-01-01', ano: 2025, t: IRRF_2025_JAN_ABR },
+  { desde: '2025-05-01', ano: 2025, t: IRRF_2025 },
+  { desde: '2026-01-01', ano: 2026, t: IRRF },
+];
