@@ -1,5 +1,6 @@
 // Validação dos campos numéricos das calculadoras (laudo QA 10/10/2026 e reteste: CC-01 a CC-05, N-01, N-02, N-04, N-11).
 // Funções puras, testáveis no Node; o ui.js aplica o resultado no formulário.
+import { avosFerias, parseData } from './calc.js?v=5da5274d8f';
 const fmt = (x) => Number(x).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 
 // Lê um número digitado no formato brasileiro (N-01).
@@ -53,3 +54,47 @@ export function validarNumero({ raw = '', badInput = false, min = null, max = nu
 // Lê o atributo numérico (min/max) de um input; null se ausente ou inválido.
 export const attrNum = (v) => (v === null || v === undefined || v === '' || !Number.isFinite(Number(v)) ? null : Number(v));
 
+
+// ---- Rescisão: férias vencidas × datas (N-02), com a data projetada do aviso (R-2/R-3; art. 487 § 1º, OJ 82)
+const iso = (s) => (/^\d{4}-\d{2}-\d{2}$/.test(String(s || '')) ? s : null);
+const addAnosISO = (s, k) => { const d = parseData(s); d.setUTCFullYear(d.getUTCFullYear() + k); return d; };
+// Períodos aquisitivos de 12 meses completos até a data (inclusive).
+export function periodosAquisitivosCompletos(admissao, data) {
+  if (!iso(admissao) || !iso(data) || parseData(data) < parseData(admissao)) return 0;
+  return avosFerias(admissao, data).periodosCompletos;
+}
+// Períodos cujo prazo de concessão (12 meses após o fim do período aquisitivo) terminou até a data, exclusive.
+export function periodosComPrazoVencido(admissao, data) {
+  if (!iso(admissao) || !iso(data) || parseData(data) < parseData(admissao)) return 0;
+  const d = parseData(data).getTime();
+  let k = 0;
+  while (addAnosISO(admissao, k + 2).getTime() - 864e5 < d) k++;
+  return k;
+}
+const pl = (n, s, p) => `${n} ${n === 1 ? s : p}`;
+const br = (s) => s.split('-').reverse().join('/');
+// desligamento: último dia trabalhado; fimProjetado: fim da projeção do aviso (igual ao desligamento sem aviso indenizado).
+// Retorna null (ok) ou { campo, erro }.
+export function validarFeriasVencidas({ admissao, desligamento, fimProjetado = desligamento, periodos = 0, emDobro = [] }) {
+  if (!iso(admissao) || !iso(desligamento) || parseData(desligamento) < parseData(admissao)) return null;
+  const fim = iso(fimProjetado) || desligamento;
+  const n = Math.max(0, Math.floor(Number(periodos) || 0));
+  const sim = emDobro.slice(0, Math.min(2, n)).filter(Boolean).length;
+  const total = periodosAquisitivosCompletos(admissao, fim);
+  const naProjecao = Math.max(0, total - periodosAquisitivosCompletos(admissao, desligamento));
+  const max = total - naProjecao;
+  const dataTxt = fim !== desligamento ? ` (com a projeção do aviso até ${br(fim)})` : '';
+  if (n > max) {
+    const extra = naProjecao ? ` ${naProjecao === 1 ? 'O período completado' : 'Os períodos completados'} durante a projeção do aviso já ${naProjecao === 1 ? 'entra' : 'entram'} no cálculo automaticamente.` : '';
+    return { campo: 'feriasVencidas', erro: max === 0
+      ? `Pelas datas informadas${dataTxt}, não há período de férias vencido para informar. Use 0.${extra}`
+      : `Pelas datas informadas${dataTxt}, informe no máximo ${pl(max, 'período vencido', 'períodos vencidos')}.${extra}` };
+  }
+  const v = Math.min(periodosComPrazoVencido(admissao, fim), max);
+  if (sim > v) {
+    return { campo: 'dobro1', erro: v === 0
+      ? `Pelas datas informadas${dataTxt}, nenhum período teve o prazo de concessão encerrado. Marque Não.`
+      : `Pelas datas informadas${dataTxt}, só ${pl(v, 'período teve', 'períodos tiveram')} o prazo de concessão encerrado. Marque Sim em no máximo ${v}.` };
+  }
+  return null;
+}

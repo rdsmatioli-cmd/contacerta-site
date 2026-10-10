@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=3dd501c2c7';
-import { INDICADORES } from './tabelas.js?v=3dd501c2c7';
-import { validarNumero, attrNum } from './valida.js?v=3dd501c2c7';
+import * as C from './calc.js?v=5da5274d8f';
+import { INDICADORES } from './tabelas.js?v=5da5274d8f';
+import { validarNumero, attrNum, validarFeriasVencidas } from './valida.js?v=5da5274d8f';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -91,8 +91,18 @@ const CALCS = {
     ]) + (s.liquido < 0 ? '<p class="erro">Os descontos informados são maiores que o salário bruto. Confira pensão e outros descontos.</p>' : '') + `<p class="nota">IR calculado com ${s.ir.usaSimplificado ? 'desconto simplificado de R$ 607,20' : 'deduções legais'} (a opção mais vantajosa). Imposto pela tabela: ${R(s.ir.impostoTabela)}; redução da Lei 15.270/2025: ${R(s.ir.reducao)}.</p>`;
   },
   rescisao(d) {
-    const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, saldoFgts: d.saldoFgts, dependentes: d.dependentes });
+    const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, vencidasEmDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'], saldoFgts: d.saldoFgts, dependentes: d.dependentes });
     if (!r) return '<p class="erro">Confira as datas: o desligamento deve ser depois da admissão.</p>';
+    // N-02: períodos e dobra conferidos contra as datas, com a projeção do aviso.
+    const v = validarFeriasVencidas({ admissao: d.admissao, desligamento: d.desligamento, fimProjetado: r.fimProjetado, periodos: d._orig.feriasVencidas ?? d.feriasVencidas, emDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'] });
+    if (v) {
+      const el = document.getElementById(`f-${v.campo}`);
+      const msg = document.getElementById(`f-${v.campo}-msg`);
+      if (el) el.setAttribute('aria-invalid', 'true');
+      if (msg) { msg.textContent = v.erro; msg.hidden = false; msg.className = 'campo-msg err'; }
+      const rot = (document.querySelector(`label[for="f-${v.campo}"]`) || {}).textContent || '';
+      return `<div class="erro" role="alert"><p><strong>Confira o campo antes de calcular:</strong></p><ul><li><a href="#f-${v.campo}">${esc(rot)}</a>: ${esc(v.erro)}</li></ul></div>`;
+    }
     const informados = d._orig.feriasVencidas;
     const usados = d.feriasVencidas;
     const topo = informados > usados
@@ -101,10 +111,12 @@ const CALCS = {
     return topo + tabela([
       [`Saldo de salário (${r.diasNoMes} dias)`, R(r.saldoSalario)],
       r.avisoIndenizado ? [`Aviso prévio indenizado (${r.diasProjecao} dias)`, R(r.avisoIndenizado)] : null,
-      [`13º proporcional (${r.avos13}/12)`, R(r.decimo)],
+      ...(r.avos13Anterior ? [[`13º proporcional de ${r.anoDes} (${r.avos13Anterior}/12)`, R(r.decimoAnterior)], [`13º proporcional de ${r.anoFim}, pela projeção do aviso (${r.avos13Atual}/12)`, R(r.decimoAtual)]] : [[`13º proporcional (${r.avos13}/12)`, R(r.decimo)]]),
       [`Férias proporcionais (${r.avosFerias}/12)`, R(r.feriasProp)],
-      r.feriasVenc ? ['Férias vencidas', R(r.feriasVenc)] : null,
-      ['1/3 constitucional sobre férias', R(r.tercoFerias)],
+      r.feriasVencSimples ? [`Férias vencidas (${r.periodosVenc} ${r.periodosVenc === 1 ? 'período' : 'períodos'})`, R(r.feriasVencSimples)] : null,
+      r.dobraFeriasVenc ? [`Dobra das férias vencidas fora do prazo (${r.periodosEmDobro} ${r.periodosEmDobro === 1 ? 'período' : 'períodos'}, art. 137 da CLT)`, R(r.dobraFeriasVenc)] : null,
+      r.feriasProjecao ? [`Férias integrais do período completado na projeção do aviso (${r.periodosProjecao} ${r.periodosProjecao === 1 ? 'período' : 'períodos'})`, R(r.feriasProjecao)] : null,
+      [r.dobraFeriasVenc ? '1/3 constitucional sobre férias (inclui a dobra)' : '1/3 constitucional sobre férias', R(r.tercoFerias)],
       ['Total bruto das verbas', R(r.verbas), 'sub'],
       ['INSS sobre saldo de salário', `− ${R(r.inssSaldo)}`],
       r.irSaldo ? ['IRRF sobre saldo de salário', `− ${R(r.irSaldo)}`] : null,
@@ -114,7 +126,7 @@ const CALCS = {
       ['Líquido a receber na rescisão', R(r.liquido), 'total'],
       r.multaFgts ? [`Multa do FGTS (depositada na conta do FGTS)`, R(r.multaFgts)] : null,
       r.saqueFgts ? ['Saque do saldo do FGTS', R(r.saqueFgts)] : null,
-    ]) + (d.tipo === 'justaCausa' ? '' : `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`);
+    ]) + (d.tipo === 'justaCausa' ? '' : `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`) + (d.tipo === 'acordo' ? '<p class="nota">No acordo (CLT, art. 484-A), o aviso indenizado é pago pela metade, e a calculadora projeta também metade do prazo no tempo de serviço, que é o entendimento predominante. A lei não trata expressamente da projeção, e há decisões que projetam o aviso inteiro.</p>' : '');
   },
   'decimo-terceiro'(d) {
     const r = C.decimoTerceiro({ salario: d.salario, meses: d.meses, mediaVariaveis: d.media, dependentes: d.dependentes });
@@ -460,7 +472,14 @@ function iniciar() {
     popularUnidades(form);
     form.elements.categoria.addEventListener('change', () => popularUnidades(form));
   }
+  const vencN = form.elements.feriasVencidas;
+  const ajustaDobro = () => {
+    if (!vencN) return;
+    const n = Math.min(2, Math.max(0, Math.floor(Number(vencN.value) || 0)));
+    ['dobro1', 'dobro2'].forEach((nome, i) => { const el = form.elements[nome]; if (!el) return; const box = el.closest('.campo'); if (box) box.hidden = i >= n; if (i >= n) el.value = 'nao'; });
+  };
   const rodar = () => {
+    ajustaDobro();
     try {
       const { d, erros, avisos, alertas } = ler(form);
       out.innerHTML = erros.length ? listaErros(erros) : listaAvisos(avisos) + listaAlertas(alertas) + fn(d);

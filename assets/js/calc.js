@@ -1,5 +1,5 @@
 // Funções puras de cálculo. Usadas pelo navegador (ui.js) e pelos testes (node --test).
-import { INSS, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=3dd501c2c7';
+import { INSS, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=5da5274d8f';
 
 /** Arredonda para 2 casas (meio para cima), imune a ruído de ponto flutuante. */
 export function r2(x) {
@@ -358,7 +358,7 @@ export function avosFerias(admissao, fim) {
  * tipo: semJustaCausa | pedidoDemissao | justaCausa | acordo
  * aviso: indenizado | trabalhado | naoCumprido (pedido de demissão sem cumprir: desconto de 30 dias)
  */
-export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso = 'indenizado', feriasVencidas = 0, saldoFgts = 0, dependentes = 0 }) {
+export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso = 'indenizado', feriasVencidas = 0, vencidasEmDobro = [], saldoFgts = 0, dependentes = 0 }) {
   salario = num(salario);
   const dAdm = parseData(admissao);
   const dDes = parseData(desligamento);
@@ -377,12 +377,33 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
   const fimProjetado = addDias(dDes, diasProjecao);
 
   const temProporcionais = tipo !== 'justaCausa';
-  const avos13 = temProporcionais ? avos13Fn(dAdm, fimProjetado) : 0;
-  const decimo = r2((salario / 12) * avos13);
+  // 13º (R-1): se a projeção do aviso passa para o ano seguinte, somam-se os avos dos dois anos civis.
+  const anoDes = dDes.getUTCFullYear();
+  const anoFim = fimProjetado.getUTCFullYear();
+  let avos13Anterior = 0;
+  let avos13Atual = 0;
+  if (temProporcionais) {
+    if (anoFim > anoDes) {
+      avos13Anterior = avos13Fn(dAdm, new Date(Date.UTC(anoDes, 11, 31)));
+      avos13Atual = avos13Fn(dAdm, fimProjetado);
+    } else avos13Atual = avos13Fn(dAdm, fimProjetado);
+  }
+  const avos13 = avos13Anterior + avos13Atual;
+  const decimoAnterior = r2((salario / 12) * avos13Anterior);
+  const decimoAtual = r2((salario / 12) * avos13Atual);
+  const decimo = r2(decimoAnterior + decimoAtual);
   const af = avosFerias(dAdm, fimProjetado);
   const avosF = temProporcionais ? af.avos : 0;
   const feriasProp = r2((salario / 12) * avosF);
-  const feriasVenc = r2(salario * Math.max(0, Math.floor(num(feriasVencidas))));
+  // Férias vencidas informadas (até a data real): um salário por período; em dobro se o prazo de concessão venceu (CLT, art. 137).
+  const periodosVenc = Math.max(0, Math.floor(num(feriasVencidas)));
+  const periodosEmDobro = Array.from({ length: periodosVenc }, (_, i) => !!vencidasEmDobro[i]).filter(Boolean).length;
+  // Períodos completados durante a projeção do aviso (R-2; art. 487 § 1º, OJ 82): integrais, simples, nunca em dobro (art. 146).
+  const periodosProjecao = Math.max(0, af.periodosCompletos - avosFerias(dAdm, dDes).periodosCompletos);
+  const feriasVencSimples = r2(salario * periodosVenc);
+  const dobraFeriasVenc = r2(salario * periodosEmDobro);
+  const feriasProjecao = r2(salario * periodosProjecao);
+  const feriasVenc = r2(feriasVencSimples + dobraFeriasVenc + feriasProjecao);
   const tercoFerias = r2((feriasProp + feriasVenc) / 3);
 
   // Descontos estimados: INSS/IRRF sobre saldo de salário e, em separado, sobre o 13º.
@@ -398,7 +419,8 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
   const verbas = r2(saldoSalario + avisoIndenizado + decimo + feriasProp + feriasVenc + tercoFerias);
   const descontos = r2(inssSaldo + irSaldo + inss13 + ir13 + descontoAviso);
   return {
-    diasNoMes, saldoSalario, diasAviso, diasProjecao, avisoIndenizado, avos13, decimo, avosFerias: avosF, feriasProp, feriasVenc, tercoFerias,
+    diasNoMes, saldoSalario, diasAviso, diasProjecao, avisoIndenizado, avos13, avos13Anterior, avos13Atual, anoDes, anoFim, decimoAnterior, decimoAtual, decimo,
+    avosFerias: avosF, feriasProp, feriasVenc, periodosVenc, periodosEmDobro, periodosProjecao, feriasVencSimples, dobraFeriasVenc, feriasProjecao, tercoFerias,
     inssSaldo, irSaldo, inss13, ir13, descontoAviso, verbas, descontos, liquido: r2(verbas - descontos),
     multaFgts, saqueFgts: r2(num(saldoFgts) * saqueFgtsPct), fimProjetado: fimProjetado.toISOString().slice(0, 10),
   };
