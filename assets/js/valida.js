@@ -1,0 +1,55 @@
+// Validação dos campos numéricos das calculadoras (laudo QA 10/10/2026 e reteste: CC-01 a CC-05, N-01, N-02, N-04, N-11).
+// Funções puras, testáveis no Node; o ui.js aplica o resultado no formulário.
+const fmt = (x) => Number(x).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+
+// Lê um número digitado no formato brasileiro (N-01).
+// "3500,50" → 3500.5 · "3.500" e "3.500,00" → 3500 · "1.234.567,8" → 1234567.8 · "3500.50" → 3500.5 (ponto decimal sem ambiguidade).
+// "3.500" com exatamente 3 dígitos após um único ponto e parte inteira sem zero à esquerda é lido como milhar.
+// Retorna { n } ou { erro }.
+export function lerNumeroBR(raw) {
+  let s = String(raw ?? '').trim().replace(/^R\$\s*/i, '').replace(/[\s\u00a0]/g, '');
+  if (s === '') return { vazio: true };
+  if (!/^[-+]?[\d.,]+$/.test(s) || !/\d/.test(s)) return { erro: 'Digite só números.' };
+  const neg = s.startsWith('-');
+  s = s.replace(/^[-+]/, '');
+  const temVirg = s.includes(',');
+  const pontos = (s.match(/\./g) || []).length;
+  let norm;
+  if (temVirg) {
+    if ((s.match(/,/g) || []).length > 1) return { erro: 'Use a vírgula só uma vez, para os centavos.' };
+    const [int, dec] = s.split(',');
+    // "1,000" sem ponto de milhar é ambíguo (mil no formato americano ou 1 no brasileiro): erro, sem conversão.
+    if (!pontos && /^[1-9]\d{0,2}$/.test(int) && /^\d{3}$/.test(dec)) return { erro: 'Formato ambíguo: use 1.000,00 ou 1000' };
+    if (pontos && !/^\d{1,3}(\.\d{3})+$/.test(int)) return { erro: 'Ponto só como separador de milhar (ex.: 3.500,50).' };
+    if (!/^\d*$/.test(dec)) return { erro: 'Digite só números.' };
+    norm = `${int.replace(/\./g, '') || '0'}.${dec || '0'}`;
+  } else if (pontos > 1) {
+    if (!/^\d{1,3}(\.\d{3})+$/.test(s)) return { erro: 'Ponto só como separador de milhar (ex.: 1.500.000).' };
+    norm = s.replace(/\./g, '');
+  } else if (pontos === 1) {
+    norm = /^[1-9]\d{0,2}\.\d{3}$/.test(s) ? s.replace('.', '') : s;
+  } else norm = s;
+  const n = Number(norm);
+  if (!Number.isFinite(n)) return { erro: 'Digite só números.' };
+  return { n: neg ? -n : n };
+}
+
+// campo: { raw, min, max, teto, obrig, positivo, inteiro, badInput }
+// Retorna { valor, erro?, aviso?, original? }. Erro bloqueia o cálculo; aviso informa que o valor foi limitado ao máximo do campo.
+export function validarNumero({ raw = '', badInput = false, min = null, max = null, teto = null, obrig = false, positivo = false, inteiro = false }) {
+  if (badInput) return { valor: null, erro: 'Digite só números.' };
+  const r = lerNumeroBR(raw);
+  if (r.vazio) return obrig ? { valor: null, erro: 'Preencha este campo.' } : { valor: 0 };
+  if (r.erro) return { valor: null, erro: r.erro };
+  const n = r.n;
+  if (inteiro && !Number.isInteger(n)) return { valor: null, erro: 'Use um número inteiro.' };
+  if (min !== null && n < min) return { valor: null, erro: min === 0 ? 'O valor não pode ser negativo.' : `O mínimo é ${fmt(min)}.` };
+  if (positivo && n <= 0) return { valor: null, erro: 'Informe um valor maior que zero.' };
+  if (teto !== null && n > teto) return { valor: null, erro: `Valor muito alto: o máximo aceito é ${fmt(teto)}.` };
+  if (max !== null && n > max) return { valor: max, original: n, aviso: `O máximo é ${fmt(max)}; o cálculo usou ${fmt(max)}.` };
+  return { valor: n };
+}
+
+// Lê o atributo numérico (min/max) de um input; null se ausente ou inválido.
+export const attrNum = (v) => (v === null || v === undefined || v === '' || !Number.isFinite(Number(v)) ? null : Number(v));
+

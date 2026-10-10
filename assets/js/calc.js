@@ -1,5 +1,5 @@
 // Funções puras de cálculo. Usadas pelo navegador (ui.js) e pelos testes (node --test).
-import { INSS, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js';
+import { INSS, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=3dd501c2c7';
 
 /** Arredonda para 2 casas (meio para cima), imune a ruído de ponto flutuante. */
 export function r2(x) {
@@ -534,7 +534,7 @@ export function dasMei({ atividade = 'servicos', caminhoneiro = false, faturamen
   const excesso = Math.max(0, fat - limite);
   let situacao = 'dentro';
   if (excesso > 0) situacao = excesso <= limite * 0.2 ? 'excessoAte20' : 'excessoAcima20';
-  return { mensal, anual: r2(mensal * m), inss, icms, iss, limite, excesso: r2(excesso), situacao };
+  return { mensal, meses: m, anual: r2(mensal * m), inss, icms, iss, limite, excesso: r2(excesso), situacao };
 }
 
 // ---------------------------------------------------------------- Conversor de medidas

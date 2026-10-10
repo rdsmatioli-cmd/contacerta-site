@@ -1,6 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js';
-import { INDICADORES } from './tabelas.js';
+import * as C from './calc.js?v=3dd501c2c7';
+import { INDICADORES } from './tabelas.js?v=3dd501c2c7';
+import { validarNumero, attrNum } from './valida.js?v=3dd501c2c7';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -25,16 +26,48 @@ function barra(partes) {
   return `<div class="barra" aria-hidden="true">${ok.map(([, v, c]) => `<i class="${c}" style="flex:${pc(v)} 1 0"></i>`).join('')}</div><ul class="legenda">${ok.map(([r, v, c]) => `<li class="${c}">${r} ${pc(v).toLocaleString('pt-BR')}%</li>`).join('')}</ul>`;
 }
 
+// Lê o formulário validando os campos numéricos (laudo QA CC-01 a CC-05):
+// erros (vazio obrigatório, texto, negativo, abaixo do mínimo) bloqueiam o cálculo;
+// valor acima do máximo é limitado ao máximo, com aviso visível no campo e no resultado.
 function ler(form) {
-  const d = {};
+  const d = { _orig: {} };
+  const erros = [];
+  const avisos = [];
+  const alertas = [];
+  const marca = (el, texto, erro) => {
+    const msg = document.getElementById(`${el.id}-msg`);
+    if (msg) { msg.textContent = texto || ''; msg.hidden = !texto; msg.className = `campo-msg${erro ? ' err' : ''}`; }
+    if (erro) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid');
+  };
+  const rotulo = (el) => ((form.querySelector(`label[for="${el.id}"]`) || {}).textContent || el.name);
   for (const el of form.elements) {
     if (!el.name) continue;
     if (el.type === 'checkbox') d[el.name] = el.checked;
-    else if (el.type === 'number') d[el.name] = el.value === '' ? 0 : Number(el.value);
-    else d[el.name] = el.value;
+    else if (el.hasAttribute('data-num')) {
+      const ds = el.dataset;
+      const r = validarNumero({ raw: el.value, min: attrNum(ds.min), max: attrNum(ds.max), teto: attrNum(ds.teto), obrig: 'obrig' in ds, positivo: 'positivo' in ds, inteiro: 'inteiro' in ds });
+      if (r.aviso && ds.avisoMax) r.aviso = ds.avisoMax;
+      marca(el, r.erro || r.aviso, !!r.erro);
+      if (r.erro) erros.push([rotulo(el), r.erro, el.id]);
+      if (r.aviso) avisos.push([rotulo(el), r.aviso]);
+      if (r.original !== undefined) d._orig[el.name] = r.original;
+      // Salário abaixo do mínimo: só alerta, o cálculo segue.
+      const minimo = attrNum(ds.alertaMinimo);
+      if (!r.erro && minimo !== null && r.valor > 0 && r.valor < minimo) {
+        const t = `Valor abaixo do salário mínimo (${brl.format(minimo)}). Confira se é o salário mensal integral.`;
+        marca(el, t, false); alertas.push([rotulo(el), t]);
+      }
+      d[el.name] = r.valor ?? 0;
+    } else {
+      d[el.name] = el.value;
+      if (el.tagName === 'SELECT' && document.getElementById(`${el.id}-msg`)) marca(el, '', false);
+    }
   }
-  return d;
+  return { d, erros, avisos, alertas };
 }
+const listaErros = (erros) => `<div class="erro" role="alert"><p><strong>Confira ${erros.length > 1 ? 'os campos' : 'o campo'} antes de calcular:</strong></p><ul>${erros.map(([r, m, id]) => `<li><a href="#${id}">${esc(r)}</a>: ${esc(m)}</li>`).join('')}</ul></div>`;
+const listaAlertas = (a) => (a.length ? `<div class="aviso-limite" role="status"><p><strong>Atenção:</strong></p><ul>${a.map(([r, m]) => `<li>${esc(r)}: ${esc(m)}</li>`).join('')}</ul></div>` : '');
+const listaAvisos = (avisos) => (avisos.length ? `<div class="aviso-limite" role="status"><p><strong>Valor ajustado ao limite:</strong></p><ul>${avisos.map(([r, m]) => `<li>${esc(r)}: ${esc(m)}</li>`).join('')}</ul></div>` : '');
 
 // Assinatura do resultado (molde "ferramenta gratuita com a marca no resultado") + botão de imprimir/salvar PDF.
 const dataBR = () => new Date().toLocaleDateString('pt-BR');
@@ -55,12 +88,17 @@ const CALCS = {
       s.outrosDescontos ? ['Outros descontos', `− ${R(s.outrosDescontos)}`] : null,
       ['Total de descontos', `− ${R(s.descontos)}`],
       ['Salário líquido', R(s.liquido), 'total'],
-    ]) + `<p class="nota">IR calculado com ${s.ir.usaSimplificado ? 'desconto simplificado de R$ 607,20' : 'deduções legais'} (a opção mais vantajosa). Imposto pela tabela: ${R(s.ir.impostoTabela)}; redução da Lei 15.270/2025: ${R(s.ir.reducao)}.</p>`;
+    ]) + (s.liquido < 0 ? '<p class="erro">Os descontos informados são maiores que o salário bruto. Confira pensão e outros descontos.</p>' : '') + `<p class="nota">IR calculado com ${s.ir.usaSimplificado ? 'desconto simplificado de R$ 607,20' : 'deduções legais'} (a opção mais vantajosa). Imposto pela tabela: ${R(s.ir.impostoTabela)}; redução da Lei 15.270/2025: ${R(s.ir.reducao)}.</p>`;
   },
   rescisao(d) {
     const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, saldoFgts: d.saldoFgts, dependentes: d.dependentes });
     if (!r) return '<p class="erro">Confira as datas: o desligamento deve ser depois da admissão.</p>';
-    return destaque('Valor líquido estimado da rescisão', R(r.liquido)) + tabela([
+    const informados = d._orig.feriasVencidas;
+    const usados = d.feriasVencidas;
+    const topo = informados > usados
+      ? `<p class="destaque parcial"><span>Valor líquido <strong>parcial</strong>: inclui só ${usados} de ${informados} períodos de férias vencidas</span> <strong>${R(r.liquido)}</strong><em class="parcial-aviso">O valor devido é maior: faltam ${informados - usados} ${informados - usados === 1 ? 'período' : 'períodos'}, que precisam de cálculo manual.</em></p>`
+      : destaque('Valor líquido estimado da rescisão', R(r.liquido));
+    return topo + tabela([
       [`Saldo de salário (${r.diasNoMes} dias)`, R(r.saldoSalario)],
       r.avisoIndenizado ? [`Aviso prévio indenizado (${r.diasProjecao} dias)`, R(r.avisoIndenizado)] : null,
       [`13º proporcional (${r.avos13}/12)`, R(r.decimo)],
@@ -76,7 +114,7 @@ const CALCS = {
       ['Líquido a receber na rescisão', R(r.liquido), 'total'],
       r.multaFgts ? [`Multa do FGTS (depositada na conta do FGTS)`, R(r.multaFgts)] : null,
       r.saqueFgts ? ['Saque do saldo do FGTS', R(r.saqueFgts)] : null,
-    ]) + `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`;
+    ]) + (d.tipo === 'justaCausa' ? '' : `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`);
   },
   'decimo-terceiro'(d) {
     const r = C.decimoTerceiro({ salario: d.salario, meses: d.meses, mediaVariaveis: d.media, dependentes: d.dependentes });
@@ -219,7 +257,7 @@ const CALCS = {
       ['INSS (previdência)', R(r.inss)],
       r.icms ? ['ICMS', R(r.icms)] : null,
       r.iss ? ['ISS', R(r.iss)] : null,
-      [`Total no ano (${d.meses} meses)`, R(r.anual), 'total'],
+      [`Total no ano (${r.meses} ${r.meses === 1 ? 'mês' : 'meses'})`, R(r.anual), 'total'],
       ['Limite de faturamento proporcional', R(r.limite)],
       d.faturamento ? ['Situação do faturamento informado', sit] : null,
     ]);
@@ -315,7 +353,7 @@ const CALCS = {
     const final = r.anos[r.anos.length - 1];
     const linhas = r.anos.map((a) => `<tr><th scope="row">${a.ano}</th><td>${a.fase}</td><td>${pct(a.antigos)}</td><td>${pct(a.novos)}${a.ano === 2026 ? '*' : ''}${a.ano >= 2029 && a.ano <= 2032 ? '**' : ''}</td><td>${R(a.totalCliente)}</td><td>${pct(a.carga)}</td></tr>`).join('');
     return destaque('Carga sobre a venda em 2033 (estimativa)', `${pct(final.carga)} (hoje ${pct(r.cargaHoje)})`)
-      + `<div class="tabela-rolar"><table class="res"><thead><tr><th scope="col">Ano</th><th scope="col">Fase</th><th scope="col">PIS/Cofins + ISS</th><th scope="col">CBS + IBS</th><th scope="col">Cliente paga</th><th scope="col">Carga</th></tr></thead><tbody>${linhas}</tbody></table></div>`
+      + `<div class="tabela-rolar" tabindex="0" role="region" aria-label="Tabela do resultado (role para o lado)"><table class="res"><thead><tr><th scope="col">Ano</th><th scope="col">Fase</th><th scope="col">PIS/Cofins + ISS</th><th scope="col">CBS + IBS</th><th scope="col">Cliente paga</th><th scope="col">Carga</th></tr></thead><tbody>${linhas}</tbody></table></div>`
       + `<p class="nota">Valor que fica com a empresa em todos os anos: ${R(r.liquido)}, que também é a base de CBS/IBS (sem ISS, PIS e Cofins: LC 214/2025, art. 12, § 2º, V). ISS ${issSobreCbsIbs ? 'calculado também sobre a CBS/IBS (cenário conservador)' : 'calculado sem a CBS/IBS na base'}: o tema ainda não está definido em lei. Por padrão, o ISS é calculado por dentro, sobre o total: cliente paga = (base + CBS + IBS) ÷ (1 − ISS do ano). É uma interpretação; a alternativa está no campo “ISS sobre a CBS/IBS?”. *2026: CBS 0,9% e IBS 0,1% de teste, destacados mas compensáveis ou dispensados para quem cumpre as obrigações acessórias, sem custo adicional; não se aplicam ao Simples Nacional. **2029-2032: IBS aproximado como (1 − fração do ISS/ICMS restante) × alíquota final estimada; as alíquotas de referência de cada ano serão fixadas pelo Senado (LC 214/2025, arts. 361 a 364).${r.simples ? ` No Simples, com DAS de ${pct(r.simples.carga)}, a carga segue a alíquota do DAS informada (${R(r.simples.tributos)} nesta venda), salvo opção pelo regime regular; as tabelas do Simples mudam a partir de 2027 (LC 214/2025, art. 519).` : ''} Alíquotas de referência são estimativas editáveis: CBS ${n2.format(d.cbs)}% e IBS ${n2.format(d.ibs)}% nesta simulação.</p>` + marcaResultado();
   },
   'simples-hibrido'(d) {
@@ -335,7 +373,7 @@ const CALCS = {
       'hibrido-negociar': ['Nesta simulação, o híbrido só compensa se houver negociação de preço', `Mantendo o mesmo valor total, o seu lucro estimado cai ${R(-r.diferencaLucro)}/mês. Em compensação, o custo efetivo dos clientes B2B do regime regular pode cair até ${R(r.ganhoClientes)}/mês, se eles tiverem débitos para usar o crédito. Essa diferença pode abrir espaço para negociar preço com esses clientes, o que depende de acordo com cada um e do que prevê o contrato; sem negociação, o puro rende mais nesta simulação.`],
       puro: ['Nesta simulação, o puro tende a ser melhor', `Nesta simulação (alíquotas de 2027-2028), ${cen}, no híbrido o seu lucro estimado cairia ${R(-r.diferencaLucro)}/mês${r.ganhoClientes > 0 ? `, mais do que a redução de custo que os clientes B2B teriam (${R(r.ganhoClientes)}/mês)` : ''}. Reavalie a cada janela semestral.`],
     }[r.recomendacao];
-    const comp = `<div class="tabela-rolar"><table class="res comp"><thead><tr><td></td><th scope="col">Simples puro</th><th scope="col">Simples híbrido</th></tr></thead><tbody>
+    const comp = `<div class="tabela-rolar" tabindex="0" role="region" aria-label="Tabela do resultado (role para o lado)"><table class="res comp"><thead><tr><td></td><th scope="col">Simples puro</th><th scope="col">Simples híbrido</th></tr></thead><tbody>
 <tr><th scope="row">Valor total cobrado dos clientes</th><td>${R(d.receita)}</td><td>${R(r.hibrido.recebido)}</td></tr>
 <tr><th scope="row">DAS</th><td>${R(r.puro.imposto)}</td><td>${R(r.hibrido.das)}</td></tr>
 <tr><th scope="row">CBS + IBS por fora (débito − crédito das compras)</th><td>—</td><td>${R(r.hibrido.cbsIbsAPagar)}</td></tr>
@@ -343,7 +381,7 @@ const CALCS = {
 <tr class="total"><th scope="row">Lucro estimado</th><td>${R(r.puro.lucro)} (${pct(r.puro.margem, 1)})</td><td>${R(r.hibrido.lucro)} (${pct(r.hibrido.margem, 1)})</td></tr>
 <tr><th scope="row">Crédito de CBS/IBS para clientes B2B</th><td>${R(r.puro.creditoClientes)}</td><td>${R(r.hibrido.creditoClientes)}</td></tr>
 </tbody></table></div>`;
-    const lado = `<div class="tabela-rolar"><table class="res comp"><caption>Híbrido nos dois cenários de preço</caption><thead><tr><td></td><th scope="col">Preço mantido</th><th scope="col">CBS/IBS repassado ao B2B</th></tr></thead><tbody>
+    const lado = `<div class="tabela-rolar" tabindex="0" role="region" aria-label="Tabela do resultado (role para o lado)"><table class="res comp"><caption>Híbrido nos dois cenários de preço</caption><thead><tr><td></td><th scope="col">Preço mantido</th><th scope="col">CBS/IBS repassado ao B2B</th></tr></thead><tbody>
 <tr><th scope="row">Lucro estimado no híbrido</th><td>${R(mant.hibrido.lucro)}</td><td>${R(rep.hibrido.lucro)}</td></tr>
 <tr><th scope="row">Diferença para o puro</th><td>${sinal(mant.diferencaLucro)}</td><td>${sinal(rep.diferencaLucro)}</td></tr>
 <tr><th scope="row">Crédito dos clientes B2B</th><td>${R(mant.hibrido.creditoClientes)}</td><td>${R(rep.hibrido.creditoClientes)}</td></tr>
@@ -385,7 +423,7 @@ const CALCS = {
     if (!r) return '<p class="erro">Informe uma data válida.</p>';
     const fmt = (iso) => iso.split('-').reverse().join('/');
     const prox = r.proximo ? `${fmt(r.proximo.data)} (em ${r.proximo.dias} dias)` : 'todos os marcos já passaram';
-    return destaque('Próximo marco', prox) + `<p class="nota">Fase na data informada: <strong>${esc(r.fase)}</strong>.</p><div class="tabela-rolar"><table class="res"><thead><tr><th scope="col">Data</th><th scope="col">O que acontece</th><th scope="col">Situação</th></tr></thead><tbody>${r.marcos.map((m) => `<tr><th scope="row">${fmt(m.data)}</th><td>${esc(m.t)}</td><td>${m.passou ? 'Já passou' : `Faltam ${m.dias} dias`}</td></tr>`).join('')}</tbody></table></div>`;
+    return destaque('Próximo marco', prox) + `<p class="nota">Fase na data informada: <strong>${esc(r.fase)}</strong>.</p><div class="tabela-rolar" tabindex="0" role="region" aria-label="Tabela do resultado (role para o lado)"><table class="res"><thead><tr><th scope="col">Data</th><th scope="col">O que acontece</th><th scope="col">Situação</th></tr></thead><tbody>${r.marcos.map((m) => `<tr><th scope="row">${fmt(m.data)}</th><td>${esc(m.t)}</td><td>${m.passou ? 'Já passou' : `Faltam ${m.dias} dias`}</td></tr>`).join('')}</tbody></table></div>`;
   },
   'nr1-riscos-psicossociais'(d) {
     const r = C.nr1Checklist(d);
@@ -417,14 +455,15 @@ function iniciar() {
   const fn = CALCS[id];
   // valores padrão dinâmicos
   for (const el of form.querySelectorAll('[data-hoje]')) if (!el.value) el.value = hoje();
-  for (const el of form.querySelectorAll('[data-indicador]')) if (el.value === '') el.value = INDICADORES[el.dataset.indicador];
+  for (const el of form.querySelectorAll('[data-indicador]')) if (el.value === '') el.value = String(INDICADORES[el.dataset.indicador]).replace('.', ',');
   if (id === 'conversor-de-medidas') {
     popularUnidades(form);
     form.elements.categoria.addEventListener('change', () => popularUnidades(form));
   }
   const rodar = () => {
     try {
-      out.innerHTML = fn(ler(form));
+      const { d, erros, avisos, alertas } = ler(form);
+      out.innerHTML = erros.length ? listaErros(erros) : listaAvisos(avisos) + listaAlertas(alertas) + fn(d);
     } catch (e) {
       out.innerHTML = '<p class="erro">Não foi possível calcular. Confira os valores informados.</p>';
       console.error(e);
