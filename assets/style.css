@@ -320,3 +320,15 @@ details>div{color:var(--suave)}
 .cards li>a:not(.card){display:flex;flex-direction:column;gap:2px;height:100%;padding:16px 18px;border:1px solid var(--borda);border-radius:var(--raio);background:var(--card);text-decoration:none;color:var(--texto);box-shadow:var(--sombra)}
 .cards li>a:not(.card)>span{color:var(--suave);font-size:.88rem;line-height:1.45}
 .cards li>a:not(.card):hover{border-color:var(--borda-forte)}
+/* Reforma Tributária: tabelas largas e bloco de lista de espera */
+.tabela-rolar{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabela-rolar table.res th,.tabela-rolar table.res td{white-space:nowrap;font-size:.88rem}
+.tabela-rolar table.res td:nth-child(2){white-space:normal;min-width:180px}
+.lista-espera{margin:24px 0;padding:18px 20px;border:2px solid var(--verde);border-radius:var(--raio);background:var(--card)}
+.lista-espera h2{margin:0 0 6px;font-size:1.15rem}
+.lista-espera p{margin:0 0 10px}
+.le-botao{display:inline-block;min-height:44px;padding:10px 20px;border-radius:10px;background:var(--verde);color:#fff;font-weight:700;text-decoration:none}
+.le-form{display:grid;gap:12px;max-width:520px}
+.le-form label{font-weight:600}
+.le-form input,.le-form select,.le-form textarea{width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--borda);border-radius:8px;font:inherit;background:var(--card);color:var(--texto)}
+.le-form button{min-height:46px;border:0;border-radius:10px;background:var(--verde);color:#fff;font-weight:700;font:inherit;font-weight:700;cursor:pointer}

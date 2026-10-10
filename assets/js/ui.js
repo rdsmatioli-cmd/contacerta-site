@@ -303,6 +303,68 @@ const CALCS = {
       ['Dias até o próximo aniversário', r.diasProximoAniversario === 0 ? 'É hoje! 🎉' : n2.format(r.diasProximoAniversario)],
     ]);
   },
+  'transicao-cbs-ibs'(d) {
+    const r = C.transicaoCbsIbs({ precoAtual: d.preco, pisCofinsPct: d.piscofins, issPct: d.iss, cbsRefPct: d.cbs, ibsRefPct: d.ibs, dasPct: d.das });
+    if (!r) return '<p class="erro">Informe um preço maior que zero.</p>';
+    const final = r.anos[r.anos.length - 1];
+    const linhas = r.anos.map((a) => `<tr><th scope="row">${a.ano}</th><td>${a.fase}</td><td>${pct(a.antigos)}</td><td>${pct(a.novos)}${a.ano === 2026 ? '*' : ''}</td><td>${R(a.totalCliente)}</td><td>${pct(a.carga)}</td></tr>`).join('');
+    return destaque('Carga sobre a venda em 2033 (estimativa)', `${pct(final.carga)} (hoje ${pct(r.cargaHoje)})`)
+      + `<div class="tabela-rolar"><table class="res"><thead><tr><th scope="col">Ano</th><th scope="col">Fase</th><th scope="col">PIS/Cofins + ISS</th><th scope="col">CBS + IBS</th><th scope="col">Cliente paga</th><th scope="col">Carga</th></tr></thead><tbody>${linhas}</tbody></table></div>`
+      + `<p class="nota">Valor que fica com a empresa em todos os anos: ${R(r.liquido)}. *2026: CBS 0,9% e IBS 0,1% de teste, destacados mas compensáveis/dispensados, sem custo adicional.${r.simples ? ` No Simples, com DAS de ${pct(r.simples.carga)}, a carga segue a alíquota do DAS (${R(r.simples.tributos)} nesta venda), salvo opção pelo regime regular.` : ''} Alíquotas de referência são estimativas editáveis.</p>`;
+  },
+  'simples-hibrido'(d) {
+    const r = C.simplesHibrido({ receitaMensal: d.receita, pctB2B: d.b2b, dasPct: d.das, parcelaCbsIbsDasPct: d.parcela, cbsPct: d.cbs, ibsPct: d.ibs, comprasComCredito: d.compras });
+    if (!r) return '<p class="erro">Informe a receita mensal e a alíquota efetiva do DAS.</p>';
+    return destaque('Crédito a mais para seus clientes B2B no híbrido', `${R(r.diferencaCredito)}/mês`) + tabela([
+      ['<strong>Ficar 100% no DAS</strong>', ''],
+      ['Imposto da empresa', R(r.ficar.imposto)],
+      ['Crédito de CBS/IBS para clientes (estimativa)', R(r.ficar.creditoClientes)],
+      ['<strong>Apurar CBS/IBS por fora (híbrido)</strong>', ''],
+      ['DAS sem a parcela de CBS/IBS', R(r.hibrido.dasReduzido)],
+      ['CBS/IBS a pagar (débito − crédito das compras)', R(r.hibrido.cbsIbsAPagar)],
+      ['Imposto total da empresa', R(r.hibrido.imposto)],
+      ['Crédito integral para clientes B2B', R(r.hibrido.creditoClientes)],
+      ['Diferença de imposto (híbrido − DAS)', `${r.diferencaImposto >= 0 ? '+ ' : '− '}${R(Math.abs(r.diferencaImposto))}`, 'total'],
+    ]) + '<p class="nota">No híbrido, a CBS/IBS é cobrada por fora, no valor da nota; o cliente do regime regular recupera esse valor como crédito. Para consumidor final e clientes do Simples, o imposto extra pesa no preço.</p>';
+  },
+  'preco-reforma-tributaria'(d) {
+    const r = C.precoReforma({ precoAtual: d.preco, tributosAtuaisPct: d.atuais, tributosRestantesPct: d.restantes, cbsPct: d.cbs, ibsPct: d.ibs });
+    if (!r) return '<p class="erro">Confira o preço e os percentuais (precisam ser menores que 100%).</p>';
+    return destaque('Total da nota para manter a margem', R(r.total)) + tabela([
+      ['Receita líquida de hoje (mantida)', R(r.liquido)],
+      ['Valor da operação (com tributos que continuam por dentro)', R(r.valor)],
+      ['CBS', `+ ${R(r.cbs)}`],
+      ['IBS', `+ ${R(r.ibs)}`],
+      ['Total cobrado do cliente', R(r.total), 'total'],
+      ['Variação do total da nota', pct(r.variacaoTotal, 1)],
+      ['Custo efetivo para cliente com direito a crédito', R(r.custoClienteComCredito), 'sub'],
+      ['Variação para esse cliente', pct(r.variacaoComCredito, 1)],
+    ]);
+  },
+  'credito-travado'(d) {
+    const r = C.creditoTravado({ comprasMensais: d.compras, cbsPct: d.cbs, ibsPct: d.ibs, pctInadimplente: d.inad, diasAtraso: d.dias, custoDinheiroMes: d.custo });
+    if (!r) return '<p class="erro">Informe o valor das compras do mês.</p>';
+    return destaque('Crédito travado por mês (estimativa)', R(r.travado)) + tabela([
+      ['Crédito de CBS/IBS nas compras do mês', R(r.credito)],
+      ['Crédito que depende de fornecedor com débito em aberto', R(r.travado)],
+      ['Em 12 meses', R(r.travadoAno), 'sub'],
+      ['Custo financeiro da espera (mês)', R(r.custoFinanceiroMes)],
+      ['Custo financeiro em 12 meses', R(r.custoFinanceiroAno), 'total'],
+    ]);
+  },
+  'calendario-reforma-tributaria'(d) {
+    const r = C.calendarioReforma(d.data);
+    if (!r) return '<p class="erro">Informe uma data válida.</p>';
+    const fmt = (iso) => iso.split('-').reverse().join('/');
+    const prox = r.proximo ? `${fmt(r.proximo.data)} (em ${r.proximo.dias} dias)` : 'todos os marcos já passaram';
+    return destaque('Próximo marco', prox) + `<p class="nota">Fase na data informada: <strong>${esc(r.fase)}</strong>.</p><div class="tabela-rolar"><table class="res"><thead><tr><th scope="col">Data</th><th scope="col">O que acontece</th><th scope="col">Situação</th></tr></thead><tbody>${r.marcos.map((m) => `<tr><th scope="row">${fmt(m.data)}</th><td>${esc(m.t)}</td><td>${m.passou ? 'Já passou' : `Faltam ${m.dias} dias`}</td></tr>`).join('')}</tbody></table></div>`;
+  },
+  'nr1-riscos-psicossociais'(d) {
+    const r = C.nr1Checklist(d);
+    const msg = { avancado: 'Gestão avançada: mantenha as evidências', parcial: 'Gestão parcial: há lacunas a fechar', inicial: 'Gestão inicial: priorize inventário e plano de ação' }[r.nivel];
+    return destaque(`${r.pontos} de ${r.total} itens atendidos`, msg) + barra([['Atendidos', r.pontos, 'c1'], ['Pendentes', r.total - r.pontos, 'c5']])
+      + (r.pendentes.length ? `<p class="nota"><strong>O que falta:</strong></p><ul>${r.pendentes.map((p) => `<li>${esc(p.t)}</li>`).join('')}</ul>` : '<p class="nota">Todos os itens marcados. Guarde as evidências e revise o PGR quando a organização do trabalho mudar.</p>');
+  },
 };
 
 // Conversor: troca as unidades conforme a categoria

@@ -554,3 +554,141 @@ export function converter(valor, categoria, de, para) {
   const t = UNIDADES[categoria];
   return (v * t[de]) / t[para];
 }
+
+// ---------- Reforma Tributária do Consumo (EC 132/2023 e LC 214/2025)
+// Fatos legais fixos. Alíquotas de referência de CBS/IBS NÃO são oficiais até a resolução do Senado:
+// entram sempre como parâmetro editável (estimativa) informado pelo usuário.
+// Fração de ICMS/ISS que continua valendo em cada ano (ADCT, EC 132/2023): 9/10 em 2029 ... 6/10 em 2032; zero em 2033.
+export const TRANSICAO = [
+  { ano: 2026, fase: 'Teste', cbsFixa: 0.009, ibsFixa: 0.001, pisCofins: true, fracaoAntigos: 1, testeCompensavel: true },
+  { ano: 2027, fase: 'CBS cheia', cbsRed: 0.001, ibsFixa: 0.001, pisCofins: false, fracaoAntigos: 1 },
+  { ano: 2028, fase: 'CBS cheia', cbsRed: 0.001, ibsFixa: 0.001, pisCofins: false, fracaoAntigos: 1 },
+  { ano: 2029, fase: 'Transição ICMS/ISS', pisCofins: false, fracaoAntigos: 0.9 },
+  { ano: 2030, fase: 'Transição ICMS/ISS', pisCofins: false, fracaoAntigos: 0.8 },
+  { ano: 2031, fase: 'Transição ICMS/ISS', pisCofins: false, fracaoAntigos: 0.7 },
+  { ano: 2032, fase: 'Transição ICMS/ISS', pisCofins: false, fracaoAntigos: 0.6 },
+  { ano: 2033, fase: 'Modelo final', pisCofins: false, fracaoAntigos: 0 },
+];
+
+// Alíquotas de cada ano para um prestador de serviços do Lucro Presumido.
+// pisCofinsPct (3,65% cumulativo), issPct, cbsRefPct e ibsRefPct em %. IBS de 2029-2032 aproximado como
+// a fração complementar da referência (estimativa: as alíquotas do IBS desses anos serão fixadas pelo Senado).
+export function aliquotasAno(linha, { pisCofinsPct = 3.65, issPct = 5, cbsRefPct, ibsRefPct }) {
+  const antigos = (linha.pisCofins ? pisCofinsPct : 0) / 100 + (issPct / 100) * linha.fracaoAntigos;
+  let cbs, ibs;
+  if (linha.ano === 2026) { cbs = linha.cbsFixa; ibs = linha.ibsFixa; }
+  else if (linha.ano <= 2028) { cbs = Math.max(0, cbsRefPct / 100 - linha.cbsRed); ibs = linha.ibsFixa; }
+  else { cbs = cbsRefPct / 100; ibs = (ibsRefPct / 100) * (1 - linha.fracaoAntigos); }
+  return { antigos, cbs, ibs, novos: cbs + ibs };
+}
+
+// Simulador da transição: mantém a receita líquida de hoje e mostra preço e carga ano a ano.
+// Tributos antigos "por dentro" (no preço); CBS/IBS "por fora" (somados ao valor da operação).
+export function transicaoCbsIbs({ precoAtual, pisCofinsPct = 3.65, issPct = 5, cbsRefPct, ibsRefPct, dasPct = 0 }) {
+  if (!(precoAtual > 0)) return null;
+  const tHoje = pisCofinsPct / 100 + issPct / 100;
+  const liquido = precoAtual * (1 - tHoje);
+  const anos = TRANSICAO.map((l) => {
+    const a = aliquotasAno(l, { pisCofinsPct, issPct, cbsRefPct, ibsRefPct });
+    // 2026: CBS/IBS de teste destacados, mas compensáveis/dispensados -> sem custo adicional.
+    const novosEfetivos = l.testeCompensavel ? 0 : a.novos;
+    const valor = liquido / (1 - a.antigos); // valor da operação (base de CBS/IBS)
+    const totalCliente = valor * (1 + novosEfetivos);
+    const tributos = totalCliente - liquido;
+    return { ano: l.ano, fase: l.fase, ...a, novosEfetivos, valor: r2(valor), totalCliente: r2(totalCliente), tributos: r2(tributos), carga: tributos / totalCliente };
+  });
+  const simples = dasPct > 0 ? { carga: dasPct / 100, tributos: r2(precoAtual * dasPct / 100) } : null;
+  return { liquido: r2(liquido), cargaHoje: tHoje, anos, simples };
+}
+
+// Simples Nacional: ficar no DAS x apurar CBS/IBS por fora (opção "híbrida", LC 214/2025).
+export function simplesHibrido({ receitaMensal, pctB2B = 100, dasPct, parcelaCbsIbsDasPct, cbsPct, ibsPct, comprasComCredito = 0 }) {
+  if (!(receitaMensal > 0) || !(dasPct > 0)) return null;
+  const novo = (cbsPct + ibsPct) / 100;
+  const das = receitaMensal * dasPct / 100;
+  const parcela = das * parcelaCbsIbsDasPct / 100; // parte do DAS que corresponde a CBS/IBS
+  const b2b = receitaMensal * pctB2B / 100;
+  const ficar = { imposto: r2(das), creditoClientes: r2(b2b / receitaMensal * parcela) };
+  const debito = receitaMensal * novo;
+  const creditoCompras = comprasComCredito * novo;
+  const hib = {
+    dasReduzido: r2(das - parcela),
+    cbsIbsAPagar: r2(Math.max(0, debito - creditoCompras)),
+    imposto: r2(das - parcela + Math.max(0, debito - creditoCompras)),
+    creditoClientes: r2(b2b * novo),
+  };
+  return { ficar, hibrido: hib, diferencaImposto: r2(hib.imposto - ficar.imposto), diferencaCredito: r2(hib.creditoClientes - ficar.creditoClientes) };
+}
+
+// Preço que mantém a receita líquida quando CBS/IBS passam a valer.
+export function precoReforma({ precoAtual, tributosAtuaisPct, tributosRestantesPct = 0, cbsPct, ibsPct }) {
+  const t = tributosAtuaisPct / 100;
+  const rest = tributosRestantesPct / 100;
+  if (!(precoAtual > 0) || t >= 1 || rest >= 1) return null;
+  const liquido = precoAtual * (1 - t);
+  const valor = liquido / (1 - rest);
+  const novo = (cbsPct + ibsPct) / 100;
+  const cbs = valor * cbsPct / 100;
+  const ibs = valor * ibsPct / 100;
+  const total = valor + cbs + ibs;
+  return { liquido: r2(liquido), valor: r2(valor), cbs: r2(cbs), ibs: r2(ibs), total: r2(total), variacaoTotal: total / precoAtual - 1, custoClienteComCredito: r2(valor), variacaoComCredito: valor / precoAtual - 1, aliqNova: novo };
+}
+
+// Crédito condicionado à extinção do débito do fornecedor (crédito "travado").
+export function creditoTravado({ comprasMensais, cbsPct, ibsPct, pctInadimplente, diasAtraso, custoDinheiroMes }) {
+  if (!(comprasMensais > 0)) return null;
+  const credito = comprasMensais * (cbsPct + ibsPct) / 100;
+  const travado = credito * pctInadimplente / 100;
+  const custoFin = travado * (custoDinheiroMes / 100) * (diasAtraso / 30);
+  return { credito: r2(credito), travado: r2(travado), travadoAno: r2(travado * 12), custoFinanceiroMes: r2(custoFin), custoFinanceiroAno: r2(custoFin * 12) };
+}
+
+// Calendário oficial: marcos e situação em relação a uma data (AAAA-MM-DD).
+export const MARCOS_REFORMA = [
+  { data: '2026-01-01', t: 'Início do ano de teste: CBS de 0,9% e IBS de 0,1% destacados nos documentos fiscais, compensáveis com PIS/Cofins ou dispensados para quem cumpre as obrigações acessórias' },
+  { data: '2026-10-30', t: 'Fim do prazo para o Simples Nacional optar por apurar IBS/CBS por fora (regime regular) no 1º semestre de 2027; prazo do TCU para enviar ao Senado o cálculo da alíquota de referência da CBS' },
+  { data: '2026-11-16', t: 'Novas regras de validação de IBS/CBS da NF-e em produção (NT 2025.002-RTC, cronograma sujeito a mudança)' },
+  { data: '2026-12-15', t: 'Prazo do Senado para fixar a alíquota de referência da CBS de 2027' },
+  { data: '2027-01-01', t: 'CBS entra na alíquota de referência (menos 0,1 ponto em 2027-2028); PIS e Cofins extintos; IBS de 0,1%; IPI zerado (exceto Zona Franca de Manaus); apuração assistida da CBS' },
+  { data: '2027-03-01', t: 'Abre a janela (1º a 31/03/2027) para o Simples optar pelo regime regular de IBS/CBS no 2º semestre de 2027' },
+  { data: '2029-01-01', t: 'ICMS e ISS caem para 90% das alíquotas; IBS sobe na mesma proporção' },
+  { data: '2030-01-01', t: 'ICMS e ISS em 80%' },
+  { data: '2031-01-01', t: 'ICMS e ISS em 70%' },
+  { data: '2032-01-01', t: 'ICMS e ISS em 60%' },
+  { data: '2033-01-01', t: 'ICMS e ISS extintos; IBS e CBS integrais: modelo final do IVA dual' },
+];
+export function calendarioReforma(dataISO) {
+  const ref = new Date(`${dataISO}T00:00:00Z`);
+  if (Number.isNaN(ref.getTime())) return null;
+  const marcos = MARCOS_REFORMA.map((m) => {
+    const dias = Math.round((new Date(`${m.data}T00:00:00Z`) - ref) / 86400000);
+    return { ...m, dias, passou: dias < 0 };
+  });
+  const proximo = marcos.find((m) => !m.passou) || null;
+  const ano = ref.getUTCFullYear();
+  const fase = ano < 2026 ? 'Antes da reforma' : (TRANSICAO.find((l) => l.ano === Math.min(ano, 2033)) || {}).fase;
+  return { marcos, proximo, fase };
+}
+
+// NR-1 (riscos psicossociais): autoavaliação simples. respostas: objeto { chave: true/false }.
+export const NR1_ITENS = [
+  ['inventario', 'Os fatores de risco psicossociais (metas, jornada, assédio, conflitos, isolamento etc.) estão identificados no inventário de riscos do PGR'],
+  ['avaliacao', 'Cada fator foi avaliado (severidade e probabilidade) com critério documentado'],
+  ['escuta', 'Os trabalhadores foram ouvidos (questionário, entrevista ou reunião) na identificação dos perigos'],
+  ['plano', 'Existe plano de ação com medidas, responsáveis e prazos para os riscos psicossociais'],
+  ['jornada', 'Jornada, pausas, horas extras e metas são acompanhadas e revistas quando excessivas'],
+  ['assedio', 'Há canal de denúncia e procedimento contra assédio e violência no trabalho'],
+  ['liderancas', 'Gestores foram orientados sobre organização do trabalho e prevenção do adoecimento'],
+  ['afastamentos', 'Afastamentos e atestados por saúde mental são analisados para revisar as medidas'],
+  ['ergonomia', 'A análise ergonômica (NR-17) considera aspectos de organização do trabalho'],
+  ['revisao', 'O PGR é revisado após mudanças na organização, acidentes ou a cada no máximo 2 anos'],
+  ['terceiros', 'Riscos de prestadores e terceirizados no mesmo ambiente são considerados'],
+  ['registro', 'As evidências (atas, listas de presença, relatórios) ficam guardadas para a fiscalização'],
+];
+export function nr1Checklist(respostas = {}) {
+  const feitos = NR1_ITENS.filter(([k]) => respostas[k]);
+  const pendentes = NR1_ITENS.filter(([k]) => !respostas[k]);
+  const pct = feitos.length / NR1_ITENS.length;
+  const nivel = pct >= 0.85 ? 'avancado' : pct >= 0.5 ? 'parcial' : 'inicial';
+  return { pontos: feitos.length, total: NR1_ITENS.length, pct, nivel, pendentes: pendentes.map(([k, t]) => ({ k, t })) };
+}

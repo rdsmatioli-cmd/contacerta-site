@@ -1,6 +1,6 @@
 # Conta Certa
 
-> Conta Certa (https://contacertabr.com.br) reúne 23 calculadoras gratuitas em português do Brasil para salário, direitos trabalhistas (CLT), impostos, MEI, investimentos, financiamentos e contas do dia a dia. Os cálculos usam as tabelas oficiais vigentes em 2026, citam a norma de origem e rodam no navegador do usuário, sem cadastro e sem envio de dados.
+> Conta Certa (https://contacertabr.com.br) reúne 29 calculadoras gratuitas em português do Brasil para salário, direitos trabalhistas (CLT), impostos, MEI, investimentos, financiamentos e contas do dia a dia. Os cálculos usam as tabelas oficiais vigentes em 2026, citam a norma de origem e rodam no navegador do usuário, sem cadastro e sem envio de dados.
 
 Tabelas conferidas em 08/10/2026. Principais valores usados em 2026:
 
@@ -30,6 +30,7 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 - [Calculadora de adicional noturno](https://contacertabr.com.br/adicional-noturno/): Calcule o adicional noturno de 20% (urbano) ou 25% (rural), com a hora noturna reduzida de 52min30s e o reflexo no DSR. Regras da CLT e exemplos.
 - [Calculadora de seguro-desemprego 2026](https://contacertabr.com.br/seguro-desemprego/): Calcule o valor e o número de parcelas do seguro-desemprego 2026 pela tabela oficial do MTE: piso de R$ 1.621 e teto de R$ 2.518,65.
 - [Calculadora de aviso prévio](https://contacertabr.com.br/aviso-previo/): Calcule quantos dias de aviso prévio você tem (30 + 3 por ano, até 90), o valor do aviso indenizado e a data final com a projeção. Lei 12.506/2011.
+- [Checklist NR-1: riscos psicossociais na sua empresa](https://contacertabr.com.br/nr1-riscos-psicossociais/): Autoavaliação grátis da NR-1 para pequenas empresas: veja se os riscos psicossociais estão no PGR, o que falta e o prazo das multas suspensas pelo STF.
 
 ## Finanças e investimentos
 
@@ -46,6 +47,14 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 - [Calculadora de custo de funcionário para a empresa](https://contacertabr.com.br/custo-funcionario/): Calcule quanto um funcionário CLT custa por mês e por ano: 13º, férias, FGTS, INSS patronal e benefícios, no Simples Nacional, Lucro Presumido ou MEI.
 - [Calculadora de markup e preço de venda](https://contacertabr.com.br/markup/): Calcule o preço de venda pelo markup: custo, despesas fixas, impostos, taxas de cartão, comissões e margem de lucro. Fórmula do Sebrae e exemplos.
 
+## Reforma Tributária
+
+- [Simulador da transição CBS e IBS 2026-2033](https://contacertabr.com.br/transicao-cbs-ibs/): Veja ano a ano, de 2026 a 2033, como PIS, Cofins e ISS dão lugar à CBS e ao IBS no preço de um serviço do Lucro Presumido, comparado ao Simples.
+- [Simulador do Simples híbrido: DAS ou CBS e IBS por fora](https://contacertabr.com.br/simples-hibrido/): Compare ficar 100% no DAS com a opção do Simples por apurar CBS e IBS no regime regular: imposto da empresa e crédito para clientes B2B. Prazo até 30/10/2026.
+- [Calculadora de preço na Reforma Tributária](https://contacertabr.com.br/preco-reforma-tributaria/): Calcule o novo preço que mantém a sua margem quando PIS e Cofins saem e entram CBS e IBS. Veja o total da nota e o custo para o cliente com crédito.
+- [Calculadora de crédito travado de CBS e IBS](https://contacertabr.com.br/credito-travado/): Na reforma, o crédito de CBS e IBS só fica disponível quando o fornecedor quita o tributo. Estime quanto crédito pode ficar travado e o custo dessa espera.
+- [Calendário da Reforma Tributária 2026-2033](https://contacertabr.com.br/calendario-reforma-tributaria/): Todas as datas oficiais da Reforma Tributária do consumo: teste de 2026, CBS em 2027, Simples híbrido, transição de ICMS e ISS de 2029 a 2032 e o modelo final de 2033.
+
 ## Matemática
 
 - [Calculadora de porcentagem](https://contacertabr.com.br/porcentagem/): Calcule porcentagem de um valor, quanto um número representa em %, variação percentual, aumento e desconto. Com fórmulas e exemplos práticos.
@@ -60,6 +69,7 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 ## Sobre o site
 
 - [Sobre e metodologia](https://contacertabr.com.br/sobre/): quem mantém o site, como as fontes são verificadas e como as tabelas são atualizadas.
+- [Lista de espera](https://contacertabr.com.br/lista-de-espera/): aviso de lançamento das ferramentas de automação da Reforma Tributária e da NR-1.
 - [Contato](https://contacertabr.com.br/contato/): correções de tabelas e sugestões.
 - [Política de privacidade](https://contacertabr.com.br/privacidade/)
 - [Termos de uso](https://contacertabr.com.br/termos/)
