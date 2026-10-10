@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=75bd7fab5f';
-import { INDICADORES } from './tabelas.js?v=75bd7fab5f';
-import { validarNumero, attrNum, validarFeriasVencidas } from './valida.js?v=75bd7fab5f';
+import * as C from './calc.js?v=825856845b';
+import { INDICADORES } from './tabelas.js?v=825856845b';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=825856845b';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -91,8 +91,16 @@ const CALCS = {
     ]) + (s.liquido < 0 ? '<p class="erro">Os descontos informados são maiores que o salário bruto. Confira pensão e outros descontos.</p>' : '') + `<p class="nota">IR calculado com ${s.ir.usaSimplificado ? 'desconto simplificado de R$ 607,20' : 'deduções legais'} (a opção mais vantajosa). Imposto pela tabela: ${R(s.ir.impostoTabela)}; redução da Lei 15.270/2025: ${R(s.ir.reducao)}.</p>`;
   },
   rescisao(d) {
-    const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, vencidasEmDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'], saldoFgts: d.saldoFgts, dependentes: d.dependentes });
+    const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, vencidasEmDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'], saldoFgts: d.saldoFgts, dependentes: d.dependentes, dataPagamento: d.dataPagamento });
     if (!r) return '<p class="erro">Confira as datas: o desligamento deve ser depois da admissão.</p>';
+    const vp = validarDataPagamento(d.desligamento, d.dataPagamento);
+    const elP = document.getElementById('f-dataPagamento');
+    if (elP) elP.removeAttribute('aria-invalid');
+    if (vp && vp.erro) {
+      if (elP) elP.setAttribute('aria-invalid', 'true');
+      return `<div class="erro" role="alert"><p><strong>Confira o campo antes de calcular:</strong></p><ul><li><a href="#f-dataPagamento">Data de pagamento das verbas</a>: ${esc(vp.erro)}</li></ul></div>`;
+    }
+    const alertaPag = vp && vp.alerta ? listaAlertas([['Data de pagamento das verbas', vp.alerta]]) : '';
     // N-02: períodos e dobra conferidos contra as datas, com a projeção do aviso.
     const v = validarFeriasVencidas({ admissao: d.admissao, desligamento: d.desligamento, fimProjetado: r.fimProjetado, periodos: d._orig.feriasVencidas ?? d.feriasVencidas, emDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'] });
     if (v) {
@@ -108,7 +116,7 @@ const CALCS = {
     const topo = informados > usados
       ? `<p class="destaque parcial"><span>Valor líquido <strong>parcial</strong>: inclui só ${usados} de ${informados} períodos de férias vencidas</span> <strong>${R(r.liquido)}</strong><em class="parcial-aviso">O valor devido é maior: faltam ${informados - usados} ${informados - usados === 1 ? 'período' : 'períodos'}, que precisam de cálculo manual.</em></p>`
       : destaque('Valor líquido estimado da rescisão', R(r.liquido));
-    return topo + tabela([
+    return alertaPag + topo + tabela([
       [`Saldo de salário (${r.diasNoMes} dias)`, R(r.saldoSalario)],
       r.avisoIndenizado ? [`Aviso prévio indenizado (${r.diasProjecao} dias)`, R(r.avisoIndenizado)] : null,
       ...(r.avos13Anterior ? [[`13º proporcional de ${r.anoDes} (${r.avos13Anterior}/12)`, R(r.decimoAnterior)], [`13º proporcional de ${r.anoFim}, pela projeção do aviso (${r.avos13Atual}/12)`, R(r.decimoAtual)]] : [[`13º proporcional (${r.avos13}/12)`, R(r.decimo)]]),
@@ -126,7 +134,7 @@ const CALCS = {
       ['Líquido a receber na rescisão', R(r.liquido), 'total'],
       r.multaFgts ? [`Multa do FGTS (depositada na conta do FGTS)`, R(r.multaFgts)] : null,
       r.saqueFgts ? ['Saque do saldo do FGTS', R(r.saqueFgts)] : null,
-    ]) + (d.tipo === 'justaCausa' ? '' : `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`) + (r.avos13Anterior ? `<p class="nota">Quando o 13º abrange dois anos pela projeção do aviso, o INSS é calculado separadamente por ano, com a tabela de cada ano, e o IR incide sobre o total, num pagamento único. A prática de folha varia nesse ponto.${r.tabelasSubstituidas.map(([a, b]) => ` A tabela do INSS de ${a} ainda não está disponível no site; foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`).join('')}</p>` : '') + `<p class="nota">IRRF pela data de pagamento (considerada a data do desligamento informada): tabela de ${r.tabelaIrrf.rotulo}${r.tabelaIrrf.ano >= 2026 ? ', com a redução da Lei 15.270/2025' : ', sem a redução da Lei 15.270/2025 (vigente a partir de 2026)'}.${r.inssSaldoSubstituida ? ` A tabela do INSS de ${r.inssSaldoSubstituida[0]} ainda não está disponível no site; para o saldo de salário foi usada a de ${r.inssSaldoSubstituida[1]}, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}${r.tabelaIrrf.substituida ? ` Ainda não há tabela do IR de ${r.tabelaIrrf.anoPagamento} no site; foi usada a mais recente, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}</p>` + (d.tipo === 'acordo' ? '<p class="nota">No acordo (CLT, art. 484-A), o aviso indenizado é pago pela metade, e a calculadora projeta também metade do prazo no tempo de serviço, que é o entendimento predominante. A lei não trata expressamente da projeção, e há decisões que projetam o aviso inteiro.</p>' : '');
+    ]) + (d.tipo === 'justaCausa' ? '' : `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`) + (r.avos13Anterior ? `<p class="nota">Quando o 13º abrange dois anos pela projeção do aviso, o INSS é calculado separadamente por ano, com a tabela de cada ano, e o IR incide sobre o total, num pagamento único. A prática de folha varia nesse ponto.${r.tabelasSubstituidas.map(([a, b]) => ` A tabela do INSS de ${a} ainda não está disponível no site; foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`).join('')}</p>` : '') + `<p class="nota">IRRF pela data de pagamento (${r.dataPagamento.split('-').reverse().join('/')}${r.pagamentoInformado ? '' : ', data do desligamento, pois não foi informada outra'}): tabela de ${r.tabelaIrrf.rotulo}${r.tabelaIrrf.ano >= 2026 ? ', com a redução da Lei 15.270/2025' : ', sem a redução da Lei 15.270/2025 (vigente a partir de 2026)'}.${r.inssSaldoSubstituida ? ` A tabela do INSS de ${r.inssSaldoSubstituida[0]} ainda não está disponível no site; para o saldo de salário foi usada a de ${r.inssSaldoSubstituida[1]}, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}${r.tabelaIrrf.substituida ? ` Ainda não há tabela do IR de ${r.tabelaIrrf.anoPagamento} no site; foi usada a mais recente, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}</p>` + (d.tipo === 'acordo' ? '<p class="nota">No acordo (CLT, art. 484-A), o aviso indenizado é pago pela metade, e a calculadora projeta também metade do prazo no tempo de serviço, que é o entendimento predominante. A lei não trata expressamente da projeção, e há decisões que projetam o aviso inteiro.</p>' : '');
   },
   'decimo-terceiro'(d) {
     const r = C.decimoTerceiro({ salario: d.salario, meses: d.meses, mediaVariaveis: d.media, dependentes: d.dependentes });

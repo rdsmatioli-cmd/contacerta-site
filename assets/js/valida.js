@@ -1,6 +1,6 @@
 // Validação dos campos numéricos das calculadoras (laudo QA 10/10/2026 e reteste: CC-01 a CC-05, N-01, N-02, N-04, N-11).
 // Funções puras, testáveis no Node; o ui.js aplica o resultado no formulário.
-import { avosFerias, parseData } from './calc.js?v=75bd7fab5f';
+import { avosFerias, parseData } from './calc.js?v=825856845b';
 const fmt = (x) => Number(x).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 
 // Lê um número digitado no formato brasileiro (N-01).
@@ -96,5 +96,14 @@ export function validarFeriasVencidas({ admissao, desligamento, fimProjetado = d
       ? `Pelas datas informadas${dataTxt}, nenhum período teve o prazo de concessão encerrado. Marque Não.`
       : `Pelas datas informadas${dataTxt}, só ${pl(v, 'período teve', 'períodos tiveram')} o prazo de concessão encerrado. Marque Sim em no máximo ${v}.` };
   }
+  return null;
+}
+
+// Rescisão: data de pagamento das verbas (CLT, art. 477, § 6º).
+export function validarDataPagamento(desligamento, pagamento) {
+  if (!iso(pagamento) || !iso(desligamento)) return null;
+  const dias = Math.round((parseData(pagamento) - parseData(desligamento)) / 86400000);
+  if (dias < 0) return { erro: 'A data de pagamento não pode ser anterior à data do desligamento.' };
+  if (dias > 10) return { alerta: `Pagamento ${dias} dias após o desligamento: o prazo legal é de até 10 dias após o término do contrato (CLT, art. 477, § 6º). O cálculo usa a data informada.` };
   return null;
 }

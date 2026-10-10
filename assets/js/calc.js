@@ -1,5 +1,5 @@
 // Funções puras de cálculo. Usadas pelo navegador (ui.js) e pelos testes (node --test).
-import { INSS, INSS_POR_ANO, IRRF_POR_DATA, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=75bd7fab5f';
+import { INSS, INSS_POR_ANO, IRRF_POR_DATA, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=825856845b';
 
 /** Arredonda para 2 casas (meio para cima), imune a ruído de ponto flutuante. */
 export function r2(x) {
@@ -370,7 +370,7 @@ export function avosFerias(admissao, fim) {
  * tipo: semJustaCausa | pedidoDemissao | justaCausa | acordo
  * aviso: indenizado | trabalhado | naoCumprido (pedido de demissão sem cumprir: desconto de 30 dias)
  */
-export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso = 'indenizado', feriasVencidas = 0, vencidasEmDobro = [], saldoFgts = 0, dependentes = 0 }) {
+export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso = 'indenizado', feriasVencidas = 0, vencidasEmDobro = [], saldoFgts = 0, dependentes = 0, dataPagamento = '' }) {
   salario = num(salario);
   const dAdm = parseData(admissao);
   const dDes = parseData(desligamento);
@@ -426,7 +426,10 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
   const inssSaldo = inssEmpregado(saldoSalario, tSaldo.t).inss;
   const inssSaldoSubstituida = tSaldo.ano !== dDes.getUTCFullYear() ? [dDes.getUTCFullYear(), tSaldo.ano] : null;
   // IRRF pelo regime de caixa: tabela (e redução da Lei 15.270, só a partir de 2026) da data de pagamento = data real do desligamento.
-  const irTab = tabelaIrrfPorData(desligamento);
+  // Data de pagamento (Lei 8.134/1990, arts. 3º e 16, II; IN RFB 1.500/2014, art. 13, I); vazia = data do desligamento.
+  const pagamentoInformado = /^\d{4}-\d{2}-\d{2}$/.test(String(dataPagamento || ''));
+  const dataPag = pagamentoInformado ? dataPagamento : desligamento;
+  const irTab = tabelaIrrfPorData(dataPag);
   const irSaldoR = irrfMensal({ rendimentos: saldoSalario, inss: inssSaldo, dependentes, tabela: irTab.tabela });
   const irSaldo = irSaldoR.irrf;
   // 13º de dois anos: INSS separado por ano, com a tabela e o teto de cada ano; IRRF sobre o total, deduzido o INSS do 13º.
@@ -455,7 +458,7 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
   return {
     diasNoMes, saldoSalario, diasAviso, diasProjecao, avisoIndenizado, avos13, avos13Anterior, avos13Atual, anoDes, anoFim, decimoAnterior, decimoAtual, decimo,
     avosFerias: avosF, feriasProp, feriasVenc, periodosVenc, periodosEmDobro, periodosProjecao, feriasVencSimples, dobraFeriasVenc, feriasProjecao, tercoFerias,
-    inssSaldo, inssSaldoSubstituida, irSaldo, inss13, inss13Anterior, inss13Atual, tabelasSubstituidas, ir13, ir13Base: ir13R.base, ir13Reducao: ir13R.reducao, irSaldoBase: irSaldoR.base, tabelaIrrf: { vigencia: irTab.tabela.vigencia, rotulo: irTab.tabela.rotulo, ano: irTab.ano, anoPagamento: irTab.anoPagamento, substituida: irTab.substituida }, descontoAviso, verbas, descontos, liquido: r2(verbas - descontos),
+    dataPagamento: dataPag, pagamentoInformado, inssSaldo, inssSaldoSubstituida, irSaldo, inss13, inss13Anterior, inss13Atual, tabelasSubstituidas, ir13, ir13Base: ir13R.base, ir13Reducao: ir13R.reducao, irSaldoBase: irSaldoR.base, tabelaIrrf: { vigencia: irTab.tabela.vigencia, rotulo: irTab.tabela.rotulo, ano: irTab.ano, anoPagamento: irTab.anoPagamento, substituida: irTab.substituida }, descontoAviso, verbas, descontos, liquido: r2(verbas - descontos),
     multaFgts, saqueFgts: r2(num(saldoFgts) * saqueFgtsPct), fimProjetado: fimProjetado.toISOString().slice(0, 10),
   };
 }
