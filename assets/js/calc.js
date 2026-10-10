@@ -674,18 +674,25 @@ export function simplesHibridoOuPuro({ receitaMensal, pctB2B = 0, margemPct = 0,
   };
 }
 
-// Preço que mantém a receita líquida quando CBS/IBS passam a valer.
-export function precoReforma({ precoAtual, tributosAtuaisPct, tributosRestantesPct = 0, cbsPct, ibsPct }) {
+// Preço que mantém a receita líquida quando CBS/IBS passam a valer (revisão tributária de 10/10/2026).
+// V_base = preço líquido sem ISS, ICMS e PIS/Cofins; a base de CBS/IBS nunca inclui o ISS (ADCT, art. 133; LC 214/2025, art. 12, § 2º, V).
+// ISS do ano = alíquota cheia × fator (2027-28 = 1; 2029 = 0,9; 2030 = 0,8; 2031 = 0,7; 2032 = 0,6; 2033 = 0) (ADCT, art. 128).
+// issPorDentro = true (padrão, interpretação): Total = (V_base + CBS + IBS) ÷ (1 − ISS do ano); ISS = Total × ISS do ano.
+// false (alternativa, ISS por fora): Total = V_base × (1 + CBS + IBS + ISS do ano).
+export const FATOR_ISS_ANO = { 2027: 1, 2028: 1, 2029: 0.9, 2030: 0.8, 2031: 0.7, 2032: 0.6, 2033: 0 };
+export function precoReforma({ precoAtual, tributosAtuaisPct, issPct = 0, ano = 2027, cbsPct, ibsPct, issPorDentro = true }) {
   const t = tributosAtuaisPct / 100;
-  const rest = tributosRestantesPct / 100;
-  if (!(precoAtual > 0) || t >= 1 || rest >= 1) return null;
-  const liquido = precoAtual * (1 - t);
-  const valor = liquido / (1 - rest);
-  const novo = (cbsPct + ibsPct) / 100;
-  const cbs = valor * cbsPct / 100;
-  const ibs = valor * ibsPct / 100;
-  const total = valor + cbs + ibs;
-  return { liquido: r2(liquido), valor: r2(valor), cbs: r2(cbs), ibs: r2(ibs), total: r2(total), variacaoTotal: total / precoAtual - 1, custoClienteComCredito: r2(valor), variacaoComCredito: valor / precoAtual - 1, aliqNova: novo };
+  const fator = FATOR_ISS_ANO[ano];
+  if (!(precoAtual > 0) || t >= 1 || fator === undefined) return null;
+  const issAno = (issPct / 100) * fator;
+  if (issAno >= 1) return null;
+  const base = precoAtual * (1 - t);
+  const cbs = base * cbsPct / 100;
+  const ibs = base * ibsPct / 100;
+  const total = issPorDentro ? (base + cbs + ibs) / (1 - issAno) : base * (1 + (cbsPct + ibsPct) / 100 + issAno);
+  const iss = issPorDentro ? total * issAno : base * issAno;
+  const semCbsIbs = total - cbs - ibs; // custo efetivo para o cliente que se credita de CBS/IBS
+  return { liquido: r2(base), base: r2(base), cbs: r2(cbs), ibs: r2(ibs), iss: r2(iss), issAno, fatorIss: fator, total: r2(total), variacaoTotal: total / precoAtual - 1, custoClienteComCredito: r2(semCbsIbs), variacaoComCredito: semCbsIbs / precoAtual - 1, aliqNova: (cbsPct + ibsPct) / 100, issPorDentro };
 }
 
 // Crédito condicionado à extinção do débito do fornecedor (crédito "travado").
