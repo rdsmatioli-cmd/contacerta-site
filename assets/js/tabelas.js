@@ -26,6 +26,21 @@ export const INSS = {
   individual: { normal: 0.2, simplificado: 0.11, baixaRendaMei: 0.05 },
 };
 
+// INSS do empregado por ano (para o 13º que abrange dois anos pela projeção do aviso).
+// 2025: Portaria Interministerial MPS/MF nº 6, de 10/01/2025, Anexo II.
+export const INSS_2025 = {
+  vigencia: 'competência janeiro/2025',
+  fonte: 'Portaria Interministerial MPS/MF nº 6, de 10/01/2025',
+  faixas: [
+    { ate: 1518.0, aliquota: 0.075 },
+    { ate: 2793.88, aliquota: 0.09 },
+    { ate: 4190.83, aliquota: 0.12 },
+    { ate: 8157.41, aliquota: 0.14 },
+  ],
+  teto: 8157.41,
+};
+export const INSS_POR_ANO = { 2025: INSS_2025, 2026: INSS };
+
 // IRRF — tabela progressiva mensal + redução da Lei 15.270/2025
 export const IRRF = {
   vigencia: 'a partir de janeiro/2026',
