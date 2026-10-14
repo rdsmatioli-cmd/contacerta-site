@@ -1,5 +1,5 @@
 // Funções puras de cálculo. Usadas pelo navegador (ui.js) e pelos testes (node --test).
-import { INSS, INSS_POR_ANO, IRRF_POR_DATA, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=049349b469';
+import { INSS, INSS_POR_ANO, IRRF_POR_DATA, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=c4c802ed8b';
 
 /** Arredonda para 2 casas (meio para cima), imune a ruído de ponto flutuante. */
 export function r2(x) {
@@ -802,7 +802,7 @@ export const NR1_FATORES = [
   ['apoio', 'Falta apoio da liderança ou dos colegas quando surge um problema no trabalho', 'Criar reuniões curtas de acompanhamento e orientar as lideranças a dar suporte e retorno.'],
   ['reconhecimento', 'O esforço e os resultados não são reconhecidos (retorno, valorização, oportunidades)', 'Dar retorno regular, critérios transparentes de avaliação e reconhecimento.'],
   ['conflitos', 'Há conflitos frequentes, falta de respeito ou comunicação agressiva entre as pessoas', 'Estabelecer regras de convivência, mediar conflitos e capacitar as lideranças.'],
-  ['assedio', 'Há relatos ou sinais de assédio moral, assédio sexual ou discriminação', 'Tratar como prioridade: canal de denúncia com sigilo, apuração, medidas contra o assédio e orientação a todos.'],
+  ['assedio', 'Há relatos ou sinais de assédio moral, assédio sexual ou discriminação', 'Tratar como prioridade: canal de denúncia com sigilo e anonimato de quem denuncia (obrigatório para empresas com CIPA; recomendado para as demais), apuração, medidas contra o assédio e orientação a todos.'],
   ['publico', 'O trabalho envolve atendimento a público agressivo, ameaças ou situações traumáticas', 'Prever procedimentos para situações de violência, apoio após ocorrências e revezamento em funções expostas.'],
   ['isolamento', 'Há trabalho isolado ou remoto sem contato regular com a equipe', 'Manter contato regular com quem trabalha isolado ou remoto e um meio rápido de pedir ajuda.'],
   ['mudancas', 'Mudanças (reestruturação, demissões, novos sistemas) acontecem sem informar ou ouvir a equipe', 'Comunicar mudanças com antecedência, explicar os motivos e ouvir a equipe antes de implantar.'],
