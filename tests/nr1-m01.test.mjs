@@ -23,3 +23,12 @@ test('ui.js restaura os nomes, habilita o botão e impede o envio nativo', () =>
 test('GA4 config com page_location sem query string', () => {
   assert.match(html, /g\('config',ID,\{anonymize_ip:true,page_location:location\.origin\+location\.pathname\}\)/);
 });
+
+test('M01: listener de submit registrado antes de restaurar names e habilitar o botão', () => {
+  const i = ui.indexOf('function iniciar(');
+  const sub = ui.indexOf("form.addEventListener('submit'", i);
+  const nome = ui.indexOf("querySelectorAll('[data-name]')", i);
+  const btn = ui.indexOf("querySelectorAll('[data-requer-js]')", i);
+  assert.ok(i > 0 && sub > i && nome > 0 && btn > 0);
+  assert.ok(sub < nome && sub < btn, 'submit deve vir antes');
+});
