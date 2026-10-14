@@ -30,7 +30,7 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 - [Calculadora de adicional noturno](https://contacertabr.com.br/adicional-noturno/): Calcule o adicional noturno de 20% (urbano) ou 25% (rural), com a hora noturna reduzida de 52min30s e o reflexo no DSR. Regras da CLT e exemplos.
 - [Calculadora de seguro-desemprego 2026](https://contacertabr.com.br/seguro-desemprego/): Calcule o valor e o número de parcelas do seguro-desemprego 2026 pela tabela oficial do MTE: piso de R$ 1.621 e teto de R$ 2.518,65.
 - [Calculadora de aviso prévio](https://contacertabr.com.br/aviso-previo/): Calcule quantos dias de aviso prévio você tem (30 + 3 por ano, até 90), o valor do aviso indenizado e a data final com a projeção. Lei 12.506/2011.
-- [Checklist NR-1: riscos psicossociais na sua empresa](https://contacertabr.com.br/nr1-riscos-psicossociais/): Autoavaliação grátis da NR-1 para pequenas empresas: veja se os riscos psicossociais estão no PGR, o que falta e o prazo das multas suspensas pelo STF.
+- [Diagnóstico NR-1: riscos psicossociais na sua empresa](https://contacertabr.com.br/nr1-riscos-psicossociais/): Autodiagnóstico grátis da NR-1 para pequenas empresas: veja se os riscos psicossociais estão no PGR, o que falta e o prazo das multas suspensas pelo STF.
 
 ## Finanças e investimentos
 

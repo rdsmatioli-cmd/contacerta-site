@@ -1,5 +1,5 @@
 // Funções puras de cálculo. Usadas pelo navegador (ui.js) e pelos testes (node --test).
-import { INSS, INSS_POR_ANO, IRRF_POR_DATA, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=5cbe66632b';
+import { INSS, INSS_POR_ANO, IRRF_POR_DATA, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=c4c802ed8b';
 
 /** Arredonda para 2 casas (meio para cima), imune a ruído de ponto flutuante. */
 export function r2(x) {
@@ -790,25 +790,47 @@ export function calendarioReforma(dataISO) {
   return { marcos, proximo, fase };
 }
 
-// NR-1 (riscos psicossociais): autoavaliação simples. respostas: objeto { chave: true/false }.
-export const NR1_ITENS = [
-  ['inventario', 'Os fatores de risco psicossociais (metas, jornada, assédio, conflitos, isolamento etc.) estão identificados no inventário de riscos do PGR'],
-  ['avaliacao', 'Cada fator foi avaliado (severidade e probabilidade) com critério documentado'],
-  ['escuta', 'Os trabalhadores foram ouvidos (questionário, entrevista ou reunião) na identificação dos perigos'],
-  ['plano', 'Existe plano de ação com medidas, responsáveis e prazos para os riscos psicossociais'],
-  ['jornada', 'Jornada, pausas, horas extras e metas são acompanhadas e revistas quando excessivas'],
-  ['assedio', 'Há canal de denúncia e procedimento contra assédio e violência no trabalho (obrigatório para empresas com CIPA; recomendado para as demais)'],
-  ['liderancas', 'Gestores foram orientados sobre organização do trabalho e prevenção do adoecimento'],
-  ['afastamentos', 'Afastamentos e atestados por saúde mental são analisados para revisar as medidas'],
-  ['ergonomia', 'A análise ergonômica (NR-17) considera aspectos de organização do trabalho'],
-  ['revisao', 'A avaliação de riscos do PGR é revista após mudanças na organização, acidentes ou a cada no máximo 2 anos (3 com certificação em SST)'],
-  ['terceiros', 'Riscos de prestadores e terceirizados no mesmo ambiente são considerados'],
-  ['registro', 'As evidências (atas, listas de presença, relatórios) ficam guardadas para a fiscalização'],
+// NR-1 (riscos psicossociais): autodiagnóstico orientativo de exposição a fatores de risco psicossociais.
+// Cada fator recebe 0 (nunca ou quase nunca) a 3 (quase sempre). Nada é enviado nem gravado: roda só no navegador.
+export const NR1_ESCALA = [['', 'Selecione'], ['0', 'Nunca ou quase nunca'], ['1', 'Às vezes'], ['2', 'Com frequência'], ['3', 'Quase sempre']];
+export const NR1_FATORES = [
+  ['demanda', 'As metas ou o volume de trabalho exigem ritmo acelerado ou não cabem na jornada', 'Revisar metas e distribuição de tarefas com a equipe; ajustar prazos e dimensionar o quadro.'],
+  ['jornada', 'Há horas extras habituais, jornadas longas ou pausas e intervalos que não são cumpridos', 'Controlar a jornada, limitar horas extras habituais e garantir pausas e intervalos.'],
+  ['desconexao', 'Espera-se que as pessoas respondam mensagens ou ligações fora do horário de trabalho', 'Definir regras de contato fora do expediente e respeitar descansos e férias.'],
+  ['autonomia', 'As pessoas têm pouca liberdade para decidir como e em que ordem fazem o próprio trabalho', 'Dar margem de decisão sobre métodos e ordem das tarefas; envolver a equipe nas mudanças de rotina.'],
+  ['clareza', 'Tarefas, responsabilidades e prioridades não são claras ou mudam sem aviso', 'Descrever funções e responsabilidades por escrito e comunicar prioridades de forma clara.'],
+  ['apoio', 'Falta apoio da liderança ou dos colegas quando surge um problema no trabalho', 'Criar reuniões curtas de acompanhamento e orientar as lideranças a dar suporte e retorno.'],
+  ['reconhecimento', 'O esforço e os resultados não são reconhecidos (retorno, valorização, oportunidades)', 'Dar retorno regular, critérios transparentes de avaliação e reconhecimento.'],
+  ['conflitos', 'Há conflitos frequentes, falta de respeito ou comunicação agressiva entre as pessoas', 'Estabelecer regras de convivência, mediar conflitos e capacitar as lideranças.'],
+  ['assedio', 'Há relatos ou sinais de assédio moral, assédio sexual ou discriminação', 'Tratar como prioridade: canal de denúncia com sigilo e anonimato de quem denuncia (obrigatório para empresas com CIPA; recomendado para as demais), apuração, medidas contra o assédio e orientação a todos.'],
+  ['publico', 'O trabalho envolve atendimento a público agressivo, ameaças ou situações traumáticas', 'Prever procedimentos para situações de violência, apoio após ocorrências e revezamento em funções expostas.'],
+  ['isolamento', 'Há trabalho isolado ou remoto sem contato regular com a equipe', 'Manter contato regular com quem trabalha isolado ou remoto e um meio rápido de pedir ajuda.'],
+  ['mudancas', 'Mudanças (reestruturação, demissões, novos sistemas) acontecem sem informar ou ouvir a equipe', 'Comunicar mudanças com antecedência, explicar os motivos e ouvir a equipe antes de implantar.'],
 ];
-export function nr1Checklist(respostas = {}) {
-  const feitos = NR1_ITENS.filter(([k]) => respostas[k]);
-  const pendentes = NR1_ITENS.filter(([k]) => !respostas[k]);
-  const pct = feitos.length / NR1_ITENS.length;
-  const nivel = pct >= 0.85 ? 'avancado' : pct >= 0.5 ? 'parcial' : 'inicial';
-  return { pontos: feitos.length, total: NR1_ITENS.length, pct, nivel, pendentes: pendentes.map(([k, t]) => ({ k, t })) };
+export const NR1_NIVEIS = {
+  baixo: 'Exposição baixa',
+  moderado: 'Exposição moderada',
+  alto: 'Exposição alta',
+  muitoAlto: 'Exposição muito alta',
+};
+// respostas: { chave: '0'..'3' | '' }. Itens sem resposta ficam fora da média.
+export function nr1Diagnostico(respostas = {}) {
+  const itens = NR1_FATORES.map(([k, t, medida]) => {
+    const raw = respostas[k];
+    const v = raw === '' || raw === undefined || raw === null ? null : Number(raw);
+    return { k, t, medida, v: Number.isInteger(v) && v >= 0 && v <= 3 ? v : null };
+  });
+  const respondidos = itens.filter((i) => i.v !== null);
+  const total = NR1_FATORES.length;
+  if (!respondidos.length) return { respondidos: 0, total, nivel: null, media: null, prioridades: [] };
+  const soma = respondidos.reduce((s, i) => s + i.v, 0);
+  const media = soma / respondidos.length;
+  const ordem = ['baixo', 'moderado', 'alto', 'muitoAlto'];
+  let n = media < 0.75 ? 0 : media < 1.5 ? 1 : media < 2.25 ? 2 : 3;
+  // Um fator em "quase sempre" não deixa o resultado em baixo; sinal de assédio frequente leva no mínimo a alto.
+  if (respondidos.some((i) => i.v === 3)) n = Math.max(n, 1);
+  const assedio = itens.find((i) => i.k === 'assedio');
+  if (assedio.v !== null && assedio.v >= 2) n = Math.max(n, 2);
+  const prioridades = respondidos.filter((i) => i.v >= 2).sort((a, b) => b.v - a.v || (a.k === 'assedio' ? -1 : b.k === 'assedio' ? 1 : 0));
+  return { respondidos: respondidos.length, total, soma, media, nivel: ordem[n], completo: respondidos.length === total, prioridades };
 }

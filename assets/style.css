@@ -536,3 +536,4 @@ main p a,main li a,main dd a{overflow-wrap:anywhere}
 .rodape nav h2{font-size:.875rem}
 .migalhas{font-size:.875rem}
 .resposta h2{font-size:.875rem}
+@media (min-width:600px){[data-calc="nr1-riscos-psicossociais"] .grade-campos>.campo{justify-content:flex-end}}

@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=5cbe66632b';
-import { INDICADORES } from './tabelas.js?v=5cbe66632b';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=5cbe66632b';
+import * as C from './calc.js?v=c4c802ed8b';
+import { INDICADORES } from './tabelas.js?v=c4c802ed8b';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=c4c802ed8b';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -446,10 +446,20 @@ const CALCS = {
     return destaque('Próximo marco', prox) + `<p class="nota">Fase na data informada: <strong>${esc(r.fase)}</strong>.</p><div class="tabela-rolar" tabindex="0" role="region" aria-label="Tabela do resultado (role para o lado)"><table class="res"><thead><tr><th scope="col">Data</th><th scope="col">O que acontece</th><th scope="col">Situação</th></tr></thead><tbody>${r.marcos.map((m) => `<tr><th scope="row">${fmt(m.data)}</th><td>${esc(m.t)}</td><td>${m.passou ? 'Já passou' : `Faltam ${m.dias} dias`}</td></tr>`).join('')}</tbody></table></div>`;
   },
   'nr1-riscos-psicossociais'(d) {
-    const r = C.nr1Checklist(d);
-    const msg = { avancado: 'Gestão avançada: mantenha as evidências', parcial: 'Gestão parcial: há lacunas a fechar', inicial: 'Gestão inicial: priorize inventário e plano de ação' }[r.nivel];
-    return destaque(`${r.pontos} de ${r.total} itens atendidos`, msg) + barra([['Atendidos', r.pontos, 'c1'], ['Pendentes', r.total - r.pontos, 'c5']])
-      + (r.pendentes.length ? `<p class="nota"><strong>O que falta:</strong></p><ul>${r.pendentes.map((p) => `<li>${esc(p.t)}</li>`).join('')}</ul>` : '<p class="nota">Todos os itens marcados. Guarde as evidências e revise o PGR quando a organização do trabalho mudar.</p>');
+    const r = C.nr1Diagnostico(d);
+    if (!r.respondidos) return `<p class="nota">Responda às ${r.total} perguntas para ver o nível indicativo de exposição. As respostas ficam só no seu navegador: nada é enviado nem gravado.</p>`;
+    const msg = {
+      baixo: 'Mantenha o monitoramento e registre no inventário de riscos que os fatores foram avaliados.',
+      moderado: 'Há fatores que merecem medidas de prevenção no plano de ação, com prazo e responsável.',
+      alto: 'Priorize os fatores abaixo no plano de ação e ouça os trabalhadores para confirmar o diagnóstico.',
+      muitoAlto: 'Trate os fatores abaixo como prioridade e procure apoio de profissional de SST para a avaliação no PGR.',
+    }[r.nivel];
+    const falta = r.completo ? '' : `<p class="nota">Você respondeu ${r.respondidos} de ${r.total} perguntas. O resultado considera só as respondidas.</p>`;
+    const prio = r.prioridades.length
+      ? `<p class="nota"><strong>Fatores para priorizar e exemplos de medidas:</strong></p><ul>${r.prioridades.map((p) => `<li><strong>${esc(p.t)}.</strong> ${esc(p.medida)}</li>`).join('')}</ul>`
+      : '<p class="nota">Nenhum fator apareceu com frequência. Registre a avaliação e repita o diagnóstico após mudanças na organização do trabalho.</p>';
+    return destaque('Nível indicativo', C.NR1_NIVEIS[r.nivel]) + `<p class="nota">${msg}</p>` + falta + prio
+      + '<p class="nota">Resultado orientativo, baseado na percepção de quem respondeu. Não é laudo, não avalia a saúde de ninguém e não substitui a avaliação de riscos do PGR feita com profissional de SST.</p>';
   },
 };
 
@@ -472,6 +482,11 @@ function iniciar() {
   if (!form) return;
   const id = form.dataset.calc;
   const out = document.getElementById('resultado');
+  // M01: o bloqueio do envio nativo é registrado ANTES de restaurar os names e habilitar o botão.
+  form.addEventListener('submit', (e) => { e.preventDefault(); rodar(); out.focus(); });
+  // Campos sem name no HTML (sem envio nativo sem JS); o nome vem de data-name.
+  for (const el of form.querySelectorAll('[data-name]')) if (!el.name) el.name = el.dataset.name;
+  for (const el of form.querySelectorAll('[data-requer-js]')) el.disabled = false;
   const fn = CALCS[id];
   // valores padrão dinâmicos
   for (const el of form.querySelectorAll('[data-hoje]')) if (!el.value) el.value = hoje();
@@ -496,7 +511,6 @@ function iniciar() {
       console.error(e);
     }
   };
-  form.addEventListener('submit', (e) => { e.preventDefault(); rodar(); out.focus(); });
   let t;
   form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(rodar, 250); });
   rodar();
