@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=a93411cfb0';
-import { INDICADORES } from './tabelas.js?v=a93411cfb0';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=a93411cfb0';
+import * as C from './calc.js?v=aa96b28286';
+import { INDICADORES } from './tabelas.js?v=aa96b28286';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=aa96b28286';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });

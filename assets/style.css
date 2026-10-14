@@ -310,6 +310,7 @@ details>div{color:var(--suave)}
 .hero>*,.hero-txt,.cards>*,.grade-campos>*,.calc>*{min-width:0}
 h1,h2,h3,p,li,dd,td,th,.lead{overflow-wrap:break-word}
 h1,h2,h3{overflow-wrap:anywhere}
+main p a,main li a,main dd a{overflow-wrap:anywhere}
 .busca{width:100%;max-width:min(560px,100%);box-sizing:border-box}
 .busca input,input,select,textarea{max-width:100%;box-sizing:border-box}
 .atalhos{max-width:100%;min-width:0}
