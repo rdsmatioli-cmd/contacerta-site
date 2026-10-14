@@ -5,7 +5,7 @@
     "prefer-native-element": "off",
     "no-inline-style": "off",
     "no-implicit-input-type": "off",
-    "unique-landmark": "warn",
-    "aria-label-misuse": "warn"
+    "unique-landmark": "error",
+    "aria-label-misuse": "error"
   }
 }
