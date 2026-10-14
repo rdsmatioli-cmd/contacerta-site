@@ -481,6 +481,9 @@ function iniciar() {
   const form = document.querySelector('form[data-calc]');
   if (!form) return;
   const id = form.dataset.calc;
+  // M01: campos sem name no HTML (sem envio nativo sem JS); o nome vem de data-name.
+  for (const el of form.querySelectorAll('[data-name]')) if (!el.name) el.name = el.dataset.name;
+  for (const el of form.querySelectorAll('[data-requer-js]')) el.disabled = false;
   const out = document.getElementById('resultado');
   const fn = CALCS[id];
   // valores padrão dinâmicos
