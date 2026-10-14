@@ -69,6 +69,8 @@
 .blog .post-card:hover{border-color:var(--ds-borda-campo)}
 .blog .post-card strong{display:block;font-size:18px;line-height:1.3;margin:var(--s2) 0}
 .blog .post-card span{display:block;font-size:16px;line-height:1.5;color:var(--ds-texto-2)}
+/* QA CC-V01: no post com coluna lateral (>=980px) a coluna de texto tem ~512px; 3 colunas quebravam o texto letra a letra. */
+@media (min-width:980px){.blog .relacionadas .cards{grid-template-columns:repeat(auto-fit,minmax(14em,1fr))}}
 .blog .post-card small{display:block;margin-top:var(--s2);font-size:14px;color:var(--ds-texto-2)}
 .blog .paginacao{display:flex;flex-wrap:wrap;gap:var(--s2);margin:var(--s8) 0 0;padding:0;list-style:none}
 .blog .paginacao a,.blog .paginacao span{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0 var(--s3);border-radius:var(--r-s,8px);border:1px solid var(--ds-borda);font-size:16px}
