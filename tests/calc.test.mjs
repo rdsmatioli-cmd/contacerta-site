@@ -363,13 +363,23 @@ test('Calendário da reforma: próximo marco e fase', () => {
   assert.ok(C.MARCOS_REFORMA.every((m, i, a) => i === 0 || a[i - 1].data < m.data), 'marcos em ordem');
 });
 
-test('Checklist NR-1: pontuação e pendências', () => {
-  const nada = C.nr1Checklist({});
-  assert.equal(nada.pontos, 0); assert.equal(nada.nivel, 'inicial'); assert.equal(nada.pendentes.length, 12);
-  const tudo = C.nr1Checklist(Object.fromEntries(C.NR1_ITENS.map(([k]) => [k, true])));
-  assert.equal(tudo.pontos, 12); assert.equal(tudo.nivel, 'avancado');
-  const metade = C.nr1Checklist(Object.fromEntries(C.NR1_ITENS.slice(0, 6).map(([k]) => [k, true])));
-  assert.equal(metade.nivel, 'parcial');
+test('Diagnóstico NR-1: níveis, respostas parciais e prioridades', () => {
+  const vazio = C.nr1Diagnostico({});
+  assert.equal(vazio.respondidos, 0); assert.equal(vazio.nivel, null); assert.equal(vazio.total, 12);
+  const todos = (v) => Object.fromEntries(C.NR1_FATORES.map(([k]) => [k, String(v)]));
+  assert.equal(C.nr1Diagnostico(todos(0)).nivel, 'baixo');
+  assert.equal(C.nr1Diagnostico(todos(1)).nivel, 'moderado');
+  assert.equal(C.nr1Diagnostico(todos(2)).nivel, 'alto');
+  assert.equal(C.nr1Diagnostico(todos(3)).nivel, 'muitoAlto');
+  assert.equal(C.nr1Diagnostico(todos(3)).prioridades.length, 12);
+  // Um "quase sempre" com o resto em zero sobe para moderado.
+  assert.equal(C.nr1Diagnostico({ ...todos(0), jornada: '3' }).nivel, 'moderado');
+  // Assédio com frequência leva no mínimo a alto e aparece primeiro entre os de mesmo peso.
+  const a = C.nr1Diagnostico({ ...todos(0), demanda: '2', assedio: '2' });
+  assert.equal(a.nivel, 'alto'); assert.equal(a.prioridades[0].k, 'assedio');
+  // Parcial: só os respondidos contam; valor inválido é ignorado.
+  const p = C.nr1Diagnostico({ demanda: '1', jornada: '', autonomia: 'x' });
+  assert.equal(p.respondidos, 1); assert.equal(p.completo, false); assert.equal(p.nivel, 'moderado');
 });
 
 // Teste sugerido pelo Marketing (10/10/2026), ajustado às revisões tributária e jurídica de 10/10/2026:
