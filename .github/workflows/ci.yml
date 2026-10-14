@@ -1,0 +1,18 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: html-validate
+        run: find . -name '*.html' -not -path './.git/*' -not -name 'google*.html' -print0 | xargs -0 npx --yes html-validate@9 -c .htmlvalidate.json
+      - name: Testes (node --test)
+        run: node --test tests/

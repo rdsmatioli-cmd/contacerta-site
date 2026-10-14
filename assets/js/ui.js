@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=aa96b28286';
-import { INDICADORES } from './tabelas.js?v=aa96b28286';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=aa96b28286';
+import * as C from './calc.js?v=5cbe66632b';
+import { INDICADORES } from './tabelas.js?v=5cbe66632b';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=5cbe66632b';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -241,12 +241,12 @@ const CALCS = {
       ['Total pago', R(r.totalPago), 'total'],
       ['Taxa mensal equivalente', pct(r.taxaMensal, 4)],
       [`Comparação: total de juros no ${nomeOutro}`, R(outro.totalJuros)],
-    ]) + `<details><summary>Tabela de amortização (${r.linhas.length} parcelas)</summary><div class="rolagem"><table class="grade"><thead><tr><th>Nº</th><th>Parcela</th><th>Juros</th><th>Amortização</th><th>Saldo</th></tr></thead><tbody>${r.linhas.map((l) => `<tr><td>${l.n}</td><td>${R(l.parcela)}</td><td>${R(l.juros)}</td><td>${R(l.amortizacao)}</td><td>${R(l.saldo)}</td></tr>`).join('')}</tbody></table></div></details><p class="nota">Não inclui seguros (MIP/DFI), tarifas, IOF nem correção pela TR, que entram no CET do banco.</p>`;
+    ]) + `<details><summary>Tabela de amortização (${r.linhas.length} parcelas)</summary><div class="rolagem" tabindex="0" role="region" aria-label="Tabela de amortização (role para o lado)"><table class="grade"><thead><tr><th>Nº</th><th>Parcela</th><th>Juros</th><th>Amortização</th><th>Saldo</th></tr></thead><tbody>${r.linhas.map((l) => `<tr><td>${l.n}</td><td>${R(l.parcela)}</td><td>${R(l.juros)}</td><td>${R(l.amortizacao)}</td><td>${R(l.saldo)}</td></tr>`).join('')}</tbody></table></div></details><p class="nota">Não inclui seguros (MIP/DFI), tarifas, IOF nem correção pela TR, que entram no CET do banco.</p>`;
   },
   investimentos(d) {
     const r = C.investimentos({ valor: d.valor, dias: d.dias, cdi: d.cdi, pctCdb: d.pctCdb, pctLci: d.pctLci, selic: d.selic, trMensal: d.tr });
     const melhor = [...r.resultados].sort((a, b) => b.final - a.final)[0];
-    return destaque('Melhor resultado líquido', `${esc(melhor.nome)}: ${R(melhor.final)}`) + `<div class="rolagem"><table class="grade"><thead><tr><th>Aplicação</th><th>Rendimento bruto</th><th>IR</th><th>Valor final líquido</th><th>Rentab. líquida</th></tr></thead><tbody>${r.resultados.map((x) => `<tr><td>${esc(x.nome)}</td><td>${R(x.rendimentoBruto)}</td><td>${R(x.ir)}</td><td>${R(x.final)}</td><td>${pct(x.rentabilidadeLiquida)}</td></tr>`).join('')}</tbody></table></div><p class="nota">Alíquota de IR para ${d.dias} dias: ${pct(r.aliquotaIr, 1)}. Não considera IOF (resgates em menos de 30 dias) nem a taxa de custódia da B3.</p>`;
+    return destaque('Melhor resultado líquido', `${esc(melhor.nome)}: ${R(melhor.final)}`) + `<div class="rolagem" tabindex="0" role="region" aria-label="Tabela comparativa das aplicações (role para o lado)"><table class="grade"><thead><tr><th>Aplicação</th><th>Rendimento bruto</th><th>IR</th><th>Valor final líquido</th><th>Rentab. líquida</th></tr></thead><tbody>${r.resultados.map((x) => `<tr><td>${esc(x.nome)}</td><td>${R(x.rendimentoBruto)}</td><td>${R(x.ir)}</td><td>${R(x.final)}</td><td>${pct(x.rentabilidadeLiquida)}</td></tr>`).join('')}</tbody></table></div><p class="nota">Alíquota de IR para ${d.dias} dias: ${pct(r.aliquotaIr, 1)}. Não considera IOF (resgates em menos de 30 dias) nem a taxa de custódia da B3.</p>`;
   },
   porcentagem(d) {
     const P = C.porcentagem;
@@ -393,7 +393,7 @@ const CALCS = {
       'hibrido-negociar': ['Nesta simulação, o híbrido só compensa se houver negociação de preço', `Mantendo o mesmo valor total, o seu lucro estimado cai ${R(-r.diferencaLucro)}/mês. Em compensação, o custo efetivo dos clientes B2B do regime regular pode cair até ${R(r.ganhoClientes)}/mês, se eles tiverem débitos para usar o crédito. Essa diferença pode abrir espaço para negociar preço com esses clientes, o que depende de acordo com cada um e do que prevê o contrato; sem negociação, o puro rende mais nesta simulação.`],
       puro: ['Nesta simulação, o puro tende a ser melhor', `Nesta simulação (alíquotas de 2027-2028), ${cen}, no híbrido o seu lucro estimado cairia ${R(-r.diferencaLucro)}/mês${r.ganhoClientes > 0 ? `, mais do que a redução de custo que os clientes B2B teriam (${R(r.ganhoClientes)}/mês)` : ''}. Reavalie a cada janela semestral.`],
     }[r.recomendacao];
-    const comp = `<div class="tabela-rolar" tabindex="0" role="region" aria-label="Tabela do resultado (role para o lado)"><table class="res comp"><thead><tr><td></td><th scope="col">Simples puro</th><th scope="col">Simples híbrido</th></tr></thead><tbody>
+    const comp = `<div class="tabela-rolar" tabindex="0" role="region" aria-label="Tabela: Simples puro x Simples híbrido (role para o lado)"><table class="res comp"><thead><tr><td></td><th scope="col">Simples puro</th><th scope="col">Simples híbrido</th></tr></thead><tbody>
 <tr><th scope="row">Valor total cobrado dos clientes</th><td>${R(d.receita)}</td><td>${R(r.hibrido.recebido)}</td></tr>
 <tr><th scope="row">DAS</th><td>${R(r.puro.imposto)}</td><td>${R(r.hibrido.das)}</td></tr>
 <tr><th scope="row">CBS + IBS por fora (débito − crédito das compras)</th><td>—</td><td>${R(r.hibrido.cbsIbsAPagar)}</td></tr>
@@ -401,7 +401,7 @@ const CALCS = {
 <tr class="total"><th scope="row">Lucro estimado</th><td>${R(r.puro.lucro)} (${pct(r.puro.margem, 1)})</td><td>${R(r.hibrido.lucro)} (${pct(r.hibrido.margem, 1)})</td></tr>
 <tr><th scope="row">Crédito de CBS/IBS para clientes B2B</th><td>${R(r.puro.creditoClientes)}</td><td>${R(r.hibrido.creditoClientes)}</td></tr>
 </tbody></table></div>`;
-    const lado = `<div class="tabela-rolar" tabindex="0" role="region" aria-label="Tabela do resultado (role para o lado)"><table class="res comp"><caption>Híbrido nos dois cenários de preço</caption><thead><tr><td></td><th scope="col">Preço mantido</th><th scope="col">CBS/IBS repassado ao B2B</th></tr></thead><tbody>
+    const lado = `<div class="tabela-rolar" tabindex="0" role="region" aria-label="Tabela: híbrido nos dois cenários de preço (role para o lado)"><table class="res comp"><caption>Híbrido nos dois cenários de preço</caption><thead><tr><td></td><th scope="col">Preço mantido</th><th scope="col">CBS/IBS repassado ao B2B</th></tr></thead><tbody>
 <tr><th scope="row">Lucro estimado no híbrido</th><td>${R(mant.hibrido.lucro)}</td><td>${R(rep.hibrido.lucro)}</td></tr>
 <tr><th scope="row">Diferença para o puro</th><td>${sinal(mant.diferencaLucro)}</td><td>${sinal(rep.diferencaLucro)}</td></tr>
 <tr><th scope="row">Crédito dos clientes B2B</th><td>${R(mant.hibrido.creditoClientes)}</td><td>${R(rep.hibrido.creditoClientes)}</td></tr>
