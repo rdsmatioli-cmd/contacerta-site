@@ -21,7 +21,7 @@ test('ui.js restaura os nomes, habilita o botão e impede o envio nativo', () =>
   assert.match(ui, /addEventListener\('submit', \(e\) => \{ e\.preventDefault\(\)/);
 });
 test('GA4 config com page_location sem query string', () => {
-  assert.match(html, /g\('config',ID,\{anonymize_ip:true,page_location:pl\(\)\}\)/);
+  assert.match(html, /g\('config',ID,\{anonymize_ip:true,page_location:semQ\(\)\}\)/);
 });
 
 test('M01: listener de submit registrado antes de restaurar names e habilitar o botão', () => {
@@ -34,9 +34,9 @@ test('M01: listener de submit registrado antes de restaurar names e habilitar o 
 });
 const GA_SRC = html;
 const plDe = (src) => {
-  const m = src.match(/function pl\(\)\{.*?return location\.origin\+location\.pathname\+\(s\?'\?'\+s:''\)\}/);
+  const m = src.match(/function semQ\(\)\{.*?return location\.origin\+location\.pathname\+\(s\?'\?'\+s:''\)\}/);
   assert.ok(m, 'função pl() presente');
-  return (href) => { const u = new URL(href); return new Function('location', `${m[0]};return pl()`)({ origin: u.origin, pathname: u.pathname, search: u.search }); };
+  return (href) => { const u = new URL(href); return new Function('location', `${m[0]};return semQ()`)({ origin: u.origin, pathname: u.pathname, search: u.search }); };
 };
 test('GA4 page_location: UTMs, gclid e fbclid preservados', () => {
   const pl = plDe(GA_SRC);
@@ -52,4 +52,9 @@ test('GA4 page_location: respostas do formulário e outros parâmetros removidos
   const out = pl(`https://contacertabr.com.br/nr1-riscos-psicossociais/?utm_source=x&${q}&email=a@b.c`);
   assert.equal(out, 'https://contacertabr.com.br/nr1-riscos-psicossociais/?utm_source=x');
   for (const c of campos) assert.ok(!out.includes(`${c}=`));
+});
+test('GA4: semQ() não é sombreada por outra variável do snippet', () => {
+  const s = html.match(/<script>\(function\(\)\{var ID=[^]*?<\/script>/)[0];
+  assert.equal((s.match(/\bsemQ\b/g) || []).length, 2);
+  assert.doesNotMatch(s, /var semQ\b|,semQ=/);
 });
