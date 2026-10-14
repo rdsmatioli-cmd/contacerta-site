@@ -21,7 +21,7 @@ test('ui.js restaura os nomes, habilita o botão e impede o envio nativo', () =>
   assert.match(ui, /addEventListener\('submit', \(e\) => \{ e\.preventDefault\(\)/);
 });
 test('GA4 config com page_location sem query string', () => {
-  assert.match(html, /g\('config',ID,\{anonymize_ip:true,page_location:location\.origin\+location\.pathname\}\)/);
+  assert.match(html, /g\('config',ID,\{anonymize_ip:true,page_location:pl\(\)\}\)/);
 });
 
 test('M01: listener de submit registrado antes de restaurar names e habilitar o botão', () => {
@@ -31,4 +31,25 @@ test('M01: listener de submit registrado antes de restaurar names e habilitar o 
   const btn = ui.indexOf("querySelectorAll('[data-requer-js]')", i);
   assert.ok(i > 0 && sub > i && nome > 0 && btn > 0);
   assert.ok(sub < nome && sub < btn, 'submit deve vir antes');
+});
+const GA_SRC = html;
+const plDe = (src) => {
+  const m = src.match(/function pl\(\)\{.*?return location\.origin\+location\.pathname\+\(s\?'\?'\+s:''\)\}/);
+  assert.ok(m, 'função pl() presente');
+  return (href) => { const u = new URL(href); return new Function('location', `${m[0]};return pl()`)({ origin: u.origin, pathname: u.pathname, search: u.search }); };
+};
+test('GA4 page_location: UTMs, gclid e fbclid preservados', () => {
+  const pl = plDe(GA_SRC);
+  assert.equal(pl('https://contacertabr.com.br/nr1-riscos-psicossociais/?utm_source=ig&utm_medium=social&utm_campaign=nr1&gclid=G1&fbclid=F1'),
+    'https://contacertabr.com.br/nr1-riscos-psicossociais/?utm_source=ig&utm_medium=social&utm_campaign=nr1&gclid=G1&fbclid=F1');
+  assert.equal(pl('https://contacertabr.com.br/nr1-riscos-psicossociais/'), 'https://contacertabr.com.br/nr1-riscos-psicossociais/');
+});
+test('GA4 page_location: respostas do formulário e outros parâmetros removidos', () => {
+  const pl = plDe(GA_SRC);
+  const campos = ['demanda','jornada','desconexao','apoio','assedio','autonomia','clareza','conflitos','isolamento','mudancas','publico','reconhecimento'];
+  const q = campos.map((c) => `${c}=3`).join('&');
+  assert.equal(pl(`https://contacertabr.com.br/nr1-riscos-psicossociais/?${q}`), 'https://contacertabr.com.br/nr1-riscos-psicossociais/');
+  const out = pl(`https://contacertabr.com.br/nr1-riscos-psicossociais/?utm_source=x&${q}&email=a@b.c`);
+  assert.equal(out, 'https://contacertabr.com.br/nr1-riscos-psicossociais/?utm_source=x');
+  for (const c of campos) assert.ok(!out.includes(`${c}=`));
 });
