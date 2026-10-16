@@ -53,7 +53,7 @@
 <p class="calc-rot" aria-hidden="true">Preencha os dados</p>
 <div class="grade-campos"><div class="campo"><label for="f-salario">Salário ou salário de contribuição</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-salario" name="salario" data-num data-min="0" data-teto="100000000" value="5000" data-obrig data-positivo data-alerta-minimo="1621" aria-describedby="f-salario-msg"></div><p class="campo-msg" id="f-salario-msg" hidden></p></div>
 <div class="campo"><label for="f-categoria">Categoria</label><select id="f-categoria" name="categoria" data-padrao="empregado" aria-describedby="f-categoria-msg"><option value="empregado" selected>Empregado CLT, doméstico ou avulso (progressiva)</option><option value="normal">Contribuinte individual ou facultativo (20%)</option><option value="simplificado">Plano simplificado (11% do mínimo)</option><option value="baixaRendaMei">Facultativo baixa renda (5% do mínimo)</option></select><p class="campo-msg" id="f-categoria-msg" hidden></p></div></div>
-<button type="submit">Calcular</button>
+<button type="submit" disabled data-requer-js>Calcular</button>
 </form>
 <div class="calc-saida">
 <p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>

@@ -56,7 +56,7 @@
 <div class="campo"><label for="f-taxa">Taxa de juros</label><div class="entrada"><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-taxa" name="taxa" data-num data-min="0" data-teto="1000000000" value="1" data-obrig aria-describedby="f-taxa-msg"><span class="suf" aria-hidden="true">%</span></div><p class="campo-msg" id="f-taxa-msg" hidden></p></div>
 <div class="campo"><label for="f-periodo">A taxa é</label><select id="f-periodo" name="periodo" data-padrao="mensal" aria-describedby="f-periodo-msg"><option value="mensal" selected>Ao mês</option><option value="anual">Ao ano</option></select><p class="campo-msg" id="f-periodo-msg" hidden></p></div>
 <div class="campo"><label for="f-meses">Prazo em meses</label><div class="entrada"><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="f-meses" name="meses" data-num data-min="1" data-teto="100000" value="120" data-obrig data-inteiro aria-describedby="f-meses-msg"></div><p class="campo-msg" id="f-meses-msg" hidden></p></div></div>
-<button type="submit">Calcular</button>
+<button type="submit" disabled data-requer-js>Calcular</button>
 </form>
 <div class="calc-saida">
 <p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>

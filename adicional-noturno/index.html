@@ -58,7 +58,7 @@
 <div class="campo"><label for="f-percentual">Percentual do adicional</label><div class="entrada"><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-percentual" name="percentual" data-num data-min="0" data-teto="1000000000" value="20" data-obrig aria-describedby="f-percentual-ajuda f-percentual-msg"><span class="suf" aria-hidden="true">%</span></div><div id="f-percentual-ajuda" class="ajuda"><small>Mínimo legal: 20% urbano e 25% rural. Use o da convenção coletiva, se for maior.</small></div><p class="campo-msg" id="f-percentual-msg" hidden></p></div>
 <div class="campo"><label for="f-diasUteis">Dias úteis no mês</label><div class="entrada"><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="f-diasUteis" name="diasUteis" data-num data-min="0" data-teto="100000" value="25" data-obrig data-inteiro aria-describedby="f-diasUteis-msg"></div><p class="campo-msg" id="f-diasUteis-msg" hidden></p></div>
 <div class="campo"><label for="f-domingos">Domingos e feriados no mês</label><div class="entrada"><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="f-domingos" name="domingos" data-num data-min="0" data-teto="100000" value="5" data-obrig data-inteiro aria-describedby="f-domingos-msg"></div><p class="campo-msg" id="f-domingos-msg" hidden></p></div></div>
-<button type="submit">Calcular</button>
+<button type="submit" disabled data-requer-js>Calcular</button>
 </form>
 <div class="calc-saida">
 <p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>

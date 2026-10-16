@@ -57,7 +57,7 @@
 <div class="campo"><label for="f-tipo">Situação na saída</label><select id="f-tipo" name="tipo" data-padrao="semJustaCausa" aria-describedby="f-tipo-msg"><option value="semJustaCausa" selected>Demissão sem justa causa (multa 40%)</option><option value="acordo">Acordo (multa 20%, saque de 80%)</option><option value="outro">Pedido de demissão ou justa causa (sem saque)</option></select><p class="campo-msg" id="f-tipo-msg" hidden></p></div>
 <div class="campo check"><input type="checkbox" id="f-rendimento" name="rendimento" checked aria-describedby="f-rendimento-ajuda"><label for="f-rendimento">Incluir rendimento de 3% ao ano</label><div id="f-rendimento-ajuda" class="ajuda"><small>Não inclui TR nem distribuição de lucros.</small></div></div>
 <div class="campo check"><input type="checkbox" id="f-aprendiz" name="aprendiz"><label for="f-aprendiz">Jovem aprendiz (depósito de 2%)</label></div></div>
-<button type="submit">Calcular</button>
+<button type="submit" disabled data-requer-js>Calcular</button>
 </form>
 <div class="calc-saida">
 <p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>

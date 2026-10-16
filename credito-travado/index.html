@@ -57,7 +57,7 @@
 <div class="campo"><label for="f-inad">Compras de fornecedores que atrasam o tributo</label><div class="entrada"><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-inad" name="inad" data-num data-min="0" data-max="100" data-teto="1000000000" value="10" data-obrig aria-describedby="f-inad-ajuda f-inad-msg"><span class="suf" aria-hidden="true">%</span></div><div id="f-inad-ajuda" class="ajuda"><small>Suposição sua: parcela das compras cujo débito não é quitado no prazo.</small></div><p class="campo-msg" id="f-inad-msg" hidden></p></div>
 <div class="campo"><label for="f-dias">Atraso médio até o fornecedor pagar</label><div class="entrada"><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="f-dias" name="dias" data-num data-min="0" data-teto="100000" value="60" data-obrig data-inteiro aria-describedby="f-dias-msg"><span class="suf" aria-hidden="true">dias</span></div><p class="campo-msg" id="f-dias-msg" hidden></p></div>
 <div class="campo"><label for="f-custo">Custo do dinheiro da empresa</label><div class="entrada"><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-custo" name="custo" data-num data-min="0" data-teto="1000000000" value="1,5" data-obrig aria-describedby="f-custo-ajuda f-custo-msg"><span class="suf" aria-hidden="true">% a.m.</span></div><div id="f-custo-ajuda" class="ajuda"><small>Juros do capital de giro ou rendimento que você deixa de ter.</small></div><p class="campo-msg" id="f-custo-msg" hidden></p></div></div>
-<button type="submit">Calcular</button>
+<button type="submit" disabled data-requer-js>Calcular</button>
 </form>
 <div class="calc-saida">
 <p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>

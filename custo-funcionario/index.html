@@ -58,7 +58,7 @@
 <div class="campo"><label for="f-vt">Custo mensal do vale-transporte (opcional)</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-vt" name="vt" data-num data-min="0" data-teto="100000000" value="0" aria-describedby="f-vt-ajuda f-vt-msg"></div><div id="f-vt-ajuda" class="ajuda"><small>A empresa paga o que passar de 6% do salário.</small></div><p class="campo-msg" id="f-vt-msg" hidden></p></div>
 <div class="campo"><label for="f-beneficios">Outros benefícios por mês (opcional)</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-beneficios" name="beneficios" data-num data-min="0" data-teto="100000000" value="0" aria-describedby="f-beneficios-ajuda f-beneficios-msg"></div><div id="f-beneficios-ajuda" class="ajuda"><small>Vale-refeição, plano de saúde etc.</small></div><p class="campo-msg" id="f-beneficios-msg" hidden></p></div>
 <div class="campo check"><input type="checkbox" id="f-multa" name="multa"><label for="f-multa">Provisionar a multa de 40% do FGTS</label></div></div>
-<button type="submit">Calcular</button>
+<button type="submit" disabled data-requer-js>Calcular</button>
 </form>
 <div class="calc-saida">
 <p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>

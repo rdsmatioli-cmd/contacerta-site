@@ -55,7 +55,7 @@
 <div class="campo check"><input type="checkbox" id="f-caminhoneiro" name="caminhoneiro"><label for="f-caminhoneiro">MEI transportador autônomo de cargas (caminhoneiro)</label></div>
 <div class="campo"><label for="f-meses">Meses de atividade no ano</label><div class="entrada"><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="f-meses" name="meses" data-num data-min="1" data-max="12" data-teto="100000" value="12" data-obrig data-inteiro aria-describedby="f-meses-ajuda f-meses-msg"></div><div id="f-meses-ajuda" class="ajuda"><small>No ano de abertura, o limite é proporcional aos meses.</small></div><p class="campo-msg" id="f-meses-msg" hidden></p></div>
 <div class="campo"><label for="f-faturamento">Faturamento bruto no ano (opcional)</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-faturamento" name="faturamento" data-num data-min="0" data-teto="100000000" value="0" aria-describedby="f-faturamento-msg"></div><p class="campo-msg" id="f-faturamento-msg" hidden></p></div></div>
-<button type="submit">Calcular</button>
+<button type="submit" disabled data-requer-js>Calcular</button>
 </form>
 <div class="calc-saida">
 <p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>

@@ -56,7 +56,7 @@
 <div class="campo"><label for="f-s3">Salário do antepenúltimo mês</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-s3" name="s3" data-num data-min="0" data-teto="100000000" value="3000" data-obrig aria-describedby="f-s3-msg"></div><p class="campo-msg" id="f-s3-msg" hidden></p></div>
 <div class="campo"><label for="f-solicitacao">Qual solicitação é esta?</label><select id="f-solicitacao" name="solicitacao" data-padrao="1" aria-describedby="f-solicitacao-msg"><option value="1" selected>1ª solicitação</option><option value="2">2ª solicitação</option><option value="3">3ª ou posterior</option></select><p class="campo-msg" id="f-solicitacao-msg" hidden></p></div>
 <div class="campo"><label for="f-meses">Meses trabalhados nos últimos 36 meses</label><div class="entrada"><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="f-meses" name="meses" data-num data-min="0" data-teto="100000" value="20" data-obrig data-inteiro aria-describedby="f-meses-ajuda f-meses-msg"></div><div id="f-meses-ajuda" class="ajuda"><small>Para a carência, conta-se o tempo com salário nos 18 (1ª), 12 (2ª) ou 6 (demais) meses anteriores à dispensa.</small></div><p class="campo-msg" id="f-meses-msg" hidden></p></div></div>
-<button type="submit">Calcular</button>
+<button type="submit" disabled data-requer-js>Calcular</button>
 </form>
 <div class="calc-saida">
 <p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>
