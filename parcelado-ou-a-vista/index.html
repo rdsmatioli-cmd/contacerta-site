@@ -56,7 +56,7 @@
 <div class="campo"><label for="f-parcela">Valor de cada parcela</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-parcela" name="parcela" data-num data-min="0" data-teto="100000000" value="110" data-obrig aria-describedby="f-parcela-msg"></div><p class="campo-msg" id="f-parcela-msg" hidden></p></div>
 <div class="campo check"><input type="checkbox" id="f-entrada" name="entrada"><label for="f-entrada">A primeira parcela é paga no ato da compra</label></div>
 <div class="campo"><label for="f-rendimento">Rendimento do seu dinheiro (% ao ano)</label><div class="entrada"><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-rendimento" name="rendimento" data-num data-min="0" data-teto="1000000000" value="" data-indicador="cdi" data-obrig aria-describedby="f-rendimento-ajuda f-rendimento-msg"><span class="suf" aria-hidden="true">%</span></div><div id="f-rendimento-ajuda" class="ajuda"><small>Padrão: CDI aproximado. Use o rendimento real da sua aplicação.</small></div><p class="campo-msg" id="f-rendimento-msg" hidden></p></div></div>
-<button type="submit">Calcular</button>
+<button type="submit" disabled data-requer-js>Calcular</button>
 </form>
 <div class="calc-saida">
 <p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>
