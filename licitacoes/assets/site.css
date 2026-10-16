@@ -42,7 +42,7 @@ h1 .hl{color:var(--pri)}
 .checks{display:grid;grid-template-columns:repeat(2,minmax(0,max-content));gap:12px 28px;margin:0 0 36px;padding:0;list-style:none}
 .checks li{display:flex;align-items:center;gap:10px;font-size:14.5px;font-weight:500;color:var(--ink)}
 .checks .ck{flex:none;width:20px;height:20px;border-radius:6px;background:var(--b50);border:1px solid var(--b100);display:grid;place-items:center;color:var(--b700)}
-.facts{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--e1);max-width:600px}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--e1);max-width:600px}
 .facts div{padding:16px 18px}
 .facts div+div{border-left:1px solid var(--line)}
 .facts b{display:block;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-.025em;color:var(--n950);font-variant-numeric:tabular-nums}
@@ -219,8 +219,9 @@ footer .ver{margin-top:12px;font:450 11px/16px var(--mono);color:var(--ink-4);te
 @media (max-width:720px){
  .wrap{padding:0 16px}
  body{font-size:15px}
- .top .wrap{height:56px}
- .top nav a:not(.cta){display:none}
+ .top .wrap{height:56px;gap:8px}
+ .top nav{gap:0;flex-wrap:wrap;justify-content:flex-end}
+ .top nav a:not(.cta){padding:6px 6px;font-size:13px}
  .top nav a.cta{padding:6px 12px;font-size:13px;margin-left:0}
  .logo small{display:none}
  .draft{display:none}
