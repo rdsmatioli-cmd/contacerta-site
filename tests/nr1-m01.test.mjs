@@ -51,7 +51,7 @@ test('política: G-02, G-03, B-01 e M-01; sem AdSense em uso e sem o contador fo
   assert.match(priv, /O Google Analytics é fornecido pelo Google LLC, que atua como operador e pode tratar esses dados nos Estados Unidos e em outros países, com base nas cláusulas contratuais do Google para transferência internacional \(LGPD, art\. 33, II\)\. Os dados de eventos ficam guardados no Google Analytics por 2 meses\. Sua escolha no aviso de cookies vale por 6 meses; depois disso, perguntaremos de novo\./);
   assert.doesNotMatch(priv, /adssettings|aboutads|Este site pode exibir anúncios|link_interno|uso da busca/);
   assert.match(priv, /a conclusão de um cálculo \(só o nome da calculadora\) e cliques em botões de chamada e em links de parceiros \(só o caminho da página ou o domínio do parceiro\)/);
-  const nota = '<p><em>Última atualização: 16/10/2026. Nesta versão: retiramos o contador de visitas Abacus, informamos que o site não exibe anúncios e detalhamos a transferência internacional e os prazos do Google Analytics.</em></p>';
+  const nota = '<p><em>Última atualização: 16/10/2026. Nesta versão: retiramos o contador de visitas Abacus, informamos que o site não exibe anúncios e detalhamos a transferência internacional e os prazos do Google Analytics. Google LLC identificado como operador do Google Analytics e incluída a informação sobre os registros de acesso do GitHub Pages.</em></p>';
   assert.ok(priv.includes(nota));
   assert.doesNotMatch(priv.replace(nota, ''), /abacus/i);
 });
