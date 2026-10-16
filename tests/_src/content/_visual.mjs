@@ -108,7 +108,7 @@ export function rodape({ cfg, institucional, mini, calcs = [], guias = [] }) {
   return `<footer class="rodape"><div class="caixa">
 <div class="rod-grade">
 <div class="rod-marca">${marca(cfg.nome)}
-<p><strong>${esc(cfg.nome)}</strong> — ${esc(cfg.slogan)}. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p></div>
+<p><strong>${esc(cfg.nome)} (contacertabr.com.br)</strong> — ${esc(cfg.slogan)}. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p></div>
 <nav aria-label="Calculadoras mais usadas"><h2>Mais usadas</h2>${pop.map((c) => `<a href="/${c.slug}/">${esc(c.nomeCurto)}</a>`).join('')}</nav>
 <nav aria-label="Tabelas oficiais 2026"><h2>Tabelas 2026</h2>${guias.map((g) => `<a href="/${g.slug}/">${esc(g.nomeCurto)}</a>`).join('')}</nav>
 <nav aria-label="Institucional"><h2>Institucional</h2>${institucional}${linkPreferencias(cfg)}</nav>
