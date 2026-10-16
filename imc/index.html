@@ -51,9 +51,9 @@
 <h2 id="titulo-calc" class="vh">Calculadora</h2>
 <form class="calc-form" data-calc="imc" novalidate>
 <p class="calc-rot" aria-hidden="true">Preencha os dados</p>
-<div class="grade-campos"><div class="campo"><label for="f-peso">Peso</label><div class="entrada"><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-peso" data-num data-min="1" data-teto="1000000000" value="80" data-obrig aria-describedby="f-peso-msg"><span class="suf" aria-hidden="true">kg</span></div><p class="campo-msg" id="f-peso-msg" hidden></p></div>
-<div class="campo"><label for="f-altura">Altura</label><div class="entrada"><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-altura" data-num data-min="0.5" data-teto="1000000000" value="1,78" data-obrig aria-describedby="f-altura-ajuda f-altura-msg"><span class="suf" aria-hidden="true">m</span></div><div id="f-altura-ajuda" class="ajuda"><small>Em metros (1,78) ou centímetros (178).</small></div><p class="campo-msg" id="f-altura-msg" hidden></p></div></div>
-<button type="submit" disabled>Temporariamente indisponível</button>
+<div class="grade-campos"><div class="campo"><label for="f-peso">Peso</label><div class="entrada"><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-peso" data-name="peso" data-num data-min="1" data-teto="1000000000" value="80" data-obrig aria-describedby="f-peso-msg"><span class="suf" aria-hidden="true">kg</span></div><p class="campo-msg" id="f-peso-msg" hidden></p></div>
+<div class="campo"><label for="f-altura">Altura</label><div class="entrada"><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-altura" data-name="altura" data-num data-min="0.5" data-teto="1000000000" value="1,78" data-obrig aria-describedby="f-altura-ajuda f-altura-msg"><span class="suf" aria-hidden="true">m</span></div><div id="f-altura-ajuda" class="ajuda"><small>Em metros (1,78) ou centímetros (178).</small></div><p class="campo-msg" id="f-altura-msg" hidden></p></div></div>
+<button type="submit" data-requer-js disabled>Calcular</button>
 </form>
 <div class="calc-saida">
 <p class="calc-rot calc-rot-res" aria-hidden="true">Resultado</p>
