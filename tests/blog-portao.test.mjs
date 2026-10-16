@@ -2,7 +2,7 @@
 import test from 'node:test'; import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { portaoRevisao, hashPost } from './_src/content/_portao.mjs';
-const P = () => ({ slug: 's', titulo: 'INSS no contracheque', resposta: '<p>INSS</p>', secoes: [], faq: [], tema: 'fiscal', publicado: '2026-10-01' });
+const P = () => ({ slug: 's', titulo: 'INSS no pró-labore', resposta: '<p>INSS</p>', secoes: [], faq: [], tema: 'fiscal', publicado: '2026-10-01' });
 function raiz(p, extra = {}) {
   const r = fs.mkdtempSync(path.join(os.tmpdir(), 'pt-')); fs.mkdirSync(path.join(r, 'revisoes/blog'), { recursive: true });
   const c = { Post: 's', Tema: 'fiscal', Revisor: 'Especialista Tributário', Nome: 'Maria', Data: '2026-10-12', Hash: hashPost(p), 'Evidência': 'https://x.slack.com/p1', 'De-acordo': 'sim', ...extra };

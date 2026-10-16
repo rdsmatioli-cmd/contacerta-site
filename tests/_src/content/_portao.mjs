@@ -9,7 +9,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, realpathSync, lstatSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 
-export const TEMAS = Object.freeze({ fiscal: 'Especialista Tributário', trabalhista: 'Especialista Tributário', juridico: 'Advogado' });
+export const TEMAS = Object.freeze({ fiscal: 'Especialista Tributário', trabalhista: 'Advogado', juridico: 'Advogado' });
 const temaValido = (t) => typeof t === 'string' && Object.hasOwn(TEMAS, t);
 
 // Palavras-chave, comparadas com o texto normalizado (NFKC, sem invisíveis, sem acento, minúsculas, pontuação -> espaço;
