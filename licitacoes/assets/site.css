@@ -219,8 +219,8 @@ footer .ver{margin-top:12px;font:450 11px/16px var(--mono);color:var(--ink-4);te
 @media (max-width:720px){
  .wrap{padding:0 16px}
  body{font-size:15px}
- .top .wrap{height:56px}
- .top nav{gap:0}
+ .top .wrap{height:56px;gap:12px}
+ .top nav{gap:0;flex-wrap:wrap;justify-content:flex-end}
  .top nav a:not(.cta){padding:6px 8px;font-size:13px}
  .top nav a.cta{padding:6px 12px;font-size:13px;margin-left:0}
  .logo small{display:none}
