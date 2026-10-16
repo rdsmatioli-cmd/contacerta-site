@@ -483,7 +483,7 @@ function iniciar() {
   const id = form.dataset.calc;
   const out = document.getElementById('resultado');
   // M01: o bloqueio do envio nativo é registrado ANTES de restaurar os names e habilitar o botão.
-  form.addEventListener('submit', (e) => { e.preventDefault(); rodar(); out.focus(); });
+  form.addEventListener('submit', (e) => { e.preventDefault(); rodar(true); out.focus(); });
   // Campos sem name no HTML (sem envio nativo sem JS); o nome vem de data-name.
   for (const el of form.querySelectorAll('[data-name]')) if (!el.name) el.name = el.dataset.name;
   for (const el of form.querySelectorAll('[data-requer-js]')) el.disabled = false;
@@ -501,11 +501,13 @@ function iniciar() {
     const n = Math.min(2, Math.max(0, Math.floor(Number(vencN.value) || 0)));
     ['dobro1', 'dobro2'].forEach((nome, i) => { const el = form.elements[nome]; if (!el) return; const box = el.closest('.campo'); if (box) box.hidden = i >= n; if (i >= n) el.value = 'nao'; });
   };
-  const rodar = () => {
+  const rodar = (enviado = false) => {
     ajustaDobro();
     try {
       const { d, erros, avisos, alertas } = ler(form);
       out.innerHTML = erros.length ? listaErros(erros) : listaAvisos(avisos) + listaAlertas(alertas) + fn(d);
+      // GA4 (E-03): só o fato de o cálculo ter sido concluído pelo usuário; nenhum valor sai daqui.
+      if (enviado && !erros.length) form.dispatchEvent(new CustomEvent('cc:calculo-concluido', { bubbles: true }));
     } catch (e) {
       out.innerHTML = '<p class="erro">Não foi possível calcular. Confira os valores informados.</p>';
       console.error(e);
