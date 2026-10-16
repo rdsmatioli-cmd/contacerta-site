@@ -20,41 +20,38 @@ test('ui.js restaura os nomes, habilita o botão e impede o envio nativo', () =>
   assert.match(ui, /\[data-requer-js\]/);
   assert.match(ui, /addEventListener\('submit', \(e\) => \{ e\.preventDefault\(\)/);
 });
-test('GA4 config com page_location sem query string', () => {
-  assert.match(html, /g\('config',ID,\{anonymize_ip:true,page_location:semQ\(\)\}\)/);
+// GA4 via componente consent/ (ac527630): CP-01, CP-04, CP-05, CP-06 (CONFERENCIA_GA4_PUBLICADO 1562e4ae).
+import { createHash } from 'node:crypto';
+const lcm = readFileSync(new URL('../assets/lcm-consent.js', import.meta.url));
+const med = readFileSync(new URL('../assets/js/medicao.js', import.meta.url), 'utf8');
+const priv = readFileSync(new URL('../privacidade/index.html', import.meta.url), 'utf8');
+test('componente lcm-consent.js é o ac527630, sem alteração', () => {
+  assert.equal(createHash('sha256').update(lcm).digest('hex'), 'ac527630b355304038715e0129d0e9e8adf1f10329862850cefff8933eab86d0');
 });
-
-test('M01: listener de submit registrado antes de restaurar names e habilitar o botão', () => {
-  const i = ui.indexOf('function iniciar(');
-  const sub = ui.indexOf("form.addEventListener('submit'", i);
-  const nome = ui.indexOf("querySelectorAll('[data-name]')", i);
-  const btn = ui.indexOf("querySelectorAll('[data-requer-js]')", i);
-  assert.ok(i > 0 && sub > i && nome > 0 && btn > 0);
-  assert.ok(sub < nome && sub < btn, 'submit deve vir antes');
+test('página usa o componente; nenhum gtag inline nem anonymize_ip', () => {
+  assert.match(html, /<script src="\/assets\/lcm-consent\.js\?v=[0-9a-f]+" defer data-ga4="G-D9PCMD9Q2H" data-marca="Conta Certa"[^>]*data-validade-dias="183" data-chaves-legadas="cc-consent-v1" data-eventos="calculo_concluido,cta_click" data-params="calculadora,destino"><\/script>/);
+  assert.doesNotMatch(html, /gtag\(|googletagmanager|anonymize_ip|id="cc-banner"/);
+  assert.match(html, /data-lcm-consent-abrir>Preferências de cookies</);
 });
-const GA_SRC = html;
-const plDe = (src) => {
-  const m = src.match(/function semQ\(\)\{.*?return location\.origin\+location\.pathname\+\(s\?'\?'\+s:''\)\}/);
-  assert.ok(m, 'função pl() presente');
-  return (href) => { const u = new URL(href); return new Function('location', `${m[0]};return semQ()`)({ origin: u.origin, pathname: u.pathname, search: u.search }); };
-};
-test('GA4 page_location: UTMs, gclid e fbclid preservados', () => {
-  const pl = plDe(GA_SRC);
-  assert.equal(pl('https://contacertabr.com.br/nr1-riscos-psicossociais/?utm_source=ig&utm_medium=social&utm_campaign=nr1&gclid=G1&fbclid=F1'),
-    'https://contacertabr.com.br/nr1-riscos-psicossociais/?utm_source=ig&utm_medium=social&utm_campaign=nr1&gclid=G1&fbclid=F1');
-  assert.equal(pl('https://contacertabr.com.br/nr1-riscos-psicossociais/'), 'https://contacertabr.com.br/nr1-riscos-psicossociais/');
+test('componente: signals desligados, URL sem query, escolha com data e versão (183 dias)', () => {
+  const s = lcm.toString();
+  assert.match(s, /allow_google_signals: false/); assert.match(s, /allow_ad_personalization_signals: false/);
+  assert.doesNotMatch(s, /anonymize_ip/);
+  assert.match(s, /return x\.origin \+ x\.pathname/);
+  assert.match(s, /JSON\.stringify\(\{ v: v, em: hoje\(\), versao: VERSAO \}\)/);
 });
-test('GA4 page_location: respostas do formulário e outros parâmetros removidos', () => {
-  const pl = plDe(GA_SRC);
-  const campos = ['demanda','jornada','desconexao','apoio','assedio','autonomia','clareza','conflitos','isolamento','mudancas','publico','reconhecimento'];
-  const q = campos.map((c) => `${c}=3`).join('&');
-  assert.equal(pl(`https://contacertabr.com.br/nr1-riscos-psicossociais/?${q}`), 'https://contacertabr.com.br/nr1-riscos-psicossociais/');
-  const out = pl(`https://contacertabr.com.br/nr1-riscos-psicossociais/?utm_source=x&${q}&email=a@b.c`);
-  assert.equal(out, 'https://contacertabr.com.br/nr1-riscos-psicossociais/?utm_source=x');
-  for (const c of campos) assert.ok(!out.includes(`${c}=`));
+test('medicao.js: só calculo_concluido e cta_click, via lcmTrack, destino sem query', () => {
+  const ev = [...med.matchAll(/t\('([a-z_]+)'/g)].map((m) => m[1]).sort();
+  assert.deepEqual(ev, ['calculo_concluido', 'cta_click']);
+  assert.doesNotMatch(med, /gtag|generate_lead|sign_up|trial_start|search/);
+  assert.match(med, /u\.origin === location\.origin \? u\.pathname : u\.hostname/);
 });
-test('GA4: semQ() não é sombreada por outra variável do snippet', () => {
-  const s = html.match(/<script>\(function\(\)\{var ID=[^]*?<\/script>/)[0];
-  assert.equal((s.match(/\bsemQ\b/g) || []).length, 2);
-  assert.doesNotMatch(s, /var semQ\b|,semQ=/);
+test('política: G-02, G-03, B-01 e M-01; sem AdSense em uso e sem o contador fora da nota de versão', () => {
+  assert.match(priv, /<p>Hoje este site não exibe anúncios nem usa cookies de publicidade\. Se passarmos a exibir anúncios do Google AdSense, esta política será atualizada antes e os cookies de publicidade só serão usados com o seu consentimento, pedido separadamente no aviso de cookies\.<\/p>/);
+  assert.match(priv, /O Google Analytics é fornecido pelo Google, que pode tratar esses dados nos Estados Unidos e em outros países, com base nas cláusulas contratuais do Google para transferência internacional \(LGPD, art\. 33, II\)\. Os dados de eventos ficam guardados no Google Analytics por 2 meses\. Sua escolha no aviso de cookies vale por 6 meses; depois disso, perguntaremos de novo\./);
+  assert.doesNotMatch(priv, /adssettings|aboutads|Este site pode exibir anúncios|link_interno|uso da busca/);
+  assert.match(priv, /a conclusão de um cálculo \(só o nome da calculadora\) e cliques em botões de chamada e em links de parceiros \(só o caminho da página ou o domínio do parceiro\)/);
+  const nota = '<p><em>Última atualização: 16/10/2026. Nesta versão: retiramos o contador de visitas Abacus, informamos que o site não exibe anúncios e detalhamos a transferência internacional e os prazos do Google Analytics.</em></p>';
+  assert.ok(priv.includes(nota));
+  assert.doesNotMatch(priv.replace(nota, ''), /abacus/i);
 });
