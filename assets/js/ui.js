@@ -504,10 +504,6 @@ function iniciar() {
   // valores padrão dinâmicos
   for (const el of form.querySelectorAll('[data-hoje]')) if (!el.value) el.value = hoje();
   for (const el of form.querySelectorAll('[data-indicador]')) if (el.value === '') el.value = String(INDICADORES[el.dataset.indicador]).replace('.', ',');
-  if (id === 'conversor-de-medidas') {
-    popularUnidades(form);
-    form.elements.categoria.addEventListener('change', () => popularUnidades(form));
-  }
   // Adicional noturno: ao trocar urbano/rural, o percentual acompanha o mínimo legal (20% ou 25%),
   // salvo se o usuário digitou outro valor.
   if (id === 'adicional-noturno' && form.elements.tipo && form.elements.percentual) {
@@ -519,6 +515,10 @@ function iniciar() {
       if (v === '' || v === pisoTxt(tipoAnterior)) el.value = pisoTxt(form.elements.tipo.value);
       tipoAnterior = form.elements.tipo.value;
     });
+  }
+  if (id === 'conversor-de-medidas') {
+    popularUnidades(form);
+    form.elements.categoria.addEventListener('change', () => popularUnidades(form));
   }
   const vencN = form.elements.feriasVencidas;
   const ajustaDobro = () => {
