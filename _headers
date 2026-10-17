@@ -1,4 +1,7 @@
-# Cloudflare Pages / Netlify: cabeçalhos de cache e segurança
+# NÃO APLICADO: o site está no GitHub Pages, que ignora este arquivo e não envia cabeçalhos personalizados.
+# Nenhum dos cabeçalhos abaixo chega ao navegador hoje; o arquivo só é servido como estático em /_headers.
+# Só passa a valer se o site migrar para Cloudflare Pages/Netlify ou ficar atrás do proxy da Cloudflare.
+# nosniff, frame-ancestors, X-Frame-Options e HSTS não funcionam por <meta>: dependem dessa migração.
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
