@@ -70,15 +70,18 @@ export function porExtenso(n) {
   return `${mil}${r < 100 || r % 100 === 0 ? ' e ' : ' '}${ate999(r)}`;
 }
 
-// campo: { raw, min, max, teto, obrig, positivo, inteiro, decimal, badInput }
+// campo: { raw, min, max, teto, obrig, positivo, inteiro, decimal, dicaCasas, badInput }
 // Retorna { valor, erro?, aviso?, original?, alerta? }. Erro bloqueia o cálculo; aviso informa que o valor foi limitado ao máximo do campo;
 // alerta (só em campo decimal) informa que um ponto foi lido como separador de milhar, e o cálculo segue.
-export function validarNumero({ raw = '', badInput = false, min = null, max = null, teto = null, obrig = false, positivo = false, inteiro = false, decimal = false }) {
+// dicaCasas = true (só campo não monetário e não inteiro; o ui.js decide): o erro ambíguo diz como digitar 3 casas decimais.
+export function validarNumero({ raw = '', badInput = false, min = null, max = null, teto = null, obrig = false, positivo = false, inteiro = false, decimal = false, dicaCasas = false }) {
   if (badInput) return { valor: null, erro: 'Digite só números.' };
   const r = lerNumeroBR(raw, { decimal });
   if (r.vazio) return obrig ? { valor: null, erro: 'Preencha este campo.' } : { valor: 0 };
-  // Erro ambíguo ("1,125"): diz também como digitar 3 casas decimais (CC-NUM-01).
-  if (r.erro === AMBIGUO) return { valor: null, erro: `${AMBIGUO}. Se for decimal com 3 casas, acrescente um zero no fim: ${String(raw).trim().replace(/^R\$\s*/i, '').replace(/[\s\u00a0]/g, '')}0.` };
+  // Erro ambíguo ("1,125"): em campo não monetário, diz também como digitar 3 casas decimais (CC-NUM-01).
+  // Em R$ (ou com "R$" digitado) fica a mensagem do reteste 8749b7e: "1,500" pode ser mil e quinhentos, e a dica levaria a R$ 1,50.
+  const limpo = String(raw).trim();
+  if (r.erro === AMBIGUO && dicaCasas && !/^R\$/i.test(limpo)) return { valor: null, erro: `${AMBIGUO}. Se for decimal com 3 casas, acrescente um zero no fim: ${limpo.replace(/[\s\u00a0]/g, '')}0.` };
   if (r.erro) return { valor: null, erro: r.erro };
   const n = r.n;
   if (inteiro && !Number.isInteger(n)) return { valor: null, erro: 'Use um número inteiro.' };

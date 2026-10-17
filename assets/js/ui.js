@@ -45,7 +45,10 @@ function ler(form) {
     if (el.type === 'checkbox') d[el.name] = el.checked;
     else if (el.hasAttribute('data-num')) {
       const ds = el.dataset;
-      const r = validarNumero({ raw: el.value, min: attrNum(ds.min), max: attrNum(ds.max), teto: attrNum(ds.teto), obrig: 'obrig' in ds, positivo: 'positivo' in ds, inteiro: 'inteiro' in ds, decimal: 'decimal' in ds });
+      // CC-NUM-01: a dica de 3 casas do erro ambíguo só vale em campo não monetário (sem o prefixo R$) e não inteiro.
+      const pre = el.parentElement && el.parentElement.querySelector('.pre');
+      const moeda = !!pre && pre.textContent.trim() === 'R$';
+      const r = validarNumero({ raw: el.value, min: attrNum(ds.min), max: attrNum(ds.max), teto: attrNum(ds.teto), obrig: 'obrig' in ds, positivo: 'positivo' in ds, inteiro: 'inteiro' in ds, decimal: 'decimal' in ds, dicaCasas: !moeda && !('inteiro' in ds) });
       if (r.aviso && ds.avisoMax) r.aviso = ds.avisoMax;
       marca(el, r.erro || r.aviso, !!r.erro);
       // data-bloco (porcentagem): o erro bloqueia só a linha do bloco do campo, não o cálculo inteiro.

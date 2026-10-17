@@ -2,7 +2,7 @@
 // Rode: node --test 'tests/*.test.mjs'
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import * as C from '../assets/js/calc.js';
 import { lerNumeroBR, validarNumero, porExtenso } from '../assets/js/valida.js';
 
@@ -68,14 +68,18 @@ test('CC-NUM-01: campo decimal aceita "1,125" e avisa quando "1.125" é lido com
   assert.equal(v.valor, 1125); assert.match(v.alerta, /mil cento e vinte e cinco/); assert.equal(v.erro, undefined);
 });
 
-test('CC-NUM-01: campos monetários (sem data-decimal) mantêm a leitura e o erro; a mensagem diz como digitar 3 casas', () => {
+test('CC-NUM-01: campos sem data-decimal mantêm a leitura e o erro; a dica de 3 casas só com dicaCasas (campo não monetário)', () => {
   assert.deepEqual(lerNumeroBR('1.125'), { n: 1125 });
   assert.deepEqual(lerNumeroBR('1,125'), { erro: 'Formato ambíguo: use 1.000,00 ou 1000' });
   assert.deepEqual(validarNumero({ raw: '3.500', min: 0, obrig: true }), { valor: 3500 });
-  const e = validarNumero({ raw: '1,125', min: 0 });
+  // padrão (campo em R$): a mensagem do reteste 8749b7e, sem a dica
+  assert.deepEqual(validarNumero({ raw: '1,125', min: 0 }), { valor: null, erro: 'Formato ambíguo: use 1.000,00 ou 1000' });
+  const e = validarNumero({ raw: '1,125', min: 0, dicaCasas: true });
   assert.equal(e.valor, null);
   assert.equal(e.erro, 'Formato ambíguo: use 1.000,00 ou 1000. Se for decimal com 3 casas, acrescente um zero no fim: 1,1250.');
-  assert.match(validarNumero({ raw: 'R$ 2,375' }).erro, /acrescente um zero no fim: 2,3750\.$/);
+  assert.match(validarNumero({ raw: ' 2,375 ', dicaCasas: true }).erro, /acrescente um zero no fim: 2,3750\.$/);
+  // "R$" digitado: sem a dica, mesmo em campo não monetário
+  assert.equal(validarNumero({ raw: 'R$ 2,375', dicaCasas: true }).erro, 'Formato ambíguo: use 1.000,00 ou 1000');
   // a dica funciona: "1,1250" é aceito como 1,125
   assert.deepEqual(validarNumero({ raw: '1,1250', min: 0 }), { valor: 1.125 });
 });
@@ -255,4 +259,33 @@ test('CC-PARC-01: com "não se aplica", a nota fixa não manda comparar os juros
   assert.match(ui, /Compare pelo desconto à vista\.<\/p>' : ''\)/);
   // o caso do achado continua sem taxa (à vista R$ 100, 1 parcela de R$ 120 no ato)
   assert.equal(C.parceladoOuVista({ vista: 100, parcelas: 1, valorParcela: 120, comEntrada: true }).taxaImplicita, null);
+});
+
+test('CC-NUM-01: a dica de 3 casas não aparece nos campos em R$ nem nos inteiros', () => {
+  const AMB = 'Formato ambíguo: use 1.000,00 ou 1000';
+  // ui.js decide pelo prefixo R$ do campo e por data-inteiro
+  assert.match(ui, /const pre = el\.parentElement && el\.parentElement\.querySelector\('\.pre'\);/);
+  assert.match(ui, /const moeda = !!pre && pre\.textContent\.trim\(\) === 'R\$';/);
+  assert.match(ui, /dicaCasas: !moeda && !\('inteiro' in ds\)/);
+  // mesma decisão sobre os campos reais de todas as calculadoras: "1,500" (mil e quinhentos no formato americano)
+  // nunca recebe a dica em R$; o caso do achado é o "à vista" do parcelado
+  const contagem = { moeda: 0, dica: 0 };
+  for (const dir of readdirSync(new URL('../', import.meta.url))) {
+    const f = new URL(`../${dir}/index.html`, import.meta.url);
+    if (!existsSync(f)) continue;
+    const html = readFileSync(f, 'utf8');
+    for (const [, ent] of html.matchAll(/<div class="entrada">(.*?)<\/div>/g)) {
+      const tag = (ent.match(/<input\b[^>]*\sdata-num\b[^>]*>/) || [])[0];
+      if (!tag) continue;
+      const moeda = /<span class="pre"[^>]*>R\$<\/span>/.test(ent);
+      const dicaCasas = !moeda && !/\sdata-inteiro\b/.test(tag);
+      const r = validarNumero({ raw: '1,500', dicaCasas, decimal: /\sdata-decimal\b/.test(tag) });
+      if (moeda) { contagem.moeda += 1; assert.equal(r.erro, AMB, `${dir} ${tag}`); }
+      if (r.erro && r.erro !== AMB) contagem.dica += 1;
+    }
+  }
+  assert.ok(contagem.moeda >= 30, `campos em R$ encontrados: ${contagem.moeda}`);
+  assert.ok(contagem.dica > 0, 'campos não monetários continuam com a dica');
+  assert.match(inputDe(ler('parcelado-ou-a-vista/index.html'), 'f-vista'), /data-num/);
+  assert.match(ler('parcelado-ou-a-vista/index.html'), /<span class="pre" aria-hidden="true">R\$<\/span><input [^>]*id="f-vista"/);
 });
