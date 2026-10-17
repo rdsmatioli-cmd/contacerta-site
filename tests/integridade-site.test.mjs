@@ -4,7 +4,8 @@
 //    /x -> x, x.html ou x/index.html), e a âncora #id existe na página de destino.
 //    Vale também para as URLs do site citadas em llms.txt, robots.txt e blog/feed.xml.
 // 2. JSON-LD: todo <script type="application/ld+json"> faz JSON.parse, toda URL do domínio existe e todo
-//    {"@id": ...} citado é definido em alguma página.
+//    {"@id": ...} citado é definido em alguma página. O "author" tem @type e name na PRÓPRIA página, inline ou
+//    num nó com o mesmo @id, porque o Google lê o JSON-LD de cada URL isoladamente.
 // 3. sitemap.xml x canonical: toda página indexável tem canonical para si mesma e está no sitemap; toda URL do
 //    sitemap é o canonical de uma página indexável; lastmod em AAAA-MM-DD, não futuro e >= dateModified/
 //    datePublished do PRÓPRIO documento (objetos-raiz do JSON-LD e article:*_time). Os itens blogPost do índice
@@ -119,6 +120,8 @@ const citados = [];
 for (const p of paginas) {
   test(`${p}: JSON-LD válido e URLs do domínio existentes`, () => {
     const falhas = [];
+    const naPagina = new Map();
+    const autores = [];
     for (const [k, bloco] of blocosLd(ler(p)).entries()) {
       let j;
       assert.doesNotThrow(() => { j = JSON.parse(bloco); }, `${p}: bloco ${k + 1} de JSON-LD não faz parse`);
@@ -126,10 +129,15 @@ for (const p of paginas) {
         if (/^https?:\/\/(www\.)?contacertabr\.com\.br(\/|$|#)/.test(s)) checar(s, `${ORIGEM}/`, `${p} (JSON-LD)`, falhas, { ancora: false });
       }
       for (const o of objetos(j)) {
+        if (o.author) autores.push(...[o.author].flat());
         if (typeof o['@id'] !== 'string') continue;
-        if (Object.keys(o).length > 1) definidos.add(o['@id']);
+        if (Object.keys(o).length > 1) { definidos.add(o['@id']); naPagina.set(o['@id'], { ...naPagina.get(o['@id']), ...o }); }
         else citados.push([p, o['@id']]);
       }
+    }
+    for (const a of autores) {
+      const r = a && typeof a === 'object' && typeof a['@id'] === 'string' ? { ...naPagina.get(a['@id']), ...a } : a;
+      if (!r || typeof r !== 'object' || !r['@type'] || !r.name) falhas.push(`${p}: author ${JSON.stringify(a)} sem @type e name nesta página`);
     }
     assert.deepEqual(falhas, []);
   });
