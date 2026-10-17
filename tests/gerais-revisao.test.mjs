@@ -289,3 +289,10 @@ test('CC-NUM-01: a dica de 3 casas não aparece nos campos em R$ nem nos inteiro
   assert.match(inputDe(ler('parcelado-ou-a-vista/index.html'), 'f-vista'), /data-num/);
   assert.match(ler('parcelado-ou-a-vista/index.html'), /<span class="pre" aria-hidden="true">R\$<\/span><input [^>]*id="f-vista"/);
 });
+
+test('CC-PCT-01: calculo_concluido do GA4 só sai quando pelo menos um bloco da porcentagem foi calculado', () => {
+  assert.match(ui, /d\._semResultadoTotal = linhas\.every\(\(l\) => l\[1\] === '—'\);/);
+  assert.match(ui, /if \(enviado && !erros\.length && !d\._semResultadoTotal\) form\.dispatchEvent\(new CustomEvent\('cc:calculo-concluido', \{ bubbles: true \}\)\);/);
+  // a marca é só da porcentagem: nenhuma outra calculadora a define, e o evento das outras não muda
+  assert.equal((ui.match(/_semResultadoTotal/g) || []).length, 2);
+});

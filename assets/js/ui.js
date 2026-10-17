@@ -271,6 +271,8 @@ const CALCS = {
     const inv = Object.values(d._invalidos);
     const erroBloco = inv.length ? `<div class="erro" role="alert"><p><strong>Confira ${inv.length > 1 ? 'os campos' : 'o campo'} para ver o resultado do bloco:</strong></p><ul>${inv.map(([r, m, id]) => `<li><a href="#${id}">${esc(r)}</a>: ${esc(m)}</li>`).join('')}</ul></div>` : '';
     const semResultado = linhas.some((l) => l[1] === '—');
+    // Nenhum bloco calculado (tudo vazio ou inválido): rodar() não envia o calculo_concluido do GA4.
+    d._semResultadoTotal = linhas.every((l) => l[1] === '—');
     return erroBloco + tabela(linhas) + (semResultado ? '<p class="nota">“—”: bloco com campo em branco ou inválido. Preencha os dois campos do bloco para ver o resultado; os outros blocos são calculados normalmente.</p>' : '');
   },
   'regra-de-tres'(d) {
@@ -550,7 +552,7 @@ function iniciar() {
       const { d, erros, avisos, alertas } = ler(form);
       out.innerHTML = erros.length ? listaErros(erros) : listaAvisos(avisos) + listaAlertas(alertas) + fn(d);
       // GA4 (E-03): só o fato de o cálculo ter sido concluído pelo usuário; nenhum valor sai daqui.
-      if (enviado && !erros.length) form.dispatchEvent(new CustomEvent('cc:calculo-concluido', { bubbles: true }));
+      if (enviado && !erros.length && !d._semResultadoTotal) form.dispatchEvent(new CustomEvent('cc:calculo-concluido', { bubbles: true }));
     } catch (e) {
       out.innerHTML = '<p class="erro">Não foi possível calcular. Confira os valores informados.</p>';
       console.error(e);
