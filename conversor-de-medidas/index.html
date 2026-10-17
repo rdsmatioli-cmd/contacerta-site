@@ -52,7 +52,7 @@
 <form class="calc-form" data-calc="conversor-de-medidas" novalidate>
 <p class="calc-rot" aria-hidden="true">Preencha os dados</p>
 <div class="grade-campos"><div class="campo"><label for="f-categoria">Grandeza</label><select id="f-categoria" name="categoria" data-padrao="comprimento" aria-describedby="f-categoria-msg"><option value="comprimento" selected>Comprimento</option><option value="massa">Massa (peso)</option><option value="volume">Volume</option><option value="area">Área</option><option value="velocidade">Velocidade</option><option value="temperatura">Temperatura</option></select><p class="campo-msg" id="f-categoria-msg" hidden></p></div>
-<div class="campo"><label for="f-valor">Valor</label><div class="entrada"><input type="text" inputmode="text" autocomplete="off" spellcheck="false" id="f-valor" name="valor" data-num data-teto="1000000000" value="1" data-obrig aria-describedby="f-valor-msg"></div><p class="campo-msg" id="f-valor-msg" hidden></p></div>
+<div class="campo"><label for="f-valor">Valor</label><div class="entrada"><input type="text" inputmode="text" autocomplete="off" spellcheck="false" id="f-valor" name="valor" data-num data-decimal data-teto="1000000000" value="1" data-obrig aria-describedby="f-valor-msg"></div><p class="campo-msg" id="f-valor-msg" hidden></p></div>
 <div class="campo"><label for="f-de">De</label><select id="f-de" name="de" data-padrao="m" aria-describedby="f-de-msg"></select><p class="campo-msg" id="f-de-msg" hidden></p></div>
 <div class="campo"><label for="f-para">Para</label><select id="f-para" name="para" data-padrao="cm" aria-describedby="f-para-msg"></select><p class="campo-msg" id="f-para-msg" hidden></p></div></div>
 <button type="submit" disabled data-requer-js>Calcular</button>

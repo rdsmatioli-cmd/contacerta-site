@@ -177,13 +177,14 @@ test('Investimentos: IR regressivo, CDB, LCI, Tesouro Selic, poupança', () => {
   assert.equal(r.aliquotaIr, 0.175);
   assert.equal(cdb.rendimentoBruto, 1000); assert.equal(cdb.ir, 175); assert.equal(cdb.rendimentoLiquido, 825);
   assert.equal(lci.rendimentoLiquido, 900); assert.equal(lci.ir, 0);
-  assert.equal(tesouro.rendimentoBruto, 1375); assert.equal(tesouro.ir, 240.63);
+  // Tesouro Selic rende a Selic efetiva (≈ CDI), não a meta: com CDI de 10%, igual ao CDB 100% do CDI (CC-SELIC-01)
+  assert.equal(tesouro.rendimentoBruto, 1000); assert.equal(tesouro.ir, 175);
   assert.equal(poup.rendimentoBruto, 616.78); // 10.000 x (1,005^12 - 1)
   // 730 dias: 15% sobre 10.000 x (1,1^2 - 1) = 2.100 -> IR 315
   assert.equal(C.investimentos({ valor: 10000, dias: 730, cdi: 10, selic: 10 }).resultados[0].ir, 315);
-  // Selic <= 8,5%: poupança = 70% da Selic
+  // Selic <= 8,5%: poupança = 70% da Selic; 360 dias completam só 11 aniversários (dias × 12 ÷ 365, CC-POUP-01)
   const b = C.investimentos({ valor: 10000, dias: 360, cdi: 8, selic: 8, trMensal: 0 }).resultados[3];
-  assert.equal(b.rendimentoBruto, C.r2(10000 * (1.056 - 1)));
+  assert.equal(b.rendimentoBruto, C.r2(10000 * (Math.pow(1.056, 11 / 12) - 1)));
 });
 
 test('Porcentagem e regra de três', () => {

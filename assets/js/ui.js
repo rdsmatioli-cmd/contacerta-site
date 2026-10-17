@@ -30,7 +30,7 @@ function barra(partes) {
 // erros (vazio obrigatório, texto, negativo, abaixo do mínimo) bloqueiam o cálculo;
 // valor acima do máximo é limitado ao máximo, com aviso visível no campo e no resultado.
 function ler(form) {
-  const d = { _orig: {} };
+  const d = { _orig: {}, _vazio: {}, _invalidos: {} };
   const erros = [];
   const avisos = [];
   const alertas = [];
@@ -45,11 +45,18 @@ function ler(form) {
     if (el.type === 'checkbox') d[el.name] = el.checked;
     else if (el.hasAttribute('data-num')) {
       const ds = el.dataset;
-      const r = validarNumero({ raw: el.value, min: attrNum(ds.min), max: attrNum(ds.max), teto: attrNum(ds.teto), obrig: 'obrig' in ds, positivo: 'positivo' in ds, inteiro: 'inteiro' in ds });
+      // CC-NUM-01: a dica de 3 casas do erro ambíguo só vale em campo não monetário (sem o prefixo R$) e não inteiro.
+      const pre = el.parentElement && el.parentElement.querySelector('.pre');
+      const moeda = !!pre && pre.textContent.trim() === 'R$';
+      const r = validarNumero({ raw: el.value, min: attrNum(ds.min), max: attrNum(ds.max), teto: attrNum(ds.teto), obrig: 'obrig' in ds, positivo: 'positivo' in ds, inteiro: 'inteiro' in ds, decimal: 'decimal' in ds, dicaCasas: !moeda && !('inteiro' in ds) });
       if (r.aviso && ds.avisoMax) r.aviso = ds.avisoMax;
       marca(el, r.erro || r.aviso, !!r.erro);
-      if (r.erro) erros.push([rotulo(el), r.erro, el.id]);
+      // data-bloco (porcentagem): o erro bloqueia só a linha do bloco do campo, não o cálculo inteiro.
+      if (r.erro) { if ('bloco' in ds) d._invalidos[el.name] = [rotulo(el), r.erro, el.id]; else erros.push([rotulo(el), r.erro, el.id]); }
       if (r.aviso) avisos.push([rotulo(el), r.aviso]);
+      // data-decimal: ponto lido como separador de milhar ("1.125" = 1125) gera alerta visível; o cálculo segue.
+      if (r.alerta) { marca(el, [r.aviso, r.alerta].filter(Boolean).join(' '), false); alertas.push([rotulo(el), r.alerta]); }
+      if (!r.erro && !el.value.trim()) d._vazio[el.name] = true;
       if (r.original !== undefined) d._orig[el.name] = r.original;
       // Salário abaixo do mínimo: só alerta, o cálculo segue.
       const minimo = attrNum(ds.alertaMinimo);
@@ -254,18 +261,27 @@ const CALCS = {
   investimentos(d) {
     const r = C.investimentos({ valor: d.valor, dias: d.dias, cdi: d.cdi, pctCdb: d.pctCdb, pctLci: d.pctLci, selic: d.selic, trMensal: d.tr });
     const melhor = [...r.resultados].sort((a, b) => b.final - a.final)[0];
-    return destaque('Melhor resultado líquido', `${esc(melhor.nome)}: ${R(melhor.final)}`) + `<div class="rolagem" tabindex="0" role="region" aria-label="Tabela comparativa das aplicações (role para o lado)"><table class="grade"><thead><tr><th>Aplicação</th><th>Rendimento bruto</th><th>IR</th><th>Valor final líquido</th><th>Rentab. líquida</th></tr></thead><tbody>${r.resultados.map((x) => `<tr><td>${esc(x.nome)}</td><td>${R(x.rendimentoBruto)}</td><td>${R(x.ir)}</td><td>${R(x.final)}</td><td>${pct(x.rentabilidadeLiquida)}</td></tr>`).join('')}</tbody></table></div><p class="nota">Alíquota de IR para ${d.dias} dias: ${pct(r.aliquotaIr, 1)}. Não considera IOF (resgates em menos de 30 dias) nem a taxa de custódia da B3.</p>`;
+    return destaque('Melhor resultado líquido', `${esc(melhor.nome)}: ${R(melhor.final)}`) + `<div class="rolagem" tabindex="0" role="region" aria-label="Tabela comparativa das aplicações (role para o lado)"><table class="grade"><thead><tr><th>Aplicação</th><th>Rendimento bruto</th><th>IR</th><th>Valor final líquido</th><th>Rentab. líquida</th></tr></thead><tbody>${r.resultados.map((x) => `<tr><td>${esc(x.nome)}</td><td>${R(x.rendimentoBruto)}</td><td>${R(x.ir)}</td><td>${R(x.final)}</td><td>${pct(x.rentabilidadeLiquida)}</td></tr>`).join('')}</tbody></table></div><p class="nota">Alíquota de IR para ${d.dias} dias: ${pct(r.aliquotaIr, 1)}. Não considera IOF (resgates em menos de 30 dias) nem a taxa de custódia da B3. O Tesouro Selic é calculado com o CDI informado, porque rende a Selic efetiva (over), praticamente igual ao CDI e um pouco abaixo da meta; a Selic meta entra só na regra da poupança.</p>`;
   },
   porcentagem(d) {
     const P = C.porcentagem;
     const f = (x) => (Number.isFinite(x) ? n6.format(x) : '—');
-    return tabela([
-      [`${f(d.p1)}% de ${f(d.v1)}`, f(P.deValor(d.p1, d.v1)), 'total'],
-      [`${f(d.x2)} é quantos % de ${f(d.v2)}`, `${f(P.quantoPorcento(d.x2, d.v2))}%`, 'total'],
-      [`Variação de ${f(d.a3)} para ${f(d.b3)}`, `${f(P.variacao(d.a3, d.b3))}%`, 'total'],
-      [`${f(d.v4)} com aumento de ${f(d.p4)}%`, f(P.aumento(d.v4, d.p4)), 'total'],
-      [`${f(d.v4)} com desconto de ${f(d.p4)}%`, f(P.desconto(d.v4, d.p4)), 'total'],
-    ]);
+    // CC-PCT-01: bloco com campo vazio (ausente, não zero) ou inválido mostra "—"; os outros blocos são calculados.
+    const falta = (nomes) => nomes.some((n) => d._vazio[n] || d._invalidos[n]);
+    const linha = (nomes, rotulo, generico, valor) => (falta(nomes) ? [generico, '—'] : [rotulo, valor(), 'total']);
+    const linhas = [
+      linha(['p1', 'v1'], `${f(d.p1)}% de ${f(d.v1)}`, '1) X% de um valor', () => f(P.deValor(d.p1, d.v1))),
+      linha(['x2', 'v2'], `${f(d.x2)} é quantos % de ${f(d.v2)}`, '2) Quantos % um valor é de outro', () => `${f(P.quantoPorcento(d.x2, d.v2))}%`),
+      linha(['a3', 'b3'], `Variação de ${f(d.a3)} para ${f(d.b3)}`, '3) Variação percentual', () => `${f(P.variacao(d.a3, d.b3))}%`),
+      linha(['v4', 'p4'], `${f(d.v4)} com aumento de ${f(d.p4)}%`, '4) Valor com aumento', () => f(P.aumento(d.v4, d.p4))),
+      linha(['v4', 'p4'], `${f(d.v4)} com desconto de ${f(d.p4)}%`, '4) Valor com desconto', () => f(P.desconto(d.v4, d.p4))),
+    ];
+    const inv = Object.values(d._invalidos);
+    const erroBloco = inv.length ? `<div class="erro" role="alert"><p><strong>Confira ${inv.length > 1 ? 'os campos' : 'o campo'} para ver o resultado do bloco:</strong></p><ul>${inv.map(([r, m, id]) => `<li><a href="#${id}">${esc(r)}</a>: ${esc(m)}</li>`).join('')}</ul></div>` : '';
+    const semResultado = linhas.some((l) => l[1] === '—');
+    // Nenhum bloco calculado (tudo vazio ou inválido): rodar() não envia o calculo_concluido do GA4.
+    d._semResultadoTotal = linhas.every((l) => l[1] === '—');
+    return erroBloco + tabela(linhas) + (semResultado ? '<p class="nota">“—”: bloco com campo em branco ou inválido. Preencha os dois campos do bloco para ver o resultado; os outros blocos são calculados normalmente.</p>' : '');
   },
   'regra-de-tres'(d) {
     const x = C.regraDeTres({ a: d.a, b: d.b, c: d.c, inversa: d.tipo === 'inversa' });
@@ -355,15 +371,19 @@ const CALCS = {
   'parcelado-ou-a-vista'(d) {
     const r = C.parceladoOuVista({ vista: d.vista, parcelas: d.parcelas, valorParcela: d.parcela, comEntrada: d.entrada, rendimentoAnual: d.rendimento });
     const msg = { vista: 'Pagar à vista sai mais barato', parcelado: 'Parcelar e deixar o dinheiro rendendo sai mais barato', empate: 'Tanto faz: os dois caminhos custam o mesmo' }[r.melhor];
+    // CC-PARC-01: parcela no ato igual ou maior que o preço à vista não tem taxa de juros (null), e não 0%.
+    const semTaxa = r.taxaImplicita === null;
     return destaque('Melhor opção', msg) + tabela([
       ['Total parcelado', R(r.total)],
       ['Desconto à vista em relação ao total', pct(r.descontoVista, 1)],
-      ['Juros embutidos (ao mês)', pct(r.taxaImplicita)],
-      ['Juros embutidos (ao ano)', pct(r.taxaImplicitaAnual)],
+      ['Juros embutidos (ao mês)', semTaxa ? 'não se aplica' : pct(r.taxaImplicita)],
+      ['Juros embutidos (ao ano)', semTaxa ? 'não se aplica' : pct(r.taxaImplicitaAnual)],
       ['Rendimento do seu dinheiro (ao mês)', pct(r.rendimentoMensal)],
       ['Valor das parcelas trazido a hoje', R(r.vp), 'sub'],
       [r.vantagem >= 0 ? 'Economia ao parcelar' : 'Economia ao pagar à vista', R(Math.abs(r.vantagem)), 'total'],
-    ]) + '<p class="nota">O rendimento é bruto, sem imposto de renda. Se o dinheiro não fosse ficar aplicado, compare só os juros embutidos: qualquer taxa acima de zero significa que à vista é mais barato.</p>';
+    ]) + (semTaxa ? '<p class="nota">Juros embutidos não se aplicam: a parcela paga no ato já é igual ou maior que o preço à vista, sem prazo que explique a diferença. Compare pelo desconto à vista.</p>' : '')
+      // Sem taxa, a orientação de comparar os juros embutidos contradiz a nota acima: fica só a ressalva do rendimento.
+      + `<p class="nota">O rendimento é bruto, sem imposto de renda.${semTaxa ? '' : ' Se o dinheiro não fosse ficar aplicado, compare só os juros embutidos: qualquer taxa acima de zero significa que à vista é mais barato.'}</p>`;
   },
   'conversor-de-medidas'(d) {
     const v = C.converter(d.valor, d.categoria, d.de, d.para);
@@ -429,7 +449,13 @@ const CALCS = {
     const issPorDentro = d.issmodo !== 'fora';
     const r = C.precoReforma({ precoAtual: d.preco, tributosAtuaisPct: d.atuais, issPct: d.iss, ano: Number(d.ano), cbsPct: d.cbs, ibsPct: d.ibs, issPorDentro });
     if (!r) return '<p class="erro">Confira o preço e os percentuais (precisam ser menores que 100%).</p>';
-    return destaque('Total da nota para manter a margem', R(r.total)) + tabela([
+    // CC-PRECO-01: de 2029 em diante o IBS deixa de ser 0,1%; avisa se o campo ficou com o valor de 2027-2028.
+    // calc.js antigo vindo do cache não tem aliquotasPadraoPreco: o cálculo segue, só sem o aviso.
+    const sug = typeof C.aliquotasPadraoPreco === 'function' ? C.aliquotasPadraoPreco(d.ano) : null;
+    const avisoIbs = Number(d.ano) >= 2029 && d.ibs <= 0.1 && sug
+      ? listaAlertas([['IBS', `Em ${d.ano}, o IBS não é mais de 0,1%: a estimativa da calculadora para o ano é de ${n2.format(sug.ibsPct)}%. Com ${n6.format(d.ibs)}%, o total da nota fica subestimado. Ajuste o campo IBS.`]])
+      : '';
+    return avisoIbs + destaque('Total da nota para manter a margem', R(r.total)) + tabela([
       ['Receita líquida de hoje (mantida) = base de CBS/IBS', R(r.base)],
       ['CBS', `+ ${R(r.cbs)}`],
       ['IBS', `+ ${R(r.ibs)}`],
@@ -438,7 +464,7 @@ const CALCS = {
       ['Variação do total da nota', pct(r.variacaoTotal, 1)],
       ['Custo efetivo para cliente com direito a crédito (total − CBS − IBS)', R(r.custoClienteComCredito), 'sub'],
       ['Variação para esse cliente', pct(r.variacaoComCredito, 1)],
-    ]) + `<p class="nota">A base da CBS e do IBS não inclui o ISS/ICMS (ADCT, art. 133; LC 214/2025, art. 12, § 2º, V). ISS/ICMS do ano = alíquota informada × ${n2.format(r.fatorIss)} (ADCT, arts. 128 e 129). ${issPorDentro ? 'Padrão: ISS calculado por dentro, sobre o total, inclusive a CBS/IBS: total = (base + CBS + IBS) ÷ (1 − ISS do ano). É uma interpretação: a lei ainda não diz se a CBS/IBS integra a base do ISS (PLP 16/2025); a alternativa com ISS por fora está no formulário.' : 'Alternativa: ISS por fora, sobre a base: total = base × (1 + CBS + IBS + ISS do ano). O padrão (ISS por dentro, sobre o total) é a outra interpretação possível.'} Alíquotas de CBS e IBS são estimativas editáveis.</p>`;
+    ]) + `<p class="nota">A base da CBS e do IBS não inclui o ISS/ICMS (ADCT, art. 133; LC 214/2025, art. 12, § 2º, V). ISS/ICMS do ano = alíquota informada × ${n2.format(r.fatorIss)} (ADCT, arts. 128 e 129). ${issPorDentro ? 'Padrão: ISS calculado por dentro, sobre o total, inclusive a CBS/IBS: total = (base + CBS + IBS) ÷ (1 − ISS do ano). É uma interpretação: a lei ainda não diz se a CBS/IBS integra a base do ISS (PLP 16/2025); a alternativa com ISS por fora está no formulário.' : 'Alternativa: ISS por fora, sobre a base: total = base × (1 + CBS + IBS + ISS do ano). O padrão (ISS por dentro, sobre o total) é a outra interpretação possível.'} Alíquotas de CBS e IBS são estimativas editáveis: CBS ${n6.format(d.cbs)}% e IBS ${n6.format(d.ibs)}% nesta simulação (${d.ano}).</p>`;
   },
   'credito-travado'(d) {
     const r = C.creditoTravado({ comprasMensais: d.compras, cbsPct: d.cbs, ibsPct: d.ibs, pctInadimplente: d.inad, diasAtraso: d.dias, custoDinheiroMes: d.custo });
@@ -520,6 +546,25 @@ function iniciar() {
     popularUnidades(form);
     form.elements.categoria.addEventListener('change', () => popularUnidades(form));
   }
+  // CC-PRECO-01: ao trocar o ano, CBS e IBS recebem a estimativa do ano (aliquotasPadraoPreco), só se o usuário não editou o campo.
+  // Sem a função (calc.js antigo vindo do cache), a página funciona como antes, sem o preenchimento por ano:
+  // um erro aqui, fora do try e antes de `rodar`, deixaria a calculadora sem resultado e o botão quebrado.
+  if (id === 'preco-reforma-tributaria' && typeof C.aliquotasPadraoPreco === 'function') {
+    const campos = ['cbs', 'ibs'].map((nome) => form.elements[nome]);
+    for (const el of campos) el.dataset.padrao = el.defaultValue;
+    const aplicarAno = () => {
+      const sug = C.aliquotasPadraoPreco(form.elements.ano.value);
+      if (!sug) return;
+      [sug.cbsPct, sug.ibsPct].forEach((v, i) => {
+        const el = campos[i];
+        if (el.value.trim() !== el.dataset.padrao) return; // editado pelo usuário: mantém
+        el.value = String(v).replace('.', ',');
+        el.dataset.padrao = el.value;
+      });
+    };
+    form.elements.ano.addEventListener('change', aplicarAno);
+    aplicarAno();
+  }
   const vencN = form.elements.feriasVencidas;
   const ajustaDobro = () => {
     if (!vencN) return;
@@ -532,7 +577,7 @@ function iniciar() {
       const { d, erros, avisos, alertas } = ler(form);
       out.innerHTML = erros.length ? listaErros(erros) : listaAvisos(avisos) + listaAlertas(alertas) + fn(d);
       // GA4 (E-03): só o fato de o cálculo ter sido concluído pelo usuário; nenhum valor sai daqui.
-      if (enviado && !erros.length) form.dispatchEvent(new CustomEvent('cc:calculo-concluido', { bubbles: true }));
+      if (enviado && !erros.length && !d._semResultadoTotal) form.dispatchEvent(new CustomEvent('cc:calculo-concluido', { bubbles: true }));
     } catch (e) {
       out.innerHTML = '<p class="erro">Não foi possível calcular. Confira os valores informados.</p>';
       console.error(e);
