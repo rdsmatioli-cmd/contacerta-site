@@ -249,7 +249,7 @@ export const GEO = {
 <p>Exemplos: 15% de 200 é ${N(C.porcentagem.deValor(15, 200), 0)}; 30 de 200 é ${N(C.porcentagem.quantoPorcento(30, 200), 0)}%; de 50 para 56 a variação é de ${N(C.porcentagem.variacao(50, 56), 0)}%.</p>`,
       [
         'Escolha o bloco da conta que você quer fazer: 1) quanto é X% de um valor, 2) quantos por cento, 3) variação ou 4) aumento e desconto.',
-        'Preencha os dois campos desse bloco.',
+        'Preencha os dois campos desse bloco; os outros blocos podem ficar em branco.',
         'Clique em <strong>Calcular</strong> para ver o resultado e a fórmula usada.',
       ],
     ),

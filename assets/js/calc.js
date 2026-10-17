@@ -233,20 +233,27 @@ export function parceladoOuVista({ vista, parcelas, valorParcela, comEntrada = f
   const total = r2(P * n);
   // taxa implícita: resolve V = VP(parcelas, i) por bisseção
   let taxaImplicita = 0;
-  if (V > 0 && total > V && !(comEntrada && n === 1)) {
-    let lo = 0;
-    let hi = 1;
-    for (let k = 0; k < 200; k++) {
-      const mid = (lo + hi) / 2;
-      if (valorPresenteParcelas(P, n, mid, comEntrada) > V) lo = mid; else hi = mid;
+  if (V > 0 && total > V) {
+    // Parcela no ato igual ou maior que o preço à vista (inclui a parcela única no ato): sem prazo que explique
+    // a diferença, nenhuma taxa iguala as parcelas ao preço à vista. null = "não se aplica" (não é 0%).
+    if (comEntrada && P >= V) taxaImplicita = null;
+    else {
+      let lo = 0;
+      let hi = 1;
+      // Teto dinâmico: dobra enquanto as parcelas descontadas a hi ainda valem mais que o preço à vista (limite 1e6).
+      while (hi < 1e6 && valorPresenteParcelas(P, n, hi, comEntrada) > V) hi *= 2;
+      for (let k = 0; k < 200; k++) {
+        const mid = (lo + hi) / 2;
+        if (valorPresenteParcelas(P, n, mid, comEntrada) > V) lo = mid; else hi = mid;
+      }
+      taxaImplicita = (lo + hi) / 2;
     }
-    taxaImplicita = (lo + hi) / 2;
   }
   const rend = taxaMensalDeAnual(rendimentoAnual);
   const vp = r2(valorPresenteParcelas(P, n, rend, comEntrada));
   const vantagem = r2(V - vp); // > 0: parcelar e aplicar o dinheiro sai mais barato
   return {
-    total, taxaImplicita, taxaImplicitaAnual: Math.pow(1 + taxaImplicita, 12) - 1, descontoVista: total > 0 ? 1 - V / total : 0,
+    total, taxaImplicita, taxaImplicitaAnual: taxaImplicita === null ? null : Math.pow(1 + taxaImplicita, 12) - 1, descontoVista: total > 0 ? 1 - V / total : 0,
     rendimentoMensal: rend, vp, vantagem, melhor: Math.abs(vantagem) < 0.005 ? 'empate' : vantagem > 0 ? 'parcelado' : 'vista',
   };
 }
@@ -315,6 +322,11 @@ export function idade(nascimento, referencia) {
   if (dias < 0) {
     meses -= 1;
     dias += new Date(Date.UTC(r.getUTCFullYear(), r.getUTCMonth(), 0)).getUTCDate();
+    // Fevereiro curto (ex.: 31/01 → 01/03): os dias do mês anterior não bastam; empresta também o mês antes dele.
+    if (dias < 0) {
+      meses -= 1;
+      dias += new Date(Date.UTC(r.getUTCFullYear(), r.getUTCMonth() - 1, 0)).getUTCDate();
+    }
   }
   if (meses < 0) { anos -= 1; meses += 12; }
   const totalDias = diffDias(n, r);
@@ -532,9 +544,12 @@ export function investimentos({ valor, dias, cdi, pctCdb = 100, pctLci = 90, sel
   const mk = (nome, bruto, ir) => ({ nome, rendimentoBruto: r2(bruto), ir: r2(ir), rendimentoLiquido: r2(bruto - ir), final: r2(V + bruto - ir), rentabilidadeLiquida: V > 0 ? (bruto - ir) / V : 0 });
   const cdbBruto = cresc(num(cdi) * num(pctCdb) / 100);
   const lciBruto = cresc(num(cdi) * num(pctLci) / 100);
-  const selicBruto = cresc(num(selic));
+  // Tesouro Selic rende a Selic efetiva (over), praticamente igual ao CDI e um pouco abaixo da meta: usa o CDI informado.
+  // A Selic meta (selic) entra só na regra da poupança, onde é a referência legal.
+  const selicBruto = cresc(num(cdi));
   // poupança: 0,5% a.m. + TR quando Selic > 8,5% a.a.; senão 70% da Selic + TR. Rende só a cada mês completo (aniversário).
-  const mesesPoup = Math.floor(d / 30);
+  // Meses completos aproximados por dias × 12 ÷ 365 (365 d = 12; 360 d = 11; 730 d = 24).
+  const mesesPoup = Math.floor((d * 12) / 365);
   const taxaPoup = num(selic) > 8.5 ? 0.005 + num(trMensal) / 100 : Math.pow(1 + (0.7 * num(selic)) / 100, 1 / 12) - 1 + num(trMensal) / 100;
   const poupBruto = V * Math.pow(1 + taxaPoup, mesesPoup) - V;
   return {
@@ -570,7 +585,9 @@ export function imc({ peso, altura }) {
   if (h > 3) h = h / 100; // aceita centímetros
   const p = num(peso);
   if (!(h > 0) || !(p > 0)) return null;
-  const valor = p / (h * h);
+  // Classifica pelo valor exibido (2 casas): 24,996 aparece como 25,00 e já é sobrepeso.
+  const arred = (kg) => Math.round((kg / (h * h)) * 100) / 100;
+  const valor = arred(p);
   let classe;
   if (valor < 18.5) classe = 'Abaixo do peso';
   else if (valor < 25) classe = 'Peso normal';
@@ -578,7 +595,10 @@ export function imc({ peso, altura }) {
   else if (valor < 35) classe = 'Obesidade grau I';
   else if (valor < 40) classe = 'Obesidade grau II';
   else classe = 'Obesidade grau III';
-  return { imc: Math.round(valor * 100) / 100, classe, pesoMin: r2(18.5 * h * h), pesoMax: r2(24.9 * h * h) };
+  // Teto da faixa normal com o mesmo limite da classificação: maior peso (em centésimos de kg) com IMC exibido até 24,99.
+  let pesoMax = (Math.ceil(24.995 * h * h * 100) - 1) / 100;
+  if (arred(pesoMax) >= 25) pesoMax = r2(pesoMax - 0.01);
+  return { imc: valor, classe, pesoMin: r2(18.5 * h * h), pesoMax };
 }
 
 // ---------------------------------------------------------------- MEI
@@ -752,6 +772,15 @@ export function precoReforma({ precoAtual, tributosAtuaisPct, issPct = 0, ano = 
   const iss = issPorDentro ? total * issAno : base * issAno;
   const semCbsIbs = total - cbs - ibs; // custo efetivo para o cliente que se credita de CBS/IBS
   return { liquido: r2(base), base: r2(base), cbs: r2(cbs), ibs: r2(ibs), iss: r2(iss), issAno, fatorIss: fator, total: r2(total), variacaoTotal: total / precoAtual - 1, custoClienteComCredito: r2(semCbsIbs), variacaoComCredito: semCbsIbs / precoAtual - 1, aliqNova: (cbsPct + ibsPct) / 100, issPorDentro };
+}
+// CBS e IBS (em %) sugeridos para o ano na calculadora de preço, pela mesma regra da transição (aliquotasAno/TRANSICAO):
+// 2027-2028 = referência da CBS − 0,1 ponto e IBS de 0,1%; 2029-2032 = CBS de referência e IBS × (1 − fração do ISS/ICMS);
+// 2033 = referências cheias. Referências estimadas, não oficiais (CBS 9,21% e IBS 18,70%, premissas da Resolução CGIBS 14/2026).
+export function aliquotasPadraoPreco(ano, { cbsRefPct = 9.21, ibsRefPct = 18.7 } = {}) {
+  const linha = TRANSICAO.find((l) => l.ano === Number(ano));
+  if (!linha) return null;
+  const a = aliquotasAno(linha, { cbsRefPct, ibsRefPct });
+  return { cbsPct: Math.round(a.cbs * 1e4) / 100, ibsPct: Math.round(a.ibs * 1e4) / 100 };
 }
 
 // Crédito condicionado à extinção do débito do fornecedor (crédito "travado").

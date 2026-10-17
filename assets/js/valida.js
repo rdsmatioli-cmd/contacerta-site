@@ -2,12 +2,15 @@
 // Funções puras, testáveis no Node; o ui.js aplica o resultado no formulário.
 import { avosFerias, parseData } from './calc.js?v=c4c802ed8b';
 const fmt = (x) => Number(x).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+const AMBIGUO = 'Formato ambíguo: use 1.000,00 ou 1000';
 
 // Lê um número digitado no formato brasileiro (N-01).
 // "3500,50" → 3500.5 · "3.500" e "3.500,00" → 3500 · "1.234.567,8" → 1234567.8 · "3500.50" → 3500.5 (ponto decimal sem ambiguidade).
 // "3.500" com exatamente 3 dígitos após um único ponto e parte inteira sem zero à esquerda é lido como milhar.
-// Retorna { n } ou { erro }.
-export function lerNumeroBR(raw) {
+// decimal = true (campos não monetários com data-decimal: regra de três, conversor, porcentagem): a vírgula é sempre
+// decimal ("1,125" = 1,125) e "1.125" continua milhar, mas com alerta visível da leitura (CC-NUM-01).
+// Retorna { n }, { n, alerta } (só com decimal) ou { erro }.
+export function lerNumeroBR(raw, { decimal = false } = {}) {
   let s = String(raw ?? '').trim().replace(/^R\$\s*/i, '').replace(/[\s\u00a0]/g, '');
   if (s === '') return { vazio: true };
   if (!/^[-+]?[\d.,]+$/.test(s) || !/\d/.test(s)) return { erro: 'Digite só números.' };
@@ -16,11 +19,13 @@ export function lerNumeroBR(raw) {
   const temVirg = s.includes(',');
   const pontos = (s.match(/\./g) || []).length;
   let norm;
+  let alerta;
   if (temVirg) {
     if ((s.match(/,/g) || []).length > 1) return { erro: 'Use a vírgula só uma vez, para os centavos.' };
     const [int, dec] = s.split(',');
     // "1,000" sem ponto de milhar é ambíguo (mil no formato americano ou 1 no brasileiro): erro, sem conversão.
-    if (!pontos && /^[1-9]\d{0,2}$/.test(int) && /^\d{3}$/.test(dec)) return { erro: 'Formato ambíguo: use 1.000,00 ou 1000' };
+    // Em campo decimal, a vírgula é sempre decimal (convenção brasileira).
+    if (!decimal && !pontos && /^[1-9]\d{0,2}$/.test(int) && /^\d{3}$/.test(dec)) return { erro: AMBIGUO };
     if (pontos && !/^\d{1,3}(\.\d{3})+$/.test(int)) return { erro: 'Ponto só como separador de milhar (ex.: 3.500,50).' };
     if (!/^\d*$/.test(dec)) return { erro: 'Digite só números.' };
     norm = `${int.replace(/\./g, '') || '0'}.${dec || '0'}`;
@@ -28,27 +33,61 @@ export function lerNumeroBR(raw) {
     if (!/^\d{1,3}(\.\d{3})+$/.test(s)) return { erro: 'Ponto só como separador de milhar (ex.: 1.500.000).' };
     norm = s.replace(/\./g, '');
   } else if (pontos === 1) {
-    norm = /^[1-9]\d{0,2}\.\d{3}$/.test(s) ? s.replace('.', '') : s;
+    const milhar = /^[1-9]\d{0,2}\.\d{3}$/.test(s);
+    norm = milhar ? s.replace('.', '') : s;
+    if (milhar && decimal) {
+      const v = Number(norm) * (neg ? -1 : 1);
+      alerta = `Lido como ${v} (${porExtenso(v)}): o ponto separa os milhares. Se era decimal, digite com vírgula: ${neg ? '-' : ''}${s.replace('.', ',')}.`;
+    }
   } else norm = s;
   const n = Number(norm);
   if (!Number.isFinite(n)) return { erro: 'Digite só números.' };
-  return { n: neg ? -n : n };
+  return alerta ? { n: neg ? -n : n, alerta } : { n: neg ? -n : n };
 }
 
-// campo: { raw, min, max, teto, obrig, positivo, inteiro, badInput }
-// Retorna { valor, erro?, aviso?, original? }. Erro bloqueia o cálculo; aviso informa que o valor foi limitado ao máximo do campo.
-export function validarNumero({ raw = '', badInput = false, min = null, max = null, teto = null, obrig = false, positivo = false, inteiro = false }) {
+// Inteiro de 0 a 999.999 por extenso, para o alerta de leitura ("1125" → "mil cento e vinte e cinco").
+const UNI = ['zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez', 'onze', 'doze', 'treze', 'catorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+const DEZ = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+const CEN = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+const ate999 = (n) => {
+  if (n === 100) return 'cem';
+  const c = Math.floor(n / 100);
+  const r = n % 100;
+  const partes = [];
+  if (c) partes.push(CEN[c]);
+  if (r) partes.push(r < 20 ? UNI[r] : DEZ[Math.floor(r / 10)] + (r % 10 ? ` e ${UNI[r % 10]}` : ''));
+  return partes.join(' e ');
+};
+export function porExtenso(n) {
+  if (n < 0) return `menos ${porExtenso(-n)}`;
+  if (n === 0) return UNI[0];
+  const m = Math.floor(n / 1000);
+  const r = n % 1000;
+  const mil = m === 0 ? '' : m === 1 ? 'mil' : `${ate999(m)} mil`;
+  if (!r) return mil;
+  if (!mil) return ate999(r);
+  // "e" depois de mil só quando o resto é menor que 100 ou centena redonda: "mil e quinhentos", "mil cento e vinte e cinco".
+  return `${mil}${r < 100 || r % 100 === 0 ? ' e ' : ' '}${ate999(r)}`;
+}
+
+// campo: { raw, min, max, teto, obrig, positivo, inteiro, decimal, badInput }
+// Retorna { valor, erro?, aviso?, original?, alerta? }. Erro bloqueia o cálculo; aviso informa que o valor foi limitado ao máximo do campo;
+// alerta (só em campo decimal) informa que um ponto foi lido como separador de milhar, e o cálculo segue.
+export function validarNumero({ raw = '', badInput = false, min = null, max = null, teto = null, obrig = false, positivo = false, inteiro = false, decimal = false }) {
   if (badInput) return { valor: null, erro: 'Digite só números.' };
-  const r = lerNumeroBR(raw);
+  const r = lerNumeroBR(raw, { decimal });
   if (r.vazio) return obrig ? { valor: null, erro: 'Preencha este campo.' } : { valor: 0 };
+  // Erro ambíguo ("1,125"): diz também como digitar 3 casas decimais (CC-NUM-01).
+  if (r.erro === AMBIGUO) return { valor: null, erro: `${AMBIGUO}. Se for decimal com 3 casas, acrescente um zero no fim: ${String(raw).trim().replace(/^R\$\s*/i, '').replace(/[\s\u00a0]/g, '')}0.` };
   if (r.erro) return { valor: null, erro: r.erro };
   const n = r.n;
   if (inteiro && !Number.isInteger(n)) return { valor: null, erro: 'Use um número inteiro.' };
   if (min !== null && n < min) return { valor: null, erro: min === 0 ? 'O valor não pode ser negativo.' : `O mínimo é ${fmt(min)}.` };
   if (positivo && n <= 0) return { valor: null, erro: 'Informe um valor maior que zero.' };
   if (teto !== null && n > teto) return { valor: null, erro: `Valor muito alto: o máximo aceito é ${fmt(teto)}.` };
-  if (max !== null && n > max) return { valor: max, original: n, aviso: `O máximo é ${fmt(max)}; o cálculo usou ${fmt(max)}.` };
-  return { valor: n };
+  const extra = r.alerta ? { alerta: r.alerta } : {};
+  if (max !== null && n > max) return { valor: max, original: n, aviso: `O máximo é ${fmt(max)}; o cálculo usou ${fmt(max)}.`, ...extra };
+  return { valor: n, ...extra };
 }
 
 // Lê o atributo numérico (min/max) de um input; null se ausente ou inválido.
