@@ -31,10 +31,25 @@ test('CC-TRAB-10: mês trabalhado por inteiro vale 30 dias (mês comercial), inc
   assert.equal(C.diasSaldoSalario('2020-01-01', '2024-02-28'), 28); // não é o último dia
   assert.equal(C.diasSaldoSalario('2020-01-01', '2026-03-31'), 30); // 31 dias trabalhados = 30
   assert.equal(C.diasSaldoSalario('2026-02-01', '2026-02-28'), 30); // admitido no dia 1º e trabalhou o mês todo
-  // admissão no meio do mês: conta os dias desde a admissão, mesmo no último dia do mês
-  assert.equal(C.diasSaldoSalario('2026-02-10', '2026-02-28'), 19);
-  assert.equal(C.diasSaldoSalario('2026-03-10', '2026-03-31'), 22);
-  assert.match(pagina('rescisao'), /Se a admissão foi no próprio mês, contam só os dias desde a admissão/);
+  // admissão no mês e desligamento no último dia: mês comercial, 30 − dia da admissão + 1 (revisão do CC-TRAB-01/10)
+  assert.equal(C.diasSaldoSalario('2026-02-02', '2026-02-28'), 29); // antes: 27, 3 dias a menos que a admissão em 01/02
+  assert.equal(C.diasSaldoSalario('2026-03-02', '2026-03-31'), 29); // antes: 30, igual ao mês inteiro
+  assert.equal(C.diasSaldoSalario('2026-02-10', '2026-02-28'), 21);
+  assert.equal(C.diasSaldoSalario('2026-03-10', '2026-03-31'), 21);
+  assert.equal(C.diasSaldoSalario('2024-02-10', '2024-02-29'), 21); // bissexto
+  assert.equal(C.diasSaldoSalario('2026-03-31', '2026-03-31'), 1); // admissão no dia 31 vale como dia 30
+  // um dia a mais de admissão tira exatamente um dia de saldo, em fevereiro e em março
+  for (const m of ['2026-02', '2026-03']) {
+    const fimMes = m === '2026-02' ? `${m}-28` : `${m}-31`;
+    assert.equal(C.diasSaldoSalario(`${m}-01`, fimMes) - C.diasSaldoSalario(`${m}-02`, fimMes), 1, m);
+  }
+  assert.equal(C.rescisao({ salario: 3000, admissao: '2026-02-02', desligamento: '2026-02-28', tipo: 'pedidoDemissao', aviso: 'trabalhado' }).saldoSalario, 2900);
+  // desligamento antes do último dia: dias corridos desde a admissão (inalterado)
+  assert.equal(C.diasSaldoSalario('2026-03-10', '2026-03-30'), 21);
+  assert.equal(C.diasSaldoSalario('2024-02-10', '2024-02-28'), 19);
+  const html = pagina('rescisao');
+  assert.match(html, /Se a admissão foi no próprio mês, contam só os dias desde a admissão, também pelo mês de 30 dias: quem entra no dia 10 e sai no último dia do mês recebe 21 dias, em qualquer mês\./);
+  assert.ok(rescisaoPag.artigo.includes('quem entra no dia 10 e sai no último dia do mês recebe 21 dias'));
 });
 
 test('CC-TRAB-02: acordo paga a metade exata do aviso; a projeção usa a metade arredondada para baixo', () => {

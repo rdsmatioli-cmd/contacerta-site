@@ -391,7 +391,8 @@ export const PRIMEIRO_ANO_TABELAS = Math.max(Math.min(...Object.keys(INSS_POR_AN
 
 /**
  * Dias do saldo de salário (mês comercial de 30 dias): conta da admissão, se ela caiu no mês do desligamento,
- * ou do dia 1º; o mês trabalhado por inteiro (desligamento no último dia, sem admissão no mês) vale 30 dias.
+ * ou do dia 1º. Desligamento no último dia do mês conta até o dia 30, com ou sem admissão no mês: o mês inteiro
+ * vale 30 dias (inclusive fevereiro) e a admissão no dia N dá 30 − N + 1 (02/02 a 28/02 = 29; 10/03 a 31/03 = 21).
  */
 export function diasSaldoSalario(admissao, desligamento) {
   const dAdm = parseData(admissao);
@@ -400,9 +401,10 @@ export function diasSaldoSalario(admissao, desligamento) {
   const mes = dDes.getUTCMonth();
   const admNoMes = dAdm.getTime() > Date.UTC(ano, mes, 1);
   const ultimoDia = new Date(Date.UTC(ano, mes + 1, 0)).getUTCDate();
-  if (!admNoMes && dDes.getUTCDate() === ultimoDia) return 30;
-  const de = admNoMes ? dAdm.getUTCDate() : 1;
-  return Math.min(30, dDes.getUTCDate() - de + 1);
+  const fim = dDes.getUTCDate() === ultimoDia ? 30 : dDes.getUTCDate();
+  // Admissão no dia 31: no mês comercial vale como dia 30 (1 dia de saldo).
+  const de = admNoMes ? Math.min(30, dAdm.getUTCDate()) : 1;
+  return Math.min(30, fim - de + 1);
 }
 
 /**
