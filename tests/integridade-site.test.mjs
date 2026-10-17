@@ -10,6 +10,9 @@
 //    sitemap é o canonical de uma página indexável; lastmod em AAAA-MM-DD, não futuro e >= dateModified/
 //    datePublished do PRÓPRIO documento (objetos-raiz do JSON-LD e article:*_time). Os itens blogPost do índice
 //    e das categorias do blog trazem datas dos posts filhos e por isso não entram na comparação.
+// 4. Contenção GET em TODAS as páginas (formularios-get.test.mjs só olha pasta/index.html do primeiro nível):
+//    fora da busca da home (role="search", só o campo q), todo <form> tem ao menos um botão de envio, todos como
+//    <button type="submit" disabled>, e nenhum input type=submit/image. Sem JS, nada é enviado pela URL.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -200,3 +203,26 @@ test('sitemap.xml: lastmod válido, não futuro e >= as datas do próprio docume
   }
   assert.deepEqual(falhas, []);
 });
+
+const formsDe = (html) => html.match(/<form\b[^]*?<\/form>/gi) || [];
+const nomesDe = (f) => [...f.matchAll(/<(?:input|select|textarea|button)\b[^>]*\sname="([^"]*)"/gi)].map((m) => m[1]);
+const ehBuscaDaHome = (p, f) => p === 'index.html' && /^<form\b[^>]*\srole="search"/i.test(f) && nomesDe(f).join() === 'q';
+const comForm = paginas.filter((p) => formsDe(ler(p)).length > 0);
+
+test('a varredura de formulários é recursiva e acha os da home, das calculadoras e da lista de espera', () => {
+  assert.ok(comForm.length >= 31);
+  for (const p of ['index.html', 'nr1-riscos-psicossociais/index.html', 'lista-de-espera/index.html', 'salario-liquido/index.html']) assert.ok(comForm.includes(p), p);
+  assert.equal(formsDe(ler('index.html')).filter((f) => ehBuscaDaHome('index.html', f)).length, 1);
+});
+
+for (const p of comForm) {
+  test(`${p}: sem JS nenhum formulário envia campos (botões de envio desabilitados no HTML)`, () => {
+    for (const f of formsDe(ler(p))) {
+      if (ehBuscaDaHome(p, f)) continue;
+      assert.doesNotMatch(f, /<input\b[^>]*\stype="?(submit|image)\b/i);
+      const botoes = f.match(/<button\b(?![^>]*\stype="button")[^>]*>/gi) || [];
+      assert.ok(botoes.length >= 1, 'formulário sem botão de envio desabilitado');
+      for (const b of botoes) assert.match(b, /^<button type="submit" disabled[ >]/);
+    }
+  });
+}
