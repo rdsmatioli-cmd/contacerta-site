@@ -237,3 +237,12 @@ test('CC-PCT-01: porcentagem sem campos obrigatórios; bloco vazio ou inválido 
   // campo vazio não obrigatório continua valendo 0 na validação (a ausência é marcada no ui.js)
   assert.deepEqual(validarNumero({ raw: '', decimal: true }), { valor: 0 });
 });
+
+// ---------- Reteste do revisor (grupo cger)
+test('CC-PRECO-01: ui.js tolera calc.js antigo vindo do cache (sem aliquotasPadraoPreco)', () => {
+  // As duas chamadas ficam protegidas. A do iniciar() roda fora do try e antes de `rodar`: sem a proteção,
+  // o TypeError deixava a página sem resultado e o envio dava ReferenceError.
+  assert.equal((ui.match(/C\.aliquotasPadraoPreco\(/g) || []).length, 2);
+  assert.match(ui, /if \(id === 'preco-reforma-tributaria' && typeof C\.aliquotasPadraoPreco === 'function'\) \{/);
+  assert.match(ui, /const sug = typeof C\.aliquotasPadraoPreco === 'function' \? C\.aliquotasPadraoPreco\(d\.ano\) : null;/);
+});

@@ -430,7 +430,8 @@ const CALCS = {
     const r = C.precoReforma({ precoAtual: d.preco, tributosAtuaisPct: d.atuais, issPct: d.iss, ano: Number(d.ano), cbsPct: d.cbs, ibsPct: d.ibs, issPorDentro });
     if (!r) return '<p class="erro">Confira o preço e os percentuais (precisam ser menores que 100%).</p>';
     // CC-PRECO-01: de 2029 em diante o IBS deixa de ser 0,1%; avisa se o campo ficou com o valor de 2027-2028.
-    const sug = C.aliquotasPadraoPreco(d.ano);
+    // calc.js antigo vindo do cache não tem aliquotasPadraoPreco: o cálculo segue, só sem o aviso.
+    const sug = typeof C.aliquotasPadraoPreco === 'function' ? C.aliquotasPadraoPreco(d.ano) : null;
     const avisoIbs = Number(d.ano) >= 2029 && d.ibs <= 0.1 && sug
       ? listaAlertas([['IBS', `Em ${d.ano}, o IBS não é mais de 0,1%: a estimativa da calculadora para o ano é de ${n2.format(sug.ibsPct)}%. Com ${n6.format(d.ibs)}%, o total da nota fica subestimado. Ajuste o campo IBS.`]])
       : '';
@@ -514,7 +515,9 @@ function iniciar() {
     form.elements.categoria.addEventListener('change', () => popularUnidades(form));
   }
   // CC-PRECO-01: ao trocar o ano, CBS e IBS recebem a estimativa do ano (aliquotasPadraoPreco), só se o usuário não editou o campo.
-  if (id === 'preco-reforma-tributaria') {
+  // Sem a função (calc.js antigo vindo do cache), a página funciona como antes, sem o preenchimento por ano:
+  // um erro aqui, fora do try e antes de `rodar`, deixaria a calculadora sem resultado e o botão quebrado.
+  if (id === 'preco-reforma-tributaria' && typeof C.aliquotasPadraoPreco === 'function') {
     const campos = ['cbs', 'ibs'].map((nome) => form.elements[nome]);
     for (const el of campos) el.dataset.padrao = el.defaultValue;
     const aplicarAno = () => {
