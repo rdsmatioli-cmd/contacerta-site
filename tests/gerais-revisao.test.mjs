@@ -246,3 +246,13 @@ test('CC-PRECO-01: ui.js tolera calc.js antigo vindo do cache (sem aliquotasPadr
   assert.match(ui, /if \(id === 'preco-reforma-tributaria' && typeof C\.aliquotasPadraoPreco === 'function'\) \{/);
   assert.match(ui, /const sug = typeof C\.aliquotasPadraoPreco === 'function' \? C\.aliquotasPadraoPreco\(d\.ano\) : null;/);
 });
+
+test('CC-PARC-01: com "não se aplica", a nota fixa não manda comparar os juros embutidos', () => {
+  const frase = 'compare só os juros embutidos';
+  // a frase aparece uma vez, condicionada a semTaxa ser falso; a ressalva do rendimento continua sempre
+  assert.equal(ui.split(frase).length - 1, 1);
+  assert.match(ui, /`<p class="nota">O rendimento é bruto, sem imposto de renda\.\$\{semTaxa \? '' : ' Se o dinheiro não fosse ficar aplicado, compare só os juros embutidos: qualquer taxa acima de zero significa que à vista é mais barato\.'\}<\/p>`/);
+  assert.match(ui, /Compare pelo desconto à vista\.<\/p>' : ''\)/);
+  // o caso do achado continua sem taxa (à vista R$ 100, 1 parcela de R$ 120 no ato)
+  assert.equal(C.parceladoOuVista({ vista: 100, parcelas: 1, valorParcela: 120, comEntrada: true }).taxaImplicita, null);
+});

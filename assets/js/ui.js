@@ -363,7 +363,9 @@ const CALCS = {
       ['Rendimento do seu dinheiro (ao mês)', pct(r.rendimentoMensal)],
       ['Valor das parcelas trazido a hoje', R(r.vp), 'sub'],
       [r.vantagem >= 0 ? 'Economia ao parcelar' : 'Economia ao pagar à vista', R(Math.abs(r.vantagem)), 'total'],
-    ]) + (semTaxa ? '<p class="nota">Juros embutidos não se aplicam: a parcela paga no ato já é igual ou maior que o preço à vista, sem prazo que explique a diferença. Compare pelo desconto à vista.</p>' : '') + '<p class="nota">O rendimento é bruto, sem imposto de renda. Se o dinheiro não fosse ficar aplicado, compare só os juros embutidos: qualquer taxa acima de zero significa que à vista é mais barato.</p>';
+    ]) + (semTaxa ? '<p class="nota">Juros embutidos não se aplicam: a parcela paga no ato já é igual ou maior que o preço à vista, sem prazo que explique a diferença. Compare pelo desconto à vista.</p>' : '')
+      // Sem taxa, a orientação de comparar os juros embutidos contradiz a nota acima: fica só a ressalva do rendimento.
+      + `<p class="nota">O rendimento é bruto, sem imposto de renda.${semTaxa ? '' : ' Se o dinheiro não fosse ficar aplicado, compare só os juros embutidos: qualquer taxa acima de zero significa que à vista é mais barato.'}</p>`;
   },
   'conversor-de-medidas'(d) {
     const v = C.converter(d.valor, d.categoria, d.de, d.para);
