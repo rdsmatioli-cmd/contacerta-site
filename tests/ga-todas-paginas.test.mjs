@@ -6,6 +6,8 @@
 //   tem o botão para rever a escolha;
 // - /licitacoes/ promete "sem ferramentas de análise": nada de lcm-consent, data-ga4, ID de medição nem
 //   script de outro domínio, e a CSP da página só aceita script do próprio site.
+// - nenhum script publicado (*.js e *.mjs fora de tests/, .git e node_modules) carrega o Google por conta própria nem
+//   traz o ID de medição; a exceção é o próprio assets/lcm-consent.js, que só liga o GA4 depois do aceite.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -20,6 +22,13 @@ const listar = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
   return d.name.endsWith('.html') && !d.name.startsWith('google') ? [relative(raiz, p).split(sep).join('/')] : [];
 });
 const paginas = listar(raiz).sort();
+const listarJs = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((d) => {
+  if (['.git', 'node_modules', 'tests'].includes(d.name)) return [];
+  const p = join(dir, d.name);
+  if (d.isDirectory()) return listarJs(p);
+  return /\.m?js$/.test(d.name) ? [relative(raiz, p).split(sep).join('/')] : [];
+});
+const scripts = listarJs(raiz).filter((p) => p !== 'assets/lcm-consent.js').sort();
 const ler = (p) => readFileSync(join(raiz, p), 'utf8');
 const ehLicitacoes = (p) => p.startsWith('licitacoes/');
 
@@ -36,6 +45,20 @@ test('a varredura é recursiva: acha páginas da raiz, do blog e de /licitacoes/
   assert.ok(paginas.filter((p) => !ehLicitacoes(p)).length >= 50);
   assert.ok(!paginas.some((p) => /(^|\/)google[^/]*\.html$/.test(p)));
 });
+
+test('a varredura de scripts é recursiva e só deixa de fora o lcm-consent', () => {
+  for (const p of ['assets/js/ui.js', 'assets/js/calc.js', 'assets/js/medicao.js', 'licitacoes/assets/app.js']) assert.ok(scripts.includes(p), p);
+  assert.ok(!scripts.includes('assets/lcm-consent.js'));
+  assert.ok(!scripts.some((p) => p.startsWith('tests/')));
+});
+
+for (const p of scripts) {
+  test(`${p}: nenhum Google direto nem ID de medição`, () => {
+    const js = ler(p);
+    assert.doesNotMatch(js, PROIBIDO);
+    assert.equal((js.match(ID_MEDICAO) || []).length, 0);
+  });
+}
 
 for (const p of paginas.filter((x) => !ehLicitacoes(x))) {
   test(`${p}: GA4 só pelo lcm-consent, uma vez, e nenhum Google direto`, () => {
