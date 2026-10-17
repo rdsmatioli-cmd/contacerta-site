@@ -93,6 +93,12 @@ const CALCS = {
   rescisao(d) {
     const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, vencidasEmDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'], saldoFgts: d.saldoFgts, dependentes: d.dependentes, dataPagamento: d.dataPagamento });
     if (!r) return '<p class="erro">Confira as datas: o desligamento deve ser depois da admissão.</p>';
+    const elD = document.getElementById('f-desligamento');
+    if (elD) elD.removeAttribute('aria-invalid');
+    if (r.anteriorTabelas) {
+      if (elD) elD.setAttribute('aria-invalid', 'true');
+      return `<div class="erro" role="alert"><p><strong>Confira o campo antes de calcular:</strong></p><ul><li><a href="#f-desligamento">Data do desligamento (último dia)</a>: ${esc(`A calculadora tem as tabelas de INSS e de IR a partir de janeiro de ${r.primeiroAno}. Para desligamento anterior, o cálculo precisa ser feito com as tabelas da época.`)}</li></ul></div>`;
+    }
     const vp = validarDataPagamento(d.desligamento, d.dataPagamento);
     const elP = document.getElementById('f-dataPagamento');
     if (elP) elP.removeAttribute('aria-invalid');
@@ -118,7 +124,7 @@ const CALCS = {
       : destaque('Valor líquido estimado da rescisão', R(r.liquido));
     return alertaPag + topo + tabela([
       [`Saldo de salário (${r.diasNoMes} dias)`, R(r.saldoSalario)],
-      r.avisoIndenizado ? [`Aviso prévio indenizado (${r.diasProjecao} dias)`, R(r.avisoIndenizado)] : null,
+      r.avisoIndenizado ? [d.tipo === 'acordo' ? `Aviso prévio indenizado (${n2.format(r.diasAviso / 2)} dias, metade de ${r.diasAviso})` : `Aviso prévio indenizado (${r.diasProjecao} dias)`, R(r.avisoIndenizado)] : null,
       ...(r.avos13Anterior ? [[`13º proporcional de ${r.anoDes} (${r.avos13Anterior}/12)`, R(r.decimoAnterior)], [`13º proporcional de ${r.anoFim}, pela projeção do aviso (${r.avos13Atual}/12)`, R(r.decimoAtual)]] : [[`13º proporcional (${r.avos13}/12)`, R(r.decimo)]]),
       [`Férias proporcionais (${r.avosFerias}/12)`, R(r.feriasProp)],
       r.feriasVencSimples ? [`Férias vencidas (${r.periodosVenc} ${r.periodosVenc === 1 ? 'período' : 'períodos'})`, R(r.feriasVencSimples)] : null,
@@ -132,9 +138,10 @@ const CALCS = {
       r.ir13 ? ['IRRF sobre 13º', `− ${R(r.ir13)}`] : null,
       r.descontoAviso ? ['Desconto do aviso prévio não cumprido', `− ${R(r.descontoAviso)}`] : null,
       ['Líquido a receber na rescisão', R(r.liquido), 'total'],
+      (r.multaFgts || r.saqueFgts) && r.depositoFgtsRescisao ? ['Depósito do FGTS sobre as verbas da rescisão (8%, somado ao saldo informado)', R(r.depositoFgtsRescisao)] : null,
       r.multaFgts ? [`Multa do FGTS (depositada na conta do FGTS)`, R(r.multaFgts)] : null,
       r.saqueFgts ? ['Saque do saldo do FGTS', R(r.saqueFgts)] : null,
-    ]) + (d.tipo === 'justaCausa' ? '' : `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`) + (r.avos13Anterior ? `<p class="nota">Quando o 13º abrange dois anos pela projeção do aviso, o INSS é calculado separadamente por ano, com a tabela de cada ano, e o IR incide sobre o total, num pagamento único. A prática de folha varia nesse ponto.${r.tabelasSubstituidas.map(([a, b]) => ` A tabela do INSS de ${a} ainda não está disponível no site; foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`).join('')}</p>` : '') + `<p class="nota">IRRF pela data de pagamento (${r.dataPagamento.split('-').reverse().join('/')}${r.pagamentoInformado ? '' : ', data do desligamento, pois não foi informada outra'}): tabela de ${r.tabelaIrrf.rotulo}${r.tabelaIrrf.ano >= 2026 ? ', com a redução da Lei 15.270/2025' : ', sem a redução da Lei 15.270/2025 (vigente a partir de 2026)'}.${r.inssSaldoSubstituida ? ` A tabela do INSS de ${r.inssSaldoSubstituida[0]} ainda não está disponível no site; para o saldo de salário foi usada a de ${r.inssSaldoSubstituida[1]}, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}${r.tabelaIrrf.substituida ? ` Ainda não há tabela do IR de ${r.tabelaIrrf.anoPagamento} no site; foi usada a mais recente, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}</p>` + (d.tipo === 'acordo' ? '<p class="nota">No acordo (CLT, art. 484-A), o aviso indenizado é pago pela metade, e a calculadora projeta também metade do prazo no tempo de serviço, que é o entendimento predominante. A lei não trata expressamente da projeção, e há decisões que projetam o aviso inteiro.</p>' : '');
+    ]) + (d.tipo === 'justaCausa' ? '' : `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`) + (r.avos13Anterior ? `<p class="nota">Quando o 13º abrange dois anos pela projeção do aviso, o INSS é calculado separadamente por ano, com a tabela de cada ano, e o IR incide sobre o total, num pagamento único. A prática de folha varia nesse ponto.${r.tabelasSubstituidas.map(([a, b]) => ` A tabela do INSS de ${a} ainda não está disponível no site; foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`).join('')}</p>` : '') + `<p class="nota">IRRF pela data de pagamento (${r.dataPagamento.split('-').reverse().join('/')}${r.pagamentoInformado ? '' : ', data do desligamento, pois não foi informada outra'}): tabela de ${r.tabelaIrrf.rotulo}${r.tabelaIrrf.ano >= 2026 ? ', com a redução da Lei 15.270/2025' : ', sem a redução da Lei 15.270/2025 (vigente a partir de 2026)'}.${r.inssSaldoSubstituida ? ` A tabela do INSS de ${r.inssSaldoSubstituida[0]} ainda não está disponível no site; para o saldo de salário foi usada a de ${r.inssSaldoSubstituida[1]}, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}${r.avos13Anterior ? '' : r.tabelasSubstituidas.map(([a, b]) => (r.inssSaldoSubstituida && r.inssSaldoSubstituida[0] === a ? ` A mesma tabela foi usada no INSS do 13º.` : ` A tabela do INSS de ${a} ainda não está disponível no site; para o 13º foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`)).join('')}${r.tabelaIrrf.substituida ? ` Ainda não há tabela do IR de ${r.tabelaIrrf.anoPagamento} no site; foi usada a mais recente, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}</p>` + (d.tipo === 'acordo' ? '<p class="nota">No acordo (CLT, art. 484-A), o aviso indenizado é pago pela metade, e a calculadora projeta também metade do prazo no tempo de serviço, que é o entendimento predominante. A lei não trata expressamente da projeção, e há decisões que projetam o aviso inteiro.</p>' : '');
   },
   'decimo-terceiro'(d) {
     const r = C.decimoTerceiro({ salario: d.salario, meses: d.meses, mediaVariaveis: d.media, dependentes: d.dependentes });
@@ -164,6 +171,7 @@ const CALCS = {
     const r = C.fgts({ salario: d.salario, meses: d.meses, saldoAtual: d.saldo, aprendiz: d.aprendiz, comRendimento: d.rendimento, tipo: d.tipo });
     return destaque('Saldo estimado do FGTS', R(r.saldo)) + tabela([
       ['Depósito mensal do empregador', R(r.deposito)],
+      r.depositosAnuais ? [`Depósito anual sobre 13º e 1/3 de férias (${r.depositosAnuais} ${r.depositosAnuais === 1 ? 'vez' : 'vezes'})`, R(r.depositoAnual)] : null,
       ['Total depositado no período', R(r.depositado)],
       d.rendimento ? ['Rendimento estimado (3% a.a.)', R(r.rendimento)] : null,
       ['Saldo estimado', R(r.saldo), 'sub'],
@@ -284,7 +292,11 @@ const CALCS = {
   },
   'adicional-noturno'(d) {
     const r = C.adicionalNoturno({ salario: d.salario, jornadaMensal: d.jornada, horas: d.horas, tipo: d.tipo, percentual: d.percentual, diasUteis: d.diasUteis, domingosFeriados: d.domingos });
-    return destaque('Adicional noturno + DSR', R(r.total)) + tabela([
+    // Percentual abaixo do mínimo legal: o cálculo usa o mínimo, com aviso no campo e no resultado.
+    const avisoPiso = r.pisoAplicado ? `O mínimo legal para o trabalhador ${d.tipo === 'rural' ? 'rural é 25% (Lei 5.889/1973, art. 7º)' : 'urbano é 20% (CLT, art. 73)'}; o cálculo usa ${pct(r.pct, 0)}.` : '';
+    const msgPct = document.getElementById('f-percentual-msg');
+    if (msgPct && avisoPiso) { msgPct.textContent = avisoPiso; msgPct.hidden = false; msgPct.className = 'campo-msg'; }
+    return listaAvisos(avisoPiso ? [['Percentual do adicional', avisoPiso]] : []) + destaque('Adicional noturno + DSR', R(r.total)) + tabela([
       ['Valor da hora normal', R(r.valorHora)],
       ['Valor da hora noturna (com adicional)', R(r.valorHoraNoturna)],
       [`Horas trabalhadas no relógio`, `${n2.format(r.horasRelogio)} h`],
@@ -298,14 +310,15 @@ const CALCS = {
     const r = C.avisoPrevio({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo });
     if (!r) return '<p class="erro">Confira as datas: o desligamento deve ser depois da admissão.</p>';
     const fimBR = r.fimProjetado.split('-').reverse().join('/');
-    return destaque('Aviso prévio', `${r.dias} dias`) + tabela([
+    const acordo = d.tipo === 'acordo';
+    return destaque('Aviso prévio', `${n2.format(r.diasValor)} dias`) + tabela([
       ['Anos completos de empresa', String(r.anos)],
       ['Aviso pela Lei 12.506/2011 (30 + 3 por ano)', `${r.diasLei} dias`],
       d.tipo === 'pedidoDemissao' ? ['No pedido de demissão (sem proporcional)', '30 dias'] : null,
-      d.tipo === 'acordo' ? ['No acordo (art. 484-A da CLT)', 'metade'] : null,
+      acordo ? ['No acordo (art. 484-A da CLT): metade do aviso', `${n2.format(r.diasValor)} dias`] : null,
       ['Valor de um dia de salário', R(r.diaria)],
       [d.tipo === 'pedidoDemissao' ? 'Valor do aviso (desconto se não for cumprido)' : 'Valor do aviso indenizado', R(r.valor), 'total'],
-      d.tipo !== 'pedidoDemissao' ? ['Data final com a projeção do aviso', fimBR] : null,
+      d.tipo !== 'pedidoDemissao' ? [acordo ? `Data final com a projeção do aviso (${r.dias} dias, metade arredondada para baixo)` : 'Data final com a projeção do aviso', fimBR] : null,
     ]);
   },
   'custo-funcionario'(d) {
@@ -491,6 +504,18 @@ function iniciar() {
   // valores padrão dinâmicos
   for (const el of form.querySelectorAll('[data-hoje]')) if (!el.value) el.value = hoje();
   for (const el of form.querySelectorAll('[data-indicador]')) if (el.value === '') el.value = String(INDICADORES[el.dataset.indicador]).replace('.', ',');
+  // Adicional noturno: ao trocar urbano/rural, o percentual acompanha o mínimo legal (20% ou 25%),
+  // salvo se o usuário digitou outro valor.
+  if (id === 'adicional-noturno' && form.elements.tipo && form.elements.percentual) {
+    const pisoTxt = (t) => (t === 'rural' ? '25' : '20');
+    let tipoAnterior = form.elements.tipo.value;
+    form.elements.tipo.addEventListener('change', () => {
+      const el = form.elements.percentual;
+      const v = el.value.trim();
+      if (v === '' || v === pisoTxt(tipoAnterior)) el.value = pisoTxt(form.elements.tipo.value);
+      tipoAnterior = form.elements.tipo.value;
+    });
+  }
   if (id === 'conversor-de-medidas') {
     popularUnidades(form);
     form.elements.categoria.addEventListener('change', () => popularUnidades(form));

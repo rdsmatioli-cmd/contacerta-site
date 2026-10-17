@@ -55,7 +55,7 @@
 <div class="campo"><label for="f-dependentes">Número de dependentes (IR)</label><div class="entrada"><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="f-dependentes" name="dependentes" data-num data-min="0" data-teto="30" value="0" data-inteiro aria-describedby="f-dependentes-msg"></div><p class="campo-msg" id="f-dependentes-msg" hidden></p></div>
 <div class="campo"><label for="f-pensao">Pensão alimentícia descontada</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-pensao" name="pensao" data-num data-min="0" data-teto="100000000" value="0" aria-describedby="f-pensao-msg"></div><p class="campo-msg" id="f-pensao-msg" hidden></p></div>
 <div class="campo"><label for="f-outros">Outros descontos (plano de saúde, VR etc.)</label><div class="entrada"><span class="pre" aria-hidden="true">R$</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="f-outros" name="outros" data-num data-min="0" data-teto="100000000" value="0" aria-describedby="f-outros-msg"></div><p class="campo-msg" id="f-outros-msg" hidden></p></div>
-<div class="campo check"><input type="checkbox" id="f-vt" name="vt"><label for="f-vt">Descontar vale-transporte (6% do salário)</label></div></div>
+<div class="campo check"><input type="checkbox" id="f-vt" name="vt"><label for="f-vt">Descontar vale-transporte (6% do valor digitado; por lei, o desconto é de até 6% do salário-base e não passa do custo das passagens)</label></div></div>
 <button type="submit" disabled data-requer-js>Calcular</button>
 </form>
 <div class="calc-saida">

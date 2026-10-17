@@ -19,7 +19,7 @@ export default {
     { n: 'feriasVencidas', l: 'Períodos de férias vencidas não tiradas', t: 'int', v: 0, max: 2, ajuda: 'Informe só os períodos que já estavam vencidos na data real do desligamento. O período completado durante a projeção do aviso entra no cálculo automaticamente.', avisoMax: 'A CLT não limita a 2 os períodos de férias vencidas, mas esta calculadora considera no máximo 2. Com mais de 2 períodos, faça o cálculo manualmente.' },
     { n: 'dobro1', l: '1º período vencido: prazo de concessão já venceu?', t: 'select', v: 'nao', o: [['nao', 'Não'], ['sim', 'Sim']], ajudaMaisRotulo: 'Quando marcar Sim?', ajudaMais: 'Marque Sim se a empresa não concedeu essas férias nos 12 meses seguintes ao fim do período aquisitivo. Nesse caso, elas são pagas em dobro, com o 1/3 também em dobro (art. 137 da CLT). Períodos muito antigos podem estar prescritos: o prazo de 5 anos conta do fim do prazo de concessão, limitado a 2 anos após o fim do contrato (art. 149 da CLT; CF, art. 7º, XXIX).' },
     { n: 'dobro2', l: '2º período vencido: prazo de concessão já venceu?', t: 'select', v: 'nao', o: [['nao', 'Não'], ['sim', 'Sim']] },
-    { n: 'saldoFgts', l: 'Saldo do FGTS (para a multa)', t: 'money', v: 12000, ajuda: 'Consulte no app FGTS. Inclua os depósitos feitos durante o contrato.' },
+    { n: 'saldoFgts', l: 'Saldo do FGTS (para a multa)', t: 'money', v: 12000, ajuda: 'Consulte no app FGTS. Inclua os depósitos feitos durante o contrato; se o do mês anterior ainda não aparecer, some-o. Não inclua o depósito sobre as verbas da rescisão (saldo de salário, aviso indenizado e 13º): o app ainda não o mostra e a calculadora já o soma.' },
     { n: 'dependentes', l: 'Dependentes para IR', t: 'int', v: 0 },
   ],
   aviso: 'Cálculo estimativo. Não considera médias de horas extras e comissões, adicionais, convenção coletiva, estabilidades nem descontos de adiantamentos. Confira o termo de rescisão (TRCT) com o sindicato ou um advogado.',
@@ -39,7 +39,7 @@ export default {
 </tbody></table>
 <h2>Como cada parte é calculada</h2>
 <h3>Saldo de salário</h3>
-<p>São os dias trabalhados no mês da saída. A conta usa o mês comercial de 30 dias: salário ÷ 30 × dias trabalhados.</p>
+<p>São os dias trabalhados no mês da saída. A conta usa o mês comercial de 30 dias: salário ÷ 30 × dias trabalhados. Se a admissão foi no próprio mês, contam só os dias desde a admissão, também pelo mês de 30 dias: quem entra no dia 10 e sai no último dia do mês recebe 21 dias, em qualquer mês. Quem trabalha o mês inteiro recebe os 30 dias, inclusive em fevereiro; há empresas que pagam 28 ou 29 dias nesse caso, e a prática varia.</p>
 <h3>Aviso prévio proporcional</h3>
 <p>Pela Lei 12.506/2011, o aviso é de 30 dias mais 3 dias por ano completo de trabalho, até o máximo de 90 dias. Quando indenizado, esse período também conta como tempo de serviço (a chamada projeção do aviso) e pode acrescentar avos de 13º e de férias.</p>
 <h3>13º e férias proporcionais</h3>
@@ -60,7 +60,7 @@ export default {
 <li>Férias proporcionais: 9/12 = R$ 3.000,00, mais 1/3 = R$ 1.000,00.</li>
 <li>Descontos: INSS de R$ 155,69 sobre o saldo e R$ 288,60 sobre o 13º; IR zerado.</li>
 </ul>
-<p>Total líquido estimado no termo de rescisão: R$ 14.089,04. Além disso, ela recebe a multa de R$ 4.800,00 no FGTS e pode sacar todo o saldo.</p>
+<p>Total líquido estimado no termo de rescisão: R$ 14.089,04. Além disso, a empresa deposita no FGTS R$ 842,67 (8% sobre saldo de salário, aviso e 13º) e a multa de R$ 5.137,07 (40% sobre R$ 12.842,67), e ela pode sacar todo o saldo.</p>
 <h2>Prazos e cuidados</h2>
 <p>A empresa tem até 10 dias corridos após o fim do contrato para pagar as verbas e entregar os documentos (art. 477 da CLT). O atraso gera multa de um salário a favor do trabalhador. Guarde o termo de rescisão, as guias do FGTS e os holerites para conferir os valores.</p>`,
   faq: [...faqExtra('rescisao'),
