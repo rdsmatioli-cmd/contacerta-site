@@ -278,6 +278,8 @@ details>div{color:var(--suave)}
 .le-form .le-ok{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:.92rem;line-height:1.45}
 .le-form .le-ok input{width:22px;min-height:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--verde)}
 .le-form{position:relative}
+.le-form input:focus-visible,.le-form select:focus-visible{outline:3px solid var(--verde);outline-offset:2px}
+@media (prefers-color-scheme:dark){.le-botao,.le-form button{color:var(--tinta)}}
 
 /* Recomendação e assinatura do resultado (simuladores da Reforma, 10/10/2026) */
 .recomenda{border-radius:12px;padding:14px 16px;margin:0 0 12px;border:1.5px solid var(--borda);background:var(--card)}
