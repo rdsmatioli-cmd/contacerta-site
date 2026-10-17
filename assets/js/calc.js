@@ -1,5 +1,5 @@
 // Funções puras de cálculo. Usadas pelo navegador (ui.js) e pelos testes (node --test).
-import { INSS, INSS_POR_ANO, IRRF_POR_DATA, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=c4c802ed8b';
+import { INSS, INSS_POR_ANO, IRRF_POR_DATA, IRRF, IR_RENDA_FIXA, MEI, SEGURO_DESEMPREGO, FGTS, SALARIO_MINIMO } from './tabelas.js?v=2469a7d685';
 
 /** Arredonda para 2 casas (meio para cima), imune a ruído de ponto flutuante. */
 export function r2(x) {
@@ -60,11 +60,16 @@ export function reducaoLei15270(rendimentos, imposto, T = IRRF) {
  * Compara deduções legais (INSS + dependentes + pensão + outras) com o desconto simplificado
  * e usa a opção mais vantajosa, depois aplica a redução da Lei 15.270/2025.
  */
-/** Tabela de IRRF pela data de pagamento (regime de caixa); ano sem tabela usa a mais recente (substituida = true). */
+/**
+ * Tabela de IRRF pela data de pagamento (regime de caixa); ano posterior sem tabela usa a mais recente (substituida = true).
+ * Data anterior à primeira tabela: devolve a primeira com anterior = true (a rescisão bloqueia esse caso).
+ */
 export function tabelaIrrfPorData(dataISO) {
   const s = String(dataISO || '').slice(0, 10);
+  const primeira = IRRF_POR_DATA[0];
   const ultima = IRRF_POR_DATA[IRRF_POR_DATA.length - 1];
   const ano = Number(s.slice(0, 4));
+  if (s < primeira.desde) return { tabela: primeira.t, ano: primeira.ano, anoPagamento: ano, substituida: false, anterior: true };
   if (!IRRF_POR_DATA.some((e) => e.ano === ano)) return { tabela: ultima.t, ano: ultima.ano, anoPagamento: ano, substituida: true };
   const e = IRRF_POR_DATA.filter((x) => x.desde <= s).pop();
   return { tabela: e.t, ano: e.ano, anoPagamento: ano, substituida: false };
@@ -152,17 +157,25 @@ export function horasExtras({ salario, jornadaMensal = 220, horas50 = 0, horas10
  */
 export function adicionalNoturno({ salario, jornadaMensal = 220, horas = 0, tipo = 'urbano', percentual, diasUteis = 0, domingosFeriados = 0 }) {
   const rural = tipo === 'rural';
-  const pct = num(percentual, rural ? 25 : 20) / 100;
+  // Percentual abaixo do mínimo legal (20% urbano, 25% rural) é elevado ao mínimo (pisoAplicado = true).
+  const piso = rural ? 25 : 20;
+  const informado = num(percentual, piso);
+  const pisoAplicado = informado < piso;
+  const pct = Math.max(informado, piso) / 100;
   const valorHora = num(salario) / Math.max(1, num(jornadaMensal, 220));
   const horasRelogio = num(horas);
   const horasConsideradas = rural ? horasRelogio : (horasRelogio * 60) / 52.5;
   const adicional = r2(valorHora * pct * horasConsideradas);
   const dsr = num(diasUteis) > 0 ? r2((adicional / num(diasUteis)) * num(domingosFeriados)) : 0;
-  return { valorHora: r2(valorHora), horasRelogio, horasConsideradas: r2(horasConsideradas), pct, adicional, dsr, total: r2(adicional + dsr), valorHoraNoturna: r2(valorHora * (1 + pct)) };
+  return { valorHora: r2(valorHora), horasRelogio, horasConsideradas: r2(horasConsideradas), pct, piso: piso / 100, pisoAplicado, adicional, dsr, total: r2(adicional + dsr), valorHoraNoturna: r2(valorHora * (1 + pct)) };
 }
 
 // ---------------------------------------------------------------- Aviso prévio
-/** tipo: semJustaCausa | pedidoDemissao | acordo. Proporcionalidade da Lei 12.506/2011 só a favor do empregado. */
+/**
+ * tipo: semJustaCausa | pedidoDemissao | acordo. Proporcionalidade da Lei 12.506/2011 só a favor do empregado.
+ * Acordo (CLT, art. 484-A, I, a): o valor é a metade exata do aviso (diasValor pode ser fracionário, ex.: 25,5);
+ * a projeção no tempo de serviço usa a metade arredondada para baixo (dias).
+ */
 export function avisoPrevio({ salario, admissao, desligamento, tipo = 'semJustaCausa' }) {
   const dAdm = parseData(admissao);
   const dDes = parseData(desligamento);
@@ -170,10 +183,11 @@ export function avisoPrevio({ salario, admissao, desligamento, tipo = 'semJustaC
   const anos = anosCompletos(dAdm, dDes);
   const diasLei = diasAvisoPrevio(dAdm, dDes);
   const dias = tipo === 'pedidoDemissao' ? 30 : tipo === 'acordo' ? Math.floor(diasLei / 2) : diasLei;
+  const diasValor = tipo === 'acordo' ? diasLei / 2 : dias;
   const diaria = num(salario) / 30;
-  const valor = r2(diaria * dias);
+  const valor = r2(diaria * diasValor);
   const fim = addDias(dDes, dias).toISOString().slice(0, 10);
-  return { anos, diasLei, dias, valor, fimProjetado: fim, diaria: r2(diaria) };
+  return { anos, diasLei, dias, diasValor, valor, fimProjetado: fim, diaria: r2(diaria) };
 }
 
 // ---------------------------------------------------------------- Custo do funcionário
@@ -233,20 +247,27 @@ export function parceladoOuVista({ vista, parcelas, valorParcela, comEntrada = f
   const total = r2(P * n);
   // taxa implícita: resolve V = VP(parcelas, i) por bisseção
   let taxaImplicita = 0;
-  if (V > 0 && total > V && !(comEntrada && n === 1)) {
-    let lo = 0;
-    let hi = 1;
-    for (let k = 0; k < 200; k++) {
-      const mid = (lo + hi) / 2;
-      if (valorPresenteParcelas(P, n, mid, comEntrada) > V) lo = mid; else hi = mid;
+  if (V > 0 && total > V) {
+    // Parcela no ato igual ou maior que o preço à vista (inclui a parcela única no ato): sem prazo que explique
+    // a diferença, nenhuma taxa iguala as parcelas ao preço à vista. null = "não se aplica" (não é 0%).
+    if (comEntrada && P >= V) taxaImplicita = null;
+    else {
+      let lo = 0;
+      let hi = 1;
+      // Teto dinâmico: dobra enquanto as parcelas descontadas a hi ainda valem mais que o preço à vista (limite 1e6).
+      while (hi < 1e6 && valorPresenteParcelas(P, n, hi, comEntrada) > V) hi *= 2;
+      for (let k = 0; k < 200; k++) {
+        const mid = (lo + hi) / 2;
+        if (valorPresenteParcelas(P, n, mid, comEntrada) > V) lo = mid; else hi = mid;
+      }
+      taxaImplicita = (lo + hi) / 2;
     }
-    taxaImplicita = (lo + hi) / 2;
   }
   const rend = taxaMensalDeAnual(rendimentoAnual);
   const vp = r2(valorPresenteParcelas(P, n, rend, comEntrada));
   const vantagem = r2(V - vp); // > 0: parcelar e aplicar o dinheiro sai mais barato
   return {
-    total, taxaImplicita, taxaImplicitaAnual: Math.pow(1 + taxaImplicita, 12) - 1, descontoVista: total > 0 ? 1 - V / total : 0,
+    total, taxaImplicita, taxaImplicitaAnual: taxaImplicita === null ? null : Math.pow(1 + taxaImplicita, 12) - 1, descontoVista: total > 0 ? 1 - V / total : 0,
     rendimentoMensal: rend, vp, vantagem, melhor: Math.abs(vantagem) < 0.005 ? 'empate' : vantagem > 0 ? 'parcelado' : 'vista',
   };
 }
@@ -273,19 +294,25 @@ export function seguroDesemprego({ salarios = [], solicitacao = 1, mesesTrabalha
 }
 
 // ---------------------------------------------------------------- FGTS
+/**
+ * Depósitos mensais sobre o salário e, a cada 12 meses de contrato, depósitos sobre o 13º e o 1/3 de férias gozadas
+ * (Lei 8.036/1990, art. 15): aliq × (salário + salário ÷ 3).
+ */
 export function fgts({ salario, meses, saldoAtual = 0, aprendiz = false, comRendimento = true, tipo = 'semJustaCausa' }) {
   const aliq = aprendiz ? FGTS.aliquotaAprendiz : FGTS.aliquota;
   const deposito = r2(num(salario) * aliq);
+  const depositoAnual = r2(num(salario) * aliq + (num(salario) / 3) * aliq);
   const n = Math.max(0, Math.floor(num(meses)));
   const i = comRendimento ? Math.pow(1 + FGTS.jurosAnuais, 1 / 12) - 1 : 0;
   let saldo = num(saldoAtual);
-  for (let k = 0; k < n; k++) saldo = saldo * (1 + i) + deposito;
+  for (let k = 1; k <= n; k++) saldo = saldo * (1 + i) + deposito + (k % 12 === 0 ? depositoAnual : 0);
   saldo = r2(saldo);
-  const depositado = r2(deposito * n);
+  const depositosAnuais = Math.floor(n / 12);
+  const depositado = r2(deposito * n + depositoAnual * depositosAnuais);
   const multaPct = tipo === 'semJustaCausa' ? FGTS.multaSemJustaCausa : tipo === 'acordo' ? FGTS.multaAcordo : 0;
   const multa = r2(saldo * multaPct);
   const saquePct = tipo === 'semJustaCausa' ? 1 : tipo === 'acordo' ? 0.8 : 0;
-  return { deposito, depositado, saldo, rendimento: r2(saldo - depositado - num(saldoAtual)), multa, multaPct, saque: r2(saldo * saquePct + multa) };
+  return { deposito, depositoAnual, depositosAnuais, depositado, saldo, rendimento: r2(saldo - depositado - num(saldoAtual)), multa, multaPct, saque: r2(saldo * saquePct + multa) };
 }
 
 // ---------------------------------------------------------------- Datas
@@ -315,6 +342,11 @@ export function idade(nascimento, referencia) {
   if (dias < 0) {
     meses -= 1;
     dias += new Date(Date.UTC(r.getUTCFullYear(), r.getUTCMonth(), 0)).getUTCDate();
+    // Fevereiro curto (ex.: 31/01 → 01/03): os dias do mês anterior não bastam; empresta também o mês antes dele.
+    if (dias < 0) {
+      meses -= 1;
+      dias += new Date(Date.UTC(r.getUTCFullYear(), r.getUTCMonth() - 1, 0)).getUTCDate();
+    }
   }
   if (meses < 0) { anos -= 1; meses += 12; }
   const totalDias = diffDias(n, r);
@@ -366,17 +398,40 @@ export function avosFerias(admissao, fim) {
 }
 
 // ---------------------------------------------------------------- Rescisão
+/** Primeiro ano com tabelas de INSS e de IRRF no site; desligamentos anteriores não são calculados. */
+export const PRIMEIRO_ANO_TABELAS = Math.max(Math.min(...Object.keys(INSS_POR_ANO).map(Number)), Number(IRRF_POR_DATA[0].desde.slice(0, 4)));
+
+/**
+ * Dias do saldo de salário (mês comercial de 30 dias): conta da admissão, se ela caiu no mês do desligamento,
+ * ou do dia 1º. Desligamento no último dia do mês conta até o dia 30, com ou sem admissão no mês: o mês inteiro
+ * vale 30 dias (inclusive fevereiro) e a admissão no dia N dá 30 − N + 1 (02/02 a 28/02 = 29; 10/03 a 31/03 = 21).
+ */
+export function diasSaldoSalario(admissao, desligamento) {
+  const dAdm = parseData(admissao);
+  const dDes = parseData(desligamento);
+  const ano = dDes.getUTCFullYear();
+  const mes = dDes.getUTCMonth();
+  const admNoMes = dAdm.getTime() > Date.UTC(ano, mes, 1);
+  const ultimoDia = new Date(Date.UTC(ano, mes + 1, 0)).getUTCDate();
+  const fim = dDes.getUTCDate() === ultimoDia ? 30 : dDes.getUTCDate();
+  // Admissão no dia 31: no mês comercial vale como dia 30 (1 dia de saldo).
+  const de = admNoMes ? Math.min(30, dAdm.getUTCDate()) : 1;
+  return Math.min(30, fim - de + 1);
+}
+
 /**
  * tipo: semJustaCausa | pedidoDemissao | justaCausa | acordo
  * aviso: indenizado | trabalhado | naoCumprido (pedido de demissão sem cumprir: desconto de 30 dias)
+ * Desligamento antes de PRIMEIRO_ANO_TABELAS: devolve { anteriorTabelas: true, primeiroAno } sem calcular.
  */
 export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso = 'indenizado', feriasVencidas = 0, vencidasEmDobro = [], saldoFgts = 0, dependentes = 0, dataPagamento = '' }) {
   salario = num(salario);
   const dAdm = parseData(admissao);
   const dDes = parseData(desligamento);
   if (!(dDes >= dAdm)) return null;
+  if (dDes.getUTCFullYear() < PRIMEIRO_ANO_TABELAS) return { anteriorTabelas: true, primeiroAno: PRIMEIRO_ANO_TABELAS };
   const diaria = salario / 30;
-  const diasNoMes = Math.min(30, dDes.getUTCDate());
+  const diasNoMes = diasSaldoSalario(dAdm, dDes);
   const saldoSalario = r2(diaria * diasNoMes);
 
   const diasAviso = diasAvisoPrevio(dAdm, dDes);
@@ -384,7 +439,8 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
   let diasProjecao = 0;
   let descontoAviso = 0;
   if ((tipo === 'semJustaCausa') && aviso === 'indenizado') { avisoIndenizado = r2(diaria * diasAviso); diasProjecao = diasAviso; }
-  if (tipo === 'acordo') { const d = Math.floor(diasAviso / 2); avisoIndenizado = r2(diaria * d); diasProjecao = d; }
+  // Acordo (art. 484-A, I, a): valor pela metade exata; projeção pela metade arredondada para baixo.
+  if (tipo === 'acordo') { avisoIndenizado = r2((diaria * diasAviso) / 2); diasProjecao = Math.floor(diasAviso / 2); }
   if (tipo === 'pedidoDemissao' && aviso === 'naoCumprido') descontoAviso = r2(salario);
   const fimProjetado = addDias(dDes, diasProjecao);
 
@@ -445,12 +501,22 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
     inss13Anterior = inssEmpregado(decimoAnterior, ta.t).inss;
     inss13Atual = inssEmpregado(decimoAtual, tb.t).inss;
     inss13 = r2(inss13Anterior + inss13Atual);
-  } else inss13 = inssEmpregado(decimo).inss;
+  } else {
+    // 13º de um só ano: tabela do ano a que os avos pertencem (o do fim da projeção), como no ramo de dois anos.
+    const t13 = tabelaInss(anoFim);
+    if (decimo > 0 && t13.ano !== anoFim) tabelasSubstituidas.push([anoFim, t13.ano]);
+    inss13 = inssEmpregado(decimo, t13.t).inss;
+  }
   const ir13R = irrfMensal({ rendimentos: decimo, inss: inss13, dependentes, tabela: irTab.tabela });
   const ir13 = ir13R.irrf;
 
+  // FGTS (Lei 8.036/1990, arts. 15 e 18): o depósito de 8% sobre saldo de salário, aviso indenizado (Súmula 305 do TST)
+  // e 13º da rescisão ainda não aparece no app quando o saldo é consultado; entra na base da multa e do saque.
+  // Férias indenizadas não têm depósito.
+  const depositoFgtsRescisao = r2(FGTS.aliquota * (saldoSalario + avisoIndenizado + decimo));
+  const baseFgts = r2(num(saldoFgts) + depositoFgtsRescisao);
   const multaPct = tipo === 'semJustaCausa' ? 0.4 : tipo === 'acordo' ? 0.2 : 0;
-  const multaFgts = r2(num(saldoFgts) * multaPct);
+  const multaFgts = r2(baseFgts * multaPct);
   const saqueFgtsPct = tipo === 'semJustaCausa' ? 1 : tipo === 'acordo' ? 0.8 : 0;
 
   const verbas = r2(saldoSalario + avisoIndenizado + decimo + feriasProp + feriasVenc + tercoFerias);
@@ -459,7 +525,7 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
     diasNoMes, saldoSalario, diasAviso, diasProjecao, avisoIndenizado, avos13, avos13Anterior, avos13Atual, anoDes, anoFim, decimoAnterior, decimoAtual, decimo,
     avosFerias: avosF, feriasProp, feriasVenc, periodosVenc, periodosEmDobro, periodosProjecao, feriasVencSimples, dobraFeriasVenc, feriasProjecao, tercoFerias,
     dataPagamento: dataPag, pagamentoInformado, inssSaldo, inssSaldoSubstituida, irSaldo, inss13, inss13Anterior, inss13Atual, tabelasSubstituidas, ir13, ir13Base: ir13R.base, ir13Reducao: ir13R.reducao, irSaldoBase: irSaldoR.base, tabelaIrrf: { vigencia: irTab.tabela.vigencia, rotulo: irTab.tabela.rotulo, ano: irTab.ano, anoPagamento: irTab.anoPagamento, substituida: irTab.substituida }, descontoAviso, verbas, descontos, liquido: r2(verbas - descontos),
-    multaFgts, saqueFgts: r2(num(saldoFgts) * saqueFgtsPct), fimProjetado: fimProjetado.toISOString().slice(0, 10),
+    depositoFgtsRescisao, baseFgts, multaFgts, saqueFgts: r2(baseFgts * saqueFgtsPct), fimProjetado: fimProjetado.toISOString().slice(0, 10),
   };
 }
 const avos13Fn = avos13;
@@ -532,9 +598,12 @@ export function investimentos({ valor, dias, cdi, pctCdb = 100, pctLci = 90, sel
   const mk = (nome, bruto, ir) => ({ nome, rendimentoBruto: r2(bruto), ir: r2(ir), rendimentoLiquido: r2(bruto - ir), final: r2(V + bruto - ir), rentabilidadeLiquida: V > 0 ? (bruto - ir) / V : 0 });
   const cdbBruto = cresc(num(cdi) * num(pctCdb) / 100);
   const lciBruto = cresc(num(cdi) * num(pctLci) / 100);
-  const selicBruto = cresc(num(selic));
+  // Tesouro Selic rende a Selic efetiva (over), praticamente igual ao CDI e um pouco abaixo da meta: usa o CDI informado.
+  // A Selic meta (selic) entra só na regra da poupança, onde é a referência legal.
+  const selicBruto = cresc(num(cdi));
   // poupança: 0,5% a.m. + TR quando Selic > 8,5% a.a.; senão 70% da Selic + TR. Rende só a cada mês completo (aniversário).
-  const mesesPoup = Math.floor(d / 30);
+  // Meses completos aproximados por dias × 12 ÷ 365 (365 d = 12; 360 d = 11; 730 d = 24).
+  const mesesPoup = Math.floor((d * 12) / 365);
   const taxaPoup = num(selic) > 8.5 ? 0.005 + num(trMensal) / 100 : Math.pow(1 + (0.7 * num(selic)) / 100, 1 / 12) - 1 + num(trMensal) / 100;
   const poupBruto = V * Math.pow(1 + taxaPoup, mesesPoup) - V;
   return {
@@ -570,7 +639,9 @@ export function imc({ peso, altura }) {
   if (h > 3) h = h / 100; // aceita centímetros
   const p = num(peso);
   if (!(h > 0) || !(p > 0)) return null;
-  const valor = p / (h * h);
+  // Classifica pelo valor exibido (2 casas): 24,996 aparece como 25,00 e já é sobrepeso.
+  const arred = (kg) => Math.round((kg / (h * h)) * 100) / 100;
+  const valor = arred(p);
   let classe;
   if (valor < 18.5) classe = 'Abaixo do peso';
   else if (valor < 25) classe = 'Peso normal';
@@ -578,7 +649,10 @@ export function imc({ peso, altura }) {
   else if (valor < 35) classe = 'Obesidade grau I';
   else if (valor < 40) classe = 'Obesidade grau II';
   else classe = 'Obesidade grau III';
-  return { imc: Math.round(valor * 100) / 100, classe, pesoMin: r2(18.5 * h * h), pesoMax: r2(24.9 * h * h) };
+  // Teto da faixa normal com o mesmo limite da classificação: maior peso (em centésimos de kg) com IMC exibido até 24,99.
+  let pesoMax = (Math.ceil(24.995 * h * h * 100) - 1) / 100;
+  if (arred(pesoMax) >= 25) pesoMax = r2(pesoMax - 0.01);
+  return { imc: valor, classe, pesoMin: r2(18.5 * h * h), pesoMax };
 }
 
 // ---------------------------------------------------------------- MEI
@@ -752,6 +826,15 @@ export function precoReforma({ precoAtual, tributosAtuaisPct, issPct = 0, ano = 
   const iss = issPorDentro ? total * issAno : base * issAno;
   const semCbsIbs = total - cbs - ibs; // custo efetivo para o cliente que se credita de CBS/IBS
   return { liquido: r2(base), base: r2(base), cbs: r2(cbs), ibs: r2(ibs), iss: r2(iss), issAno, fatorIss: fator, total: r2(total), variacaoTotal: total / precoAtual - 1, custoClienteComCredito: r2(semCbsIbs), variacaoComCredito: semCbsIbs / precoAtual - 1, aliqNova: (cbsPct + ibsPct) / 100, issPorDentro };
+}
+// CBS e IBS (em %) sugeridos para o ano na calculadora de preço, pela mesma regra da transição (aliquotasAno/TRANSICAO):
+// 2027-2028 = referência da CBS − 0,1 ponto e IBS de 0,1%; 2029-2032 = CBS de referência e IBS × (1 − fração do ISS/ICMS);
+// 2033 = referências cheias. Referências estimadas, não oficiais (CBS 9,21% e IBS 18,70%, premissas da Resolução CGIBS 14/2026).
+export function aliquotasPadraoPreco(ano, { cbsRefPct = 9.21, ibsRefPct = 18.7 } = {}) {
+  const linha = TRANSICAO.find((l) => l.ano === Number(ano));
+  if (!linha) return null;
+  const a = aliquotasAno(linha, { cbsRefPct, ibsRefPct });
+  return { cbsPct: Math.round(a.cbs * 1e4) / 100, ibsPct: Math.round(a.ibs * 1e4) / 100 };
 }
 
 // Crédito condicionado à extinção do débito do fornecedor (crédito "travado").

@@ -6,7 +6,7 @@ a{color:inherit}
 img,svg{display:block}
 .num{font-variant-numeric:tabular-nums}
 .mono{font-family:var(--mono);font-weight:450;font-feature-settings:normal}
-:focus-visible{outline:none;box-shadow:var(--ring)!important;border-color:var(--b500)!important;border-radius:var(--r-sm)}
+:focus-visible{outline:2px solid var(--b600);outline-offset:2px}
 .wrap{max-width:1200px;margin:0 auto;padding:0 32px}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
@@ -191,14 +191,14 @@ footer b{color:var(--ink-2);font-weight:600}
 footer nav{display:flex;gap:20px;justify-content:flex-end;flex-wrap:wrap}
 footer nav a{text-decoration:none;color:var(--ink-2);font-weight:500}
 footer nav a:hover{color:var(--pri)}
-footer .ver{margin-top:12px;font:450 11px/16px var(--mono);color:var(--ink-4);text-align:right}
+footer .ver{margin-top:12px;font:450 11px/16px var(--mono);color:var(--ink-2);text-align:right}
 
 /* ---------- política ---------- */
 .doc{max-width:800px;margin:0 auto;padding:48px 32px 80px}
 .doc .meta{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 28px}
 .doc h1{font-size:38px;line-height:44px;margin:16px 0 10px}
 .doc h2{font-size:19px;line-height:26px;font-weight:650;letter-spacing:-.015em;margin:36px 0 10px;color:var(--n950);display:flex;gap:10px;align-items:baseline}
-.doc h2 .mono{font-size:12px;color:var(--ink-4)}
+.doc h2 .mono{font-size:12px;color:var(--ink-2)}
 .doc p,.doc li{font-size:15.5px;line-height:26px;color:var(--ink-2)}
 .doc ul{padding-left:20px}
 .doc table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;line-height:21px;border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--surface)}

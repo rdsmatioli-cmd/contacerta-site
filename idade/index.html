@@ -27,7 +27,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/style.css?v=d4f783aee5">
+<link rel="stylesheet" href="/assets/style.css?v=91b0bc7970">
 
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculadora de idade exata","url":"https://contacertabr.com.br/idade/","description":"Calcule a idade exata em anos, meses e dias a partir da data de nascimento, com total em meses, dias e semanas e a contagem até o próximo aniversário.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requer JavaScript","inLanguage":"pt-BR","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"dateModified":"2026-10-10","image":"https://contacertabr.com.br/og/idade.jpg","publisher":{"@id":"https://contacertabr.com.br/#organizacao"},"isPartOf":{"@id":"https://contacertabr.com.br/#site"},"citation":[{"@type":"CreativeWork","name":"Código Civil — Lei nº 10.406/2002, art. 132 (contagem de prazos)","url":"https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm"},{"@type":"CreativeWork","name":"Observatório Nacional — Hora Legal Brasileira e calendário","url":"https://www.gov.br/observatorio/pt-br"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Quem nasceu em 29 de fevereiro faz aniversário quando?","acceptedAnswer":{"@type":"Answer","text":"Nos anos bissextos, em 29 de fevereiro. Nos demais, pela regra do art. 132, § 3º, do Código Civil (prazos em anos vencem no dia seguinte quando falta o dia correspondente), o ano se completa em 1º de março. É essa data que a calculadora usa, embora muita gente comemore em 28 de fevereiro."}},{"@type":"Question","name":"Quantos dias tem um ano?","acceptedAnswer":{"@type":"Answer","text":"365 dias, ou 366 nos anos bissextos. Por isso \"idade em dias ÷ 365\" não dá a idade exata em anos."}},{"@type":"Question","name":"A calculadora conta o dia de hoje?","acceptedAnswer":{"@type":"Answer","text":"Sim. A idade é calculada até a data de referência informada, inclusive."}},{"@type":"Question","name":"Serve para calcular tempo de serviço?","acceptedAnswer":{"@type":"Answer","text":"Serve como referência do tempo entre duas datas, mas benefícios previdenciários e trabalhistas têm regras próprias de contagem de dias e competências."}}]}</script>
@@ -77,7 +77,7 @@
 <ol>
 <li><strong>Anos:</strong> diferença entre os anos, reduzida em 1 se o aniversário ainda não ocorreu na data de referência.</li>
 <li><strong>Meses:</strong> diferença entre os meses, ajustada quando o dia do nascimento ainda não chegou no mês.</li>
-<li><strong>Dias:</strong> o que sobra, emprestando os dias do mês anterior quando necessário.</li>
+<li><strong>Dias:</strong> o que sobra, emprestando os dias do mês anterior quando necessário (e também os do mês antes dele quando fevereiro não basta, como de 31/01 a 01/03).</li>
 </ol>
 <p>O total em dias é a diferença direta entre as datas, então inclui corretamente os anos bissextos. O total em meses é anos × 12 + meses.</p>
 <h2>Exemplos</h2>
@@ -125,8 +125,8 @@
 <ul class="cards"><li><a class="card" href="/imc/"><span class="tile t-dia"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-coracao"/></svg></span><span class="card-txt"><strong>IMC</strong><span>Índice de massa corporal e faixa de peso.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/conversor-de-medidas/"><span class="tile t-matematica"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-regua"/></svg></span><span class="card-txt"><strong>Conversor de medidas</strong><span>Metros, quilos, litros, alqueires e temperatura.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/rescisao/"><span class="tile t-trabalho"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-saida"/></svg></span><span class="card-txt"><strong>Rescisão trabalhista</strong><span>Verbas rescisórias, aviso prévio e multa do FGTS.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/ferias/"><span class="tile t-trabalho"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-sol"/></svg></span><span class="card-txt"><strong>Férias</strong><span>Férias + 1/3, venda de 10 dias e descontos.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/regra-de-tres/"><span class="tile t-matematica"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-balanca"/></svg></span><span class="card-txt"><strong>Regra de três</strong><span>Simples, direta ou inversa, com explicação.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li></ul>
 </section>
 </article>
-<script type="module" src="/assets/js/ui.js?v=02f30233e9"></script>
-<link rel="modulepreload" href="/assets/js/calc.js?v=c4c802ed8b">
+<script type="module" src="/assets/js/ui.js?v=58bc4e1f25"></script>
+<link rel="modulepreload" href="/assets/js/calc.js?v=57d937b1e5">
 </main>
 <footer class="rodape"><div class="caixa">
 <div class="rod-grade">

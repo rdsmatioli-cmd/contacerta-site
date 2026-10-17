@@ -12,7 +12,7 @@ export default {
   campos: [
     { n: 'salario', l: 'Salário bruto mensal', t: 'money', v: 4000 },
     { n: 'media', l: 'Média de horas extras e adicionais', t: 'money', v: 0 },
-    { n: 'dias', l: 'Dias de férias', t: 'int', v: 30, min: 5, max: 30, ajuda: 'Calcula um período por vez.', ajudaMaisRotulo: 'Regras para dividir as férias', ajudaMais: 'Com a concordância do empregado, as férias podem ser divididas em até 3 períodos: um com pelo menos 14 dias corridos e os outros com pelo menos 5 dias corridos cada (art. 134, § 1º, da CLT). As férias não podem começar nos 2 dias antes de feriado ou do descanso semanal remunerado (art. 134, § 3º).' },
+    { n: 'dias', l: 'Dias deste período de férias, somando os dias vendidos', t: 'int', v: 30, min: 5, max: 30, ajuda: 'Calcula um período por vez.', ajudaMaisRotulo: 'Regras para dividir as férias', ajudaMais: 'Com a concordância do empregado, as férias podem ser divididas em até 3 períodos: um com pelo menos 14 dias corridos e os outros com pelo menos 5 dias corridos cada (art. 134, § 1º, da CLT). As férias não podem começar nos 2 dias antes de feriado ou do descanso semanal remunerado (art. 134, § 3º).' },
     { n: 'vender', l: 'Vender 1/3 das férias (abono pecuniário)', t: 'check', v: false },
     { n: 'dependentes', l: 'Dependentes para IR', t: 'int', v: 0 },
   ],

@@ -92,12 +92,13 @@ test('Seguro-desemprego 2026 (tabela MTE)', () => {
 
 test('FGTS', () => {
   let f = C.fgts({ salario: 3000, meses: 12, comRendimento: false });
-  assert.equal(f.deposito, 240); assert.equal(f.saldo, 2880); assert.equal(f.multa, 1152); assert.equal(f.saque, 4032);
+  // CC-TRAB-07: 12 depósitos de 240 + depósito anual sobre 13º e 1/3 de férias (8% × 4.000 = 320)
+  assert.equal(f.deposito, 240); assert.equal(f.saldo, 3200); assert.equal(f.multa, 1280); assert.equal(f.saque, 4480);
   f = C.fgts({ salario: 3000, meses: 12, comRendimento: true });
   const i = Math.pow(1.03, 1 / 12) - 1;
-  assert.equal(f.saldo, C.r2(240 * (0.03 / i))); // série de 12 depósitos a 3% a.a.
+  assert.equal(f.saldo, C.r2(240 * (0.03 / i) + 320)); // série de 12 depósitos a 3% a.a. + depósito anual no 12º mês
   f = C.fgts({ salario: 3000, meses: 12, comRendimento: false, tipo: 'acordo' });
-  assert.equal(f.multa, 576); assert.equal(f.saque, C.r2(2880 * 0.8 + 576));
+  assert.equal(f.multa, 640); assert.equal(f.saque, C.r2(3200 * 0.8 + 640));
   assert.equal(C.fgts({ salario: 3000, meses: 1, aprendiz: true }).deposito, 60);
 });
 
@@ -130,7 +131,8 @@ test('Rescisão sem justa causa com aviso indenizado', () => {
   assert.equal(r.fimProjetado, '2026-11-13'); assert.equal(r.avos13, 10); assert.equal(r.decimo, 2500);
   assert.equal(r.avosFerias, 8); assert.equal(r.feriasProp, 2000); assert.equal(r.tercoFerias, 666.67);
   assert.equal(r.verbas, 9566.67); assert.equal(r.inssSaldo, 60); assert.equal(r.inss13, 200.69);
-  assert.equal(r.liquido, 9305.98); assert.equal(r.multaFgts, 2800); assert.equal(r.saqueFgts, 7000);
+  // CC-TRAB-05: base do FGTS = 7.000 + 8% × (800 + 3.600 + 2.500) = 7.552
+  assert.equal(r.liquido, 9305.98); assert.equal(r.depositoFgtsRescisao, 552); assert.equal(r.multaFgts, 3020.8); assert.equal(r.saqueFgts, 7552);
 });
 
 test('Rescisão — pedido de demissão sem cumprir aviso e justa causa', () => {
@@ -142,7 +144,8 @@ test('Rescisão — pedido de demissão sem cumprir aviso e justa causa', () => 
   const j = C.rescisao({ salario: 3000, admissao: '2024-03-10', desligamento: '2026-10-08', tipo: 'justaCausa', feriasVencidas: 1 });
   assert.equal(j.verbas, 4800); assert.equal(j.liquido, 4740); assert.equal(j.decimo, 0);
   const a = C.rescisao({ salario: 3000, admissao: '2024-03-10', desligamento: '2026-10-08', tipo: 'acordo', saldoFgts: 7000 });
-  assert.equal(a.avisoIndenizado, 1800); assert.equal(a.multaFgts, 1400); assert.equal(a.saqueFgts, 5600);
+  // CC-TRAB-05: base do FGTS = 7.000 + 8% × (800 + 1.800 + 2.500) = 7.408
+  assert.equal(a.avisoIndenizado, 1800); assert.equal(a.multaFgts, 1481.6); assert.equal(a.saqueFgts, 5926.4);
 });
 
 test('Juros compostos', () => {
@@ -174,13 +177,14 @@ test('Investimentos: IR regressivo, CDB, LCI, Tesouro Selic, poupança', () => {
   assert.equal(r.aliquotaIr, 0.175);
   assert.equal(cdb.rendimentoBruto, 1000); assert.equal(cdb.ir, 175); assert.equal(cdb.rendimentoLiquido, 825);
   assert.equal(lci.rendimentoLiquido, 900); assert.equal(lci.ir, 0);
-  assert.equal(tesouro.rendimentoBruto, 1375); assert.equal(tesouro.ir, 240.63);
+  // Tesouro Selic rende a Selic efetiva (≈ CDI), não a meta: com CDI de 10%, igual ao CDB 100% do CDI (CC-SELIC-01)
+  assert.equal(tesouro.rendimentoBruto, 1000); assert.equal(tesouro.ir, 175);
   assert.equal(poup.rendimentoBruto, 616.78); // 10.000 x (1,005^12 - 1)
   // 730 dias: 15% sobre 10.000 x (1,1^2 - 1) = 2.100 -> IR 315
   assert.equal(C.investimentos({ valor: 10000, dias: 730, cdi: 10, selic: 10 }).resultados[0].ir, 315);
-  // Selic <= 8,5%: poupança = 70% da Selic
+  // Selic <= 8,5%: poupança = 70% da Selic; 360 dias completam só 11 aniversários (dias × 12 ÷ 365, CC-POUP-01)
   const b = C.investimentos({ valor: 10000, dias: 360, cdi: 8, selic: 8, trMensal: 0 }).resultados[3];
-  assert.equal(b.rendimentoBruto, C.r2(10000 * (1.056 - 1)));
+  assert.equal(b.rendimentoBruto, C.r2(10000 * (Math.pow(1.056, 11 / 12) - 1)));
 });
 
 test('Porcentagem e regra de três', () => {
