@@ -80,9 +80,7 @@ test('CC-TRAB-04: adicional noturno nunca abaixo do mínimo legal (25% rural, 20
   const u = C.adicionalNoturno({ salario: 2200, jornadaMensal: 220, horas: 154, percentual: 10 });
   assert.equal(u.pct, 0.2); assert.equal(u.adicional, 352); assert.equal(u.pisoAplicado, true);
   assert.equal(C.adicionalNoturno({ salario: 2200, horas: 154, percentual: 20 }).pisoAplicado, false);
-  // o formulário troca 20 ↔ 25 ao mudar o tipo
-  const ui = readFileSync(new URL('../assets/js/ui.js', import.meta.url), 'utf8');
-  assert.match(ui, /id === 'adicional-noturno' && form\.elements\.tipo/);
+  // comportamento do formulário (aviso no campo, troca 20 ↔ 25): ver os testes "CC-TRAB-04 (formulário)" abaixo
 });
 
 test('CC-TRAB-05: multa e saque do FGTS incluem o depósito sobre as verbas da rescisão', () => {
@@ -138,8 +136,7 @@ test('CC-TRAB-06: tabelas de 2024 (INSS e IRRF) e bloqueio antes da primeira tab
   assert.equal(C.tabelaIrrfPorData('2023-12-31').anterior, true);
   // ano futuro continua usando a mais recente e sinalizando (nota de tabela ainda não publicada)
   assert.equal(C.tabelaIrrfPorData('2027-02-01').substituida, true);
-  const ui = readFileSync(new URL('../assets/js/ui.js', import.meta.url), 'utf8');
-  assert.match(ui, /if \(r\.anteriorTabelas\)/);
+  // bloqueio no formulário (aria-invalid e mensagem): ver o teste "CC-TRAB-06 (formulário)" abaixo
 });
 
 test('CC-TRAB-07: FGTS deposita também sobre o 13º e o 1/3 de férias a cada 12 meses', () => {
@@ -205,4 +202,118 @@ test('CC-TRAB-11: rótulo do vale-transporte deixa claro a base e o limite legal
   assert.match(html, /<label for="f-vt">Descontar vale-transporte \(6% do valor digitado; por lei, o desconto é de até 6% do salário-base e não passa do custo das passagens\)<\/label>/);
   // cálculo inalterado: 6% do valor digitado
   assert.equal(C.salarioLiquido({ bruto: 3000, valeTransporte: true }).vt, 180);
+});
+
+// ---------------------------------------------------------------- Formulário (ui.js) com um document mínimo
+// Monta o formulário publicado da página (inputs, selects e mensagens dos campos), instala um document mínimo
+// e importa ui.js numa instância nova (query na URL), que roda iniciar() e o primeiro cálculo.
+const atributos = (tag) => Object.fromEntries([...tag.replace(/^<\w+/, '').matchAll(/([\w-]+)(?:="([^"]*)")?/g)].map(([, k, v]) => [k, v ?? '']));
+function elemento(tagName, at, value) {
+  const attrs = new Map(Object.entries(at));
+  const ouvintes = {};
+  const dataset = {};
+  for (const [k, v] of attrs) if (k.startsWith('data-')) dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = v;
+  return {
+    tagName, id: at.id, name: at.name || '', type: tagName === 'SELECT' ? 'select-one' : at.type || 'text',
+    value, defaultValue: value, checked: 'checked' in at, dataset, hidden: 'hidden' in at, textContent: '', className: at.class || '', disabled: 'disabled' in at,
+    hasAttribute: (k) => attrs.has(k), getAttribute: (k) => (attrs.has(k) ? attrs.get(k) : null),
+    setAttribute: (k, v) => attrs.set(k, String(v)), removeAttribute: (k) => attrs.delete(k),
+    addEventListener: (t, f) => (ouvintes[t] ||= []).push(f),
+    disparar(t) { for (const f of ouvintes[t] || []) f({ type: t, target: this, preventDefault() {} }); },
+    closest: () => null, focus() {}, dispatchEvent() { return true; },
+  };
+}
+let instancia = 0;
+async function abrirCalculadora(pag, valores = {}) {
+  const html = readFileSync(new URL(`../${pag}/index.html`, import.meta.url), 'utf8');
+  const ini = html.indexOf('<form class="calc-form"');
+  const formHtml = html.slice(ini, html.indexOf('</form>', ini));
+  const campos = [];
+  const porId = {};
+  for (const [tag] of formHtml.matchAll(/<input\b[^>]*>|<select\b[^>]*>[\s\S]*?<\/select>/g)) {
+    const abre = tag.match(/^<\w+[^>]*>/)[0];
+    const at = atributos(abre);
+    let value = at.value ?? '';
+    if (tag.startsWith('<select')) {
+      const ops = [...tag.matchAll(/<option\b[^>]*>/g)].map(([o]) => atributos(o));
+      value = (ops.find((o) => 'selected' in o) || ops[0]).value;
+    }
+    const el = elemento(tag.startsWith('<select') ? 'SELECT' : 'INPUT', at, value);
+    if (at.name in valores) el.value = valores[at.name];
+    campos.push(el); porId[el.id] = el;
+  }
+  for (const [p] of formHtml.matchAll(/<p class="campo-msg"[^>]*>/g)) { const at = atributos(p); porId[at.id] = elemento('P', at, ''); }
+  const out = elemento('DIV', { id: 'resultado' }, '');
+  out.innerHTML = '';
+  porId.resultado = out;
+  const form = elemento('FORM', { 'data-calc': atributos(formHtml.match(/^<form[^>]*>/)[0])['data-calc'] }, '');
+  form.elements = Object.assign([...campos], Object.fromEntries(campos.map((c) => [c.name, c])));
+  form.querySelector = () => null;
+  form.querySelectorAll = (sel) => { const m = sel.match(/^\[([\w-]+)\]$/); return m ? campos.filter((c) => c.hasAttribute(m[1])) : []; };
+  globalThis.document = {
+    readyState: 'complete',
+    addEventListener() {},
+    querySelector: (sel) => (sel === 'form[data-calc]' ? form : null),
+    getElementById: (id) => porId[id] || null,
+  };
+  try {
+    await import(new URL(`../assets/js/ui.js?cenario=${++instancia}`, import.meta.url));
+  } finally {
+    delete globalThis.document;
+  }
+  // Envio pelo botão Calcular (cálculo imediato, sem o atraso do evento input).
+  const calcular = () => { globalThis.document = { getElementById: (id) => porId[id] || null, querySelector: () => null }; try { form.disparar('submit'); } finally { delete globalThis.document; } return out.innerHTML; };
+  return { form, campo: (n) => form.elements[n], el: (id) => porId[id], out, calcular };
+}
+
+test('CC-TRAB-04 (formulário): rural com o padrão de 20% mostra o aviso no resultado e no campo', async () => {
+  const f = await abrirCalculadora('adicional-noturno', { tipo: 'rural' });
+  assert.equal(f.campo('percentual').value, '20');
+  const aviso = 'O mínimo legal para o trabalhador rural é 25% (Lei 5.889/1973, art. 7º); o cálculo usa 25%.';
+  assert.ok(f.out.innerHTML.includes(aviso), f.out.innerHTML.slice(0, 300));
+  const msg = f.el('f-percentual-msg');
+  assert.equal(msg.textContent, aviso); assert.equal(msg.hidden, false); assert.equal(msg.className, 'campo-msg');
+  // valor do cálculo é o de 25%
+  const r = C.adicionalNoturno({ salario: 2200, jornadaMensal: 220, horas: 154, tipo: 'rural', percentual: 25, diasUteis: 25, domingosFeriados: 5 });
+  assert.ok(f.out.innerHTML.replace(/\u00a0/g, ' ').includes(R(r.total)));
+  // urbano abaixo de 20%: aviso do mínimo urbano; com 20% não há aviso e a mensagem do campo some
+  f.campo('tipo').value = 'urbano'; f.campo('percentual').value = '10';
+  const urb = f.calcular();
+  assert.ok(urb.includes('O mínimo legal para o trabalhador urbano é 20% (CLT, art. 73); o cálculo usa 20%.'));
+  assert.equal(msg.hidden, false);
+  f.campo('percentual').value = '20';
+  assert.ok(!f.calcular().includes('O mínimo legal'));
+  assert.equal(msg.hidden, true); assert.equal(msg.textContent, '');
+});
+
+test('CC-TRAB-04 (formulário): trocar urbano/rural troca 20 ↔ 25 e mantém valor digitado', async () => {
+  const f = await abrirCalculadora('adicional-noturno');
+  const tipo = f.campo('tipo'); const pctEl = f.campo('percentual');
+  assert.equal(tipo.value, 'urbano'); assert.equal(pctEl.value, '20');
+  const muda = (t) => { tipo.value = t; tipo.disparar('change'); return pctEl.value; };
+  assert.equal(muda('rural'), '25');
+  assert.equal(muda('urbano'), '20');
+  assert.equal(muda('rural'), '25');
+  assert.ok(!f.calcular().includes('O mínimo legal')); // 25% rural: sem aviso
+  // valor digitado pelo usuário é mantido nas duas direções
+  pctEl.value = '30';
+  assert.equal(muda('urbano'), '30');
+  assert.equal(muda('rural'), '30');
+  // campo vazio recebe o mínimo do tipo
+  pctEl.value = '';
+  assert.equal(muda('urbano'), '20');
+});
+
+test('CC-TRAB-06 (formulário): desligamento antes de 2024 marca o campo e não calcula', async () => {
+  const f = await abrirCalculadora('rescisao', { desligamento: '2023-12-31', admissao: '2020-01-01' });
+  const des = f.el('f-desligamento');
+  assert.equal(des.getAttribute('aria-invalid'), 'true');
+  assert.ok(f.out.innerHTML.includes('<a href="#f-desligamento">Data do desligamento (último dia)</a>'));
+  assert.ok(f.out.innerHTML.includes('A calculadora tem as tabelas de INSS e de IR a partir de janeiro de 2024.'));
+  assert.ok(!f.out.innerHTML.includes('Líquido a receber'));
+  // corrigida a data, o campo deixa de ser inválido e o cálculo sai
+  des.value = '2024-11-30';
+  const ok = f.calcular();
+  assert.equal(des.getAttribute('aria-invalid'), null);
+  assert.ok(ok.includes('Líquido a receber na rescisão'), ok.slice(0, 300));
 });
