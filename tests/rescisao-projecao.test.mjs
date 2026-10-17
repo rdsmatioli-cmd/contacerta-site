@@ -176,7 +176,7 @@ test('INSS do saldo de salário pela tabela do mês trabalhado (ano do desligame
 });
 
 test('Nota do IRRF: rótulos das tabelas', () => {
-  assert.equal(C.tabelaIrrfPorData('2025-03-10').tabela.rotulo, 'janeiro a abril/2025');
+  assert.equal(C.tabelaIrrfPorData('2025-03-10').tabela.rotulo, 'fevereiro/2024 a abril/2025'); // CC-TRAB-06: mesma tabela desde fev/2024
   assert.equal(C.tabelaIrrfPorData('2025-12-20').tabela.rotulo, 'maio a dezembro/2025');
   assert.equal(C.tabelaIrrfPorData('2026-09-15').tabela.rotulo, '2026 em diante');
 });

@@ -26,13 +26,31 @@ export const INSS = {
   individual: { normal: 0.2, simplificado: 0.11, baixaRendaMei: 0.05 },
 };
 
-// IRRF por data de pagamento (regime de caixa). Fonte: Receita Federal, "Tributação de 2025"
-// (https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2025);
-// Lei nº 11.482/2007, art. 1º, XI e XII (redação da Lei nº 15.191/2025). Sem redução da Lei 15.270 (vigente a partir de 2026).
+// IRRF por data de pagamento (regime de caixa). Fonte: Receita Federal, "Tributação de 2024" e "Tributação de 2025"
+// (https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2024 e .../2025);
+// Lei nº 11.482/2007, art. 1º, X, XI e XII (incisos incluídos pelas Leis nº 14.663/2023, 14.848/2024 e 15.191/2025).
+// Sem redução da Lei 15.270 (vigente a partir de 2026).
+// Janeiro/2024: tabela vigente desde maio/2023 (Lei nº 14.663/2023): isenção até 2.112,00 e desconto simplificado de 528,00.
+export const IRRF_2024_JAN = {
+  vigencia: 'janeiro/2024',
+  rotulo: 'janeiro/2024',
+  fonte: 'Receita Federal — Tributação de 2024 (Lei nº 11.482/2007, art. 1º, X, incluído pela Lei nº 14.663/2023)',
+  faixas: [
+    { ate: 2112.0, aliquota: 0, deducao: 0 },
+    { ate: 2826.65, aliquota: 0.075, deducao: 158.4 },
+    { ate: 3751.05, aliquota: 0.15, deducao: 370.4 },
+    { ate: 4664.68, aliquota: 0.225, deducao: 651.73 },
+    { ate: Infinity, aliquota: 0.275, deducao: 884.96 },
+  ],
+  deducaoDependente: 189.59,
+  descontoSimplificado: 528.0,
+  reducao: null,
+};
+// Fevereiro/2024 a abril/2025: mesma tabela (Lei nº 14.848/2024, conversão da MP nº 1.206/2024).
 export const IRRF_2025_JAN_ABR = {
-  vigencia: 'janeiro a abril/2025',
-  rotulo: 'janeiro a abril/2025',
-  fonte: 'Receita Federal — Tributação de 2025 (Lei nº 11.482/2007, art. 1º, XI)',
+  vigencia: 'fevereiro/2024 a abril/2025',
+  rotulo: 'fevereiro/2024 a abril/2025',
+  fonte: 'Receita Federal — Tributação de 2024 e de 2025 (Lei nº 11.482/2007, art. 1º, XI, incluído pela Lei nº 14.848/2024)',
   faixas: [
     { ate: 2259.2, aliquota: 0, deducao: 0 },
     { ate: 2826.65, aliquota: 0.075, deducao: 169.44 },
@@ -61,6 +79,18 @@ export const IRRF_2025 = {
 };
 
 // INSS do empregado por ano (para o 13º que abrange dois anos pela projeção do aviso).
+// 2024: Portaria Interministerial MPS/MF nº 2, de 11/01/2024, Anexo II.
+export const INSS_2024 = {
+  vigencia: 'competência janeiro/2024',
+  fonte: 'Portaria Interministerial MPS/MF nº 2, de 11/01/2024',
+  faixas: [
+    { ate: 1412.0, aliquota: 0.075 },
+    { ate: 2666.68, aliquota: 0.09 },
+    { ate: 4000.03, aliquota: 0.12 },
+    { ate: 7786.02, aliquota: 0.14 },
+  ],
+  teto: 7786.02,
+};
 // 2025: Portaria Interministerial MPS/MF nº 6, de 10/01/2025, Anexo II.
 export const INSS_2025 = {
   vigencia: 'competência janeiro/2025',
@@ -73,7 +103,7 @@ export const INSS_2025 = {
   ],
   teto: 8157.41,
 };
-export const INSS_POR_ANO = { 2025: INSS_2025, 2026: INSS };
+export const INSS_POR_ANO = { 2024: INSS_2024, 2025: INSS_2025, 2026: INSS };
 
 // IRRF — tabela progressiva mensal + redução da Lei 15.270/2025
 export const IRRF = {
@@ -151,8 +181,11 @@ export const FGTS = {
   jurosAnuais: 0.03,
 };
 
-// Tabelas de IRRF por início de vigência (data de pagamento). Anos fora da lista usam a mais recente.
+// Tabelas de IRRF por início de vigência (data de pagamento). Anos posteriores à lista usam a mais recente;
+// datas anteriores à primeira entrada não são calculadas (a rescisão bloqueia o cálculo).
 export const IRRF_POR_DATA = [
+  { desde: '2024-01-01', ano: 2024, t: IRRF_2024_JAN },
+  { desde: '2024-02-01', ano: 2024, t: IRRF_2025_JAN_ABR },
   { desde: '2025-01-01', ano: 2025, t: IRRF_2025_JAN_ABR },
   { desde: '2025-05-01', ano: 2025, t: IRRF_2025 },
   { desde: '2026-01-01', ano: 2026, t: IRRF },

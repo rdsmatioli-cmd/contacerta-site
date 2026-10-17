@@ -100,7 +100,7 @@ export const GEO = {
 <p>Exemplo: salário de R$ 3.000,00 e 30 dias de férias dão ${R(fer.bruto)} brutos e <strong>${R(fer.liquido)}</strong> líquidos. Vendendo 10 dias, o líquido sobe para ${R(ferV.liquido)}.</p>`,
       [
         'Digite o salário bruto e a média de variáveis (horas extras, comissões) dos últimos 12 meses.',
-        'Escolha quantos dias de férias vai tirar e marque se vai vender 1/3 delas (abono pecuniário).',
+        'Informe os dias de férias a que tem direito no período, antes da venda. Se marcar a venda de 1/3 (abono pecuniário), 1/3 desses dias vira abono: para tirar 20 dias e vender 10, informe 30.',
         'Informe os dependentes para o IR.',
         'Clique em <strong>Calcular</strong> e confira férias, 1/3, abono e descontos separados.',
       ],
@@ -113,7 +113,7 @@ export const GEO = {
   fgts: {
     topo: bloco(
       `<p><strong>O empregador deposita todo mês 8% do salário bruto no FGTS (2% para aprendiz), sem descontar nada do trabalhador.</strong> O saldo rende 3% ao ano mais TR e pode receber distribuição de lucros. Na demissão sem justa causa, você saca tudo e recebe multa de 40% sobre o saldo; no acordo, a multa é de 20% e o saque, de 80%.</p>
-<p>Exemplo: salário de R$ 3.000,00 gera depósito de ${R(fg.deposito)} por mês, ou ${R(fg.depositado)} em 12 meses, antes do rendimento.</p>`,
+<p>Exemplo: salário de R$ 3.000,00 gera depósito de ${R(fg.deposito)} por mês. Em 12 meses, com os depósitos sobre o 13º e o 1/3 de férias, o total é de ${R(fg.depositado)}, antes do rendimento.</p>`,
       [
         'Digite o salário bruto mensal e os meses de contrato que quer projetar.',
         'Informe o saldo que já existe na conta (consulte no app FGTS), se quer incluir o rendimento de 3% ao ano e se você é jovem aprendiz.',
