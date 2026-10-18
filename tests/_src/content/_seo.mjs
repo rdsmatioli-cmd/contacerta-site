@@ -4,6 +4,8 @@
 // categorias chegam por parâmetro (no build, dos posts que passaram no portão, na ordem do índice do blog).
 // tests/fonte-seo.test.mjs prova que cada função reproduz, byte a byte, o que está publicado; o passo a passo do porte
 // está em tests/_src/PORTAR-PR25.md.
+// O gerador não foi encontrado (18/10/2026): o HTML do repositório é a fonte oficial e a regra do lastmod (seção 7)
+// é aplicada por tests/manutencao/lastmod.mjs.
 import { card, icone, COR_CAT } from './_visual.mjs';
 
 export const SITE = 'https://contacertabr.com.br/';
@@ -125,3 +127,19 @@ export function ordenaSprite(html) {
 }
 export const normalizaLastmod = (html) => ordenaSprite(html).replace(/\?v=[0-9a-f]{10}\b/g, '?v=').split(LINHA_ESPECULACAO).join('');
 export const mudancaSignificativa = (antes, depois) => normalizaLastmod(antes) !== normalizaLastmod(depois);
+// Datas do próprio documento: dateModified/datePublished dos objetos-raiz do JSON-LD (o objeto, os itens da lista ou
+// os do @graph; os blogPost aninhados no índice e nas categorias do blog não contam) e article:*_time, em AAAA-MM-DD.
+// Mesma leitura do teste do sitemap em integridade-site.test.mjs. JSON-LD inválido lança erro (não some com a data).
+export function datasDoDocumento(html) {
+  const datas = [];
+  for (const m of String(html).matchAll(/<script type="application\/ld\+json">([^]*?)<\/script>/g)) {
+    const j = JSON.parse(m[1]);
+    const raizes = Array.isArray(j) ? j : Array.isArray(j?.['@graph']) ? j['@graph'] : [j];
+    for (const r of raizes) for (const k of ['dateModified', 'datePublished']) if (typeof r?.[k] === 'string') datas.push(r[k].slice(0, 10));
+  }
+  for (const m of String(html).matchAll(/<meta\b[^>]*property="article:(?:modified|published)_time"[^>]*content="([^"]+)"/g)) datas.push(m[1].slice(0, 10));
+  return datas;
+}
+// lastmod pela regra: a maior entre a data do commit (AAAA-MM-DD do último commit com mudança significativa) e as
+// datas do documento. Sem data nenhuma, undefined.
+export const lastmodPelaRegra = (dataCommit, html) => [dataCommit, ...datasDoDocumento(html)].filter(Boolean).sort().at(-1);
