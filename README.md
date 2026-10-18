@@ -13,7 +13,9 @@ O HTML deste repositório é a fonte oficial: não existe gerador (o antigo `scr
 3. `node tests/manutencao/lastmod.mjs`: recalcula o `lastmod` do `sitemap.xml`. Roda depois do commit porque a data
    vem do histórico (último commit que mudou a página, sem contar troca de `?v=`, da linha do `speculationrules` ou
    da ordem do sprite); antes do commit a página sai com a data de hoje e um aviso. Commit do `sitemap.xml`, se mudou.
-   Precisa do clone completo (`git fetch --unshallow` se for raso). Página nova entra no sitemap à mão.
+   Precisa do histórico: num clone raso, o script e o teste só falham (com mensagem) se o histórico não alcançar o
+   último commit significativo de alguma página; `git fetch --unshallow` resolve, e o CI usa `fetch-depth: 0`.
+   Página nova entra no sitemap à mão.
 4. Testes (abaixo) e o html-validate do `.github/workflows/ci.yml`.
 5. PR para a main, com o CI verde.
 
