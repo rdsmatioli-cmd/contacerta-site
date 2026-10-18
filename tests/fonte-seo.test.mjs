@@ -198,9 +198,8 @@ test('sprite: igual ao sprite() do gerador (ordem do primeiro uso); em SPRITE_FO
 });
 
 // Mudança significativa posterior nessas páginas move o lastmod para frente (a home muda a cada post novo, pelos
-// "Guias recentes"), então aqui vale lastmod >= 2026-10-18. A data exata, e a extensão da regra do lastmod que ignora
-// a linha do speculationrules nas outras páginas, só o conferir-porte.mjs confere (passo 11 do guia): com a regra
-// antiga, 41 entradas iriam para 2026-10-18 e esta suíte continuaria passando.
+// "Guias recentes"), então aqui vale lastmod >= 2026-10-18. A data exata de todas as URLs, pela regra inteira (que
+// também ignora a linha do speculationrules nas outras páginas), quem confere é o lastmod.test.mjs.
 test('sitemap.xml: lastmod a partir de 2026-10-18 nas 8 páginas do PR, que são as que têm conteúdo do PR', () => {
   const lastmod = Object.fromEntries([...ler('sitemap.xml').matchAll(/<loc>https:\/\/contacertabr\.com\.br(\/[^<]*)<\/loc><lastmod>([^<]+)<\/lastmod>/g)].map((m) => [m[1], m[2]]));
   for (const u of S.PAGINAS_PR25) assert.ok(lastmod[u] >= S.LASTMOD_PR25, `${u}: lastmod ${lastmod[u]}`);
