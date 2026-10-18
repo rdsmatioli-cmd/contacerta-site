@@ -170,10 +170,11 @@ test('aviso prévio nas relacionadas: 2º em rescisão e seguro-desemprego, últ
 });
 
 // ---------- 6. CSS
-test('style.css termina com a regra do Guia completo e o ?v= das páginas é o sha256 do arquivo', () => {
+// Regra nova entra no fim do style.css (convenção do arquivo), então aqui só se exige a regra do PR uma vez, em
+// qualquer posição. A posição exata durante o porte é conferida pelo conferir-porte.mjs (passo 11 do guia).
+test('style.css tem a regra do Guia completo (uma vez) e o ?v= das páginas é o sha256 do arquivo', () => {
   const css = readFileSync(join(raiz, 'assets/style.css'));
-  assert.ok(css.toString('utf8').endsWith(S.CSS_GUIA_COMPLETO));
-  assert.equal(conta(css.toString('utf8'), '.relacionadas.guia-completo'), 1);
+  assert.equal(conta(css.toString('utf8'), S.CSS_GUIA_COMPLETO), 1);
   const v = createHash('sha256').update(css).digest('hex').slice(0, 10);
   const usados = new Set(paginas.flatMap((p) => [...ler(p).matchAll(/href="\/assets\/style\.css\?v=([0-9a-f]+)"/g)].map((m) => m[1])));
   assert.deepEqual([...usados], [v]);
@@ -196,9 +197,13 @@ test('sprite: igual ao sprite() do gerador (ordem do primeiro uso); em SPRITE_FO
   assert.deepEqual(falhas, []);
 });
 
-test('sitemap.xml: lastmod 2026-10-18 nas 8 páginas do PR, que são as que têm conteúdo do PR', () => {
+// Mudança significativa posterior nessas páginas move o lastmod para frente (a home muda a cada post novo, pelos
+// "Guias recentes"), então aqui vale lastmod >= 2026-10-18. A data exata, e a extensão da regra do lastmod que ignora
+// a linha do speculationrules nas outras páginas, só o conferir-porte.mjs confere (passo 11 do guia): com a regra
+// antiga, 41 entradas iriam para 2026-10-18 e esta suíte continuaria passando.
+test('sitemap.xml: lastmod a partir de 2026-10-18 nas 8 páginas do PR, que são as que têm conteúdo do PR', () => {
   const lastmod = Object.fromEntries([...ler('sitemap.xml').matchAll(/<loc>https:\/\/contacertabr\.com\.br(\/[^<]*)<\/loc><lastmod>([^<]+)<\/lastmod>/g)].map((m) => [m[1], m[2]]));
-  for (const u of S.PAGINAS_PR25) assert.equal(lastmod[u], S.LASTMOD_PR25, u);
+  for (const u of S.PAGINAS_PR25) assert.ok(lastmod[u] >= S.LASTMOD_PR25, `${u}: lastmod ${lastmod[u]}`);
   const comConteudo = ['/', ...Object.keys(S.GUIA_DA_CALCULADORA).map((s) => `/${s}/`), '/rescisao/', '/ferias/', '/seguro-desemprego/'];
   assert.deepEqual([...new Set(comConteudo)].sort(), [...S.PAGINAS_PR25].sort());
 });
