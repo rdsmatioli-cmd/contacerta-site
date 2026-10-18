@@ -33,10 +33,12 @@ node --test 'tests/*.test.mjs'
 
 O job `e2e` do CI roda o Playwright (versão exata em `tests/e2e/package-lock.json`, só Chromium) em 390 px e
 1280 px: cada calculadora (achada pelo HTML: `form.calc-form` com `data-calc`) calcula com os valores padrão e mostra
-resultado com número, sem erro de console nem rolagem horizontal; home e blog carregam sem erro; nada do Google antes
-de clicar no banner de cookies nem depois de Recusar, e a tentativa de carregar o GA aparece depois de Aceitar.
-Calculadora desligada fica sem `data-calc` e com o botão `disabled`. O Playwright serve o site com
-`python3 -m http.server` em 127.0.0.1:8191 (`E2E_PORTA` troca a porta) e aborta toda requisição a outro host. Local:
+resultado com número, sem recarregar a página, sem erro de console nem rolagem horizontal; home e blog carregam sem
+erro; nada do Google antes de clicar no banner de cookies nem depois de Recusar, e a tentativa de carregar o GA
+aparece depois de Aceitar. Calculadora desligada fica sem `data-calc` e com o botão `disabled`. O Playwright serve o
+site com `python3 -m http.server` em 127.0.0.1:8191 (`E2E_PORTA` troca a porta), aborta e registra toda requisição
+HTTP ou WebSocket a outro host e registra as dicas de conexão para fora (`preconnect`, `dns-prefetch`...); o Chromium
+sobe sem proxy, nem o do ambiente, e sem DNS. Local:
 
 ```sh
 cd tests/e2e
@@ -45,22 +47,38 @@ npx playwright install --with-deps --only-shell chromium   # uma vez
 npx playwright test                                        # -g "markup" roda só os casos com esse nome
 ```
 
-Quando falha, a mensagem diz o quê: resultado sem número, erro de console, elementos que passam da borda, URL do
-Google pedida antes do aceite. No CI, capturas e traces ficam no artefato `e2e-falhas` (`npx playwright show-trace`
-abre o `.zip`). Corrija a página, não o teste: Google antes do aceite é violação da regra do banner.
+Quando falha, a mensagem diz o quê: resultado sem número, envio que recarrega a página, erro de console, elementos
+que passam da borda, URL de outro host pedida, URL do Google pedida antes do aceite. No CI, capturas e traces ficam no
+artefato `e2e-falhas` (`npx playwright show-trace` abre o `.zip`). Corrija a página, não o teste. Nenhuma página pode
+pedir nada de outro host antes do aceite (imagem, vídeo, fonte, script de terceiro, `preconnect`): isso derruba o e2e
+de propósito, e liberar um host pede decisão explícita e muda o teste junto. Google antes do aceite é violação da
+regra do banner.
+
+Não use `--reporter=html` dentro do repositório: a pasta `tests/e2e/playwright-report/` (ignorada pelo git) traz um
+`index.html` que o `node --test` passa a tratar como página do site; apague-a se for criada. Para atualizar o
+Playwright: em `tests/e2e`, `npm install -D --save-exact @playwright/test@<versão>` e commit do `package.json` e do
+`package-lock.json`; o CI baixa o Chromium da versão nova sozinho.
 
 ## Links externos
 
 `.github/workflows/links.yml` confere os links externos de todas as páginas às segundas, 09:17 UTC, e sob demanda
 (Actions > Links externos > Run workflow); não roda em push nem em PR. Local: `node tests/links/conferir-links.mjs`
-(`--listar` só lista links e páginas, sem rede; atrás de proxy, `NODE_USE_ENV_PROXY=1`).
+(`--listar` só lista links e páginas, sem rede; atrás de proxy, `NODE_USE_ENV_PROXY=1`). O que não dá OK ganha uma
+nova tentativa 60 s depois do fim da primeira passada. Em link de afiliado, o parâmetro do afiliado (`tag=` da
+Amazon, `indicacao=`) sai da URL conferida, para a checagem não contar como clique.
 
-Falha só com link QUEBRADO (404/410, 5xx persistente, DNS, tempo esgotado duas vezes, redirecionamento que termina
-em 404). O resumo da execução lista cada um com o motivo e as páginas onde aparece: confira no navegador e troque ou
-remova o link nessas páginas. BLOQUEIO_DE_ROBO (403, 429...) é só aviso; vale olhar à mão se persistir. Em
-18/10/2026 o único quebrado é o link de afiliado da Hotmart (`go.hotmart.com/E107964934J`, que redireciona para uma
-página 404) em /markup/, /das-mei/ e /parcelado-ou-a-vista/; a troca depende do Rodrigo. O GitHub desliga o agendamento
-depois de 60 dias sem atividade no repositório: reative em Actions se isso acontecer.
+O job falha só com QUEBRADO: 404, 410 e os demais 4xx fora da lista de robô (400, 402, 422...); 5xx nas duas
+tentativas; erro de DNS, de rede (conexão recusada ou fechada) ou de certificado (expirado, autoassinado, de outro
+nome); tempo esgotado duas vezes; mais de 15 redirecionamentos, 3xx sem destino ou redirecionamento que termina em
+404. São só aviso: BLOQUEIO_DE_ROBO (401, 403, 405, 406, 418, 429, 451, 999 ou desafio do Cloudflare), que vale olhar
+à mão se persistir, e NAO_CONFERIDO (cadeia TLS incompleta, que o navegador completa e o Node não, comum em
+`*.gov.br`), que se confere abrindo no navegador.
+
+Quando falha, o resumo da execução lista cada link quebrado com o motivo e as páginas onde aparece. Abra o link no
+navegador: se abrir normalmente, rode o workflow de novo antes de mexer; se a falha continuar só no runner (site que
+bloqueia o IP do GitHub), registre numa issue em vez de remover o link; se estiver quebrado de fato, troque ou remova
+o link nessas páginas. O GitHub desliga o agendamento depois de 60 dias sem atividade no repositório: reative em
+Actions se isso acontecer.
 
 ## Lighthouse
 
