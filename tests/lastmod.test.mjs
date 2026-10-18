@@ -10,7 +10,11 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { LINHA_ESPECULACAO } from './_src/content/_seo.mjs';
-import { calcular, entradasDoSitemap, sitemapComLastmod } from './manutencao/lastmod.mjs';
+import { VARIAVEIS_DE_REPOSITORIO, calcular, entradasDoSitemap, sitemapComLastmod } from './manutencao/lastmod.mjs';
+
+// Rodado de um hook ou de `git rebase -x` num worktree, o processo herda GIT_DIR e GIT_INDEX_FILE absolutos: o git do
+// repositório temporário do último teste gravaria os commits de teste no branch de quem chamou. Fora com elas.
+for (const k of VARIAVEIS_DE_REPOSITORIO) delete process.env[k];
 
 let r, falha;
 try { r = calcular(); } catch (e) { falha = e; }
@@ -78,6 +82,15 @@ test('lastmod.mjs: ignora commit só de ?v=, speculationrules ou ordem do sprite
     w('a/index.html', pagina({ texto: '<script type="application/ld+json">{"@type":"Article","dateModified":"2026-05-02"}</script>' }));
     commit('2026-04-20T10:00:00-03:00');
     assert.equal(lastmodDe(repo), '2026-05-02');
+    // GIT_DIR/GIT_INDEX_FILE herdados de outro repositório (hook num worktree) não mudam o repositório lido.
+    mkdirSync(join(dir, 'outro'));
+    git(join(dir, 'outro'), ['init', '-q']);
+    Object.assign(process.env, { GIT_DIR: join(dir, 'outro', '.git'), GIT_INDEX_FILE: join(dir, 'outro', '.git', 'index'), GIT_WORK_TREE: join(dir, 'outro') });
+    try {
+      assert.equal(lastmodDe(repo), '2026-05-02');
+    } finally {
+      for (const k of ['GIT_DIR', 'GIT_INDEX_FILE', 'GIT_WORK_TREE']) delete process.env[k];
+    }
     // Mudança significativa ainda não commitada e arquivo novo: hoje, com aviso.
     w('a/index.html', pagina({ texto: 'Ainda não commitado' }));
     let c = calcular(repo, { hoje: '2030-01-01' });
@@ -110,7 +123,7 @@ test('lastmod.mjs: ignora commit só de ?v=, speculationrules ou ordem do sprite
     // Sem git nenhum: erro, não passa.
     mkdirSync(join(dir, 'semgit'));
     writeFileSync(join(dir, 'semgit', 'sitemap.xml'), '<urlset></urlset>\n');
-    assert.throws(() => calcular(join(dir, 'semgit')), /sem histórico git|não é a raiz do repositório git/);
+    assert.throws(() => calcular(join(dir, 'semgit')), /sem histórico git em .*semgit.* \(.+\): o lastmod vem do git log|não é a raiz do repositório git/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

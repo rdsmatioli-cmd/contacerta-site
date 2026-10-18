@@ -31,10 +31,24 @@ export function hojeEm(fuso = FUSO, agora = new Date()) {
   return `${p.year}-${p.month}-${p.day}`;
 }
 
+// Variáveis que prendem o git a um repositório (git rev-parse --local-env-vars do git 2.43, mais GIT_NAMESPACE). Um hook
+// ou um `git rebase -x` num worktree exporta GIT_DIR e GIT_INDEX_FILE com caminho absoluto; herdadas, fariam o
+// `git -C raiz` ler o repositório de quem chamou, e o teste com repositório temporário gravar commits nele.
+export const VARIAVEIS_DE_REPOSITORIO = Object.freeze(['GIT_ALTERNATE_OBJECT_DIRECTORIES', 'GIT_CONFIG', 'GIT_CONFIG_PARAMETERS',
+  'GIT_CONFIG_COUNT', 'GIT_OBJECT_DIRECTORY', 'GIT_DIR', 'GIT_WORK_TREE', 'GIT_IMPLICIT_WORK_TREE', 'GIT_GRAFT_FILE',
+  'GIT_INDEX_FILE', 'GIT_NO_REPLACE_OBJECTS', 'GIT_REPLACE_REF_BASE', 'GIT_PREFIX', 'GIT_SHALLOW_FILE', 'GIT_COMMON_DIR', 'GIT_NAMESPACE']);
+export const envSemRepositorio = (env = process.env) =>
+  Object.fromEntries(Object.entries(env).filter(([k]) => !VARIAVEIS_DE_REPOSITORIO.includes(k)));
+
 // Sem input, devolve a saída como texto; com input (cat-file --batch), como Buffer, porque os tamanhos são em bytes.
+// O repositório é sempre o de raiz: o env vai sem VARIAVEIS_DE_REPOSITORIO.
 const git = (raiz, args, input) => execFileSync('git', ['-C', raiz, ...args], {
   ...(input === undefined ? { encoding: 'utf8' } : { input }), maxBuffer: 1 << 28, stdio: ['pipe', 'pipe', 'pipe'],
+  env: envSemRepositorio(),
 });
+// O que o git disse ao falhar (todas as linhas do stderr, numa só), ou que ele não está instalado.
+const motivoGit = (e) => (e.code === 'ENOENT' ? 'git não encontrado no PATH'
+  : String(e.stderr || e.message).split('\n').map((l) => l.trim()).filter(Boolean).join(' '));
 
 // Conteúdo de cada "rev:caminho" (string UTF-8), ou null se o objeto não existe; um processo git para a lista toda.
 function versoes(raiz, revs) {
@@ -55,15 +69,15 @@ function versoes(raiz, revs) {
 // Repositório git na raiz, se o clone é raso e quais commits são a borda do histórico.
 export function historico(raiz = RAIZ) {
   let topo;
-  try { topo = git(raiz, ['rev-parse', '--show-toplevel']).trim(); } catch {
-    throw new Error(`sem histórico git em ${raiz}: o lastmod vem do git log (clone o repositório; não baixe o zip)`);
+  try { topo = git(raiz, ['rev-parse', '--show-toplevel']).trim(); } catch (e) {
+    throw new Error(`sem histórico git em ${raiz} (${motivoGit(e)}): o lastmod vem do git log; rode num clone do repositório (o zip `
+      + 'baixado do GitHub não traz o histórico)');
   }
   if (realpathSync(topo) !== realpathSync(raiz)) throw new Error(`${raiz} não é a raiz do repositório git (${topo})`);
   // Histórico legível do HEAD até o começo (ou até a borda do clone raso). Um clone por caminho local de um repositório
   // raso, por exemplo, sai sem a marca de raso e sem os commits antigos: o git log quebraria em cada página.
   try { git(raiz, ['rev-list', '--count', 'HEAD']); } catch (e) {
-    const motivo = String(e.stderr || e.message).trim().split('\n').at(-1);
-    throw new Error(`histórico git incompleto (${motivo}): o lastmod vem do git log; faça um clone completo (git clone sem --depth, ou git fetch --unshallow)`);
+    throw new Error(`histórico git incompleto (${motivoGit(e)}): o lastmod vem do git log; faça um clone completo (git clone sem --depth, ou git fetch --unshallow)`);
   }
   const raso = git(raiz, ['rev-parse', '--is-shallow-repository']).trim() === 'true';
   const bordas = new Set();
