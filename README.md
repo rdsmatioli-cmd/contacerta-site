@@ -95,8 +95,12 @@ node tests/lighthouse/rodar.mjs --base http://127.0.0.1:8080 --saida /tmp/lighth
 
 `CHROME_PATH` escolhe o Chrome. `--perfis mobile` roda só um perfil; `--so-verificar` só confere os JSON já gerados.
 
-## Dependabot
+## Dependabot e workflows
 
 `.github/dependabot.yml` abre no dia 1 de cada mês PRs agrupados das actions e de `tests/e2e`, só com versão publicada
 há pelo menos 14 dias (no máximo 4 PRs por mês); merge manual, com o CI verde. Os alertas e as atualizações de
 segurança do Dependabot são uma opção do repositório, em Settings > Advanced Security.
+
+O job `check` passa o zizmor 1.30.1 em `.github/` (offline, sem token) e falha com qualquer achado: workflow novo ou
+editado mantém action fixada por SHA completo com o comentário da versão, `persist-credentials: false` no checkout e
+`permissions` só de leitura. Local: `pipx run --spec zizmor==1.30.1 zizmor --offline .github`.
