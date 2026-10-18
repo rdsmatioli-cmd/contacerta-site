@@ -3,8 +3,8 @@
 // - Calculadora com post aprovado correspondente: card "Guia completo" antes das relacionadas, com o título (h1) do
 //   post e o resumo do card do índice do blog, copiados literalmente. Os pares foram conferidos lendo os dois lados:
 //   o post também linka a calculadora.
-// - Home: bloco estático "Guias recentes" com todos os posts do índice do blog, na mesma ordem, título literal e a
-//   categoria do card do índice.
+// - Home: bloco estático "Guias recentes" com os RECENTES primeiros posts do índice do blog, na mesma ordem, título
+//   literal e a categoria do card do índice.
 // - /aviso-previo/ nas relacionadas de rescisão, férias e seguro-desemprego, com o mesmo card da home.
 // - Todo <use href="#..."> tem o <symbol> correspondente na própria página (os cards novos usam ícones do sprite).
 import { test } from 'node:test';
@@ -39,6 +39,9 @@ const posts = readdirSync(join(raiz, 'blog'), { withFileTypes: true })
   .filter((d) => d.isDirectory() && d.name !== 'categoria' && existsSync(join(raiz, 'blog', d.name, 'index.html')))
   .map((d) => `/blog/${d.name}/`);
 
+const RECENTES = 6; // posts no bloco da home; com mais posts no índice, a home mostra só os primeiros
+const recentes = indice.slice(0, RECENTES);
+
 const PARES = {
   'rescisao': '/blog/como-calcular-rescisao-2026/',
   'decimo-terceiro': '/blog/decimo-terceiro-2026/',
@@ -48,7 +51,7 @@ const PARES = {
 };
 
 test('o índice do blog lista todos os posts publicados e o título do card é o h1 do post', () => {
-  assert.equal(indice.length, 6);
+  assert.ok(indice.length >= 1, 'índice do blog sem posts');
   assert.deepEqual([...indice.map((p) => p.href)].sort(), [...posts].sort());
   for (const p of indice) assert.equal((ler(`${p.href.slice(1)}index.html`).match(/<h1>([^<]+)<\/h1>/) || [])[1], p.titulo, p.href);
 });
@@ -68,19 +71,19 @@ for (const [calc, href] of Object.entries(PARES)) {
   });
 }
 
-test('home: bloco "Guias recentes" com todos os posts do índice, na mesma ordem e com o título literal', () => {
+test('home: bloco "Guias recentes" com os primeiros posts do índice, na mesma ordem e com o título literal', () => {
   const s = secao(ler('index.html'), 'guias');
   assert.ok(s, 'bloco ausente');
   assert.match(s, /<h2 id="guias">Guias recentes<\/h2>/);
-  assert.deepEqual(cards(s), indice.map((p) => ({ href: p.href, titulo: p.titulo, resumo: p.categoria })));
-  for (const p of indice) assert.ok(existe(p.href), p.href);
+  assert.deepEqual(cards(s), recentes.map((p) => ({ href: p.href, titulo: p.titulo, resumo: p.categoria })));
+  for (const p of recentes) assert.ok(existe(p.href), p.href);
 });
 
-test('todo post recebe link da home e, quando há calculadora correspondente, também dela', () => {
+test('post recente recebe link da home e, quando há calculadora correspondente, também dela', () => {
   const fora = paginas.filter((p) => !p.startsWith('blog/') && !p.startsWith('licitacoes/'));
   for (const post of posts) {
     const origens = fora.filter((p) => hrefs(ler(p)).includes(post));
-    assert.ok(origens.includes('index.html'), `${post} sem link da home`);
+    if (recentes.some((p) => p.href === post)) assert.ok(origens.includes('index.html'), `${post} sem link da home`);
     const calc = Object.keys(PARES).find((c) => PARES[c] === post);
     if (calc) assert.ok(origens.includes(`${calc}/index.html`), `${post} sem link de /${calc}/`);
   }

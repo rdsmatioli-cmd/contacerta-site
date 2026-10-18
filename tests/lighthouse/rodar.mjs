@@ -12,7 +12,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { LIGHTHOUSE, URLS, PERFIS, avaliar, nomeRelatorio, resumo } from './metas.mjs';
+import { LIGHTHOUSE, URLS, PERFIS, METAS, avaliar, nomeRelatorio, resumo } from './metas.mjs';
 
 const args = process.argv.slice(2);
 const opcao = (nome, padrao) => {
@@ -59,7 +59,8 @@ if (!soVerificar) {
 }
 
 let falhou = false;
-console.log(`\nMetas: SEO >= 0,95 | Acessibilidade >= 0,95 | CLS < 0,1 | llms-txt (agentic-browsing) = 1`);
+const br = (n) => String(n).replace('.', ',');
+console.log(`\nMetas: SEO >= ${br(METAS.seo)} | Acessibilidade >= ${br(METAS.acessibilidade)} | CLS < ${br(METAS.clsMax)} | ${METAS.auditLlms} (agentic-browsing) = 1`);
 for (const perfil of perfis) {
   for (const url of URLS) {
     const arq = join(saida, nomeRelatorio(url, perfil));
