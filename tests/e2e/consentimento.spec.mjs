@@ -3,11 +3,12 @@
 // localStorage "lcm-consent"). A rede externa está sempre abortada (fixtures.mjs): nada sai de verdade, mas a
 // tentativa fica registrada. Antes de qualquer clique no banner e depois de Recusar, zero tentativa ao Google;
 // depois de Aceitar, a tentativa de carregar o gtag.js aparece, o que prova que o bloqueio depende do consentimento.
-import { test, expect, ehGoogle, semErros, semRedeExterna, semRolagemHorizontal, assentar } from './fixtures.mjs';
+import { test, expect, ehGoogle, semErros, semRedeExterna, semRolagemHorizontal, assentar, prepararEnvio, semRecarga } from './fixtures.mjs';
 import { ARQUIVOS, BLOG, CALCULADORAS, DESLIGADAS, LICITACOES, POSTS, urlDe } from './site.mjs';
 
 const banner = (page) => page.locator('section#lcm-consent');
 
+// rede.google() inclui as dicas de conexão (preconnect, dns-prefetch...) para hosts do Google, que não viram request.
 async function semGoogle(page, rede, quando) {
   expect(rede.google(), `tentativas de requisição ao Google ${quando}`).toEqual([]);
   const estado = await page.evaluate(() => ({
@@ -19,10 +20,13 @@ async function semGoogle(page, rede, quando) {
   expect(estado, `nenhum gtag, dataLayer, script ou cookie do Google ${quando}`).toEqual({ gtag: 'undefined', dataLayer: 'undefined', scripts: [], cookies: [] });
 }
 
-// Envia a calculadora: o ui.js dispara cc:calculo-concluido, que o medicao.js passa ao lcmTrack.
+// Envia a calculadora: o ui.js dispara cc:calculo-concluido, que o medicao.js passa ao lcmTrack. Sem recarga: senão o
+// evento nem sai e o teste não exercitaria o caminho da medição.
 async function calcular(page, id) {
+  await prepararEnvio(page);
   await page.locator(`form[data-calc="${id}"] button[type="submit"]`).click();
   await expect(page.locator('#resultado')).toHaveText(/\d/);
+  await semRecarga(page);
 }
 
 const calc = CALCULADORAS[0];
@@ -51,8 +55,8 @@ for (const p of PAGINAS) {
     await assentar(page);
     await expect(banner(page), 'a recusa fica guardada: o banner não volta').toBeHidden();
     await semGoogle(page, rede, 'depois de Recusar e recarregar');
-    semErros(erros, rede);
     semRedeExterna(rede);
+    semErros(erros, rede);
   });
 
   test(`${p.nome}: depois de Aceitar, a tentativa de carregar o GA aparece (e é abortada)`, async ({ page, rede, erros }) => {
@@ -77,7 +81,9 @@ for (const p of PAGINAS) {
     await assentar(page);
     await expect(banner(page)).toBeHidden();
     await expect.poll(() => rede.google(), { message: 'com o aceite guardado, o GA é tentado ao recarregar' }).toEqual([gtag, gtag]);
-    semErros(erros, rede, { externasAbortadas: true });
+    expect(rede.tentativas.filter((u) => !ehGoogle(u)), 'nenhum outro host externo, também depois de recarregar').toEqual([]);
+    expect(rede.dicas, 'nenhuma dica de conexão para outro host').toEqual([]);
+    semErros(erros, rede);
   });
 }
 
@@ -92,8 +98,8 @@ for (const url of demais) {
     await assentar(page);
     await semGoogle(page, rede, 'antes de qualquer clique no banner');
     await semRolagemHorizontal(page);
-    semErros(erros, rede);
     semRedeExterna(rede);
+    semErros(erros, rede);
   });
 }
 
@@ -107,7 +113,7 @@ for (const url of LICITACOES) {
     await expect(page.locator('#lcm-consent'), 'sem banner de cookies').toHaveCount(0);
     expect(await page.evaluate(() => [typeof window.lcmConsent, typeof window.gtag, typeof window.dataLayer]), 'sem lcmConsent, gtag e dataLayer')
       .toEqual(['undefined', 'undefined', 'undefined']);
-    semErros(erros, rede);
     semRedeExterna(rede);
+    semErros(erros, rede);
   });
 }

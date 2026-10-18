@@ -15,7 +15,7 @@ for (const url of ['/', ...BLOG]) {
     await assentar(page);
     await expect(page.locator('h1').first()).toBeVisible();
     await semRolagemHorizontal(page);
-    semErros(erros, rede);
     semRedeExterna(rede);
+    semErros(erros, rede);
   });
 }

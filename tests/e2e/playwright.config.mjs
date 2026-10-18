@@ -1,12 +1,17 @@
 // Testes de navegador do site (Playwright, só Chromium). Rodar dentro de tests/e2e: `npm ci --ignore-scripts` e
 // `npx playwright test`. O próprio Playwright sobe o site com `python3 -m http.server` em 127.0.0.1 (porta
 // E2E_PORTA, padrão 8191) a partir da raiz do repositório, ou de E2E_RAIZ (usado para rodar contra uma cópia).
-// Toda requisição para fora do servidor local é abortada e registrada (fixtures.mjs); o Chromium também sobe sem
-// proxy e sem resolver nenhum host além de 127.0.0.1, então nada sai para a internet, nem por fora do roteamento.
+// Toda requisição HTTP ou WebSocket para fora do servidor local é abortada e registrada, e as dicas de conexão
+// (preconnect, dns-prefetch...) para outro host também são registradas (fixtures.mjs). Por baixo disso, o Chromium sobe
+// sem proxy (nem o do ambiente: as variáveis *_proxy não passam para ele) e sem resolver nenhum host além de
+// 127.0.0.1, então o que escapasse do roteamento falharia no DNS em vez de sair para a internet.
 import { defineConfig } from '@playwright/test';
 import { BASE, PORTA, RAIZ } from './site.mjs';
 
 const CI = !!process.env.CI;
+// Com HTTPS_PROXY/HTTP_PROXY no ambiente, os contextos do Chromium usavam esse proxy mesmo com --no-proxy-server, e o
+// --host-resolver-rules deixava de valer (o proxy resolve o nome).
+const AMBIENTE_SEM_PROXY = Object.fromEntries(Object.entries(process.env).filter(([k]) => !/^(https?|all|no)_proxy$/i.test(k)));
 
 export default defineConfig({
   testDir: '.',
@@ -30,6 +35,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     trace: CI ? 'retain-on-failure' : 'off',
     launchOptions: {
+      env: AMBIENTE_SEM_PROXY,
       args: ['--no-proxy-server', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1'],
     },
   },

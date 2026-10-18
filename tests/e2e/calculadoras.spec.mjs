@@ -1,7 +1,7 @@
 // (a) Cada calculadora, descoberta pelo HTML (form.calc-form[data-calc]), envia o formulário com os valores padrão e
 // mostra um resultado com número, sem erro de console nem pageerror, sem rolagem horizontal e sem rede externa.
 // O banner de cookies fica aberto (visitante novo) e nunca é clicado aqui.
-import { test, expect, semErros, semRedeExterna, semRolagemHorizontal, assentar } from './fixtures.mjs';
+import { test, expect, semErros, semRedeExterna, semRolagemHorizontal, assentar, prepararEnvio, semRecarga } from './fixtures.mjs';
 import { CALCULADORAS, DESLIGADAS, SEM_CLASSIFICACAO } from './site.mjs';
 
 test('descoberta: calculadoras achadas pelo HTML, nenhuma sem classificação', () => {
@@ -13,13 +13,16 @@ test('descoberta: calculadoras achadas pelo HTML, nenhuma sem classificação', 
 
 const enviar = async (page, form, { destaque = false } = {}) => {
   const resultado = page.locator('#resultado');
-  // O ui.js já calcula ao carregar: limpa a saída para provar que o resultado veio do envio.
+  // O ui.js já calcula ao carregar: limpa a saída para provar que o resultado veio do envio, e marca a janela para
+  // provar que o envio não recarregou a página (GET nativo com o resultado dos padrões).
   await resultado.evaluate((el) => { el.innerHTML = ''; });
+  await prepararEnvio(page);
   await form.locator('button[type="submit"]').click();
   if (destaque) await expect(resultado.locator('.destaque'), 'resultado em destaque').toBeVisible();
   else await expect(resultado, 'resultado com número').toHaveText(/\d/);
   await expect(resultado.locator('.erro'), 'resultado sem mensagem de erro').toHaveCount(0);
   await expect(resultado).not.toContainText('Não foi possível calcular');
+  await semRecarga(page);
 };
 
 for (const c of CALCULADORAS) {
@@ -44,8 +47,8 @@ for (const c of CALCULADORAS) {
 
     await assentar(page);
     await semRolagemHorizontal(page); // de novo, com o resultado na tela
-    semErros(erros, rede);
     semRedeExterna(rede);
+    semErros(erros, rede);
   });
 }
 
@@ -59,7 +62,7 @@ for (const c of DESLIGADAS) {
     await expect(form.locator('button[type="submit"]')).toBeDisabled();
     await expect(page.locator('#resultado')).toHaveText('Calculadora temporariamente indisponível.');
     await semRolagemHorizontal(page);
-    semErros(erros, rede);
     semRedeExterna(rede);
+    semErros(erros, rede);
   });
 }
