@@ -138,7 +138,7 @@ export function calcular(raiz = RAIZ, { hoje = hojeEm() } = {}) {
   if (rasas.length) {
     erros.unshift(`clone raso: o histórico acaba antes do último commit significativo de ${rasas.length} página(s), então o `
       + `lastmod delas não pode ser calculado. Busque o histórico completo (git fetch --unshallow; no CI, actions/checkout `
-      + `com fetch-depth: 0). Páginas: ${rasas.join(', ')}`);
+      + `com fetch-depth: 0). Páginas: ${rasas.slice(0, 5).join(', ')}${rasas.length > 5 ? ` e mais ${rasas.length - 5}` : ''}`);
   }
   return { xml, itens, avisos, erros, raso: hist.raso };
 }
