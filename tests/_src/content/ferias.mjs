@@ -57,5 +57,5 @@ export default {
     { nome: INSS.fonte, url: INSS.url },
     { nome: IRRF.fonte, url: IRRF.url },
   ],
-  relacionadas: ['salario-liquido', 'decimo-terceiro', 'rescisao', 'horas-extras', 'imposto-de-renda'],
+  relacionadas: ['salario-liquido', 'decimo-terceiro', 'rescisao', 'horas-extras', 'imposto-de-renda', 'aviso-previo'],
 };

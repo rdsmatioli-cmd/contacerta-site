@@ -77,5 +77,5 @@ export default {
     { nome: INSS.fonte, url: INSS.url },
     { nome: IRRF.fonte, url: IRRF.url },
   ],
-  relacionadas: ['fgts', 'seguro-desemprego', 'ferias', 'decimo-terceiro', 'salario-liquido'],
+  relacionadas: ['fgts', 'aviso-previo', 'seguro-desemprego', 'ferias', 'decimo-terceiro', 'salario-liquido'],
 };
