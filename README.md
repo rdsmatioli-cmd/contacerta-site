@@ -29,6 +29,39 @@ Os testes exigem **Node 22** (ver `.nvmrc`). Rode na raiz do repositório:
 node --test 'tests/*.test.mjs'
 ```
 
+## Testes de navegador (e2e)
+
+O job `e2e` do CI roda o Playwright (versão exata em `tests/e2e/package-lock.json`, só Chromium) em 390 px e
+1280 px: cada calculadora (achada pelo HTML: `form.calc-form` com `data-calc`) calcula com os valores padrão e mostra
+resultado com número, sem erro de console nem rolagem horizontal; home e blog carregam sem erro; nada do Google antes
+de clicar no banner de cookies nem depois de Recusar, e a tentativa de carregar o GA aparece depois de Aceitar.
+Calculadora desligada fica sem `data-calc` e com o botão `disabled`. O Playwright serve o site com
+`python3 -m http.server` em 127.0.0.1:8191 (`E2E_PORTA` troca a porta) e aborta toda requisição a outro host. Local:
+
+```sh
+cd tests/e2e
+npm ci --ignore-scripts
+npx playwright install --with-deps --only-shell chromium   # uma vez
+npx playwright test                                        # -g "markup" roda só os casos com esse nome
+```
+
+Quando falha, a mensagem diz o quê: resultado sem número, erro de console, elementos que passam da borda, URL do
+Google pedida antes do aceite. No CI, capturas e traces ficam no artefato `e2e-falhas` (`npx playwright show-trace`
+abre o `.zip`). Corrija a página, não o teste: Google antes do aceite é violação da regra do banner.
+
+## Links externos
+
+`.github/workflows/links.yml` confere os links externos de todas as páginas às segundas, 09:17 UTC, e sob demanda
+(Actions > Links externos > Run workflow); não roda em push nem em PR. Local: `node tests/links/conferir-links.mjs`
+(`--listar` só lista links e páginas, sem rede; atrás de proxy, `NODE_USE_ENV_PROXY=1`).
+
+Falha só com link QUEBRADO (404/410, 5xx persistente, DNS, tempo esgotado duas vezes, redirecionamento que termina
+em 404). O resumo da execução lista cada um com o motivo e as páginas onde aparece: confira no navegador e troque ou
+remova o link nessas páginas. BLOQUEIO_DE_ROBO (403, 429...) é só aviso; vale olhar à mão se persistir. Em
+18/10/2026 o único quebrado é o link de afiliado da Hotmart (`go.hotmart.com/E107964934J`, que redireciona para uma
+página 404) em /markup/, /das-mei/ e /parcelado-ou-a-vista/; a troca depende do Rodrigo. O GitHub desliga o agendamento
+depois de 60 dias sem atividade no repositório: reative em Actions se isso acontecer.
+
 ## Lighthouse
 
 O job `lighthouse` do CI roda o Lighthouse 13.5.0 (`npx --yes lighthouse@13.5.0`) em 9 URLs, nos perfis mobile e
