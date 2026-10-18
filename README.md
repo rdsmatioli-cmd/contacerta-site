@@ -6,7 +6,9 @@ O HTML deste repositório é a fonte oficial: não existe gerador (o antigo `scr
 18/10/2026). Edite os arquivos direto e, depois:
 
 1. `node tests/manutencao/cache.mjs`: põe em todo `?v=` de `.js`/`.css`/`.mjs` local os 10 primeiros hex do sha256
-   do arquivo (inclusive nos imports entre módulos e no `modulepreload`).
+   do arquivo (inclusive nos imports entre módulos e no `modulepreload`). Referência nova nasce com `?v=` (qualquer
+   valor): sem ele, ou numa forma que o script não reconhece, ele recusa e não grava nada. Só os assets de
+   `licitacoes/assets/` ficam sem `?v=`.
 2. Commit.
 3. `node tests/manutencao/lastmod.mjs`: recalcula o `lastmod` do `sitemap.xml`. Roda depois do commit porque a data
    vem do histórico (último commit que mudou a página, sem contar troca de `?v=`, da linha do `speculationrules` ou

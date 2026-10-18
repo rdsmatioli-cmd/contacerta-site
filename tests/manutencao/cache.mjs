@@ -3,7 +3,12 @@
 // Regra: toda referência local a .js, .css ou .mjs que tem ?v= leva os 10 primeiros hex do sha256 do arquivo
 // referenciado. Vale no HTML (script, link, modulepreload) e dentro dos próprios .js/.mjs/.css (ui.js importa
 // './calc.js?v=...'). Trocar o ?v= de um import muda o sha256 do .js que o contém, então a atualização repete até
-// nada mudar (ponto fixo). Referência sem ?v= não é tocada (as páginas de /licitacoes/ usam assets próprios sem ?v=).
+// nada mudar (ponto fixo). Só o valor do ?v= é trocado; o resto do arquivo fica byte a byte.
+// foraDaRegra() acusa o que este script não trata e que passaria em silêncio: ?v= em forma que o REF não reconhece
+// (query antes do v, valor com caractere fora de [A-Za-z0-9_-], template literal com ${...}), URL absoluta do próprio
+// site e referência local sem ?v= em <script src>, <link href>, import/from e @import/url(). As exceções sem ?v= são
+// os assets próprios de /licitacoes/ (site.css, tokens.css, app.js), que o gerador também não versionava (SEM_VERSAO).
+// Com alguma delas, a atualização não grava nada e o --conferir falha.
 // assets/lcm-consent.* vêm prontos do componente de consentimento (nr1-m01.test.mjs confere o sha256 do .js): o ?v=
 // das referências a eles segue a regra, mas os dois arquivos são só lidos, nunca regravados.
 // Varre a raiz inteira, menos .git, node_modules e tests/ (os shims de tests/_src/js importam sem ?v=).
@@ -15,16 +20,29 @@ import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, realpathSync, statSync, writeFileSync } from 'node:fs';
 import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { SITE } from '../_src/content/_seo.mjs';
 
 export const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
 export const SO_LEITURA = Object.freeze(['assets/lcm-consent.js', 'assets/lcm-consent.css']);
+export const SEM_VERSAO = Object.freeze(['licitacoes/']);
 const PULAR = new Set(['.git', 'node_modules']);
 const PULAR_NA_RAIZ = new Set(['tests']);
 const COM_REFERENCIAS = /\.(?:html|js|mjs|css)$/;
-// Referência local: começa por "/" (não "//"), "./", "../" ou por um nome, e termina em .js, .css ou .mjs seguido de
-// ?v=. O caractere antes dela é aspa, parêntese, espaço, "=" ou vírgula (atributo, import, url(), srcset); assim
-// URL absoluta (https://...) e protocolo-relativa (//...) ficam de fora.
-export const REF = /(?<=["'(\s=,])((?:\/(?!\/)|\.\.?\/|(?=[\w-]))[\w\-./]*\.(?:js|css|mjs))\?v=([^"'&#)\s,]*)/g;
+// Referência local: começa por "/" (não "//"), "./", "../" ou por um nome, e termina em .js, .css ou .mjs (sem
+// diferenciar caixa) seguido de ?v=. O caractere antes dela é aspa, crase, parêntese, espaço, ">", "=" ou vírgula
+// (atributo, import, template literal, url(), srcset, texto de <code>); URL absoluta (https://...) e
+// protocolo-relativa (//...) não casam, e hostAntes() descarta o trecho que casa dentro de uma delas
+// (https://cdn/a,assets/x.js?v=1).
+// O valor só tem letras, dígitos, "_" e "-" e precisa acabar num delimitador (aspa, crase, espaço, <, >, ")", &, #,
+// vírgula) ou no fim do texto: a troca nunca passa do valor, nem em atributo sem aspas (src=/x.js?v=1></script>) nem
+// dentro de <code>. Valor em outra forma não casa e vai para foraDaRegra().
+export const REF = /(?<=["'`(\s>=,])((?:\/(?!\/)|\.\.?\/|(?=[\w-]))[\w\-./@~+]*\.(?:js|css|mjs))\?v=([\w-]*)(?=["'`<>)\s&#,]|$)/gi;
+// Qualquer .js/.css/.mjs seguido de query, reconhecido pelo REF ou não; a query vai até o próximo delimitador.
+const CANDIDATA = /\.(?:js|css|mjs)\?([^"'`\s()<>]*)/gi;
+const TEM_V = /(?:^|[?&;])v=/;
+// Referência estrutural a .js/.css/.mjs local (sem esquema nem "//"), com ou sem query: <script src>, <link href>,
+// import/from (inclusive import() e template literal) e @import/url() do CSS.
+const ESTRUTURAL = /(?:<(?:script|link)\b[^>]*?\s(?:src|href)\s*=\s*["']?|\b(?:from|import)\s*\(?\s*["'`]|@import\s+["']|\burl\(\s*["']?)((?![a-z][a-z\d+.-]*:|\/\/)[^"'`\s()<>?#]+\.(?:js|css|mjs))(?=[?#"'`\s()<>]|$)(\?[^"'`\s()<>#]*)?/gi;
 export const hash10 = (conteudo) => createHash('sha256').update(conteudo).digest('hex').slice(0, 10);
 
 // Arquivos que podem conter referências, relativos à raiz, com "/".
@@ -66,6 +84,47 @@ function memoria(raiz) {
 }
 
 const linhaDe = (texto, i) => texto.slice(0, i).split('\n').length;
+// Começo do trecho (URL) que contém a posição i: logo depois da aspa, crase, espaço, parêntese, < ou > anterior.
+const inicioDoTrecho = (texto, i) => {
+  let ini = i;
+  while (ini > 0 && !/["'`\s()<>]/.test(texto[ini - 1])) ini--;
+  return ini;
+};
+// Host da URL com esquema ou "//" de que a posição i faz parte, ou null se o trecho é caminho local.
+const hostAntes = (texto, i) => {
+  const m = /(?:^|[=,])(?:[a-z][a-z\d+.-]*:)?\/\/([^/?#]*)/i.exec(texto.slice(inicioDoTrecho(texto, i), i));
+  return m ? m[1].toLowerCase() : null;
+};
+const HOST_PROPRIO = new URL(SITE).host;
+const proprio = (host) => host === HOST_PROPRIO || host === `www.${HOST_PROPRIO}`;
+// Ocorrências locais do REF (as que não fazem parte de URL de outro site).
+const locais = (texto) => [...texto.matchAll(REF)].filter((r) => hostAntes(texto, r.index) === null);
+
+// O que a regra exige e este script não trata: { arquivo, linha, trecho, motivo }. Vazio quando tudo está coberto.
+export function foraDaRegra(raiz = RAIZ) {
+  const fora = [];
+  for (const arquivo of listarArquivos(raiz)) {
+    const texto = readFileSync(join(raiz, arquivo), 'utf8');
+    const reconhecidas = new Set(locais(texto).map((r) => r.index + r[1].length));
+    for (const c of texto.matchAll(CANDIDATA)) {
+      const q = c.index + c[0].length - c[1].length - 1;
+      if (reconhecidas.has(q) || !TEM_V.test(c[1])) continue;
+      const host = hostAntes(texto, c.index);
+      if (host !== null && !proprio(host)) continue;
+      fora.push({ arquivo, linha: linhaDe(texto, c.index), trecho: texto.slice(inicioDoTrecho(texto, c.index), c.index + c[0].length),
+        motivo: host ? 'URL absoluta do próprio site; use caminho local' : 'forma de ?v= não reconhecida: o ?v= vem logo depois do caminho e o valor só tem letras, dígitos, "_" e "-"' });
+    }
+    for (const e of texto.matchAll(ESTRUTURAL)) {
+      if (TEM_V.test(e[2] ?? '')) continue;
+      const alvo = alvoDe(arquivo, e[1]);
+      if (alvo && SEM_VERSAO.some((p) => alvo.startsWith(p))) continue;
+      const i = e.index + e[0].length - e[1].length - (e[2]?.length ?? 0);
+      fora.push({ arquivo, linha: linhaDe(texto, i), trecho: e[1] + (e[2] ?? ''), motivo: 'sem ?v=; acrescente ?v= (qualquer valor) e rode o cache.mjs' });
+    }
+  }
+  return fora;
+}
+export const descreverFora = (f) => `${f.arquivo}:${f.linha}: ${f.trecho} (${f.motivo})`;
 
 // Toda referência com ?v=: { arquivo, linha, ref, v (o atual), alvo, esperado (sha256 do alvo; null se não existe) }.
 export function referencias(raiz = RAIZ) {
@@ -73,7 +132,7 @@ export function referencias(raiz = RAIZ) {
   const refs = [];
   for (const arquivo of listarArquivos(raiz)) {
     const texto = m.ler(arquivo).toString('utf8');
-    for (const r of texto.matchAll(REF)) {
+    for (const r of locais(texto)) {
       const alvo = alvoDe(arquivo, r[1]);
       const b = alvo && m.ler(alvo);
       refs.push({ arquivo, linha: linhaDe(texto, r.index), ref: r[1], v: r[2], alvo, esperado: b ? hash10(b) : null });
@@ -83,9 +142,12 @@ export function referencias(raiz = RAIZ) {
 }
 export const divergencias = (raiz = RAIZ) => referencias(raiz).filter((r) => r.v !== r.esperado);
 
-// Atualiza os ?v= até o ponto fixo e só então grava. Lança erro, sem gravar nada, se alguma referência estiver
-// quebrada, se um arquivo só de leitura precisar mudar ou se não houver ponto fixo (ciclo de imports com ?v=).
+// Atualiza os ?v= até o ponto fixo e só então grava. Lança erro, sem gravar nada, se houver referência fora da regra
+// (foraDaRegra) ou quebrada, se um arquivo só de leitura precisar mudar ou se não houver ponto fixo (ciclo de imports
+// com ?v=).
 export function atualizar(raiz = RAIZ, { maxPassadas = 20 } = {}) {
+  const fora = foraDaRegra(raiz);
+  if (fora.length) throw new Error(`${fora.length} referência(s) fora da regra; nada foi gravado:\n${fora.map((f) => `  ${descreverFora(f)}`).join('\n')}`);
   const m = memoria(raiz);
   const arquivos = listarArquivos(raiz);
   const alterados = new Set();
@@ -94,7 +156,8 @@ export function atualizar(raiz = RAIZ, { maxPassadas = 20 } = {}) {
     for (const arquivo of arquivos) {
       const atual = m.ler(arquivo);
       const texto = atual.toString('utf8');
-      const novo = texto.replace(REF, (_, ref, v) => {
+      const novo = texto.replace(REF, (inteira, ref, v, i) => {
+        if (hostAntes(texto, i) !== null) return inteira;
         const alvo = alvoDe(arquivo, ref);
         const b = alvo && m.ler(alvo);
         if (!b) throw new Error(`${arquivo}: referência quebrada ${ref}?v=${v} (arquivo não encontrado)`);
@@ -127,12 +190,17 @@ if (principal) {
   if (args.includes('--conferir')) {
     const refs = referencias();
     const div = refs.filter((r) => r.v !== r.esperado);
+    const fora = foraDaRegra();
+    if (fora.length) {
+      console.error(`${fora.length} referência(s) fora da regra (corrija à mão):`);
+      for (const f of fora) console.error(`  ${descreverFora(f)}`);
+    }
     if (div.length) {
       console.error(`${div.length} referência(s) com ?v= diferente do sha256 do arquivo:`);
       for (const r of div) console.error(`  ${r.arquivo}:${r.linha}: ${r.ref}?v=${r.v} -> ${r.esperado ? `esperado ?v=${r.esperado}` : 'arquivo não encontrado'}`);
       console.error('Corrija com: node tests/manutencao/cache.mjs (ajusta também os ?v= em cascata).');
-      process.exit(1);
     }
+    if (fora.length || div.length) process.exit(1);
     console.log(`${refs.length} referências com ?v= em ${new Set(refs.map((r) => r.arquivo)).size} arquivos: todas batem com o sha256.`);
   } else {
     try {
