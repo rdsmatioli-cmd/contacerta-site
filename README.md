@@ -1,5 +1,22 @@
 # Conta Certa (contacertabr.com.br)
 
+## Como editar o site
+
+O HTML deste repositório é a fonte oficial: não existe gerador (o antigo `scripts/build.mjs` não foi encontrado em
+18/10/2026). Edite os arquivos direto e, depois:
+
+1. `node tests/manutencao/cache.mjs`: põe em todo `?v=` de `.js`/`.css`/`.mjs` local os 10 primeiros hex do sha256
+   do arquivo (inclusive nos imports entre módulos e no `modulepreload`).
+2. Commit.
+3. `node tests/manutencao/lastmod.mjs`: recalcula o `lastmod` do `sitemap.xml`. Roda depois do commit porque a data
+   vem do histórico (último commit que mudou a página, sem contar troca de `?v=`, da linha do `speculationrules` ou
+   da ordem do sprite); antes do commit a página sai com a data de hoje e um aviso. Commit do `sitemap.xml`, se mudou.
+   Precisa do clone completo (`git fetch --unshallow` se for raso). Página nova entra no sitemap à mão.
+4. Testes (abaixo) e o html-validate do `.github/workflows/ci.yml`.
+5. PR para a main, com o CI verde.
+
+`--conferir` nos dois scripts só confere e sai com 1 se algo divergir.
+
 ## Testes
 
 Os testes exigem **Node 22** (ver `.nvmrc`). Rode na raiz do repositório:

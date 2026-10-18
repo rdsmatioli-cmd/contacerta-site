@@ -1,5 +1,9 @@
 # Porte do PR #25 para o gerador
 
+> **Nota (18/10/2026):** o gerador (`scripts/build.mjs`, `src/`) não foi encontrado em lugar nenhum. O HTML do
+> repositório passou a ser a fonte oficial (README, "Como editar o site"), e o `?v=` e o `lastmod` do sitemap ficam
+> com `tests/manutencao/cache.mjs` e `tests/manutencao/lastmod.mjs`. Este guia só vale se o gerador reaparecer.
+
 O PR #25 (merge `b863412`) editou o HTML publicado direto. O gerador (`scripts/build.mjs`, `src/content/*.mjs`,
 `src/css/style.css`) não tem essas mudanças: se rodar como está, apaga todas, e `links-guias`, `speculation-rules`,
 `jsonld-entidade` e `fonte-seo` acusam a perda. Este guia leva as mudanças para o gerador sem reescrever nada à mão.
