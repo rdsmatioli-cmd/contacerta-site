@@ -52,7 +52,7 @@ export function avaliar(lhr, metas = METAS) {
   }
   const cls = lhr.audits?.['cumulative-layout-shift']?.numericValue;
   if (typeof cls !== 'number') falhas.push('CLS: sem valor');
-  else if (!(cls < metas.clsMax)) falhas.push(`CLS ${num(cls, 3)} >= ${num(metas.clsMax, 1)}`);
+  else if (!(cls < metas.clsMax)) falhas.push(`CLS ${num(cls, 3)} >= ${String(metas.clsMax).replace('.', ',')}`);
   const agentic = lhr.categories?.['agentic-browsing'];
   if (!agentic || !(agentic.auditRefs || []).some((r) => r.id === metas.auditLlms)) {
     falhas.push(`categoria agentic-browsing ausente ou sem o audit ${metas.auditLlms}`);

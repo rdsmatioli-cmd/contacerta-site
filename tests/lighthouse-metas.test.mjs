@@ -49,6 +49,7 @@ test('CLS precisa ficar abaixo de 0,1', () => {
   assert.deepEqual(avaliar(lhr((r) => { r.audits['cumulative-layout-shift'].numericValue = 0.1; return r; })), ['CLS 0,100 >= 0,1']);
   assert.deepEqual(avaliar(lhr((r) => { r.audits['cumulative-layout-shift'].numericValue = 0.0999; return r; })), []);
   assert.deepEqual(avaliar(lhr((r) => { delete r.audits['cumulative-layout-shift']; return r; })), ['CLS: sem valor']);
+  assert.deepEqual(avaliar(lhr(), { ...METAS, clsMax: 0.015 }), ['CLS 0,020 >= 0,015'], 'meta com mais casas sai sem arredondar');
 });
 
 test('llms-txt reprovado, não aplicável ou fora da categoria agentic-browsing falha', () => {
