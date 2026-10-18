@@ -1,0 +1,8 @@
+# Sem conversão de fim de linha (nem com core.autocrlf=true, o padrão do Git for Windows): o ?v= é o sha256 dos bytes
+# do arquivo (tests/manutencao/cache.mjs) e o lastmod compara o arquivo com o HEAD (tests/manutencao/lastmod.mjs).
+# Num checkout em CRLF, os dois calculariam sobre bytes diferentes dos que vão para o commit e para o site.
+*.html -text
+*.js -text
+*.mjs -text
+*.css -text
+*.xml -text
