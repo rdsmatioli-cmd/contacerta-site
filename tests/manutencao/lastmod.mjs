@@ -59,6 +59,12 @@ export function historico(raiz = RAIZ) {
     throw new Error(`sem histórico git em ${raiz}: o lastmod vem do git log (clone o repositório; não baixe o zip)`);
   }
   if (realpathSync(topo) !== realpathSync(raiz)) throw new Error(`${raiz} não é a raiz do repositório git (${topo})`);
+  // Histórico legível do HEAD até o começo (ou até a borda do clone raso). Um clone por caminho local de um repositório
+  // raso, por exemplo, sai sem a marca de raso e sem os commits antigos: o git log quebraria em cada página.
+  try { git(raiz, ['rev-list', '--count', 'HEAD']); } catch (e) {
+    const motivo = String(e.stderr || e.message).trim().split('\n').at(-1);
+    throw new Error(`histórico git incompleto (${motivo}): o lastmod vem do git log; faça um clone completo (git clone sem --depth, ou git fetch --unshallow)`);
+  }
   const raso = git(raiz, ['rev-parse', '--is-shallow-repository']).trim() === 'true';
   const bordas = new Set();
   if (raso) {
