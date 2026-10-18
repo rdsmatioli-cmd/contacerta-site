@@ -4,12 +4,14 @@
 //   python3 -m http.server 8080 --bind 127.0.0.1 &
 //   node tests/lighthouse/rodar.mjs --base http://127.0.0.1:8080 --saida /tmp/lighthouse
 //
-// Opções: --perfis mobile,desktop (padrão: os dois) e --so-verificar (não roda o Lighthouse; só confere
-// os JSON que já estão em --saida). CHROME_PATH escolhe o Chrome; sem ele, o Lighthouse usa o do sistema.
+// Opções: --saida (padrão: pasta temporária do sistema, fora do site servido), --perfis mobile,desktop (padrão: os
+// dois) e --so-verificar (não roda o Lighthouse; só confere os JSON que já estão em --saida). CHROME_PATH escolhe o
+// Chrome; sem ele, o Lighthouse usa o do sistema.
 // O banner de cookies nunca é aceito e as URLs do Google Analytics ficam bloqueadas por garantia.
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 import { LIGHTHOUSE, URLS, PERFIS, avaliar, nomeRelatorio, resumo } from './metas.mjs';
 
 const args = process.argv.slice(2);
@@ -18,7 +20,7 @@ const opcao = (nome, padrao) => {
   return i >= 0 && args[i + 1] ? args[i + 1] : padrao;
 };
 const base = opcao('--base', 'http://127.0.0.1:8080').replace(/\/+$/, '');
-const saida = resolve(opcao('--saida', 'lighthouse-relatorios'));
+const saida = resolve(opcao('--saida', join(tmpdir(), 'lighthouse-contacerta')));
 const perfis = opcao('--perfis', PERFIS.join(',')).split(',').filter(Boolean);
 const soVerificar = args.includes('--so-verificar');
 for (const p of perfis) if (!PERFIS.includes(p)) { console.error(`perfil desconhecido: ${p}`); process.exit(2); }
