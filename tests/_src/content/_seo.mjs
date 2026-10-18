@@ -109,8 +109,10 @@ export const CSS_GUIA_COMPLETO = '\n/* Guia completo nas calculadoras: um card s
 // ---------- 7. sitemap.xml: lastmod
 // Regra: maior entre a data do último commit sem merge que mudou o arquivo com mudança significativa e as datas
 // do próprio documento (dateModified/datePublished, article:*_time). Não é significativo o commit que só troca ?v=,
-// só acrescenta a linha do speculationrules ou só reordena os <symbol> do sprite (o porte reordena o sprite de 5
-// páginas: ver PORTAR-PR25.md). mudancaSignificativa(antes, depois) compara as duas versões do arquivo.
+// só acrescenta, muda ou tira a linha do speculationrules (qualquer <script type="speculationrules">, não só a de
+// LINHA_ESPECULACAO: mexer nas regras de prefetch não muda o conteúdo da página) ou só reordena os <symbol> do sprite
+// (o porte reordena o sprite de 5 páginas: ver PORTAR-PR25.md). mudancaSignificativa(antes, depois) compara as duas
+// versões do arquivo.
 export const LASTMOD_PR25 = '2026-10-18';
 export const PAGINAS_PR25 = Object.freeze(['/', '/salario-liquido/', '/rescisao/', '/decimo-terceiro/', '/ferias/', '/seguro-desemprego/', '/nr1-riscos-psicossociais/', '/simples-hibrido/']);
 // sprite() de _visual.mjs põe os <symbol> na ordem do primeiro uso no HTML. O PR #25 acrescentou os símbolos novos
@@ -125,7 +127,8 @@ export function ordenaSprite(html) {
   return String(html).replace(/(<svg class="sprite"[^>]*>)((?:<symbol\b[^]*?<\/symbol>)*)(<\/svg>)/g, (_, a, simbolos, z) =>
     a + (simbolos.match(/<symbol\b[^]*?<\/symbol>/g) || []).sort((x, y) => (x.match(/id="([^"]+)"/)[1] < y.match(/id="([^"]+)"/)[1] ? -1 : 1)).join('') + z);
 }
-export const normalizaLastmod = (html) => ordenaSprite(html).replace(/\?v=[0-9a-f]{10}\b/g, '?v=').split(LINHA_ESPECULACAO).join('');
+export const normalizaLastmod = (html) => ordenaSprite(html).replace(/\?v=[0-9a-f]{10}\b/g, '?v=')
+  .replace(/<script type="speculationrules">[^]*?<\/script>\n?/g, '');
 export const mudancaSignificativa = (antes, depois) => normalizaLastmod(antes) !== normalizaLastmod(depois);
 // Datas do próprio documento: dateModified/datePublished dos objetos-raiz do JSON-LD (o objeto, os itens da lista ou
 // os do @graph; os blogPost aninhados no índice e nas categorias do blog não contam) e article:*_time, em AAAA-MM-DD.

@@ -73,9 +73,14 @@ test('lastmod.mjs: ignora commit só de ?v=, speculationrules ou ordem do sprite
     commit('2026-03-01T12:00:00-03:00');
     w('a/index.html', pagina({ v: 'abcdef0123', spec: LINHA_ESPECULACAO, ids: ['b', 'a'] }));
     commit('2026-03-15T12:00:00-03:00');
+    // Regras de prefetch mudadas (só o conteúdo da linha do speculationrules): também não conta.
+    const outraEspeculacao = LINHA_ESPECULACAO.replace(']}', ',{"not":{"href_matches":"/*.txt"}}]}');
+    assert.notEqual(outraEspeculacao, LINHA_ESPECULACAO);
+    w('a/index.html', pagina({ v: 'abcdef0123', spec: outraEspeculacao, ids: ['b', 'a'] }));
+    commit('2026-03-20T12:00:00-03:00');
     assert.equal(lastmodDe(repo), '2026-01-10', '?v=, speculationrules e ordem do sprite não contam');
     // 23h30 em -03:00 já é dia 6 em UTC: vale o dia no fuso do próprio commit.
-    w('a/index.html', pagina({ v: 'abcdef0123', spec: LINHA_ESPECULACAO, ids: ['b', 'a'], texto: 'Conteúdo novo' }));
+    w('a/index.html', pagina({ v: 'abcdef0123', spec: outraEspeculacao, ids: ['b', 'a'], texto: 'Conteúdo novo' }));
     commit('2026-04-05T23:30:00-03:00');
     assert.equal(lastmodDe(repo), '2026-04-05');
     // Data do documento maior que a do commit: vale a do documento.
