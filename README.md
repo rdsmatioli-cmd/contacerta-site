@@ -94,3 +94,9 @@ node tests/lighthouse/rodar.mjs --base http://127.0.0.1:8080 --saida /tmp/lighth
 ```
 
 `CHROME_PATH` escolhe o Chrome. `--perfis mobile` roda só um perfil; `--so-verificar` só confere os JSON já gerados.
+
+## Dependabot
+
+`.github/dependabot.yml` abre no dia 1 de cada mês PRs agrupados das actions e de `tests/e2e`, só com versão publicada
+há pelo menos 14 dias (no máximo 4 PRs por mês); merge manual, com o CI verde. Os alertas e as atualizações de
+segurança do Dependabot são uma opção do repositório, em Settings > Advanced Security.

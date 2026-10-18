@@ -46,7 +46,7 @@ jobs:
           path: ${{ runner.temp }}/lighthouse
           if-no-files-found: ignore
           retention-days: 7
-  # Testes de navegador (tests/e2e, Playwright 1.64.1 fixado no package-lock.json, só Chromium): cada calculadora
+  # Testes de navegador (tests/e2e, Playwright com versão exata no package-lock.json, só Chromium): cada calculadora
   # envia o formulário com os valores padrão e mostra resultado; home e blog carregam sem erro; nada do Google antes
   # do aceite do banner nem depois de Recusar, e a tentativa de carregar o GA só aparece depois de Aceitar. O próprio
   # Playwright serve o site com python3 -m http.server em 127.0.0.1 e aborta toda requisição a outro host.

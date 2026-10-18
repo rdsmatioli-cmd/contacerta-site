@@ -1,0 +1,43 @@
+# Dependabot: atualizações de versão das actions dos workflows e das dependências do e2e (tests/e2e). Uma vez por
+# mês (dia 1, 06:00 de Brasília), em grupos, e só com versão publicada há pelo menos 14 dias (cooldown): poucos PRs
+# e nada recém-publicado. No máximo 4 PRs por mês: 1 das actions, 1 de minor/patch do e2e e 1 por major de cada
+# dependência direta do e2e (são 2). Merge manual, com o CI verde. Sem labels próprios: valem os do Dependabot.
+# Alertas e atualizações de segurança são opção do repositório (Settings > Advanced Security), fora deste arquivo.
+version: 2
+updates:
+  # Actions fixadas por SHA completo em .github/workflows/: o PR troca o SHA e o comentário da versão juntos.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+      time: '06:00'
+      timezone: America/Sao_Paulo
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns:
+          - '*'
+  # @playwright/test e @axe-core/playwright, com versão exata no package.json e no package-lock.json. Minor e patch
+  # vêm num PR só; major, em PR separado.
+  - package-ecosystem: npm
+    directory: /tests/e2e
+    schedule:
+      interval: monthly
+      time: '06:00'
+      timezone: America/Sao_Paulo
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: testes
+    groups:
+      e2e:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
