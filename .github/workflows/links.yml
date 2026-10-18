@@ -1,0 +1,24 @@
+name: Links externos
+# Checagem semanal dos links externos (tests/links/conferir-links.mjs, Node 22, sem dependências): segunda-feira às
+# 09:17 UTC (minuto quebrado, fora do pico da hora cheia) e sob demanda. Não roda em push nem em PR: depende de sites
+# de terceiros, que caem e voltam sem relação com o código. Falha só com link QUEBRADO; bloqueio de robô é aviso.
+# O resumo, com cada link quebrado e as páginas onde aparece, fica na página da execução.
+on:
+  schedule:
+    - cron: '17 9 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: '22'
+      - name: Conferir links externos
+        run: node tests/links/conferir-links.mjs
