@@ -1,11 +1,12 @@
 // tests/links/conferir-links.mjs (checagem semanal dos links externos), sem internet: extração dos links do HTML e
 // classificação contra um servidor local em 127.0.0.1 (404, redirecionamento que termina em 404, laço de cookie,
-// bloqueio de robô, 5xx persistente e passageiro, tempo esgotado) e contra erros simulados de DNS e TLS.
+// bloqueio de robô, 5xx persistente e passageiro, tempo esgotado) e contra erros simulados de DNS e TLS; segunda
+// passada no fim da rodada e parâmetro de afiliado fora da URL conferida.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
-import { extrairLinks, mapearLinks, conferir, conferirTodos, resumoMarkdown } from './links/conferir-links.mjs';
+import { extrairLinks, mapearLinks, conferir, conferirTodos, resumoMarkdown, semAfiliado } from './links/conferir-links.mjs';
 
 test('extrai só links externos, sem fragmento, com entidades decodificadas e sem repetir', () => {
   const html = `<!doctype html><head>
@@ -35,11 +36,13 @@ test('o mapa do site ignora tests/ e o próprio domínio e guarda as páginas de
 // ---------- servidor local ----------
 let servidor, base;
 const visitas = new Map();
+const ordem = [];
 let simultaneos = 0, picoSimultaneos = 0;
 before(async () => {
   servidor = createServer((req, res) => {
     const caminho = req.url.split('?')[0];
     visitas.set(caminho, (visitas.get(caminho) || 0) + 1);
+    ordem.push(req.url);
     const ir = (status, location, extra = {}) => { res.writeHead(status, { location, ...extra }); res.end(); };
     switch (caminho) {
       case '/ok': return res.end('ok');
@@ -55,6 +58,7 @@ before(async () => {
       case '/cloudflare': res.writeHead(503, { 'cf-mitigated': 'challenge' }); return res.end();
       case '/500': res.statusCode = 500; return res.end();
       case '/instavel': res.statusCode = visitas.get(caminho) === 1 ? 503 : 200; return res.end();
+      case '/instavel-passada': res.statusCode = visitas.get(caminho) === 1 ? 503 : 200; return res.end();
       case '/lento': return; // nunca responde
       case '/devagar':
         simultaneos++; picoSimultaneos = Math.max(picoSimultaneos, simultaneos);
@@ -113,6 +117,31 @@ test('no máximo 2 requisições ao mesmo host ao mesmo tempo', async () => {
   const r = await conferirTodos(urls, { ...rapido, concorrencia: 8 });
   assert.deepEqual(r.map((x) => x.classe), Array(8).fill('OK'));
   assert.equal(picoSimultaneos, 2);
+});
+
+test('segunda passada: a nova tentativa vem depois da primeira passada inteira, com a pausa', async () => {
+  const urls = [`${base}/404?passada=1`, `${base}/ok?passada=2`, `${base}/instavel-passada?passada=3`];
+  const avisos = [];
+  const inicio = Date.now();
+  const r = await conferirTodos(urls, { ...rapido, pausa: 200, concorrencia: 1, aoRefazer: (n, ms) => avisos.push([n, ms]) });
+  assert.ok(Date.now() - inicio >= 200);
+  assert.deepEqual(avisos, [[2, 200]]);
+  assert.deepEqual(ordem.filter((u) => u.includes('passada=')), ['/404?passada=1', '/ok?passada=2', '/instavel-passada?passada=3', '/404?passada=1', '/instavel-passada?passada=3']);
+  assert.deepEqual(r.map((x) => [x.classe, x.tentativas || 1]), [['QUEBRADO', 2], ['OK', 1], ['OK', 2]]);
+  assert.equal(r[2].primeira, 'HTTP 503');
+});
+
+test('afiliado: o parâmetro do afiliado sai da URL conferida; o resultado guarda a URL publicada', async () => {
+  assert.equal(semAfiliado('https://www.amazon.com.br/dp/B0HCCKLQLX?tag=contacerta-20'), 'https://www.amazon.com.br/dp/B0HCCKLQLX');
+  assert.equal(semAfiliado('https://www.amazon.com.br/dp/X?th=1&tag=a-20&psc=1'), 'https://www.amazon.com.br/dp/X?th=1&psc=1');
+  assert.equal(semAfiliado('https://clicknotas.com/emissor/cadastro?indicacao=1423287'), 'https://clicknotas.com/emissor/cadastro');
+  for (const igual of ['https://go.hotmart.com/E107964934J', 'https://exemplo.com/?tag=x', 'https://a.gov.br/b?x=1%202']) assert.equal(semAfiliado(igual), igual);
+  const publicada = `${base}/404?indicacao=99`;
+  const r = await conferir(publicada, rapido);
+  assert.equal(r.url, publicada);
+  assert.equal(r.conferida, `${base}/404`);
+  assert.match(r.motivo, /^HTTP 404 \(conferido sem o parâmetro de afiliado\)$/);
+  assert.ok(!ordem.some((u) => u.includes('indicacao')), 'o servidor nunca recebe o parâmetro do afiliado');
 });
 
 test('resumo: link quebrado com as páginas onde aparece; aviso separado', () => {

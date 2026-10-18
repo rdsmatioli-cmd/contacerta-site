@@ -7,7 +7,13 @@
 //   fora; o fragmento (#...) é descartado, porque não vai ao servidor. Cada URL é conferida uma vez.
 // - GET com user-agent de navegador, seguindo até 15 redirecionamentos com os cookies da cadeia (como o navegador),
 //   com tempo-limite por tentativa, no máximo --concorrencia requisições ao mesmo tempo e 2 por host. O que não der
-//   OK nem bloqueio ganha uma nova tentativa.
+//   OK nem bloqueio ganha uma nova tentativa numa segunda passada, --pausa depois do fim da primeira (60 s) e com a
+//   mesma fila por host: uma queda curta de um host com muitos links (www.planalto.gov.br) não vira dezenas de
+//   QUEBRADO.
+// - Links de afiliado: o parâmetro do afiliado (tag= da Amazon, indicacao=) sai da URL conferida, para a checagem não
+//   contar como clique de robô; a página existe ou não sem ele, e o resumo mostra a URL publicada. Afiliado no caminho
+//   (go.hotmart.com/<código>, bling.com.br/planos-e-precos/<código>) não tem como sair: é conferido como está, com 1
+//   GET por semana (2 se não der OK).
 // - Classes: OK (2xx); BLOQUEIO_DE_ROBO (401, 403, 405, 406, 418, 429, 451, 999 ou desafio do Cloudflare: aviso, não
 //   falha); NAO_CONFERIDO (cadeia TLS incompleta, que o navegador completa e o Node não: aviso); QUEBRADO (404, 410
 //   e demais 4xx, 5xx nas duas tentativas, erro de DNS ou de rede, tempo esgotado duas vezes; também quando um
@@ -16,7 +22,7 @@
 //   link quebrado.
 //
 // Opções: --raiz <dir> (padrão: a raiz do repositório), --concorrencia <n> (8), --tempo-limite <ms> (15000),
-// --pausa <ms> antes da nova tentativa (3000), --listar (só lista os links e as páginas, sem rede).
+// --pausa <ms> antes da nova tentativa (60000), --listar (só lista os links e as páginas, sem rede).
 // Atrás de proxy (Node >= 22.21): NODE_USE_ENV_PROXY=1 node tests/links/conferir-links.mjs
 import { appendFileSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
@@ -27,6 +33,9 @@ const PROPRIO = /(^|\.)contacertabr\.com\.br$/i;
 const ROBO = new Set([401, 403, 405, 406, 418, 429, 451, 999]);
 const TLS_INCOMPLETO = new Set(['UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'UNABLE_TO_GET_ISSUER_CERT', 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY']);
 const DNS = new Set(['ENOTFOUND', 'EAI_AGAIN', 'EAI_NONAME', 'EAI_NODATA']);
+const PAUSA = 60000;
+// [host, parâmetros que identificam o afiliado]
+const AFILIADO = [[/(^|\.)amazon\.[a-z.]+$/i, ['tag']], [/./, ['indicacao']]];
 
 // ---------- páginas e links ----------
 export function listarPaginas(raiz) {
@@ -92,6 +101,15 @@ export function mapearLinks(raiz) {
 
 // ---------- conferência ----------
 const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// URL a conferir: a publicada sem o parâmetro de afiliado (ver o cabeçalho). Sem parâmetro a tirar, a mesma string.
+export function semAfiliado(url) {
+  const u = new URL(url);
+  const tirar = AFILIADO.filter(([host]) => host.test(u.hostname)).flatMap(([, ps]) => ps).filter((p) => u.searchParams.has(p));
+  if (!tirar.length) return url;
+  for (const p of tirar) u.searchParams.delete(p);
+  return u.href;
+}
 
 // Cookies da cadeia de redirecionamentos, como o navegador guarda. Sem isso, sites que gravam um cookie e
 // redirecionam para a mesma URL (caixa.gov.br, nfe.fazenda.gov.br) entram em laço e pareceriam quebrados.
@@ -171,20 +189,40 @@ export function classificar(t, url) {
   return { classe: 'QUEBRADO', motivo: `HTTP ${t.status}${via}` };
 }
 
-// Confere um link: uma tentativa e, se não der OK nem bloqueio, mais uma depois da pausa. Vale o resultado da
-// segunda (404 ou 5xx duas vezes, tempo esgotado duas vezes etc.).
-export async function conferir(url, { tempoLimite = 15000, pausa = 3000, fetch } = {}) {
-  let r = classificar(await tentar(url, { tempoLimite, fetch }), url);
-  if (r.classe === 'QUEBRADO' || r.classe === 'NAO_CONFERIDO') {
-    await esperar(pausa);
-    const segunda = classificar(await tentar(url, { tempoLimite, fetch }), url);
-    r = { ...segunda, tentativas: 2, primeira: r.motivo };
-  }
-  return { url, ...r };
+const refazer = (r) => r.classe === 'QUEBRADO' || r.classe === 'NAO_CONFERIDO';
+// Vale o resultado da segunda tentativa (404 ou 5xx duas vezes, tempo esgotado duas vezes etc.).
+const segunda = (primeira, nova) => ({ ...nova, tentativas: 2, primeira: primeira.motivo });
+
+// Uma tentativa classificada: `url` é a publicada; `conferida`, a URL pedida quando o parâmetro de afiliado saiu.
+async function umaTentativa(url, { tempoLimite = 15000, fetch } = {}) {
+  const alvo = semAfiliado(url);
+  const r = classificar(await tentar(alvo, { tempoLimite, fetch }), alvo);
+  return alvo === url ? { url, ...r } : { url, conferida: alvo, ...r, motivo: `${r.motivo} (conferido sem o parâmetro de afiliado)` };
 }
 
-// Fila com limite global e por host.
-export async function conferirTodos(urls, { concorrencia = 8, porHost = 2, ...opcoes } = {}) {
+// Confere um link sozinho: uma tentativa e, se não der OK nem bloqueio, mais uma depois da pausa.
+export async function conferir(url, { pausa = PAUSA, ...opcoes } = {}) {
+  const r = await umaTentativa(url, opcoes);
+  if (!refazer(r)) return r;
+  await esperar(pausa);
+  return segunda(r, await umaTentativa(url, opcoes));
+}
+
+// Todos os links: primeira passada inteira e, para o que não deu OK nem bloqueio, uma segunda passada depois da
+// pausa, com a mesma fila. `aoRefazer(n, pausa)` avisa antes da espera.
+export async function conferirTodos(urls, { concorrencia = 8, porHost = 2, pausa = PAUSA, aoRefazer, ...opcoes } = {}) {
+  const fila = { concorrencia, porHost };
+  const primeira = await emFila(urls, (u) => umaTentativa(u, opcoes), fila);
+  const deNovo = primeira.filter(refazer).map((r) => r.url);
+  if (!deNovo.length) return primeira;
+  if (aoRefazer) aoRefazer(deNovo.length, pausa);
+  await esperar(pausa);
+  const novas = new Map((await emFila(deNovo, (u) => umaTentativa(u, opcoes), fila)).map((r) => [r.url, r]));
+  return primeira.map((r) => (novas.has(r.url) ? segunda(r, novas.get(r.url)) : r));
+}
+
+// Fila com limite global e por host; devolve os resultados na ordem de `urls`.
+async function emFila(urls, fazer, { concorrencia, porHost }) {
   const fila = [...urls];
   const ativosPorHost = new Map();
   const resultados = new Map();
@@ -199,7 +237,7 @@ export async function conferirTodos(urls, { concorrencia = 8, porHost = 2, ...op
         fila.splice(i--, 1);
         ativos++;
         ativosPorHost.set(host, (ativosPorHost.get(host) || 0) + 1);
-        conferir(url, opcoes).then((r) => {
+        fazer(url).then((r) => {
           resultados.set(url, r);
           ativos--;
           ativosPorHost.set(host, ativosPorHost.get(host) - 1);
@@ -236,7 +274,7 @@ export function resumoMarkdown({ paginas, mapa, resultados }) {
 
 // ---------- linha de comando ----------
 function opcoes(argv) {
-  const o = { raiz: fileURLToPath(new URL('../../', import.meta.url)), concorrencia: 8, tempoLimite: 15000, pausa: 3000, listar: false };
+  const o = { raiz: fileURLToPath(new URL('../../', import.meta.url)), concorrencia: 8, tempoLimite: 15000, pausa: PAUSA, listar: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i], v = () => { const x = argv[++i]; if (x === undefined) throw new Error(`${a} pede um valor`); return x; };
     if (a === '--raiz') o.raiz = resolve(v());
@@ -261,7 +299,8 @@ async function main() {
   }
   console.log(`Conferindo ${urls.length} links externos únicos de ${paginas.length} páginas...`);
   const inicio = Date.now();
-  const resultados = await conferirTodos(urls, o);
+  const aoRefazer = (n, ms) => console.log(`Nova tentativa de ${n} ${n === 1 ? 'link' : 'links'} daqui a ${Math.round(ms / 1000)} s...`);
+  const resultados = await conferirTodos(urls, { ...o, aoRefazer });
   for (const r of resultados) if (r.classe !== 'OK') console.log(`${r.classe.padEnd(16)} ${r.url}\n${' '.repeat(17)}${r.motivo}\n${' '.repeat(17)}em ${[...mapa.get(r.url)].sort().join(', ')}`);
   const md = resumoMarkdown({ paginas, mapa, resultados });
   console.log(`\n${md.split('\n')[2]}\nTempo: ${Math.round((Date.now() - inicio) / 1000)} s.`);
