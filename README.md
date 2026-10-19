@@ -17,7 +17,10 @@ O HTML deste repositório é a fonte oficial: não existe gerador (o antigo `scr
    último commit significativo de alguma página; `git fetch --unshallow` resolve, e o CI usa `fetch-depth: 0`.
    Página nova entra no sitemap à mão.
 4. Testes (abaixo) e o html-validate do `.github/workflows/ci.yml`.
-5. PR para a main, com o CI verde.
+5. PR para a main, com o CI verde, mesclado com "Create a merge commit" (como os PRs anteriores). O `lastmod` usa a
+   data do autor do último commit sem merge que mudou a página; o squash cria um commit novo com a data do dia do
+   merge, e num outro dia o `node --test` passa a falhar na main. Se o PR for por squash, rode
+   `node tests/manutencao/lastmod.mjs` na main depois do merge e commit do `sitemap.xml`.
 
 `--conferir` nos dois scripts só confere e sai com 1 se algo divergir.
 
@@ -35,10 +38,12 @@ O job `e2e` do CI roda o Playwright (versão exata em `tests/e2e/package-lock.js
 1280 px: cada calculadora (achada pelo HTML: `form.calc-form` com `data-calc`) calcula com os valores padrão e mostra
 resultado com número, sem recarregar a página, sem erro de console nem rolagem horizontal; home e blog carregam sem
 erro; nada do Google antes de clicar no banner de cookies nem depois de Recusar, e a tentativa de carregar o GA
-aparece depois de Aceitar. Calculadora desligada fica sem `data-calc` e com o botão `disabled`. O Playwright serve o
-site com `python3 -m http.server` em 127.0.0.1:8191 (`E2E_PORTA` troca a porta), aborta e registra toda requisição
-HTTP ou WebSocket a outro host e registra as dicas de conexão para fora (`preconnect`, `dns-prefetch`...); o Chromium
-sobe sem proxy, nem o do ambiente, e sem DNS. Local:
+aparece depois de Aceitar. Calculadora desligada fica sem `data-calc` e com o botão `disabled`. O mesmo job passa o
+axe-core (`@axe-core/playwright`, versão exata no lockfile) em todas as páginas, nas duas larguras e nos temas claro e
+escuro (`prefers-color-scheme`), com as regras WCAG 2.0, 2.1 e 2.2 A e AA: falha só com violação serious ou critical;
+moderate e minor saem no log. O Playwright serve o site com `python3 -m http.server` em 127.0.0.1:8191 (`E2E_PORTA`
+troca a porta), aborta e registra toda requisição HTTP ou WebSocket a outro host e registra as dicas de conexão para
+fora (`preconnect`, `dns-prefetch`...); o Chromium sobe sem proxy, nem o do ambiente, e sem DNS. Local:
 
 ```sh
 cd tests/e2e
@@ -48,11 +53,11 @@ npx playwright test                                        # -g "markup" roda s�
 ```
 
 Quando falha, a mensagem diz o quê: resultado sem número, envio que recarrega a página, erro de console, elementos
-que passam da borda, URL de outro host pedida, URL do Google pedida antes do aceite. No CI, capturas e traces ficam no
-artefato `e2e-falhas` (`npx playwright show-trace` abre o `.zip`). Corrija a página, não o teste. Nenhuma página pode
-pedir nada de outro host antes do aceite (imagem, vídeo, fonte, script de terceiro, `preconnect`): isso derruba o e2e
-de propósito, e liberar um host pede decisão explícita e muda o teste junto. Google antes do aceite é violação da
-regra do banner.
+que passam da borda, URL de outro host pedida, URL do Google pedida antes do aceite, violação de acessibilidade
+(página, tema, regra do axe e seletor do elemento). No CI, capturas e traces ficam no artefato `e2e-falhas`
+(`npx playwright show-trace` abre o `.zip`). Corrija a página, não o teste. Nenhuma página pode pedir nada de outro
+host antes do aceite (imagem, vídeo, fonte, script de terceiro, `preconnect`): isso derruba o e2e de propósito, e
+liberar um host pede decisão explícita e muda o teste junto. Google antes do aceite é violação da regra do banner.
 
 Não use `--reporter=html` dentro do repositório: a pasta `tests/e2e/playwright-report/` (ignorada pelo git) traz um
 `index.html` que o `node --test` passa a tratar como página do site; apague-a se for criada. Para atualizar o
@@ -92,3 +97,22 @@ node tests/lighthouse/rodar.mjs --base http://127.0.0.1:8080 --saida /tmp/lighth
 ```
 
 `CHROME_PATH` escolhe o Chrome. `--perfis mobile` roda só um perfil; `--so-verificar` só confere os JSON já gerados.
+
+## Dependabot e workflows
+
+`.github/dependabot.yml` abre no dia 1 de cada mês PRs das actions e de `tests/e2e`, só com versão publicada há pelo
+menos 14 dias: minor e patch num PR agrupado por ecossistema, e o major de cada dependência em PR separado (no máximo
+3 PRs abertos por ecossistema); merge manual, com o CI verde. A primeira verificação costuma rodar logo que o arquivo
+chega à main, sem esperar o dia 1; em 19/10/2026, isso quer dizer um PR para `actions/checkout` v7 e outro para
+`actions/setup-node` v7. As versões fixadas nos comandos do `ci.yml` (zizmor, html-validate, Lighthouse) não passam
+pelo Dependabot: atualize à mão, com versão publicada há pelo menos 14 dias. Os alertas e as atualizações de segurança
+do Dependabot são uma opção do repositório, em Settings > Advanced Security. O CI roda em push (menos nas branches
+`dependabot/**`) e em PR, então cada PR do Dependabot roda o CI uma vez.
+
+O job `check` instala o zizmor 1.30.1 num venv, com o sha256 do wheel conferido pelo pip (`--require-hashes`), e passa
+o perfil padrão em `.github/` (offline, sem token). Ele falha com: action por tag ou branch em vez de SHA, checkout
+sem `persist-credentials: false`, workflow sem bloco `permissions` ou com escrita no nível do workflow, expressão
+`${{ }}` de entrada externa dentro de `run`, e `dependabot.yml` sem `cooldown`. Não confere, e fica para a revisão: o
+comentário da versão ao lado do SHA (a auditoria que confere, `ref-version-mismatch`, só roda online e com token),
+`permissions` de escrita no nível do job e `persist-credentials: true` explícito. Os achados dos perfis auditor e
+pedantic ficam suprimidos. Local: `pipx run --spec zizmor==1.30.1 zizmor --offline .github`.
