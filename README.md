@@ -36,11 +36,11 @@ O job `e2e` do CI roda o Playwright (versão exata em `tests/e2e/package-lock.js
 resultado com número, sem recarregar a página, sem erro de console nem rolagem horizontal; home e blog carregam sem
 erro; nada do Google antes de clicar no banner de cookies nem depois de Recusar, e a tentativa de carregar o GA
 aparece depois de Aceitar. Calculadora desligada fica sem `data-calc` e com o botão `disabled`. O mesmo job passa o
-axe-core (`@axe-core/playwright`, versão exata no lockfile) em todas as páginas, nas duas larguras, com as regras
-WCAG 2.0, 2.1 e 2.2 A e AA: falha só com violação serious ou critical; moderate e minor saem no log. O Playwright
-serve o site com `python3 -m http.server` em 127.0.0.1:8191 (`E2E_PORTA` troca a porta), aborta e registra toda
-requisição HTTP ou WebSocket a outro host e registra as dicas de conexão para fora (`preconnect`, `dns-prefetch`...);
-o Chromium sobe sem proxy, nem o do ambiente, e sem DNS. Local:
+axe-core (`@axe-core/playwright`, versão exata no lockfile) em todas as páginas, nas duas larguras e nos temas claro e
+escuro (`prefers-color-scheme`), com as regras WCAG 2.0, 2.1 e 2.2 A e AA: falha só com violação serious ou critical;
+moderate e minor saem no log. O Playwright serve o site com `python3 -m http.server` em 127.0.0.1:8191 (`E2E_PORTA`
+troca a porta), aborta e registra toda requisição HTTP ou WebSocket a outro host e registra as dicas de conexão para
+fora (`preconnect`, `dns-prefetch`...); o Chromium sobe sem proxy, nem o do ambiente, e sem DNS. Local:
 
 ```sh
 cd tests/e2e
@@ -51,7 +51,7 @@ npx playwright test                                        # -g "markup" roda s�
 
 Quando falha, a mensagem diz o quê: resultado sem número, envio que recarrega a página, erro de console, elementos
 que passam da borda, URL de outro host pedida, URL do Google pedida antes do aceite, violação de acessibilidade
-(página, regra do axe e seletor do elemento). No CI, capturas e traces ficam no artefato `e2e-falhas`
+(página, tema, regra do axe e seletor do elemento). No CI, capturas e traces ficam no artefato `e2e-falhas`
 (`npx playwright show-trace` abre o `.zip`). Corrija a página, não o teste. Nenhuma página pode pedir nada de outro
 host antes do aceite (imagem, vídeo, fonte, script de terceiro, `preconnect`): isso derruba o e2e de propósito, e
 liberar um host pede decisão explícita e muda o teste junto. Google antes do aceite é violação da regra do banner.
