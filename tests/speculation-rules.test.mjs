@@ -54,11 +54,13 @@ for (const p of fora) {
   });
 }
 
+const CSP_REDIR = /<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'">/;
+const ehRedir = (h) => /<meta http-equiv="refresh"/.test(h) && /<meta name="robots" content="noindex,follow">/.test(h) && !/<script\b/i.test(h);
 for (const p of paginas.filter(ehLicitacoes)) {
   test(`${p}: /licitacoes/ sem speculationrules e com a CSP intacta`, () => {
     const html = ler(p);
     assert.equal(regrasDe(html).length, 0);
     assert.doesNotMatch(html, /speculationrules/);
-    assert.match(html, /<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'none'">/);
+    if (ehRedir(html)) assert.match(html, CSP_REDIR); else assert.match(html, /<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'none'">/);
   });
 }

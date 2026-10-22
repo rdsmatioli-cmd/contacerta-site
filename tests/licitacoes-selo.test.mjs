@@ -18,7 +18,8 @@ const listar = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
   if (d.isDirectory()) return listar(p);
   return d.name.endsWith('.html') ? [relative(raiz, p).split(sep).join('/')] : [];
 });
-const paginas = listar(pasta).sort();
+// Páginas de redirecionamento (meta refresh + noindex, sem script) não exibem o aviso nem o selo.
+const paginas = listar(pasta).filter((p) => !/<meta http-equiv="refresh"/.test(readFileSync(join(raiz, p), 'utf8'))).sort();
 const selos = (texto) => [...texto.matchAll(SELO)].map((m) => m[1]);
 
 // Método A sobre os bytes do arquivo (o .gitattributes desliga a conversão de fim de linha dos .html).

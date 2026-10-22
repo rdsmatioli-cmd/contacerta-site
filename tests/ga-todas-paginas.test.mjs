@@ -71,6 +71,8 @@ for (const p of paginas.filter((x) => !ehLicitacoes(x))) {
   });
 }
 
+const CSP_REDIR = /<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'">/;
+const ehRedir = (h) => /<meta http-equiv="refresh"/.test(h) && /<meta name="robots" content="noindex,follow">/.test(h) && !/<script\b/i.test(h);
 for (const p of paginas.filter(ehLicitacoes)) {
   test(`${p}: sem GA, sem lcm-consent e sem script de terceiros`, () => {
     const html = ler(p);
@@ -78,6 +80,6 @@ for (const p of paginas.filter(ehLicitacoes)) {
     assert.doesNotMatch(html, /lcm-consent|data-ga4/);
     assert.equal((html.match(ID_MEDICAO) || []).length, 0);
     for (const s of html.match(/<script\b[^>]*\ssrc="[^"]*"/g) || []) assert.doesNotMatch(s, /\ssrc="(https?:)?\/\//, s);
-    assert.match(html, /<meta http-equiv="Content-Security-Policy" content="[^"]*script-src 'self';/);
+    if (ehRedir(html)) assert.match(html, CSP_REDIR); else assert.match(html, /<meta http-equiv="Content-Security-Policy" content="[^"]*script-src 'self';/);
   });
 }
