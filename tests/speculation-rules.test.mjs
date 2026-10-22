@@ -54,13 +54,25 @@ for (const p of fora) {
   });
 }
 
+// Lista fechada (decisão do CPO, 22/10/2026): só este caminho exato usa a CSP de redirecionamento. Nenhuma regra
+// genérica (meta refresh, noindex): qualquer outra página de /licitacoes/ com CSP diferente continua falhando.
+const EXCECOES_REDIR = new Set(['licitacoes/privacidade/index.html']);
 const CSP_REDIR = /<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'">/;
-const ehRedir = (h) => /<meta http-equiv="refresh"/.test(h) && /<meta name="robots" content="noindex,follow">/.test(h) && !/<script\b/i.test(h);
-for (const p of paginas.filter(ehLicitacoes)) {
-  test(`${p}: /licitacoes/ sem speculationrules e com a CSP intacta`, () => {
-    const html = ler(p);
-    assert.equal(regrasDe(html).length, 0);
-    assert.doesNotMatch(html, /speculationrules/);
-    if (ehRedir(html)) assert.match(html, CSP_REDIR); else assert.match(html, /<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'none'">/);
-  });
+const CSP_LICITACOES = /<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'none'">/;
+function checarLicitacoes(p, html) {
+  assert.equal(regrasDe(html).length, 0);
+  assert.doesNotMatch(html, /speculationrules/);
+  assert.match(html, EXCECOES_REDIR.has(p) ? CSP_REDIR : CSP_LICITACOES);
 }
+for (const p of paginas.filter(ehLicitacoes)) {
+  test(`${p}: /licitacoes/ sem speculationrules e com a CSP intacta`, () => checarLicitacoes(p, ler(p)));
+}
+
+const REDIR_HTML = ler('licitacoes/privacidade/index.html');
+const OUTRA = 'licitacoes/outra-redirect/index.html';
+// Fixture só em memória: o mesmo HTML de redirecionamento (meta refresh, noindex, CSP de redirecionamento) em outro caminho.
+const FIXTURE_OUTRA = REDIR_HTML.replaceAll('/licitacoes/politica.html', '/licitacoes/index.html');
+test('negativo: página de redirecionamento fora da lista (licitacoes/outra-redirect/index.html) falha', () => {
+  assert.throws(() => checarLicitacoes(OUTRA, FIXTURE_OUTRA), assert.AssertionError);
+  assert.doesNotThrow(() => checarLicitacoes('licitacoes/privacidade/index.html', REDIR_HTML));
+});
