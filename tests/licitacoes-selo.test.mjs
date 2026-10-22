@@ -18,7 +18,11 @@ const listar = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
   if (d.isDirectory()) return listar(p);
   return d.name.endsWith('.html') ? [relative(raiz, p).split(sep).join('/')] : [];
 });
-const paginas = listar(pasta).sort();
+// Lista fechada (decisão do CPO, 22/10/2026): só este caminho exato fica fora do selo. Nenhuma regra genérica
+// (meta refresh, noindex): qualquer outra página de /licitacoes/ sem selo continua falhando, e o total segue 6.
+const EXCLUIDAS_DO_SELO = new Set(['licitacoes/privacidade/index.html']);
+const paginasDoSelo = (lista) => lista.filter((p) => !EXCLUIDAS_DO_SELO.has(p)).sort();
+const paginas = paginasDoSelo(listar(pasta));
 const selos = (texto) => [...texto.matchAll(SELO)].map((m) => m[1]);
 
 // Método A sobre os bytes do arquivo (o .gitattributes desliga a conversão de fim de linha dos .html).
@@ -29,16 +33,34 @@ function seloMetodoA(bytes) {
   return createHash('sha256').update(zerado).digest('hex').slice(0, 12);
 }
 
-test('selo do aviso: as 6 páginas de /licitacoes/ exibem o sha256 (método A) de politica.html', () => {
-  assert.equal(paginas.length, 6, `páginas em /licitacoes/: ${paginas.join(', ')}`);
-  const esperado = seloMetodoA(readFileSync(join(pasta, 'politica.html')));
+function checarSelo(lista, lerPagina, esperado) {
+  const doSelo = paginasDoSelo(lista);
+  assert.equal(doSelo.length, 6, `páginas em /licitacoes/: ${doSelo.join(', ')}`);
   const divergentes = [];
-  for (const p of paginas) {
-    const achados = selos(readFileSync(join(raiz, p), 'utf8'));
+  for (const p of doSelo) {
+    const achados = selos(lerPagina(p));
     if (!achados.length) divergentes.push(`${p}: sem selo`);
     for (const s of achados) if (s !== esperado) divergentes.push(`${p}: ${s}`);
   }
   assert.deepEqual(divergentes, [], `selo diferente do método A (${esperado}): troque o valor nas 6 páginas`);
+}
+const lerReal = (p) => readFileSync(join(raiz, p), 'utf8');
+
+test('selo do aviso: as 6 páginas de /licitacoes/ exibem o sha256 (método A) de politica.html', () => {
+  checarSelo(listar(pasta), lerReal, seloMetodoA(readFileSync(join(pasta, 'politica.html'))));
+});
+
+const OUTRA = 'licitacoes/outra-redirect/index.html';
+// Fixture só em memória: o HTML de redirecionamento (meta refresh, noindex, CSP de redirecionamento) em outro caminho.
+const FIXTURE_OUTRA = lerReal('licitacoes/privacidade/index.html').replaceAll('/licitacoes/politica.html', '/licitacoes/index.html');
+test('negativo: página de redirecionamento fora da lista (licitacoes/outra-redirect/index.html) falha no selo', () => {
+  const esperado = seloMetodoA(readFileSync(join(pasta, 'politica.html')));
+  const ler = (p) => (p === OUTRA ? FIXTURE_OUTRA : lerReal(p));
+  // Somada às páginas reais: 7 páginas, falha a contagem.
+  assert.throws(() => checarSelo([...listar(pasta), OUTRA], ler, esperado), assert.AssertionError);
+  // No lugar de uma página real, mantendo 6: falha por "sem selo".
+  const seis = [...paginas.filter((p) => p !== 'licitacoes/index.html'), OUTRA];
+  assert.throws(() => checarSelo(seis, ler, esperado), /outra-redirect\/index\.html: sem selo/);
 });
 
 test('selo do aviso: o método A não depende do selo impresso, só do resto do arquivo', () => {
