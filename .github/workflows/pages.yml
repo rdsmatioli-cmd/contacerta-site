@@ -23,8 +23,10 @@ jobs:
         with:
           node-version: '22'
       - name: Trava da data da política (falha a publicação se não for hoje em America/Sao_Paulo)
+        # DEPLOY=1: aplica também a trava de placeholder/data dos Termos do Licitações (decisão CPO r11).
         env:
           REQUIRE_POLICY_DATE_TODAY: '1'
+          DEPLOY: '1'
         run: node --test tests/politica-data.test.mjs
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       # Só o conteúdo do site: os mesmos arquivos que o Pages legado serve hoje, sem tests, node_modules, .github,
