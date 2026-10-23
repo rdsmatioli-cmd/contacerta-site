@@ -33,8 +33,9 @@ test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
 // Mesma trava para o aviso do Licitações (AVISO-LICITACOES-1.11, item 12 e pílula do cabeçalho) e para os Termos de
 // Venda em /licitacoes/cobranca/ ("Data: dd/mm/aaaa"): as datas exibidas têm de ser a do dia da publicação.
 // Decisão do CPO (rodada 5): a trava também falha enquanto houver placeholder [MAIÚSCULAS] nas páginas publicadas
-// abaixo (lista fechada). Os textos estão congelados; o preenchimento é feito no deploy, com aprovação, e o CI do PR
-// fica vermelho até lá, bloqueando o merge de propósito. Checkboxes "[ ]" não são placeholder.
+// abaixo (lista fechada). r11 (PMO/QA): a data dos Termos foi preenchida com a data de hoje do sha (mesmo mecanismo do
+// aviso e da política). Se o merge/deploy for em outro dia, a trava volta a falhar: atualizar as 3 datas no commit do
+// deploy, com aprovação, e reexecutar o CI no próprio dia. Checkboxes "[ ]" não são placeholder.
 export const PAGINAS_TRAVADAS = ['licitacoes/cobranca/index.html', 'licitacoes/politica.html'];
 export const PLACEHOLDER = /\[[A-ZÀ-Ý][A-ZÀ-Ý0-9 _,.\/-]*\]/g;
 export function placeholders(texto) {
