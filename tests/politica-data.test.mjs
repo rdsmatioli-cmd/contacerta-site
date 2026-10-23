@@ -34,7 +34,7 @@ test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
 // Venda em /licitacoes/cobranca/ ("Data: dd/mm/aaaa"): as datas exibidas têm de ser a do dia da publicação.
 // Decisão do CPO (r11, 23/10/2026 19h17): o placeholder [DATA DE PUBLICAÇÃO] dos Termos fica no PR e só é preenchido
 // no commit do deploy, depois do OK do CEO. Por isso a trava de placeholder e da data dos Termos é aplicada só no
-// deploy: DEPLOY=1 ou ref main (GITHUB_REF=refs/heads/main, como no workflow Pages). No PR ela passa com aviso
+// deploy: workflow Pages na main (GITHUB_WORKFLOW=Pages e GITHUB_REF=refs/heads/main). No PR ela passa com aviso
 // explícito "placeholder pendente de deploy". As datas do aviso seguem a regra de sempre (obrigatória no PR).
 // Checkboxes "[ ]" não são placeholder.
 export const PAGINAS_TRAVADAS = ['licitacoes/cobranca/index.html', 'licitacoes/politica.html'];
@@ -42,8 +42,10 @@ export const PLACEHOLDER = /\[[A-ZÀ-Ý][A-ZÀ-Ý0-9 _,.\/-]*\]/g;
 export function placeholders(texto) {
   return texto.split('\n').flatMap((l, i) => [...l.matchAll(PLACEHOLDER)].map((m) => `${i + 1}: ${m[0]}`));
 }
+// Deploy = só o workflow Pages na main (GITHUB_WORKFLOW e GITHUB_REF são do próprio GitHub; nenhuma flag nossa).
+// O CI de push na main não conta, para não quebrar a main no dia seguinte ao deploy (Bugbot 4364730719).
 export function ehDeploy(e = process.env) {
-  return e.DEPLOY === '1' || e.GITHUB_REF === 'refs/heads/main';
+  return e.GITHUB_WORKFLOW === 'Pages' && e.GITHUB_REF === 'refs/heads/main';
 }
 const ler = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 
@@ -74,20 +76,21 @@ test('licitações: datas do aviso (item 12 e pílula) são de hoje', {
   }
 });
 
-test('licitações: trava de publicação dos Termos (placeholder e data) — aplicada só no deploy (DEPLOY=1 ou main)', (t) => {
+test('licitações: trava de publicação dos Termos (placeholder e data) — aplicada só no deploy (workflow Pages na main)', (t) => {
   const paginas = Object.fromEntries(PAGINAS_TRAVADAS.map((p) => [p, ler(p)]));
   const { erros, avisos } = travaLicitacoes({ deploy: ehDeploy(), hoje: hojeSaoPaulo(), paginas });
   for (const a of avisos) { t.diagnostic('AVISO: ' + a); console.log('AVISO (esperado no PR): ' + a); }
   assert.deepEqual(erros, [], erros.join('\n'));
 });
 
-test('trava dos Termos: com DEPLOY=1 falha no placeholder; sem deploy passa com aviso; preenchida com hoje passa', () => {
-  assert.equal(ehDeploy({ DEPLOY: '1' }), true);
-  assert.equal(ehDeploy({ GITHUB_REF: 'refs/heads/main' }), true);
-  assert.equal(ehDeploy({ GITHUB_REF: 'refs/pull/35/merge' }), false);
-  const termos = ler('licitacoes/cobranca/index.html');
+test('trava dos Termos: no deploy falha no placeholder; sem deploy passa com aviso; preenchida com hoje passa', () => {
+  assert.equal(ehDeploy({ GITHUB_WORKFLOW: 'Pages', GITHUB_REF: 'refs/heads/main' }), true);
+  assert.equal(ehDeploy({ GITHUB_WORKFLOW: 'CI', GITHUB_REF: 'refs/heads/main' }), false);
+  assert.equal(ehDeploy({ GITHUB_WORKFLOW: 'CI', GITHUB_REF: 'refs/pull/35/merge' }), false);
+  assert.equal(ehDeploy({ DEPLOY: '1' }), false);
+  // Fixture (não o arquivo real), para o teste continuar válido depois que a data for preenchida no deploy.
+  const termos = '<p>Versão: TERMOS-VENDA-LICITACOES-1.3 · Data: [DATA DE PUBLICAÇÃO]</p>';
   const pag = (tx) => ({ 'licitacoes/cobranca/index.html': tx, 'licitacoes/politica.html': '' });
-  assert.ok(termos.includes('[DATA DE PUBLICAÇÃO]'), 'o PR mantém o placeholder (decisão CPO r11)');
   const emDeploy = travaLicitacoes({ deploy: true, hoje: '24/10/2026', paginas: pag(termos) });
   assert.ok(emDeploy.erros.some((e) => e.includes('[DATA DE PUBLICAÇÃO]')), 'DEPLOY=1 tem de falhar no placeholder');
   const noPr = travaLicitacoes({ deploy: false, hoje: '24/10/2026', paginas: pag(termos) });
