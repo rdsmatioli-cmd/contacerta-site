@@ -32,9 +32,20 @@ test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
 
 // Mesma trava para o aviso do Licitações (AVISO-LICITACOES-1.10, item 12 e pílula do cabeçalho) e para os Termos de
 // Venda em /licitacoes/cobranca/ ("Data: dd/mm/aaaa"): as datas exibidas têm de ser a do dia da publicação.
-test('licitações: data do aviso e dos Termos de Venda é a de hoje em America/Sao_Paulo', {
+// Decisão do CPO (rodada 5): a trava também falha enquanto houver placeholder [MAIÚSCULAS] nas páginas publicadas
+// abaixo (lista fechada). Os textos estão congelados; o preenchimento é feito no deploy, com aprovação, e o CI do PR
+// fica vermelho até lá, bloqueando o merge de propósito. Checkboxes "[ ]" não são placeholder.
+export const PAGINAS_TRAVADAS = ['licitacoes/cobranca/index.html', 'licitacoes/politica.html'];
+export const PLACEHOLDER = /\[[A-ZÀ-Ý][A-ZÀ-Ý0-9 ,.\/-]*\]/g;
+export function placeholders(texto) {
+  return texto.split('\n').flatMap((l, i) => [...l.matchAll(PLACEHOLDER)].map((m) => `${i + 1}: ${m[0]}`));
+}
+
+test('licitações: trava de publicação (sem placeholder e data de hoje no aviso e nos Termos de Venda)', {
   skip: obrigatoria ? false : 'trava da data pulada: só é obrigatória em pull_request ou com REQUIRE_POLICY_DATE_TODAY=1',
 }, () => {
+  const achados = PAGINAS_TRAVADAS.flatMap((p) => placeholders(readFileSync(new URL('../' + p, import.meta.url), 'utf8')).map((x) => `${p}:${x}`));
+  assert.deepEqual(achados, [], `placeholders ainda não preenchidos (preencher no deploy, com aprovação):\n${achados.join('\n')}`);
   const hoje = hojeSaoPaulo();
   const aviso = readFileSync(new URL('../licitacoes/politica.html', import.meta.url), 'utf8');
   const itens = [...aviso.matchAll(/Versão AVISO-LICITACOES-[\d.]+, de (\d{2}\/\d{2}\/\d{4})\./g)].map((m) => m[1]);
@@ -43,12 +54,12 @@ test('licitações: data do aviso e dos Termos de Venda é a de hoje em America/
   assert.equal(pilula.length, 1, 'esperada uma data na pílula de versão do aviso');
   const termos = readFileSync(new URL('../licitacoes/cobranca/index.html', import.meta.url), 'utf8');
   const dt = [...termos.matchAll(/ · Data: (\d{2}\/\d{2}\/\d{4})/g)].map((m) => m[1]);
-  // Termos congelados (v1.3, ordem do CEO): o placeholder literal "Data: [DATA DE PUBLICAÇÃO]" é aceito; data preenchida tem de ser a de hoje.
-  const ph = (termos.match(/ · Data: \[DATA DE PUBLICAÇÃO\]/g) || []).length;
-  assert.equal(dt.length + ph, 1, 'esperada uma "Data: dd/mm/aaaa" (ou o placeholder literal) nos Termos de Venda');
-  const datas = [['aviso (item 12)', itens[0]], ['aviso (pílula)', pilula[0]]];
-  if (dt.length) datas.push(['Termos de Venda', dt[0]]);
-  for (const [nome, d] of datas) {
+  assert.equal(dt.length, 1, 'esperada uma "Data: dd/mm/aaaa" nos Termos de Venda');
+  for (const [nome, d] of [['aviso (item 12)', itens[0]], ['aviso (pílula)', pilula[0]], ['Termos de Venda', dt[0]]]) {
     assert.equal(d, hoje, `${nome} diz ${d}, mas hoje em America/Sao_Paulo é ${hoje}: ajuste a data para o dia da publicação e reexecute o CI`);
   }
+});
+
+test('detector de placeholder: acusa [MAIÚSCULAS], ignora checkbox e minúsculas', () => {
+  assert.deepEqual(placeholders('a [PREÇO] b [ ] c [x] d\n[PRAZO, NO MÁXIMO 5 DIAS ÚTEIS]'), ['1: [PREÇO]', '2: [PRAZO, NO MÁXIMO 5 DIAS ÚTEIS]']);
 });
