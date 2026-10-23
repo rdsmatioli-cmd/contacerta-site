@@ -29,3 +29,81 @@ test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
   assert.equal(hojeSaoPaulo(new Date('2026-10-24T02:59:00Z')), '23/10/2026');
   assert.equal(hojeSaoPaulo(new Date('2026-10-24T03:00:00Z')), '24/10/2026');
 });
+
+// Mesma trava para o aviso do Licitações (AVISO-LICITACOES-1.11, item 12 e pílula do cabeçalho) e para os Termos de
+// Venda em /licitacoes/cobranca/ ("Data: dd/mm/aaaa"): as datas exibidas têm de ser a do dia da publicação.
+// Decisão do CPO (r11, 23/10/2026 19h17): o placeholder [DATA DE PUBLICAÇÃO] dos Termos fica no PR e só é preenchido
+// no commit do deploy, depois do OK do CEO. DEC CPO 19h33 (QA A-PR35-01): a trava de placeholder roda em todo CI e
+// fica vermelha SÓ por [DATA DE PUBLICAÇÃO] até o commit do deploy (aceito). A comparação "Data = hoje" dos Termos
+// só vale no deploy (workflow Pages na main), para a main não quebrar no dia seguinte ao deploy (Bugbot 4364730719).
+// As datas do aviso seguem a regra de sempre (obrigatória no PR).
+// Checkboxes "[ ]" não são placeholder.
+export const PAGINAS_TRAVADAS = ['licitacoes/cobranca/index.html', 'licitacoes/politica.html'];
+export const PLACEHOLDER = /\[[A-ZÀ-Ý][A-ZÀ-Ý0-9 _,.\/-]*\]/g;
+export function placeholders(texto) {
+  return texto.split('\n').flatMap((l, i) => [...l.matchAll(PLACEHOLDER)].map((m) => `${i + 1}: ${m[0]}`));
+}
+// Deploy = só o workflow Pages na main (GITHUB_WORKFLOW e GITHUB_REF são do próprio GitHub; nenhuma flag nossa).
+// O CI de push na main não conta, para não quebrar a main no dia seguinte ao deploy (Bugbot 4364730719).
+export function ehDeploy(e = process.env) {
+  return e.GITHUB_WORKFLOW === 'Pages' && e.GITHUB_REF === 'refs/heads/main';
+}
+const ler = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
+
+// Devolve { erros, avisos }. Placeholder: erro sempre. Data dos Termos diferente de hoje: erro só com deploy=true.
+export function travaLicitacoes({ deploy, hoje, paginas }) {
+  const erros = []; const avisos = [];
+  const achados = Object.entries(paginas).flatMap(([p, t]) => placeholders(t).map((x) => `${p}:${x}`));
+  if (achados.length) erros.push(`placeholder pendente de deploy (preencher no commit do deploy, após OK do CEO):\n${achados.join('\n')}`);
+  const termos = paginas['licitacoes/cobranca/index.html'];
+  const dt = [...termos.matchAll(/ · Data: (\d{2}\/\d{2}\/\d{4})/g)].map((m) => m[1]);
+  if (dt.length !== 1) { if (!achados.length) erros.push('esperada uma "Data: dd/mm/aaaa" nos Termos de Venda'); }
+  else if (dt[0] !== hoje) (deploy ? erros : avisos).push(`Termos de Venda dizem ${dt[0]}, mas hoje em America/Sao_Paulo é ${hoje}`);
+  return { erros, avisos };
+}
+
+test('licitações: datas do aviso (item 12 e pílula) são de hoje', {
+  skip: obrigatoria ? false : 'trava da data pulada: só é obrigatória em pull_request ou com REQUIRE_POLICY_DATE_TODAY=1',
+}, () => {
+  const hoje = hojeSaoPaulo();
+  const aviso = ler('licitacoes/politica.html');
+  const itens = [...aviso.matchAll(/Versão AVISO-LICITACOES-[\d.]+, de (\d{2}\/\d{2}\/\d{4})\./g)].map((m) => m[1]);
+  const pilula = [...aviso.matchAll(/Versão AVISO-LICITACOES-[\d.]+<\/span><span class="pill n">(\d{2}\/\d{2}\/\d{4})</g)].map((m) => m[1]);
+  assert.equal(itens.length, 1, 'esperada uma "Versão AVISO-LICITACOES-x, de dd/mm/aaaa." no aviso');
+  assert.equal(pilula.length, 1, 'esperada uma data na pílula de versão do aviso');
+  for (const [nome, d] of [['aviso (item 12)', itens[0]], ['aviso (pílula)', pilula[0]]]) {
+    assert.equal(d, hoje, `${nome} diz ${d}, mas hoje em America/Sao_Paulo é ${hoje}: ajuste a data para o dia da publicação e reexecute o CI`);
+  }
+});
+
+test('licitações: trava de publicação dos Termos (vermelha só por [DATA DE PUBLICAÇÃO] até o deploy, aceito pelo CPO 19h33)', (t) => {
+  const paginas = Object.fromEntries(PAGINAS_TRAVADAS.map((p) => [p, ler(p)]));
+  const { erros, avisos } = travaLicitacoes({ deploy: ehDeploy(), hoje: hojeSaoPaulo(), paginas });
+  for (const a of avisos) { t.diagnostic('AVISO: ' + a); console.log('AVISO: ' + a); }
+  assert.deepEqual(erros, [], erros.join('\n'));
+});
+
+test('trava dos Termos: placeholder falha em qualquer CI; data diferente de hoje só falha no deploy', () => {
+  assert.equal(ehDeploy({ GITHUB_WORKFLOW: 'Pages', GITHUB_REF: 'refs/heads/main' }), true);
+  assert.equal(ehDeploy({ GITHUB_WORKFLOW: 'CI', GITHUB_REF: 'refs/heads/main' }), false);
+  assert.equal(ehDeploy({ GITHUB_WORKFLOW: 'CI', GITHUB_REF: 'refs/pull/35/merge' }), false);
+  assert.equal(ehDeploy({ DEPLOY: '1' }), false);
+  // Fixture (não o arquivo real), para o teste continuar válido depois que a data for preenchida no deploy.
+  const termos = '<p>Versão: TERMOS-VENDA-LICITACOES-1.3 · Data: [DATA DE PUBLICAÇÃO]</p>';
+  const pag = (tx) => ({ 'licitacoes/cobranca/index.html': tx, 'licitacoes/politica.html': '' });
+  const emDeploy = travaLicitacoes({ deploy: true, hoje: '24/10/2026', paginas: pag(termos) });
+  assert.ok(emDeploy.erros.some((e) => e.includes('[DATA DE PUBLICAÇÃO]')), 'deploy tem de falhar no placeholder');
+  const noPr = travaLicitacoes({ deploy: false, hoje: '24/10/2026', paginas: pag(termos) });
+  assert.equal(noPr.erros.length, 1, 'no PR o único erro é o placeholder');
+  assert.ok(noPr.erros[0].includes('[DATA DE PUBLICAÇÃO]'));
+  const preenchido = termos.replace('[DATA DE PUBLICAÇÃO]', '24/10/2026');
+  // main depois do deploy, em outro dia: não quebra (só o deploy compara com hoje)
+  assert.deepEqual(travaLicitacoes({ deploy: false, hoje: '30/10/2026', paginas: pag(preenchido) }).erros, []);
+  assert.deepEqual(travaLicitacoes({ deploy: true, hoje: '24/10/2026', paginas: pag(preenchido) }).erros, []);
+  assert.equal(travaLicitacoes({ deploy: true, hoje: '25/10/2026', paginas: pag(preenchido) }).erros.length, 1);
+});
+
+test('detector de placeholder: acusa [MAIÚSCULAS], ignora checkbox e minúsculas', () => {
+  assert.deepEqual(placeholders('a [PREÇO] b [ ] c [x] d\n[PRAZO, NO MÁXIMO 5 DIAS ÚTEIS]'), ['1: [PREÇO]', '2: [PRAZO, NO MÁXIMO 5 DIAS ÚTEIS]']);
+  assert.deepEqual(placeholders('action="[ORIGEM_CHECKOUT]/checkout"'), ['1: [ORIGEM_CHECKOUT]']);
+});
