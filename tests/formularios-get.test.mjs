@@ -11,8 +11,8 @@ const paginas = readdirSync(raiz, { withFileTypes: true })
 const formsDe = (html) => html.match(/<form\b[^]*?<\/form>/gi) || [];
 const botoes = (f) => f.match(/<button\b(?![^>]*type="button")[^>]*>/gi) || [];
 
-test('30 páginas com formulário fora da home (31 com a busca)', () => {
-  assert.equal(paginas.length, 30);
+test('31 páginas com formulário fora da home (32 com a busca)', () => {
+  assert.equal(paginas.length, 31); // +tabelas-oficiais-2026 (PR #7)
   assert.equal(formsDe(ler('index.html')).length, 1); // busca q: sem alteração
 });
 for (const p of paginas) {
