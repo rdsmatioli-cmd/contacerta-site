@@ -36,7 +36,7 @@ test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
 // abaixo (lista fechada). Os textos estão congelados; o preenchimento é feito no deploy, com aprovação, e o CI do PR
 // fica vermelho até lá, bloqueando o merge de propósito. Checkboxes "[ ]" não são placeholder.
 export const PAGINAS_TRAVADAS = ['licitacoes/cobranca/index.html', 'licitacoes/politica.html'];
-export const PLACEHOLDER = /\[[A-ZÀ-Ý][A-ZÀ-Ý0-9 ,.\/-]*\]/g;
+export const PLACEHOLDER = /\[[A-ZÀ-Ý][A-ZÀ-Ý0-9 _,.\/-]*\]/g;
 export function placeholders(texto) {
   return texto.split('\n').flatMap((l, i) => [...l.matchAll(PLACEHOLDER)].map((m) => `${i + 1}: ${m[0]}`));
 }
@@ -62,4 +62,5 @@ test('licitações: trava de publicação (sem placeholder e data de hoje no avi
 
 test('detector de placeholder: acusa [MAIÚSCULAS], ignora checkbox e minúsculas', () => {
   assert.deepEqual(placeholders('a [PREÇO] b [ ] c [x] d\n[PRAZO, NO MÁXIMO 5 DIAS ÚTEIS]'), ['1: [PREÇO]', '2: [PRAZO, NO MÁXIMO 5 DIAS ÚTEIS]']);
+  assert.deepEqual(placeholders('action="[ORIGEM_CHECKOUT]/checkout"'), ['1: [ORIGEM_CHECKOUT]']);
 });
