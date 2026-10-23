@@ -43,8 +43,12 @@ test('licitações: data do aviso e dos Termos de Venda é a de hoje em America/
   assert.equal(pilula.length, 1, 'esperada uma data na pílula de versão do aviso');
   const termos = readFileSync(new URL('../licitacoes/cobranca/index.html', import.meta.url), 'utf8');
   const dt = [...termos.matchAll(/ · Data: (\d{2}\/\d{2}\/\d{4})/g)].map((m) => m[1]);
-  assert.equal(dt.length, 1, 'esperada uma "Data: dd/mm/aaaa" nos Termos de Venda');
-  for (const [nome, d] of [['aviso (item 12)', itens[0]], ['aviso (pílula)', pilula[0]], ['Termos de Venda', dt[0]]]) {
+  // Termos congelados (v1.3, ordem do CEO): o placeholder literal "Data: [DATA DE PUBLICAÇÃO]" é aceito; data preenchida tem de ser a de hoje.
+  const ph = (termos.match(/ · Data: \[DATA DE PUBLICAÇÃO\]/g) || []).length;
+  assert.equal(dt.length + ph, 1, 'esperada uma "Data: dd/mm/aaaa" (ou o placeholder literal) nos Termos de Venda');
+  const datas = [['aviso (item 12)', itens[0]], ['aviso (pílula)', pilula[0]]];
+  if (dt.length) datas.push(['Termos de Venda', dt[0]]);
+  for (const [nome, d] of datas) {
     assert.equal(d, hoje, `${nome} diz ${d}, mas hoje em America/Sao_Paulo é ${hoje}: ajuste a data para o dia da publicação e reexecute o CI`);
   }
 });
