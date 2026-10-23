@@ -8,3 +8,5 @@ export const PAGINAS_COMPRA = ['licitacoes/cobranca/index.html'];
 // "[ORIGEM_CHECKOUT]" na CSP gera erro de console no navegador); o placeholder no action do form mantém a trava.
 export const ORIGEM_PENDENTE = ORIGEM_CHECKOUT === '[ORIGEM_CHECKOUT]';
 export const FORM_ACTION_COMPRA = ORIGEM_PENDENTE ? "'none'" : ORIGEM_CHECKOUT;
+// Produtos com botão nas páginas de compra (A-08 e Radar anual, CEO 23/10).
+export const PRODUTOS_BOTAO = ['radar', 'radar-anual'];

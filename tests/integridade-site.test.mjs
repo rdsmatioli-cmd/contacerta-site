@@ -223,7 +223,7 @@ for (const p of comForm) {
     for (const f of formsDe(ler(p))) {
       if (ehBuscaDaHome(p, f)) continue;
       // A-08: botão de compra sem campos (POST para <origem>/checkout), só nas páginas de compra.
-      if (PAGINAS_COMPRA.includes(p) && f.includes(`action="${ORIGEM_CHECKOUT}/checkout?produto=radar"`) && nomesDe(f).length === 0 && !/<(input|select|textarea)\b/i.test(f)) continue;
+      if (PAGINAS_COMPRA.includes(p) && /^<form\b[^>]*\saction="([^"]+)"/.test(f) && ['radar', 'radar-anual'].some((x) => f.includes(`action="${ORIGEM_CHECKOUT}/checkout?produto=${x}"`)) && nomesDe(f).length === 0 && !/<(input|select|textarea)\b/i.test(f)) continue;
       assert.doesNotMatch(f, /<input\b[^>]*\stype="?(submit|image)\b/i);
       const botoes = f.match(/<button\b(?![^>]*\stype="button")[^>]*>/gi) || [];
       assert.ok(botoes.length >= 1, 'formulário sem botão de envio desabilitado');
