@@ -30,7 +30,7 @@ test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
   assert.equal(hojeSaoPaulo(new Date('2026-10-24T03:00:00Z')), '24/10/2026');
 });
 
-// Mesma trava para o aviso do Licitações (AVISO-LICITACOES-1.10, item 12 e pílula do cabeçalho) e para os Termos de
+// Mesma trava para o aviso do Licitações (AVISO-LICITACOES-1.11, item 12 e pílula do cabeçalho) e para os Termos de
 // Venda em /licitacoes/cobranca/ ("Data: dd/mm/aaaa"): as datas exibidas têm de ser a do dia da publicação.
 // Decisão do CPO (rodada 5): a trava também falha enquanto houver placeholder [MAIÚSCULAS] nas páginas publicadas
 // abaixo (lista fechada). Os textos estão congelados; o preenchimento é feito no deploy, com aprovação, e o CI do PR
