@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { ORIGEM_CHECKOUT, PAGINAS_COMPRA } from './config-checkout.mjs';
+import { ORIGEM_CHECKOUT, PAGINAS_COMPRA, FORM_ACTION_COMPRA } from './config-checkout.mjs';
 
 const RAIZ = new URL('..', import.meta.url).pathname;
 function htmls(d, base = '') {
@@ -30,7 +30,7 @@ for (const p of PAGINAS_COMPRA) {
     assert.equal(forms.length, 1);
     assert.match(forms[0], /method="post"/);
     assert.ok(forms[0].includes(`action="${ORIGEM_CHECKOUT}/checkout?produto=radar"`));
-    assert.deepEqual(formAction(h), [ORIGEM_CHECKOUT]);
+    assert.deepEqual(formAction(h), [FORM_ACTION_COMPRA]);
     assert.doesNotMatch(h, /<script[^>]+src="https?:/);
   });
 }

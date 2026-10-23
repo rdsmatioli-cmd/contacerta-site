@@ -4,3 +4,7 @@
 // Enquanto for [ORIGEM_CHECKOUT], a trava de publicação (politica-data.test.mjs) falha por placeholder.
 export const ORIGEM_CHECKOUT = '[ORIGEM_CHECKOUT]';
 export const PAGINAS_COMPRA = ['licitacoes/cobranca/index.html'];
+// Fonte CSP de form-action nas páginas de compra. Enquanto a origem for o placeholder, fica 'none' (um token
+// "[ORIGEM_CHECKOUT]" na CSP gera erro de console no navegador); o placeholder no action do form mantém a trava.
+export const ORIGEM_PENDENTE = ORIGEM_CHECKOUT === '[ORIGEM_CHECKOUT]';
+export const FORM_ACTION_COMPRA = ORIGEM_PENDENTE ? "'none'" : ORIGEM_CHECKOUT;
