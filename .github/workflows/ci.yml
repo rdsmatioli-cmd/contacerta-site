@@ -24,10 +24,24 @@ jobs:
         run: find . -name '*.html' -not -path './.git/*' -not -path './tests/*' -not -path '*/node_modules/*' -not -name 'google*.html' -print0 | xargs -0 npx --yes html-validate@9.7.1 --max-warnings 0 -c .htmlvalidate.json
       - name: Testes (node --test)
         run: node --test 'tests/*.test.mjs'
-      # M-PR33-01: trava da data da política (tests/politica-data.test.mjs), obrigatória no PR. Em push/main o teste
-      # acima a pula; aqui ela é forçada em todo pull_request. Antes do merge, reexecute este job no próprio dia.
-      - name: Trava da data da política (obrigatória em pull_request)
+      # M-PR33-01: trava da data da política (tests/politica-data.test.mjs), obrigatória no PR que altera
+      # privacidade/index.html (git diff --name-only origin/<base>...HEAD). Nos demais PRs e em push/main o teste acima a
+      # pula, para não quebrar PRs sem relação com a política no dia seguinte. A publicação é barrada no pages.yml.
+      # Antes do merge de um PR que altera a política, reexecute este job no próprio dia.
+      - name: PR altera a política de privacidade?
+        id: politica
         if: github.event_name == 'pull_request'
+        run: |
+          git fetch --no-tags --quiet origin "+refs/heads/${GITHUB_BASE_REF}:refs/remotes/origin/${GITHUB_BASE_REF}"
+          if git diff --name-only "origin/${GITHUB_BASE_REF}...HEAD" | grep -qx 'privacidade/index.html'; then
+            echo 'alterada=true' >>"$GITHUB_OUTPUT"
+            echo 'privacidade/index.html alterada neste PR: trava da data ativa.'
+          else
+            echo 'alterada=false' >>"$GITHUB_OUTPUT"
+            echo 'privacidade/index.html não alterada neste PR: trava da data não se aplica.'
+          fi
+      - name: Trava da data da política (obrigatória em PR que altera privacidade/index.html)
+        if: github.event_name == 'pull_request' && steps.politica.outputs.alterada == 'true'
         env:
           REQUIRE_POLICY_DATE_TODAY: '1'
         run: node --test tests/politica-data.test.mjs
