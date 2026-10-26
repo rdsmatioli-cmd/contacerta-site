@@ -13,8 +13,8 @@ test('A-02: preços das páginas de compra conforme DEC-CFO 4b6e3baa', () => {
     }
     assert.ok(html.includes('por CNPJ'), `${pagina}: Radar tem de ser por CNPJ (DEC-CFO)`);
     const reais = [...html.matchAll(/R\$ ?(\d[\d.]*\d|\d)/g)].map((m) => m[1]);
-    // 1.500: "licitação complexa a partir de R$ 1.500" (DEC-CFO); 1.000: teto de responsabilidade do item 8.2, não é preço.
-    const permitidos = new Set(['197', '1.970', '990', '495', '1.500', '1.000']);
+    // 1.000: teto de responsabilidade do item 8.2, não é preço. Sem R$ 1.500 (parecer Advogado c3a44cc2).
+    const permitidos = new Set(['197', '1.970', '990', '495', '1.000']);
     for (const v of reais) assert.ok(permitidos.has(v), `${pagina}: valor R$ ${v} fora da DEC-CFO`);
   }
 });
