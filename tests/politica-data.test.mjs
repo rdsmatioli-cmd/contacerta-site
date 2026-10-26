@@ -7,7 +7,21 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const obrigatoria = process.env.GITHUB_EVENT_NAME === 'pull_request' || process.env.REQUIRE_POLICY_DATE_TODAY === '1';
+// DEC CPO (a) (A-PR35-14, 26/10/2026): as 3 datas (política, pílula e item 12 do aviso) e a dos Termos ficam como
+// [DATA DE PUBLICAÇÃO] até o commit do deploy; vermelho só por esse placeholder é aceito antes do deploy, sem bump diário.
+// "Data = hoje" só é obrigatória no deploy (workflow Pages na main) ou com REQUIRE_POLICY_DATE_TODAY=1 (pages.yml).
+const PH = '[DATA DE PUBLICAÇÃO]';
+const DATA_OU_PH = '(\\d{2}\\/\\d{2}\\/\\d{4}|\\[DATA DE PUBLICAÇÃO\\])';
+const obrigatoria = () => process.env.REQUIRE_POLICY_DATE_TODAY === '1' || ehDeploy();
+// Devolve a lista de erros para um conjunto [nome, valor] de datas: placeholder sempre é erro; data != hoje só se exigida.
+export function errosDatas(pares, { exigeHoje, hoje }) {
+  const e = [];
+  for (const [nome, d] of pares) {
+    if (d === PH) e.push(`${nome}: placeholder ${PH} pendente (preencher no commit do deploy, DEC CPO (a))`);
+    else if (exigeHoje && d !== hoje) e.push(`${nome} diz ${d}, mas hoje em America/Sao_Paulo é ${hoje}`);
+  }
+  return e;
+}
 
 export function hojeSaoPaulo(agora = new Date()) {
   const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -15,14 +29,12 @@ export function hojeSaoPaulo(agora = new Date()) {
   return `${p.day}/${p.month}/${p.year}`;
 }
 
-test('privacidade: "Última atualização" é a data de hoje em America/Sao_Paulo (M-PR33-01)', {
-  skip: obrigatoria ? false : 'trava da data da política pulada: só é obrigatória em pull_request (GITHUB_EVENT_NAME=pull_request) ou com REQUIRE_POLICY_DATE_TODAY=1',
-}, () => {
+test('privacidade: "Última atualização" (placeholder até o deploy; = hoje no deploy) (M-PR33-01, A-PR35-14)', () => {
   const html = readFileSync(new URL('../privacidade/index.html', import.meta.url), 'utf8');
-  const datas = [...html.matchAll(/Última atualização: (\d{2}\/\d{2}\/\d{4})\./g)].map((m) => m[1]);
+  const datas = [...html.matchAll(new RegExp(`Última atualização: ${DATA_OU_PH}\\.`, 'g'))].map((m) => m[1]);
   assert.equal(datas.length, 1, 'esperada exatamente uma "Última atualização: dd/mm/aaaa." na política');
-  const hoje = hojeSaoPaulo();
-  assert.equal(datas[0], hoje, `a política diz ${datas[0]}, mas hoje em America/Sao_Paulo é ${hoje}: ajuste a data para o dia do merge/deploy e reexecute o CI`);
+  const erros = errosDatas([['política', datas[0]]], { exigeHoje: obrigatoria(), hoje: hojeSaoPaulo() });
+  assert.deepEqual(erros, [], erros.join('\n'));
 });
 
 test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
@@ -36,7 +48,6 @@ test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
 // no commit do deploy, depois do OK do CEO. DEC CPO 19h33 (QA A-PR35-01): a trava de placeholder roda em todo CI e
 // fica vermelha SÓ por [DATA DE PUBLICAÇÃO] até o commit do deploy (aceito). A comparação "Data = hoje" dos Termos
 // só vale no deploy (workflow Pages na main), para a main não quebrar no dia seguinte ao deploy (Bugbot 4364730719).
-// As datas do aviso seguem a regra de sempre (obrigatória no PR).
 // Checkboxes "[ ]" não são placeholder.
 export const PAGINAS_TRAVADAS = ['licitacoes/cobranca/index.html', 'licitacoes/politica.html'];
 export const PLACEHOLDER = /\[[A-ZÀ-Ý][A-ZÀ-Ý0-9 _,.\/-]*\]/g;
@@ -62,18 +73,21 @@ export function travaLicitacoes({ deploy, hoje, paginas }) {
   return { erros, avisos };
 }
 
-test('licitações: datas do aviso (item 12 e pílula) são de hoje', {
-  skip: obrigatoria ? false : 'trava da data pulada: só é obrigatória em pull_request ou com REQUIRE_POLICY_DATE_TODAY=1',
-}, () => {
-  const hoje = hojeSaoPaulo();
+test('licitações: datas do aviso (item 12 e pílula): placeholder até o deploy; = hoje no deploy (A-PR35-14)', () => {
   const aviso = ler('licitacoes/politica.html');
-  const itens = [...aviso.matchAll(/Versão AVISO-LICITACOES-[\d.]+, de (\d{2}\/\d{2}\/\d{4})\./g)].map((m) => m[1]);
-  const pilula = [...aviso.matchAll(/Versão AVISO-LICITACOES-[\d.]+<\/span><span class="pill n">(\d{2}\/\d{2}\/\d{4})</g)].map((m) => m[1]);
+  const itens = [...aviso.matchAll(new RegExp(`Versão AVISO-LICITACOES-[\\d.]+, de ${DATA_OU_PH}\\.`, 'g'))].map((m) => m[1]);
+  const pilula = [...aviso.matchAll(new RegExp(`Versão AVISO-LICITACOES-[\\d.]+<\\/span><span class="pill n">${DATA_OU_PH}<`, 'g'))].map((m) => m[1]);
   assert.equal(itens.length, 1, 'esperada uma "Versão AVISO-LICITACOES-x, de dd/mm/aaaa." no aviso');
   assert.equal(pilula.length, 1, 'esperada uma data na pílula de versão do aviso');
-  for (const [nome, d] of [['aviso (item 12)', itens[0]], ['aviso (pílula)', pilula[0]]]) {
-    assert.equal(d, hoje, `${nome} diz ${d}, mas hoje em America/Sao_Paulo é ${hoje}: ajuste a data para o dia da publicação e reexecute o CI`);
-  }
+  const erros = errosDatas([['aviso (item 12)', itens[0]], ['aviso (pílula)', pilula[0]]], { exigeHoje: obrigatoria(), hoje: hojeSaoPaulo() });
+  assert.deepEqual(erros, [], erros.join('\n'));
+});
+
+test('errosDatas: placeholder falha sempre; data != hoje só quando exigida', () => {
+  assert.equal(errosDatas([['x', PH]], { exigeHoje: false, hoje: '27/10/2026' }).length, 1);
+  assert.deepEqual(errosDatas([['x', '20/10/2026']], { exigeHoje: false, hoje: '27/10/2026' }), []);
+  assert.equal(errosDatas([['x', '20/10/2026']], { exigeHoje: true, hoje: '27/10/2026' }).length, 1);
+  assert.deepEqual(errosDatas([['x', '27/10/2026']], { exigeHoje: true, hoje: '27/10/2026' }), []);
 });
 
 test('licitações: trava de publicação dos Termos (vermelha só por [DATA DE PUBLICAÇÃO] até o deploy, aceito pelo CPO 19h33)', (t) => {
