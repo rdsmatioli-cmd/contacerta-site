@@ -285,7 +285,7 @@ test('orçamento NR-1: aviso LGPD literal do Advogado, logo acima do Enviar', ()
   const r = avisoRenderizado(h);
   assert.equal(r, fonte);
   assert.equal(createHash('sha256').update(r).digest('hex'), AVISO_SHA256_TEXTO);
-  assert.match(h, /<\/section>\n<button type="submit" disabled class="btn">Enviar<\/button>\n<\/form>/);
+  assert.match(h, /<\/section>\n<button type="submit" disabled class="btn">Pedir orçamento do serviço NR-1<\/button>\n<\/form>/);
   assert.ok(h.indexOf('id="orc-aviso"') > h.indexOf('id="orc-faixa"'));
 });
 
@@ -303,6 +303,24 @@ test('orçamento NR-1: novidades separada, desmarcada e opcional; versão do avi
   const ui = ler('assets/js/empregador/ui.js');
   assert.match(ui, /\[data-orc-campo="enviadoEm"\]'\)\.value = new Date\(\)\.toISOString\(\)/);
   assert.ok(ui.indexOf('toISOString') < ui.indexOf("fetch(form.action"), 'carimbo antes do envio');
+});
+
+test('orçamento NR-1: copy do Designer v4 (sha256 407baa4a...) aplicada; preços vêm do config', () => {
+  const cp = readFileSync(new URL('_src/juridico/copy-orcamento-nr1.md', import.meta.url), 'utf8');
+  assert.equal(createHash('sha256').update(cp).digest('hex'), '407baa4a7e699f5f0ef7157386f09f57df0e389864eb4a2384d10d70841f4f13');
+  const h = ler(ORC);
+  for (const t of ['<h1>Orçamento do serviço NR-1</h1>', 'Pagamento: 50% no início e 50% na entrega, ou tudo à vista.',
+    'Prazo: proposta em até 5 dias úteis.', 'Orçamento sob medida', '>Nome da empresa</label>',
+    'Digite o nome da empresa. Não consultamos o CNPJ em nenhuma base.', '>CNPJ da empresa</label>',
+    'Opcional. Ajuda a preparar a proposta.', '<option>20 a 50</option><option>51 a 100</option><option>101 a 200</option><option>Mais de 200</option>',
+    '>Seu nome</label>', '>Telefone (opcional)</label>', '>Pedir orçamento do serviço NR-1</button>']) {
+    assert.ok(h.includes(t), t);
+    assert.ok(cp.includes(t.replace(/<[^>]+>|^>|<\/?\w*$/g, '').replace(/<\/option><option>/g, ' / ')) || t.startsWith('<option'), `copy: ${t}`);
+  }
+  assert.ok(!h.includes('R$'), 'preço só por JS, a partir de FAIXAS');
+  assert.deepEqual(FAIXAS.filter((f) => f.preco).map((f) => f.preco), [1490, 2290, 3490]);
+  // aviso v2 da copy não entra: vale o do Advogado (v3)
+  assert.ok(!h.includes('hospedagem e e-mail, que só podem usá-los'));
 });
 
 test('privacidade: seção do pedido de orçamento NR-1 com o texto do Advogado', () => {

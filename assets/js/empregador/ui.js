@@ -1,6 +1,6 @@
 // Empregador em Dia: interface das páginas E2. Nada sai do navegador: respostas só em sessionStorage (T02).
 import { FLAGS, ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, FAIXAS, NOTA_DOMESTICO } from './config.js?v=04a97dcdba';
-import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=4b4f92fd4e';
+import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=f6526c07d5';
 import { destino, oferta, pontosAtencao, textoPgr, validarPasso, faixaPorId, jornada } from './motor.js?v=2a8eac4c08';
 
 const CHAVE = 'ed-diagnostico';
@@ -32,7 +32,7 @@ function orcamentoNr1() {
   conferirOrcamento();
   const form = $('#ed-orc');
   const t = TEXTOS_ORCAMENTO;
-  set('orc-titulo', t.titulo); set('orc-intro', t.intro);
+  for (const id of ['20-50', '51-100', '101-200']) set(`orc-preco-${id}`, brl(faixaPorId(id).preco));
   form.action = ED_ORCAMENTO.action;
   for (const [k, entry] of Object.entries(ED_ORCAMENTO.campos)) { const e = form.querySelector(`[data-orc-campo="${k}"]`); if (e) e.name = entry; }
   form.querySelector('[data-orc-campo="avisoVersao"]').value = AVISO_VERSAO;

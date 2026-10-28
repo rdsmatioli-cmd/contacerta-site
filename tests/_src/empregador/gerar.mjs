@@ -169,15 +169,22 @@ pagina({
   caminho: 'empregador-em-dia/orcamento-nr1/',
   titulo: 'Pedir orçamento NR-1 | Empregador em Dia',
   desc: 'Formulário de pedido de orçamento da adequação NR-1 para empresas com mais de 200 funcionários.',
-  conteudo: `<h1 data-ed="orc-titulo">Pedir orçamento NR-1</h1>
-<p data-ed="orc-intro"></p>
+  conteudo: `<h1>Orçamento do serviço NR-1</h1>
+<table class="ed-tabela"><caption>Preços do serviço NR-1</caption><thead><tr><th scope="col">Funcionários</th><th scope="col">Preço</th></tr></thead><tbody>
+<tr><th scope="row">20 a 50</th><td data-ed="orc-preco-20-50"></td></tr>
+<tr><th scope="row">51 a 100</th><td data-ed="orc-preco-51-100"></td></tr>
+<tr><th scope="row">101 a 200</th><td data-ed="orc-preco-101-200"></td></tr>
+<tr><th scope="row">Mais de 200</th><td>Orçamento sob medida</td></tr>
+</tbody></table>
+<p>Pagamento: 50% no início e 50% na entrega, ou tudo à vista.</p>
+<p>Prazo: proposta em até 5 dias úteis.</p>
 <form class="ed-form le-form" id="ed-orc" action="#" method="post" accept-charset="UTF-8" novalidate>
-<label for="orc-nome">Nome</label><input id="orc-nome" data-orc-campo="nome" autocomplete="name" required>
+<label for="orc-empresa">Nome da empresa</label><input id="orc-empresa" data-orc-campo="empresa" autocomplete="organization" required aria-describedby="orc-empresa-ajuda"><small id="orc-empresa-ajuda">Digite o nome da empresa. Não consultamos o CNPJ em nenhuma base.</small>
+<label for="orc-cnpj">CNPJ da empresa</label><input id="orc-cnpj" data-orc-campo="cnpj" inputmode="numeric" aria-describedby="orc-cnpj-ajuda"><small id="orc-cnpj-ajuda">Opcional. Ajuda a preparar a proposta.</small>
+<label for="orc-faixa">Número de funcionários</label><select id="orc-faixa" data-orc-campo="faixa" required><option value="">Selecione</option><option>20 a 50</option><option>51 a 100</option><option>101 a 200</option><option>Mais de 200</option></select>
+<label for="orc-nome">Seu nome</label><input id="orc-nome" data-orc-campo="nome" autocomplete="name" required>
 <label for="orc-email">E-mail</label><input id="orc-email" data-orc-campo="email" type="email" autocomplete="email" required>
-<label for="orc-telefone">Telefone</label><input id="orc-telefone" data-orc-campo="telefone" type="tel" autocomplete="tel">
-<label for="orc-empresa">Empresa</label><input id="orc-empresa" data-orc-campo="empresa" autocomplete="organization" required>
-<label for="orc-cnpj">CNPJ</label><input id="orc-cnpj" data-orc-campo="cnpj" inputmode="numeric">
-<label for="orc-faixa">Número de funcionários</label><select id="orc-faixa" data-orc-campo="faixa" required><option value="">Selecione</option><option>201 a 500</option><option>501 a 1.000</option><option>Mais de 1.000</option></select>
+<label for="orc-telefone">Telefone (opcional)</label><input id="orc-telefone" data-orc-campo="telefone" type="tel" autocomplete="tel">
 <input type="hidden" data-orc-campo="avisoVersao" value="aviso-orcamento-nr1-v3-20261028">
 <input type="hidden" data-orc-campo="enviadoEm" value="">
 <div class="le-hp" aria-hidden="true" style="position:absolute;left:-9999px"><label for="ed-orc-site">Não preencha</label><input id="ed-orc-site" tabindex="-1" autocomplete="off"></div>
@@ -191,7 +198,7 @@ pagina({
 <p>Você pode pedir confirmação, acesso, correção, cópia, exclusão e informação sobre com quem compartilhamos seus dados (LGPD, art. 18). Escreva para contato@contacertabr.com.br.</p>
 <p>Mais detalhes na nossa Política de Privacidade: <a href="/privacidade/#orcamento-nr1">https://contacertabr.com.br/privacidade/</a></p>
 </section>
-<button type="submit" disabled class="btn">Enviar</button>
+<button type="submit" disabled class="btn">Pedir orçamento do serviço NR-1</button>
 </form>
 <p id="ed-orc-msg" class="nota" role="alert" aria-live="assertive" hidden></p>`,
 });

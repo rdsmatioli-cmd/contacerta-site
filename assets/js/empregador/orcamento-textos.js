@@ -2,7 +2,9 @@
 // O aviso LGPD do Advogado (textos-juridicos/aviso-lgpd-orcamento-nr1.md, MINUTA v3, sha256 17510609b25282c4...)
 // já está no HTML, literal, acima do botão Enviar (gerado por tests/_src/empregador/gerar.mjs).
 // Placeholders que ainda chegam (tudo entre colchetes):
-//   [TEXTO DO DESIGNER: ...]  -> texto final do Designer (título, introdução, mensagens)
+// Copy do Designer (v4, copy-orcamento-nr1.md, sha256 407baa4a7e699f5f...; aguarda DE ACORDO do Advogado) já está
+// no HTML. O aviso LGPD do Advogado prevalece sobre o aviso v2 citado na copy.
+//   [TEXTO DO DESIGNER: ...]  -> mensagens de sucesso e de erro (a copy v4 não traz)
 //   [ED-ORCAMENTO: ...]       -> action e ids "entry.N" do Google Form dedicado ED-Orcamento (CPO: conta Google
 //                                existente; o form é criado fora deste PR). NÃO é o CC-Leads.
 // Trava: com FLAGS.ED_CHECKOUT ON, conferirOrcamento() lança erro enquanto houver placeholder
@@ -28,8 +30,6 @@ export const ED_ORCAMENTO = {
 };
 
 export const TEXTOS_ORCAMENTO = {
-  titulo: '[TEXTO DO DESIGNER: TÍTULO DA PÁGINA]',
-  intro: '[TEXTO DO DESIGNER: INTRODUÇÃO]',
   sucesso: '[TEXTO DO DESIGNER: MENSAGEM DE SUCESSO]',
   erro: '[TEXTO DO DESIGNER: MENSAGEM DE ERRO]',
 };
