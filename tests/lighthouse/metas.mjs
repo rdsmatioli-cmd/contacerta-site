@@ -23,8 +23,8 @@ export const URLS = [
 // is-crawlable.
 export const URLS_NOINDEX = [
   '/empregador-em-dia/',
-  '/empregador-em-dia/diagnostico/',
-  '/empregador-em-dia/diagnostico/resultado/',
+  '/empregador-em-dia/avaliacao-rapida-nr1/',
+  '/empregador-em-dia/avaliacao-rapida-nr1/resultado/',
   '/empregador-em-dia/jornada-42h/',
 ];
 export const TODAS_URLS = [...URLS, ...URLS_NOINDEX];

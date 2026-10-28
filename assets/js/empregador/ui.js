@@ -55,7 +55,7 @@ function diagnostico() {
     if (erro) { msg.textContent = erro; msg.hidden = false; return; }
     // <20 e >200 não precisam dos passos 2 e 3 para o resultado, mas a v3.3 pergunta os 3 a todos.
     if (passo < 3) return mostrar(passo + 1);
-    location.assign('/empregador-em-dia/diagnostico/resultado/');
+    location.assign('/empregador-em-dia/avaliacao-rapida-nr1/resultado/');
   });
   mostrar(1);
 }
@@ -66,6 +66,7 @@ function resultado() {
   if (!d) return;
   $('[data-ed-res="vazio"]').hidden = true;
   $(`[data-ed-res="${d}"]`).hidden = false;
+  if (d === 'sob-consulta') orcamento();
   if (d !== 'oferta') return; // <20: sem preço nem Contratar (D-01); >200: sob consulta (DEC 95a76e17)
   const o = oferta(r.faixa);
   const porte = `${faixaPorId(r.faixa).rotulo} funcionários`;
@@ -77,6 +78,14 @@ function resultado() {
   set('parcelas', `À vista, ou ${brl(o.parcela1)} agora e ${brl(o.parcela2)} quando receber o relatório`);
   const b = $('[data-ed-contratar]');
   if (FLAGS.ED_CHECKOUT) { b.disabled = false; b.addEventListener('click', () => location.assign(`/empregador-em-dia/contratar/?faixa=${encodeURIComponent(r.faixa)}`)); }
+}
+
+// CTA "Pedir orçamento do serviço NR-1" (DEC CPO P-21 C-04, Designer v4.1c). A página é do E3: o botão só liga com
+// ED_CHECKOUT, que fica OFF.
+export const URL_ORCAMENTO_NR1 = '/empregador-em-dia/orcamento-nr1/';
+function orcamento() {
+  const b = $('[data-ed-orcamento]');
+  if (b && FLAGS.ED_CHECKOUT) { b.disabled = false; b.addEventListener('click', () => location.assign(URL_ORCAMENTO_NR1)); }
 }
 
 function simulador() {

@@ -2,15 +2,15 @@
 // DEC 95a76e17. Flags desligadas; páginas noindex e fora do sitemap.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { FLAGS, FAIXAS, FAIXAS_SALARIO, SALARIO_MINIMO, ED_SST_INCLUIDO, ESCALA_5, NOTA_DOMESTICO, JORNADA } from '../assets/js/empregador/config.js';
 import { destino, oferta, pontosAtencao, validarPasso, jornada } from '../assets/js/empregador/motor.js';
 import { emitirTokens, responder, podeAgregar } from '../assets/js/empregador/token.js';
 
 const raiz = new URL('../', import.meta.url);
 const ler = (p) => readFileSync(new URL(p, raiz), 'utf8');
-const PAGINAS = ['empregador-em-dia/index.html', 'empregador-em-dia/diagnostico/index.html',
-  'empregador-em-dia/diagnostico/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html'];
+const PAGINAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
+  'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html'];
 
 test('flags todas desligadas e SST em definição', () => {
   for (const [k, v] of Object.entries(FLAGS)) assert.equal(v, false, k);
@@ -44,7 +44,7 @@ test('T01 CA2: textos literais da v3.3 p. 2 (com as reescritas do Advogado 38ccc
     'Questionário anônimo para os funcionários, por link', 'Inventário de riscos psicossociais para o PGR',
     'Plano de ação com prazos e responsáveis', // 4º item e abertura: Advogado M-03 e B-01, teste abaixo
     'Preço fechado pela faixa de funcionários.', 'Você só paga o resto quando receber o relatório.',
-    'Veja quanto custaria reduzir a jornada.', 'href="/empregador-em-dia/diagnostico/"', 'href="/empregador-em-dia/jornada-42h/"']) {
+    'Veja quanto custaria reduzir a jornada.', 'href="/empregador-em-dia/avaliacao-rapida-nr1/"', 'href="/empregador-em-dia/jornada-42h/"']) {
     assert.ok(h.includes(t), t);
   }
 });
@@ -191,14 +191,18 @@ test('B-05 (backlog v3 229abc9b): caso extra com divisor 220 reproduz a conta da
 // Tributário 93bf69ba (F-01 unificado no M-01 do Advogado, F-02). Literais: qualquer mudança exige nova revisão.
 test('PR #36 revisões: textos literais travados nas páginas', () => {
   const pg = (c) => readFileSync(new URL(`../empregador-em-dia/${c}index.html`, import.meta.url), 'utf8');
-  const jor = pg('jornada-42h/'), res = pg('diagnostico/resultado/'), lan = pg('');
+  const jor = pg('jornada-42h/'), res = pg('avaliacao-rapida-nr1/resultado/'), lan = pg('');
   for (const t of [ // adendo do Advogado 113ef689: M-05, M-01 unificado (NR-1/Tributário), B-02 ajustado, B-03
     'A conta mostra um cenário: a empresa mantém 44 horas por semana em 5 dias, respeitando os 2 dias de repouso semanal exigidos a partir de 16/12/2026 e o limite de 2 horas extras por dia (CLT, art. 59), e paga como extra as horas acima do novo limite. Não é uma recomendação: hora extra fixa todo mês tem efeitos trabalhistas e pode ser questionada. Reduzir a jornada, reorganizar escalas ou contratar são alternativas.',
     'O valor não inclui os reflexos das horas extras habituais no descanso semanal remunerado, nas férias com 1/3, no 13º e no FGTS, nem os encargos sobre a folha (INSS patronal, RAT e terceiros). Por isso é um valor mínimo: o custo real tende a ser maior.',
     'Para MEI, microempresas e empresas de pequeno porte, uma lei complementar ainda poderá criar regras de transição, ligadas à manutenção de empregos. Até lá, valem as datas acima.',
   ]) assert.ok(jor.includes(t), t);
-  assert.ok(jor.includes('210</span> horas)<br><small>Divisor pelo método do art. 64 da CLT. A convenção coletiva da categoria pode adotar outro.</small>'), 'B-03');
   assert.doesNotMatch(jor, /TST/);
+  // NR-1 (CPO 28/10): os 2 literais do NR-1 junto com o texto do Advogado; B-03 também na linha do 200 (NR-1 e2d17d3)
+  assert.ok(jor.includes('Valores sem encargos e reflexos (FGTS, INSS, DSR, férias e 13º).'), 'NR-1: sem encargos e reflexos');
+  for (const d of ['210', '200']) {
+    assert.ok(jor.includes(`${d}</span> horas, cálculo pelo método da CLT (art. 64))<br><small>Divisor pelo método do art. 64 da CLT. A convenção coletiva da categoria pode adotar outro.</small></th>`), `CLT art. 64 + B-03 na linha do ${d}`);
+  }
   for (const t of [
     '<h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>',
     'MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.',
@@ -214,4 +218,22 @@ test('PR #36 revisões: textos literais travados nas páginas', () => {
     '(desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua)',
   ]) assert.ok(lan.includes(t), t);
   assert.doesNotMatch(lan, /assinado|profissional de segurança do trabalho analisa/i);
+});
+
+// CEO/CPO 28/10: "diagnóstico" sai dos títulos e do slug; a URL antiga nunca foi publicada (sem 301).
+test('Avaliação rápida NR-1: slug novo, nenhuma menção a "diagnóstico" nas páginas e no JS', () => {
+  for (const p of PAGINAS) assert.doesNotMatch(ler(p), /diagn[oó]stic/i, p);
+  assert.doesNotMatch(readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8'), /\/diagnostico\//);
+  assert.ok(!existsSync(new URL('../empregador-em-dia/diagnostico/', import.meta.url)));
+  assert.match(ler(PAGINAS[1]), /<title>Avaliação rápida NR-1 da sua empresa \| Empregador em Dia<\/title>/);
+  assert.match(ler(PAGINAS[2]), /<title>Resultado da avaliação rápida NR-1 \| Empregador em Dia<\/title>/);
+});
+
+// DEC CPO P-21 C-04 (Designer v4.1c): o CTA de orçamento NR-1 aponta para /empregador-em-dia/orcamento-nr1/, só com ED_CHECKOUT.
+test('CTA "Pedir orçamento": destino /empregador-em-dia/orcamento-nr1/, desligado com a flag OFF', () => {
+  const ui = readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8');
+  assert.match(ui, /export const URL_ORCAMENTO_NR1 = '\/empregador-em-dia\/orcamento-nr1\/';/);
+  assert.match(ui, /if \(b && FLAGS\.ED_CHECKOUT\) \{ b\.disabled = false; b\.addEventListener\('click', \(\) => location\.assign\(URL_ORCAMENTO_NR1\)\); \}/);
+  assert.match(ler(PAGINAS[2]), /<button type="button" class="btn" data-ed-orcamento disabled>Pedir orçamento<\/button>/);
+  assert.equal(FLAGS.ED_CHECKOUT, false);
 });

@@ -59,7 +59,7 @@ pagina({
 <p class="cat-pill">NR-1: riscos psicossociais no PGR</p>
 <h1>Sua empresa em dia com a NR-1, sem montar planilha</h1>
 <p class="lead">A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua). A gente aplica o questionário anônimo e você recebe o inventário e o plano de ação para o PGR. A validação por profissional de segurança do trabalho está em definição.</p>
-<p><a class="btn" href="/empregador-em-dia/diagnostico/">Ver o que minha empresa precisa</a></p>
+<p><a class="btn" href="/empregador-em-dia/avaliacao-rapida-nr1/">Ver o que minha empresa precisa</a></p>
 <h2>O que você recebe</h2>
 <ul class="ed-lista"><li>Questionário anônimo para os funcionários, por link</li><li>Inventário de riscos psicossociais para o PGR</li><li>Plano de ação com prazos e responsáveis</li><li>Relatório com o resultado do grupo para anexar ao PGR</li></ul>
 <p class="ed-sst" data-ed-sst></p>
@@ -69,12 +69,12 @@ pagina({
 <li><strong>Metade agora, metade na entrega</strong><span>Você só paga o resto quando receber o relatório.</span></li>
 <li><a href="/empregador-em-dia/jornada-42h/"><strong>Grátis: simulador da jornada 42h</strong><span>Veja quanto custaria reduzir a jornada.</span></a></li>
 </ul>
-<p><a class="btn" href="/empregador-em-dia/diagnostico/">Ver o que minha empresa precisa</a></p>`,
+<p><a class="btn" href="/empregador-em-dia/avaliacao-rapida-nr1/">Ver o que minha empresa precisa</a></p>`,
 });
 
 pagina({
-  caminho: 'empregador-em-dia/diagnostico/',
-  titulo: 'Diagnóstico NR-1 da sua empresa | Empregador em Dia',
+  caminho: 'empregador-em-dia/avaliacao-rapida-nr1/',
+  titulo: 'Avaliação rápida NR-1 da sua empresa | Empregador em Dia',
   desc: 'Três perguntas de rotina para saber o que sua empresa precisa para a NR-1.',
   conteudo: `<form class="ed-form" id="ed-diag" novalidate>
 <fieldset data-passo="1"><legend><span class="ed-passo">Passo 1 de 3</span> Quantas pessoas trabalham na empresa?</legend>
@@ -107,11 +107,11 @@ pagina({
 });
 
 pagina({
-  caminho: 'empregador-em-dia/diagnostico/resultado/',
-  titulo: 'Resultado do diagnóstico NR-1 | Empregador em Dia',
+  caminho: 'empregador-em-dia/avaliacao-rapida-nr1/resultado/',
+  titulo: 'Resultado da avaliação rápida NR-1 | Empregador em Dia',
   desc: 'O que sua empresa precisa para incluir os riscos psicossociais no PGR.',
-  conteudo: `<p class="ed-rotulo">Resultado do diagnóstico</p>
-<section data-ed-res="vazio"><h1>Faça o diagnóstico primeiro</h1><p><a class="btn" href="/empregador-em-dia/diagnostico/">Ver o que minha empresa precisa</a></p></section>
+  conteudo: `<p class="ed-rotulo">Resultado da avaliação rápida NR-1</p>
+<section data-ed-res="vazio"><h1>Faça a avaliação rápida NR-1 primeiro</h1><p><a class="btn" href="/empregador-em-dia/avaliacao-rapida-nr1/">Ver o que minha empresa precisa</a></p></section>
 <section data-ed-res="oferta" hidden><h1>Sua empresa deve avaliar os riscos psicossociais no PGR</h1>
 <ul class="ed-cartoes"><li><strong>Seu porte</strong><span data-ed="porte"></span></li><li><strong>Pontos de atenção</strong><span data-ed="pontos"></span></li><li><strong>PGR</strong><span data-ed="pgr"></span></li></ul>
 <div class="ed-oferta"><h2>Adequação NR-1 para <span data-ed="porte2"></span></h2><p class="ed-preco" data-ed="preco"></p><p data-ed="parcelas"></p><p class="ed-sst" data-ed-sst></p>
@@ -127,7 +127,7 @@ pagina({
 <section data-ed-res="sob-consulta" hidden><h1>Para mais de 200 funcionários, fazemos um orçamento</h1>
 <p>Com várias unidades ou turnos, o questionário e a análise mudam. O preço é sob consulta, caso a caso.</p>
 <p class="ed-sst" data-ed-sst></p>
-<p><button type="button" class="btn" disabled>Pedir orçamento</button></p></section>`,
+<p><button type="button" class="btn" data-ed-orcamento disabled>Pedir orçamento</button></p></section>`,
 });
 
 pagina({
@@ -148,18 +148,18 @@ pagina({
 <section class="ed-conta" aria-live="polite"><h2>Como chegamos no valor</h2>
 <table class="ed-tab"><caption>Etapa de 42 horas, a partir de 16/12/2026</caption><tbody>
 <tr><th scope="row">Salário médio (meio da faixa)</th><td data-ed="salario"></td></tr>
-<tr><th scope="row">Valor da hora (salário ÷ <span data-ed="div42">210</span> horas)<br><small>Divisor pelo método do art. 64 da CLT. A convenção coletiva da categoria pode adotar outro.</small></th><td data-ed="hora42"></td></tr>
+<tr><th scope="row">Valor da hora (salário ÷ <span data-ed="div42">210</span> horas, cálculo pelo método da CLT (art. 64))<br><small>Divisor pelo método do art. 64 da CLT. A convenção coletiva da categoria pode adotar outro.</small></th><td data-ed="hora42"></td></tr>
 <tr><th scope="row">Horas a cobrir por mês (2h × 52 semanas ÷ 12)</th><td data-ed="horas42"></td></tr>
 <tr><th scope="row">Custo por funcionário, como hora extra (+50%)</th><td data-ed="func42"></td></tr>
 <tr><th scope="row">Total para <span data-ed="n"></span> funcionários</th><td data-ed="total42"></td></tr>
 </tbody></table>
 <table class="ed-tab"><caption>Etapa de 40 horas, a partir de 16/12/2027</caption><tbody>
-<tr><th scope="row">Valor da hora (salário ÷ <span data-ed="div40">200</span> horas)<br><small>Divisor pelo método do art. 64 da CLT. A convenção coletiva da categoria pode adotar outro.</small></th><td data-ed="hora40"></td></tr>
+<tr><th scope="row">Valor da hora (salário ÷ <span data-ed="div40">200</span> horas, cálculo pelo método da CLT (art. 64))<br><small>Divisor pelo método do art. 64 da CLT. A convenção coletiva da categoria pode adotar outro.</small></th><td data-ed="hora40"></td></tr>
 <tr><th scope="row">Horas a cobrir por mês (4h × 52 semanas ÷ 12)</th><td data-ed="horas40"></td></tr>
 <tr><th scope="row">Custo por funcionário, como hora extra (+50%)</th><td data-ed="func40"></td></tr>
 <tr><th scope="row">Total para <span data-ed="n2"></span> funcionários</th><td data-ed="total40"></td></tr>
 </tbody></table>
-<p><small>O adicional de 50% é o mínimo da Constituição (art. 7º, XVI); a convenção coletiva pode prever um adicional maior. A conta mostra um cenário: a empresa mantém 44 horas por semana em 5 dias, respeitando os 2 dias de repouso semanal exigidos a partir de 16/12/2026 e o limite de 2 horas extras por dia (CLT, art. 59), e paga como extra as horas acima do novo limite. Não é uma recomendação: hora extra fixa todo mês tem efeitos trabalhistas e pode ser questionada. Reduzir a jornada, reorganizar escalas ou contratar são alternativas. O valor não inclui os reflexos das horas extras habituais no descanso semanal remunerado, nas férias com 1/3, no 13º e no FGTS, nem os encargos sobre a folha (INSS patronal, RAT e terceiros). Por isso é um valor mínimo: o custo real tende a ser maior. Para "Acima de R$ 5 mil" usamos R$ 5.000,00. Nenhuma faixa fica abaixo do salário mínimo de 2026 (R$ 1.621,00). Para MEI, microempresas e empresas de pequeno porte, uma lei complementar ainda poderá criar regras de transição, ligadas à manutenção de empregos. Até lá, valem as datas acima.</small></p>
+<p><small>O adicional de 50% é o mínimo da Constituição (art. 7º, XVI); a convenção coletiva pode prever um adicional maior. A conta mostra um cenário: a empresa mantém 44 horas por semana em 5 dias, respeitando os 2 dias de repouso semanal exigidos a partir de 16/12/2026 e o limite de 2 horas extras por dia (CLT, art. 59), e paga como extra as horas acima do novo limite. Não é uma recomendação: hora extra fixa todo mês tem efeitos trabalhistas e pode ser questionada. Reduzir a jornada, reorganizar escalas ou contratar são alternativas. O valor não inclui os reflexos das horas extras habituais no descanso semanal remunerado, nas férias com 1/3, no 13º e no FGTS, nem os encargos sobre a folha (INSS patronal, RAT e terceiros). Por isso é um valor mínimo: o custo real tende a ser maior. Valores sem encargos e reflexos (FGTS, INSS, DSR, férias e 13º). Para "Acima de R$ 5 mil" usamos R$ 5.000,00. Nenhuma faixa fica abaixo do salário mínimo de 2026 (R$ 1.621,00). Para MEI, microempresas e empresas de pequeno porte, uma lei complementar ainda poderá criar regras de transição, ligadas à manutenção de empregos. Até lá, valem as datas acima.</small></p>
 </section>
 <section class="ed-oferta"><h2>Já que está revendo a jornada, a NR-1 também mudou</h2>
 <p>Avalie riscos de sobrecarga no PGR. A partir de <span data-ed="preco-min"></span> para 20 a 50 funcionários.</p>

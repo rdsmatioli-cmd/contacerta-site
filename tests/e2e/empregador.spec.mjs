@@ -3,7 +3,7 @@
 // requisição com dados das respostas.
 import { test, expect, semErros, semRedeExterna, semRolagemHorizontal, assentar } from './fixtures.mjs';
 
-const PAGS = ['/empregador-em-dia/', '/empregador-em-dia/diagnostico/', '/empregador-em-dia/diagnostico/resultado/', '/empregador-em-dia/jornada-42h/'];
+const PAGS = ['/empregador-em-dia/', '/empregador-em-dia/avaliacao-rapida-nr1/', '/empregador-em-dia/avaliacao-rapida-nr1/resultado/', '/empregador-em-dia/jornada-42h/'];
 const ligar = (page) => page.route(/\/assets\/js\/empregador\/config\.js/, async (route) => {
   const r = await route.fetch();
   const corpo = (await r.text()).replace('EMPREGADOR_EM_DIA: false', 'EMPREGADOR_EM_DIA: true');
@@ -30,11 +30,11 @@ const CASOS = [
   ['gt200', 'sob-consulta', null, null],
 ];
 for (const [faixa, destino, preco, parcelas] of CASOS) {
-  test(`flag ON diagnóstico ${faixa} -> ${destino}`, async ({ page, rede, erros }) => {
+  test(`flag ON avaliação rápida ${faixa} -> ${destino}`, async ({ page, rede, erros }) => {
     await ligar(page);
     const posts = [];
     page.on('request', (r) => { if (r.method() !== 'GET') posts.push(r.url()); });
-    await page.goto('/empregador-em-dia/diagnostico/');
+    await page.goto('/empregador-em-dia/avaliacao-rapida-nr1/');
     await expect(page.getByText('Passo 1 de 3')).toBeVisible();
     await page.getByRole('button', { name: 'Continuar' }).click();
     await expect(page.locator('#ed-msg')).toBeVisible();
@@ -51,7 +51,7 @@ for (const [faixa, destino, preco, parcelas] of CASOS) {
     await page.getByRole('button', { name: 'Continuar' }).click();
     await page.locator('input[name="pgr"][value="naosei"]').check();
     await page.getByRole('button', { name: 'Continuar' }).click();
-    await page.waitForURL('**/diagnostico/resultado/');
+    await page.waitForURL('**/avaliacao-rapida-nr1/resultado/');
     await assentar(page);
     const bloco = page.locator(`[data-ed-res="${destino}"]`);
     await expect(bloco).toBeVisible();
