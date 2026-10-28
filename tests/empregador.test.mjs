@@ -310,13 +310,16 @@ test('orçamento NR-1: copy do Designer v4.3c (sha256 292e5ba6...) aplicada; pre
   assert.equal(createHash('sha256').update(cp).digest('hex'), '292e5ba6ab590cf65b4d8684c39e8e178ba2df864ea7cafdf0948c83eaeccf43');
   const h = ler(ORC);
   for (const t of ['<h1>Orçamento do serviço NR-1</h1>', 'Pagamento: 50% no início e 50% na entrega, ou tudo à vista.',
-    'Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.', 'Preços válidos até 31/12/2026.', 'Preço a definir', '>Nome da empresa</label>',
+    'Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.', 'Preços válidos até 31/12/2026.', '>Nome da empresa</label>',
     'Digite o nome da empresa. Não consultamos o CNPJ em nenhuma base.', '>CNPJ da empresa</label>',
     'Opcional. Ajuda a preparar a proposta.', '<option>20 a 50</option><option>51 a 100</option><option>101 a 200</option><option>Mais de 200</option>',
     '>Seu nome</label>', '>Telefone (opcional)</label>', '>Pedir orçamento do serviço NR-1</button>']) {
     assert.ok(h.includes(t), t);
     assert.ok(cp.includes(t.replace(/<[^>]+>|^>|<\/?\w*$/g, '').replace(/<\/option><option>/g, ' / ')) || t.startsWith('<option'), `copy: ${t}`);
   }
+  // Desvio deliberado da v4.3c (DEC CPO 28/10, DEC CEO 95a76e17): linha >200 = 'Orçamento sob medida', não 'Preço a definir'.
+  assert.ok(h.includes('<tr><th scope="row">Mais de 200</th><td>Orçamento sob medida</td></tr>'));
+  assert.ok(!h.includes('Preço a definir'));
   assert.ok(!h.includes('R$'), 'preço só por JS, a partir de FAIXAS');
   assert.deepEqual(FAIXAS.filter((f) => f.preco).map((f) => f.preco), [1490, 2290, 3490]);
   // aviso v2 da copy não entra: vale o do Advogado (v3)

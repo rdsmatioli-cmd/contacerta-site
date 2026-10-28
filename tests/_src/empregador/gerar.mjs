@@ -174,7 +174,7 @@ pagina({
 <tr><th scope="row">20 a 50</th><td data-ed="orc-preco-20-50"></td></tr>
 <tr><th scope="row">51 a 100</th><td data-ed="orc-preco-51-100"></td></tr>
 <tr><th scope="row">101 a 200</th><td data-ed="orc-preco-101-200"></td></tr>
-<tr><th scope="row">Mais de 200</th><td>Preço a definir</td></tr>
+<tr><th scope="row">Mais de 200</th><td>Orçamento sob medida</td></tr>
 </tbody></table>
 <p>Pagamento: 50% no início e 50% na entrega, ou tudo à vista.</p>
 <p>Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.</p>
