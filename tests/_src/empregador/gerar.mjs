@@ -6,6 +6,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
+import { FAIXAS } from '../../../assets/js/empregador/config.js';
 
 const raiz = fileURLToPath(new URL('../../../', import.meta.url));
 const molde = readFileSync(join(raiz, 'tabelas-oficiais-2026/obrigado/index.html'), 'utf8');
@@ -165,15 +166,17 @@ pagina({
 <p>Avalie riscos de sobrecarga no PGR. A partir de <span data-ed="preco-min"></span> para 20 a 50 funcionários.</p>
 <p><a class="btn" href="/empregador-em-dia/">Ver a adequação NR-1</a></p></section>`,
 });
+// N-1 (CPO/NR-1): preços da tabela no HTML estático, a partir de FAIXAS (config.js); mesmo formato do brl() de ui.js.
+const precoEstatico = (id) => FAIXAS.find((f) => f.id === id).preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).replace(/\s/g, ' ');
 pagina({
   caminho: 'empregador-em-dia/orcamento-nr1/',
   titulo: 'Pedir orçamento NR-1 | Empregador em Dia',
   desc: 'Formulário de pedido de orçamento da adequação NR-1 para empresas com mais de 200 funcionários.',
   conteudo: `<h1>Orçamento do serviço NR-1</h1>
-<table class="ed-tabela"><caption>Preços do serviço NR-1</caption><thead><tr><th scope="col">Funcionários</th><th scope="col">Preço</th></tr></thead><tbody>
-<tr><th scope="row">20 a 50</th><td data-ed="orc-preco-20-50"></td></tr>
-<tr><th scope="row">51 a 100</th><td data-ed="orc-preco-51-100"></td></tr>
-<tr><th scope="row">101 a 200</th><td data-ed="orc-preco-101-200"></td></tr>
+<table class="ed-tab"><caption>Preços do serviço NR-1</caption><thead><tr><th scope="col">Funcionários</th><th scope="col">Preço</th></tr></thead><tbody>
+<tr><th scope="row">20 a 50</th><td data-ed="orc-preco-20-50">${precoEstatico('20-50')}</td></tr>
+<tr><th scope="row">51 a 100</th><td data-ed="orc-preco-51-100">${precoEstatico('51-100')}</td></tr>
+<tr><th scope="row">101 a 200</th><td data-ed="orc-preco-101-200">${precoEstatico('101-200')}</td></tr>
 <tr><th scope="row">Mais de 200</th><td>Orçamento sob medida</td></tr>
 </tbody></table>
 <p>Pagamento: 50% no início e 50% na entrega, ou tudo à vista.</p>

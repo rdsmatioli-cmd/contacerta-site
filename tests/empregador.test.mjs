@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { FLAGS, FAIXAS, FAIXAS_SALARIO, SALARIO_MINIMO, ED_SST_INCLUIDO, ESCALA_5, NOTA_DOMESTICO, JORNADA } from '../assets/js/empregador/config.js';
 import { destino, oferta, pontosAtencao, validarPasso, jornada } from '../assets/js/empregador/motor.js';
 import { emitirTokens, responder, podeAgregar } from '../assets/js/empregador/token.js';
@@ -321,7 +321,19 @@ test('orçamento NR-1: copy do Designer v4.3d (sha256 1d65ac99...) aplicada; pre
   assert.ok(cp.includes('| Mais de 200 | Orçamento sob medida |') && !cp.includes('Preço a definir |'));
   assert.ok(h.includes('<tr><th scope="row">Mais de 200</th><td>Orçamento sob medida</td></tr>'));
   assert.ok(!h.includes('Preço a definir'));
-  assert.ok(!h.includes('R$'), 'preço só por JS, a partir de FAIXAS');
+  // NB-01 (QA 6b6dfb7, Bugbot c050e572): a tabela usa a classe que existe em ed.css.
+  assert.ok(h.includes('<table class="ed-tab"><caption>Preços do serviço NR-1</caption>') && !h.includes('ed-tabela'));
+  assert.ok(/\.ed-tab[ {,]/.test(ler('assets/js/empregador/ed.css')));
+  // NB-02 (DEC CPO 70f7c62a): o termo proibido não aparece nem em comentário de código.
+  for (const f of readdirSync(new URL('../assets/js/empregador/', import.meta.url))) assert.ok(!/sob consulta/i.test(ler('assets/js/empregador/' + f)), f);
+  // N-1 (CPO/NR-1): tabela estática no HTML, valores iguais aos de FAIXAS (config.js).
+  const fmt = (v) => 'R$ ' + v.toLocaleString('pt-BR');
+  for (const [id, rot] of [['20-50', '20 a 50'], ['51-100', '51 a 100'], ['101-200', '101 a 200']]) {
+    const f = FAIXAS.find((x) => x.id === id);
+    assert.ok(h.includes(`<tr><th scope="row">${rot}</th><td data-ed="orc-preco-${id}">${fmt(f.preco)}</td></tr>`), id);
+  }
+  assert.deepEqual([...h.matchAll(/R\$ [\d.]+/g)].map((m) => m[0]), ['R$ 1.490', 'R$ 2.290', 'R$ 3.490']);
+  assert.ok(h.indexOf('id="ed-app" hidden') < h.indexOf('<caption>Preços do serviço NR-1'), 'tabela dentro do #ed-app (oculta com flag OFF)');
   assert.deepEqual(FAIXAS.filter((f) => f.preco).map((f) => f.preco), [1490, 2290, 3490]);
   // aviso v2 da copy não entra: vale o do Advogado (v3)
   assert.ok(!h.includes('hospedagem e e-mail, que só podem usá-los'));

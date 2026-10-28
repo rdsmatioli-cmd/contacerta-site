@@ -4,7 +4,7 @@ import { FAIXAS, JORNADA, SALARIO_MINIMO, FAIXAS_SALARIO } from './config.js?v=0
 export const r2 = (x) => Math.round((x + Number.EPSILON) * 100) / 100;
 export const faixaPorId = (id) => FAIXAS.find((f) => f.id === id) || null;
 
-// Passo 1 decide o caminho (T02): <20 -> simplificada; >200 -> sob consulta (DEC 95a76e17); demais -> oferta.
+// Passo 1 decide o caminho (T02): <20 -> simplificada; >200 -> orçamento sob medida (DEC 95a76e17); demais -> oferta.
 export function destino(faixaId) {
   const f = faixaPorId(faixaId);
   if (!f) return null;
