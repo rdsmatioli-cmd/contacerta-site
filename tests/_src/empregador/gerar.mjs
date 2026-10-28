@@ -125,7 +125,7 @@ pagina({
 <button type="submit" disabled class="btn">Me avise</button></form></li></ul>
 <p><a href="/contato/">Quer mesmo assim a adequação completa? Fale com a gente.</a></p></section>
 <section data-ed-res="sob-consulta" hidden><h1>Para mais de 200 funcionários, fazemos um orçamento</h1>
-<p>Com várias unidades ou turnos, o questionário e a análise mudam. Preço a definir, caso a caso.</p>
+<p>Com várias unidades ou turnos, o questionário e a análise mudam. Orçamento sob medida, caso a caso.</p>
 <p class="ed-sst" data-ed-sst></p>
 <p><button type="button" class="btn" data-ed-orcamento disabled>Pedir orçamento</button></p></section>`,
 });
