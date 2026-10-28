@@ -8,6 +8,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const obrigatoria = process.env.REQUIRE_POLICY_DATE_TODAY === '1';
+// Decisão do CPO (28/10): na publicação (pages.yml) basta a data não estar no futuro (<= hoje), salvo quando o push
+// altera privacidade/index.html, que volta a exigir = hoje (REQUIRE_POLICY_DATE_TODAY=1).
+const naoFutura = !obrigatoria && process.env.REQUIRE_POLICY_DATE_NOT_FUTURE === '1';
+const ordem = (d) => d.split('/').reverse().join('');
 
 export function hojeSaoPaulo(agora = new Date()) {
   const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -23,6 +27,16 @@ test('privacidade: "Última atualização" é a data de hoje em America/Sao_Paul
   assert.equal(datas.length, 1, 'esperada exatamente uma "Última atualização: dd/mm/aaaa." na política');
   const hoje = hojeSaoPaulo();
   assert.equal(datas[0], hoje, `a política diz ${datas[0]}, mas hoje em America/Sao_Paulo é ${hoje}: ajuste a data para o dia do merge/deploy e reexecute o CI`);
+});
+
+test('privacidade: "Última atualização" não está no futuro (publicação sem mudança na política)', {
+  skip: naoFutura ? false : 'só com REQUIRE_POLICY_DATE_NOT_FUTURE=1 (pages.yml, push que não altera privacidade/index.html)',
+}, () => {
+  const html = readFileSync(new URL('../privacidade/index.html', import.meta.url), 'utf8');
+  const datas = [...html.matchAll(/Última atualização: (\d{2}\/\d{2}\/\d{4})\./g)].map((m) => m[1]);
+  assert.equal(datas.length, 1, 'esperada exatamente uma "Última atualização: dd/mm/aaaa." na política');
+  const hoje = hojeSaoPaulo();
+  assert.ok(ordem(datas[0]) <= ordem(hoje), `a política diz ${datas[0]}, depois de hoje em America/Sao_Paulo (${hoje})`);
 });
 
 test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {

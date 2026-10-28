@@ -1,8 +1,9 @@
 name: Pages
 # Publica o site no GitHub Pages por Actions (plano gratuito). Só passa a valer quando a fonte do Pages for trocada
 # para "GitHub Actions" nas configurações do repositório (Novos Negócios, no merge); até lá o Pages segue publicando a
-# main pelo modo legado. Antes do upload roda a trava da data da política (M-PR33-01, tests/politica-data.test.mjs):
-# se "Última atualização" for diferente de hoje em America/Sao_Paulo, a publicação falha.
+# main pelo modo legado. Antes do upload roda a trava da data da política (M-PR33-01, tests/politica-data.test.mjs,
+# decisão do CPO de 28/10): a "Última atualização" não pode estar no futuro (<= hoje em America/Sao_Paulo); se o push
+# alterar privacidade/index.html (ou não der para saber, como no workflow_dispatch ou no primeiro push), tem de ser = hoje.
 on:
   push:
     branches: [main]
@@ -22,10 +23,19 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
-      - name: Trava da data da política (falha a publicação se não for hoje em America/Sao_Paulo)
+      - name: Trava da data da política (<= hoje; = hoje se o push alterou privacidade/index.html)
         env:
-          REQUIRE_POLICY_DATE_TODAY: '1'
-        run: node --test tests/politica-data.test.mjs
+          ANTES: ${{ github.event.before }}
+        run: |
+          git fetch --no-tags --quiet --depth=1 origin "$ANTES" 2>/dev/null || true
+          if [ "$GITHUB_EVENT_NAME" = push ] && git cat-file -e "$ANTES^{commit}" 2>/dev/null \
+            && ! git diff --name-only "$ANTES" HEAD | grep -qx 'privacidade/index.html'; then
+            echo 'privacidade/index.html não alterada neste push: a data só não pode estar no futuro.'
+            REQUIRE_POLICY_DATE_NOT_FUTURE=1 node --test tests/politica-data.test.mjs
+          else
+            echo 'privacidade/index.html alterada (ou push sem base conhecida): a data tem de ser hoje.'
+            REQUIRE_POLICY_DATE_TODAY=1 node --test tests/politica-data.test.mjs
+          fi
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       # Só o conteúdo do site: os mesmos arquivos que o Pages legado serve hoje, sem tests, node_modules, .github,
       # .git e os arquivos de configuração (.gitattributes, .htmlvalidate.json, .nvmrc). Mantém .nojekyll e CNAME.
