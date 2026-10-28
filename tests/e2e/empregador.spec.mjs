@@ -3,7 +3,7 @@
 // requisição com dados das respostas.
 import { test, expect, semErros, semRedeExterna, semRolagemHorizontal, assentar } from './fixtures.mjs';
 
-const PAGS = ['/empregador-em-dia/', '/empregador-em-dia/avaliacao-rapida-nr1/', '/empregador-em-dia/avaliacao-rapida-nr1/resultado/', '/empregador-em-dia/jornada-42h/'];
+const PAGS = ['/empregador-em-dia/', '/empregador-em-dia/avaliacao-rapida-nr1/', '/empregador-em-dia/avaliacao-rapida-nr1/resultado/', '/empregador-em-dia/jornada-42h/', '/empregador-em-dia/orcamento-nr1/'];
 const ligar = (page) => page.route(/\/assets\/js\/empregador\/config\.js/, async (route) => {
   const r = await route.fetch();
   const corpo = (await r.text()).replace('EMPREGADOR_EM_DIA: false', 'EMPREGADOR_EM_DIA: true');
@@ -93,6 +93,17 @@ test('flag ON jornada 42h: conta aberta com divisor 210 e etapa de 40 h', async 
   await expect(page.locator('#f-func-msg')).toBeVisible();
   await expect(conta).not.toContainText('R$ 11.050,00'); // NB-05: conta anterior limpa
   await semRolagemHorizontal(page);
+  semRedeExterna(rede);
+  semErros(erros, rede);
+});
+
+test('orçamento NR-1: EMPREGADOR_EM_DIA ON mas ED_CHECKOUT OFF continua indisponível', async ({ page, rede, erros }) => {
+  await ligar(page);
+  await page.goto('/empregador-em-dia/orcamento-nr1/');
+  await assentar(page);
+  await expect(page.locator('#ed-off')).toBeVisible();
+  await expect(page.locator('#ed-app')).toBeHidden();
+  await expect(page.locator('#ed-orc button[type="submit"]')).toBeDisabled();
   semRedeExterna(rede);
   semErros(erros, rede);
 });

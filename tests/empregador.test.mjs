@@ -2,7 +2,8 @@
 // DEC 95a76e17. Flags desligadas; páginas noindex e fora do sitemap.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { FLAGS, FAIXAS, FAIXAS_SALARIO, SALARIO_MINIMO, ED_SST_INCLUIDO, ESCALA_5, NOTA_DOMESTICO, JORNADA } from '../assets/js/empregador/config.js';
 import { destino, oferta, pontosAtencao, validarPasso, jornada } from '../assets/js/empregador/motor.js';
 import { emitirTokens, responder, podeAgregar } from '../assets/js/empregador/token.js';
@@ -10,7 +11,8 @@ import { emitirTokens, responder, podeAgregar } from '../assets/js/empregador/to
 const raiz = new URL('../', import.meta.url);
 const ler = (p) => readFileSync(new URL(p, raiz), 'utf8');
 const PAGINAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
-  'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html'];
+  'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html',
+  'empregador-em-dia/orcamento-nr1/index.html'];
 
 test('flags todas desligadas e SST em definição', () => {
   for (const [k, v] of Object.entries(FLAGS)) assert.equal(v, false, k);
@@ -236,4 +238,103 @@ test('CTA "Pedir orçamento": destino /empregador-em-dia/orcamento-nr1/, desliga
   assert.match(ui, /if \(b && FLAGS\.ED_CHECKOUT\) \{ b\.disabled = false; b\.addEventListener\('click', \(\) => location\.assign\(URL_ORCAMENTO_NR1\)\); \}/);
   assert.match(ler(PAGINAS[2]), /<button type="button" class="btn" data-ed-orcamento disabled>Pedir orçamento<\/button>/);
   assert.equal(FLAGS.ED_CHECKOUT, false);
+});
+
+// Orçamento NR-1 (PR próprio, base empregador-e2). Placeholders (Designer e destino ED-Orcamento) em
+// assets/js/empregador/orcamento-textos.js; aviso LGPD literal do Advogado no HTML.
+const AVISO_MD = new URL('_src/juridico/aviso-lgpd-orcamento-nr1.md', import.meta.url);
+const ORC = 'empregador-em-dia/orcamento-nr1/index.html';
+const semTags = (x) => x.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').trim();
+export function avisoRenderizado(h) {
+  const sec = h.match(/<section class="nota le-privacidade" id="orc-aviso"[^>]*>([^]*?)<\/section>/)[1];
+  return [...sec.matchAll(/<(h2|p)\b[^>]*>([^]*?)<\/\1>/g)].map((m) => semTags(m[2])).join('\n\n');
+}
+export const AVISO_SHA256_FONTE_ARQUIVO = '02a3adead4672b13233758f8135838d44dfe21bf5f0550960d83321684652601';
+export const AVISO_SHA256_TEXTO = 'f6f58abc4ead701702523ff5bf735705e35ac6b7ea8433fa59a6b495980f07ce';
+
+test('orçamento NR-1: placeholders do Designer e do destino ED-Orcamento impedem ED_CHECKOUT ON', async () => {
+  const { TEXTOS_ORCAMENTO, ED_ORCAMENTO, conferirOrcamento } = await import('../assets/js/empregador/orcamento-textos.js');
+  const abertos = conferirOrcamento(TEXTOS_ORCAMENTO, ED_ORCAMENTO, { ED_CHECKOUT: false });
+  assert.ok(abertos.some((x) => x.startsWith('[TEXTO DO DESIGNER')));
+  assert.ok(abertos.includes('[ED-ORCAMENTO: ACTION DO GOOGLE FORM]'));
+  assert.throws(() => conferirOrcamento(TEXTOS_ORCAMENTO, ED_ORCAMENTO, { ED_CHECKOUT: true }), /placeholder em aberto/);
+  // destino sem configurar (só action) já trava a flag ON
+  assert.throws(() => conferirOrcamento({}, { action: '[ED-ORCAMENTO: ACTION DO GOOGLE FORM]', campos: {} }, { ED_CHECKOUT: true }), /ED-ORCAMENTO/);
+  if (abertos.length) assert.equal(FLAGS.ED_CHECKOUT, false, `ED_CHECKOUT ON com placeholder: ${abertos.join(', ')}`);
+  const ok = JSON.parse(JSON.stringify([TEXTOS_ORCAMENTO, ED_ORCAMENTO]).replace(/"\[[^\]]*\]"/g, '"ok"'));
+  assert.deepEqual(conferirOrcamento(ok[0], ok[1], { ED_CHECKOUT: true }), []);
+});
+
+test('orçamento NR-1: destino é o ED-Orcamento, não o CC-Leads; sem flag nada é enviado', async () => {
+  const { ED_ORCAMENTO } = await import('../assets/js/empregador/orcamento-textos.js');
+  const ccLeads = ler('tabelas-oficiais-2026/index.html').match(/id="tl-form" action="([^"]+)"/)[1];
+  const h = ler(ORC);
+  const src = ler('assets/js/empregador/orcamento-textos.js') + ler('assets/js/empregador/ui.js');
+  assert.ok(!src.includes(ccLeads) && !h.includes(ccLeads), 'CC-Leads não pode ser o destino');
+  for (const e of h.match(/entry\.\d+/g) || []) assert.fail(`entry do CC-Leads ou outro no HTML: ${e}`);
+  assert.notEqual(ED_ORCAMENTO.action, ccLeads);
+  assert.match(h, /<form class="ed-form le-form" id="ed-orc" action="#" method="post"/);
+  assert.ok(!/<(input|select|textarea)\b[^>]*\bname=/.test(h.match(/<form[^]*?<\/form>/g).find((f) => f.includes('id="ed-orc"'))), 'sem name estático');
+});
+
+test('orçamento NR-1: aviso LGPD literal do Advogado, logo acima do Enviar', () => {
+  const md = readFileSync(AVISO_MD, 'utf8');
+  assert.equal(createHash('sha256').update(md).digest('hex'), AVISO_SHA256_FONTE_ARQUIVO, 'fonte do Advogado mudou');
+  const fonte = md.split('Caixa opcional')[0].split('\n').filter((l) => !l.startsWith('#')).join('\n').trim();
+  const h = ler(ORC);
+  const r = avisoRenderizado(h);
+  assert.equal(r, fonte);
+  assert.equal(createHash('sha256').update(r).digest('hex'), AVISO_SHA256_TEXTO);
+  assert.match(h, /<\/section>\n<button type="submit" disabled class="btn">Pedir orçamento do serviço NR-1<\/button>\n<\/form>/);
+  assert.ok(h.indexOf('id="orc-aviso"') > h.indexOf('id="orc-faixa"'));
+});
+
+test('orçamento NR-1: novidades separada, desmarcada e opcional; versão do aviso e data/hora do envio', () => {
+  const h = ler(ORC);
+  const md = readFileSync(AVISO_MD, 'utf8');
+  const mkt = md.match(/☐ (.+)/)[1].trim();
+  const cx = h.match(/<label class="le-ok"><input type="checkbox" id="orc-novidades"[^>]*>([^<]*)<\/label>/);
+  assert.ok(cx, 'caixa de novidades');
+  assert.equal(cx[1].trim(), mkt);
+  assert.ok(!/id="orc-novidades"[^>]*\b(checked|required)/.test(h));
+  assert.equal((h.match(/type="checkbox"/g) || []).length, 1, 'nenhuma outra caixa obrigatória');
+  assert.match(h, /<input type="hidden" data-orc-campo="avisoVersao" value="aviso-orcamento-nr1-v3-20261028">/);
+  assert.match(h, /<input type="hidden" data-orc-campo="enviadoEm" value="">/);
+  const ui = ler('assets/js/empregador/ui.js');
+  assert.match(ui, /\[data-orc-campo="enviadoEm"\]'\)\.value = new Date\(\)\.toISOString\(\)/);
+  assert.ok(ui.indexOf('toISOString') < ui.indexOf("fetch(form.action"), 'carimbo antes do envio');
+});
+
+test('orçamento NR-1: copy do Designer v4.3d (sha256 1d65ac99...) aplicada; preços vêm do config', () => {
+  const cp = readFileSync(new URL('_src/juridico/copy-orcamento-nr1.md', import.meta.url), 'utf8');
+  assert.equal(createHash('sha256').update(cp).digest('hex'), '1d65ac999d75783151e35b1572a7c189fd8cb8f538308a3581a9c2c57c409921');
+  const h = ler(ORC);
+  for (const t of ['<h1>Orçamento do serviço NR-1</h1>', 'Pagamento: 50% no início e 50% na entrega, ou tudo à vista.',
+    'Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.', 'Preços válidos até 31/12/2026.', '>Nome da empresa</label>',
+    'Digite o nome da empresa. Não consultamos o CNPJ em nenhuma base.', '>CNPJ da empresa</label>',
+    'Opcional. Ajuda a preparar a proposta.', '<option>20 a 50</option><option>51 a 100</option><option>101 a 200</option><option>Mais de 200</option>',
+    '>Seu nome</label>', '>Telefone (opcional)</label>', '>Pedir orçamento do serviço NR-1</button>']) {
+    assert.ok(h.includes(t), t);
+    assert.ok(cp.includes(t.replace(/<[^>]+>|^>|<\/?\w*$/g, '').replace(/<\/option><option>/g, ' / ')) || t.startsWith('<option'), `copy: ${t}`);
+  }
+  // v4.3d (Adendo 10; DEC CPO rótulo >200, 28/10; DEC CEO 95a76e17): linha >200 = 'Orçamento sob medida', na copy e no HTML.
+  assert.ok(cp.includes('| Mais de 200 | Orçamento sob medida |') && !cp.includes('Preço a definir |'));
+  assert.ok(h.includes('<tr><th scope="row">Mais de 200</th><td>Orçamento sob medida</td></tr>'));
+  assert.ok(!h.includes('Preço a definir'));
+  // NB-01 (QA 6b6dfb7, Bugbot c050e572): a tabela usa a classe que existe em ed.css.
+  assert.ok(h.includes('<table class="ed-tab"><caption>Preços do serviço NR-1</caption>') && !h.includes('ed-tabela'));
+  assert.ok(/\.ed-tab[ {,]/.test(ler('assets/js/empregador/ed.css')));
+  // NB-02 (DEC CPO 70f7c62a): o termo proibido não aparece nem em comentário de código.
+  for (const f of readdirSync(new URL('../assets/js/empregador/', import.meta.url))) assert.ok(!/sob consulta/i.test(ler('assets/js/empregador/' + f)), f);
+  // N-1 (CPO/NR-1): tabela estática no HTML, valores iguais aos de FAIXAS (config.js).
+  const fmt = (v) => 'R$ ' + v.toLocaleString('pt-BR');
+  for (const [id, rot] of [['20-50', '20 a 50'], ['51-100', '51 a 100'], ['101-200', '101 a 200']]) {
+    const f = FAIXAS.find((x) => x.id === id);
+    assert.ok(h.includes(`<tr><th scope="row">${rot}</th><td data-ed="orc-preco-${id}">${fmt(f.preco)}</td></tr>`), id);
+  }
+  assert.deepEqual([...h.matchAll(/R\$ [\d.]+/g)].map((m) => m[0]), ['R$ 1.490', 'R$ 2.290', 'R$ 3.490']);
+  assert.ok(h.indexOf('id="ed-app" hidden') < h.indexOf('<caption>Preços do serviço NR-1'), 'tabela dentro do #ed-app (oculta com flag OFF)');
+  assert.deepEqual(FAIXAS.filter((f) => f.preco).map((f) => f.preco), [1490, 2290, 3490]);
+  // aviso v2 da copy não entra: vale o do Advogado (v3)
+  assert.ok(!h.includes('hospedagem e e-mail, que só podem usá-los'));
 });

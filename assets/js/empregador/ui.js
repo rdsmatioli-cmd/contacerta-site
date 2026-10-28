@@ -1,6 +1,7 @@
 // Empregador em Dia: interface das páginas E2. Nada sai do navegador: respostas só em sessionStorage (T02).
 import { FLAGS, ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, FAIXAS, NOTA_DOMESTICO } from './config.js?v=04a97dcdba';
-import { destino, oferta, pontosAtencao, textoPgr, validarPasso, faixaPorId, jornada } from './motor.js?v=2a8eac4c08';
+import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=0a40d19e5c';
+import { destino, oferta, pontosAtencao, textoPgr, validarPasso, faixaPorId, jornada } from './motor.js?v=b58d62d121';
 
 const CHAVE = 'ed-diagnostico';
 const brl = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: v % 1 ? 2 : 0 }).replace(/\s/g, ' ');
@@ -13,6 +14,7 @@ const gravar = (r) => sessionStorage.setItem(CHAVE, JSON.stringify(r));
 
 function iniciar() {
   if (!FLAGS.EMPREGADOR_EM_DIA) return; // flag OFF: só o aviso "em preparação"
+  if ($('#ed-orc') && !FLAGS.ED_CHECKOUT) return; // orçamento NR-1: também exige ED_CHECKOUT
   $('#ed-off').hidden = true;
   $('#ed-app').hidden = false;
   const sst = ED_SST_INCLUIDO === null ? SST_TEXTO_EM_DEFINICAO : '';
@@ -20,6 +22,33 @@ function iniciar() {
   if ($('#ed-diag')) diagnostico();
   if ($('[data-ed-res]')) resultado();
   if ($('#ed-jornada')) simulador();
+  if ($('#ed-orc')) orcamentoNr1();
+}
+
+// /empregador-em-dia/orcamento-nr1/: destino ED-Orcamento (Google Form dedicado) e textos do Designer vêm de
+// orcamento-textos.js; com placeholder a trava lança erro antes de habilitar o envio. Aviso LGPD já está no HTML.
+// Envio no padrão no-cors do Google Forms; "novidades" é opcional e o envio funciona sem ela.
+function orcamentoNr1() {
+  conferirOrcamento();
+  const form = $('#ed-orc');
+  const t = TEXTOS_ORCAMENTO;
+  for (const id of ['20-50', '51-100', '101-200']) set(`orc-preco-${id}`, brl(faixaPorId(id).preco));
+  form.action = ED_ORCAMENTO.action;
+  for (const [k, entry] of Object.entries(ED_ORCAMENTO.campos)) { const e = form.querySelector(`[data-orc-campo="${k}"]`); if (e) e.name = entry; }
+  form.querySelector('[data-orc-campo="avisoVersao"]').value = AVISO_VERSAO;
+  const msg = $('#ed-orc-msg');
+  const b = form.querySelector('button[type="submit"]');
+  b.disabled = false;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if ($('#ed-orc-site').value) return;
+    if (!form.checkValidity()) { msg.textContent = t.erro; msg.hidden = false; return; }
+    form.querySelector('[data-orc-campo="enviadoEm"]').value = new Date().toISOString();
+    b.disabled = true;
+    fetch(form.action, { method: 'POST', mode: 'no-cors', body: new FormData(form) })
+      .then(() => { form.hidden = true; msg.textContent = t.sucesso; msg.hidden = false; },
+        () => { b.disabled = false; msg.textContent = t.erro; msg.hidden = false; });
+  });
 }
 
 function diagnostico() {
@@ -67,7 +96,7 @@ function resultado() {
   $('[data-ed-res="vazio"]').hidden = true;
   $(`[data-ed-res="${d}"]`).hidden = false;
   if (d === 'sob-consulta') orcamento();
-  if (d !== 'oferta') return; // <20: sem preço nem Contratar (D-01); >200: sob consulta (DEC 95a76e17)
+  if (d !== 'oferta') return; // <20: sem preço nem Contratar (D-01); >200: orçamento sob medida (DEC 95a76e17)
   const o = oferta(r.faixa);
   const porte = `${faixaPorId(r.faixa).rotulo} funcionários`;
   set('porte', porte);
