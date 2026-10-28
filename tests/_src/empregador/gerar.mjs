@@ -165,4 +165,34 @@ pagina({
 <p>Avalie riscos de sobrecarga no PGR. A partir de <span data-ed="preco-min"></span> para 20 a 50 funcionários.</p>
 <p><a class="btn" href="/empregador-em-dia/">Ver a adequação NR-1</a></p></section>`,
 });
+pagina({
+  caminho: 'empregador-em-dia/orcamento-nr1/',
+  titulo: 'Pedir orçamento NR-1 | Empregador em Dia',
+  desc: 'Formulário de pedido de orçamento da adequação NR-1 para empresas com mais de 200 funcionários.',
+  conteudo: `<h1 data-ed="orc-titulo">Pedir orçamento NR-1</h1>
+<p data-ed="orc-intro"></p>
+<form class="ed-form le-form" id="ed-orc" action="#" method="post" accept-charset="UTF-8" novalidate>
+<label for="orc-nome">Nome</label><input id="orc-nome" data-orc-campo="nome" autocomplete="name" required>
+<label for="orc-email">E-mail</label><input id="orc-email" data-orc-campo="email" type="email" autocomplete="email" required>
+<label for="orc-telefone">Telefone</label><input id="orc-telefone" data-orc-campo="telefone" type="tel" autocomplete="tel">
+<label for="orc-empresa">Empresa</label><input id="orc-empresa" data-orc-campo="empresa" autocomplete="organization" required>
+<label for="orc-cnpj">CNPJ</label><input id="orc-cnpj" data-orc-campo="cnpj" inputmode="numeric">
+<label for="orc-faixa">Número de funcionários</label><select id="orc-faixa" data-orc-campo="faixa" required><option value="">Selecione</option><option>201 a 500</option><option>501 a 1.000</option><option>Mais de 1.000</option></select>
+<input type="hidden" data-orc-campo="avisoVersao" value="aviso-orcamento-nr1-v3-20261028">
+<input type="hidden" data-orc-campo="enviadoEm" value="">
+<div class="le-hp" aria-hidden="true" style="position:absolute;left:-9999px"><label for="ed-orc-site">Não preencha</label><input id="ed-orc-site" tabindex="-1" autocomplete="off"></div>
+<label class="le-ok"><input type="checkbox" id="orc-novidades" data-orc-campo="novidades" value="sim"> Quero receber novidades do Conta Certa por e-mail. Sei que meus dados passam por servidores do Google e do ImprovMX fora do Brasil. Posso cancelar quando quiser.</label>
+<section class="nota le-privacidade" id="orc-aviso" aria-labelledby="orc-aviso-titulo">
+<h2 id="orc-aviso-titulo">Como usamos seus dados</h2>
+<p>Quem cuida dos seus dados é RODRIGO DE SIMONE MATIOLI LTDA (LCM GLOBAL SERVICES), CNPJ 61.193.879/0001-20, responsável pelo Conta Certa.</p>
+<p>Usamos seu nome, e-mail, telefone, empresa, CNPJ e faixa de número de funcionários só para responder ao seu pedido de orçamento e enviar a proposta. A base legal é a LGPD, art. 7º, V: passos anteriores a um contrato, feitos a seu pedido.</p>
+<p>Guardamos esses dados por até 6 meses depois do envio da proposta. Se você fechar contrato, eles passam a seguir o contrato. Depois disso, apagamos.</p>
+<p>As respostas ficam no Google Forms e no Google Sheets, serviços do Google LLC, que pode tratá-las em servidores fora do Brasil. Essa transferência é necessária para atender ao seu pedido (LGPD, art. 33, IX, e art. 7º, V). Não vendemos nem cedemos seus dados.</p>
+<p>Você pode pedir confirmação, acesso, correção, cópia, exclusão e informação sobre com quem compartilhamos seus dados (LGPD, art. 18). Escreva para contato@contacertabr.com.br.</p>
+<p>Mais detalhes na nossa Política de Privacidade: <a href="/privacidade/#orcamento-nr1">https://contacertabr.com.br/privacidade/</a></p>
+</section>
+<button type="submit" disabled class="btn">Enviar</button>
+</form>
+<p id="ed-orc-msg" class="nota" role="alert" aria-live="assertive" hidden></p>`,
+});
 console.log('ok', vUi, vCss);

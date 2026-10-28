@@ -1,5 +1,6 @@
 // Empregador em Dia: interface das páginas E2. Nada sai do navegador: respostas só em sessionStorage (T02).
 import { FLAGS, ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, FAIXAS, NOTA_DOMESTICO } from './config.js?v=04a97dcdba';
+import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=4b4f92fd4e';
 import { destino, oferta, pontosAtencao, textoPgr, validarPasso, faixaPorId, jornada } from './motor.js?v=2a8eac4c08';
 
 const CHAVE = 'ed-diagnostico';
@@ -13,6 +14,7 @@ const gravar = (r) => sessionStorage.setItem(CHAVE, JSON.stringify(r));
 
 function iniciar() {
   if (!FLAGS.EMPREGADOR_EM_DIA) return; // flag OFF: só o aviso "em preparação"
+  if ($('#ed-orc') && !FLAGS.ED_CHECKOUT) return; // orçamento NR-1: também exige ED_CHECKOUT
   $('#ed-off').hidden = true;
   $('#ed-app').hidden = false;
   const sst = ED_SST_INCLUIDO === null ? SST_TEXTO_EM_DEFINICAO : '';
@@ -20,6 +22,33 @@ function iniciar() {
   if ($('#ed-diag')) diagnostico();
   if ($('[data-ed-res]')) resultado();
   if ($('#ed-jornada')) simulador();
+  if ($('#ed-orc')) orcamentoNr1();
+}
+
+// /empregador-em-dia/orcamento-nr1/: destino ED-Orcamento (Google Form dedicado) e textos do Designer vêm de
+// orcamento-textos.js; com placeholder a trava lança erro antes de habilitar o envio. Aviso LGPD já está no HTML.
+// Envio no padrão no-cors do Google Forms; "novidades" é opcional e o envio funciona sem ela.
+function orcamentoNr1() {
+  conferirOrcamento();
+  const form = $('#ed-orc');
+  const t = TEXTOS_ORCAMENTO;
+  set('orc-titulo', t.titulo); set('orc-intro', t.intro);
+  form.action = ED_ORCAMENTO.action;
+  for (const [k, entry] of Object.entries(ED_ORCAMENTO.campos)) { const e = form.querySelector(`[data-orc-campo="${k}"]`); if (e) e.name = entry; }
+  form.querySelector('[data-orc-campo="avisoVersao"]').value = AVISO_VERSAO;
+  const msg = $('#ed-orc-msg');
+  const b = form.querySelector('button[type="submit"]');
+  b.disabled = false;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if ($('#ed-orc-site').value) return;
+    if (!form.checkValidity()) { msg.textContent = t.erro; msg.hidden = false; return; }
+    form.querySelector('[data-orc-campo="enviadoEm"]').value = new Date().toISOString();
+    b.disabled = true;
+    fetch(form.action, { method: 'POST', mode: 'no-cors', body: new FormData(form) })
+      .then(() => { form.hidden = true; msg.textContent = t.sucesso; msg.hidden = false; },
+        () => { b.disabled = false; msg.textContent = t.erro; msg.hidden = false; });
+  });
 }
 
 function diagnostico() {

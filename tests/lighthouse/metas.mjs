@@ -26,6 +26,7 @@ export const URLS_NOINDEX = [
   '/empregador-em-dia/avaliacao-rapida-nr1/',
   '/empregador-em-dia/avaliacao-rapida-nr1/resultado/',
   '/empregador-em-dia/jornada-42h/',
+  '/empregador-em-dia/orcamento-nr1/',
 ];
 export const TODAS_URLS = [...URLS, ...URLS_NOINDEX];
 export const ehNoindex = (url) => URLS_NOINDEX.includes(url);
