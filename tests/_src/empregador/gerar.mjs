@@ -165,4 +165,42 @@ pagina({
 <p>Avalie riscos de sobrecarga no PGR. A partir de <span data-ed="preco-min"></span> para 20 a 50 funcionários.</p>
 <p><a class="btn" href="/empregador-em-dia/">Ver a adequação NR-1</a></p></section>`,
 });
+pagina({
+  caminho: 'empregador-em-dia/orcamento-nr1/',
+  titulo: 'Pedir orçamento NR-1 | Empregador em Dia',
+  desc: 'Formulário de pedido de orçamento da adequação NR-1 para empresas com mais de 200 funcionários.',
+  conteudo: `<h1>Orçamento do serviço NR-1</h1>
+<table class="ed-tabela"><caption>Preços do serviço NR-1</caption><thead><tr><th scope="col">Funcionários</th><th scope="col">Preço</th></tr></thead><tbody>
+<tr><th scope="row">20 a 50</th><td data-ed="orc-preco-20-50"></td></tr>
+<tr><th scope="row">51 a 100</th><td data-ed="orc-preco-51-100"></td></tr>
+<tr><th scope="row">101 a 200</th><td data-ed="orc-preco-101-200"></td></tr>
+<tr><th scope="row">Mais de 200</th><td>Preço a definir</td></tr>
+</tbody></table>
+<p>Pagamento: 50% no início e 50% na entrega, ou tudo à vista.</p>
+<p>Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.</p>
+<p>Preços válidos até 31/12/2026.</p>
+<form class="ed-form le-form" id="ed-orc" action="#" method="post" accept-charset="UTF-8" novalidate>
+<label for="orc-empresa">Nome da empresa</label><input id="orc-empresa" data-orc-campo="empresa" autocomplete="organization" required aria-describedby="orc-empresa-ajuda"><small id="orc-empresa-ajuda">Digite o nome da empresa. Não consultamos o CNPJ em nenhuma base.</small>
+<label for="orc-cnpj">CNPJ da empresa</label><input id="orc-cnpj" data-orc-campo="cnpj" inputmode="numeric" aria-describedby="orc-cnpj-ajuda"><small id="orc-cnpj-ajuda">Opcional. Ajuda a preparar a proposta.</small>
+<label for="orc-faixa">Número de funcionários</label><select id="orc-faixa" data-orc-campo="faixa" required><option value="">Selecione</option><option>20 a 50</option><option>51 a 100</option><option>101 a 200</option><option>Mais de 200</option></select>
+<label for="orc-nome">Seu nome</label><input id="orc-nome" data-orc-campo="nome" autocomplete="name" required>
+<label for="orc-email">E-mail</label><input id="orc-email" data-orc-campo="email" type="email" autocomplete="email" required>
+<label for="orc-telefone">Telefone (opcional)</label><input id="orc-telefone" data-orc-campo="telefone" type="tel" autocomplete="tel">
+<input type="hidden" data-orc-campo="avisoVersao" value="aviso-orcamento-nr1-v3-20261028">
+<input type="hidden" data-orc-campo="enviadoEm" value="">
+<div class="le-hp" aria-hidden="true" style="position:absolute;left:-9999px"><label for="ed-orc-site">Não preencha</label><input id="ed-orc-site" tabindex="-1" autocomplete="off"></div>
+<label class="le-ok"><input type="checkbox" id="orc-novidades" data-orc-campo="novidades" value="sim"> Quero receber novidades do Conta Certa por e-mail. Sei que meus dados passam por servidores do Google e do ImprovMX fora do Brasil. Posso cancelar quando quiser.</label>
+<section class="nota le-privacidade" id="orc-aviso" aria-labelledby="orc-aviso-titulo">
+<h2 id="orc-aviso-titulo">Como usamos seus dados</h2>
+<p>Quem cuida dos seus dados é RODRIGO DE SIMONE MATIOLI LTDA (LCM GLOBAL SERVICES), CNPJ 61.193.879/0001-20, responsável pelo Conta Certa.</p>
+<p>Usamos seu nome, e-mail, telefone (se informado), empresa, CNPJ (se informado) e faixa de número de funcionários só para responder ao seu pedido de orçamento e enviar a proposta. A base legal é a LGPD, art. 7º, V: passos anteriores a um contrato, feitos a seu pedido.</p>
+<p>Guardamos esses dados por até 6 meses depois do envio da proposta. Se você fechar contrato, eles passam a seguir o contrato. Depois disso, apagamos.</p>
+<p>As respostas ficam no Google Forms e no Google Sheets, serviços do Google LLC, que pode tratá-las em servidores fora do Brasil. Essa transferência é necessária para atender ao seu pedido (LGPD, art. 33, IX, e art. 7º, V). Não vendemos nem cedemos seus dados.</p>
+<p>Você pode pedir confirmação, acesso, correção, cópia, exclusão e informação sobre com quem compartilhamos seus dados (LGPD, art. 18). Escreva para contato@contacertabr.com.br.</p>
+<p>Mais detalhes na nossa Política de Privacidade: <a href="/privacidade/">https://contacertabr.com.br/privacidade/</a></p>
+</section>
+<button type="submit" disabled class="btn">Pedir orçamento do serviço NR-1</button>
+</form>
+<p id="ed-orc-msg" class="nota" role="alert" aria-live="assertive" hidden></p>`,
+});
 console.log('ok', vUi, vCss);
