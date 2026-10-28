@@ -187,17 +187,18 @@ test('B-05 (backlog v3 229abc9b): caso extra com divisor 220 reproduz a conta da
   assert.deepEqual([r(salario / 220), r(horasMes), r(porFunc), r(porFunc * 34)], [11.36, 8.67, 147.73, 5022.73]);
 });
 
-// Correções de texto do PR #36 (28/10): NR-1 a5488be6 (achados 1 e 2), Advogado 38ccc6e0 (M-01 a M-04-E2, B-01, B-02),
+// Correções de texto do PR #36 (28/10): NR-1 a5488be6 (achados 1 e 2), Advogado 38ccc6e0 (M-02 a M-04-E2, B-01) e adendo 113ef689 (fonte final: M-01 unificado, M-05, B-02, B-03; S-01 retirada),
 // Tributário 93bf69ba (F-01 unificado no M-01 do Advogado, F-02). Literais: qualquer mudança exige nova revisão.
 test('PR #36 revisões: textos literais travados nas páginas', () => {
   const pg = (c) => readFileSync(new URL(`../empregador-em-dia/${c}index.html`, import.meta.url), 'utf8');
   const jor = pg('jornada-42h/'), res = pg('diagnostico/resultado/'), lan = pg('');
-  for (const t of [
-    'O valor não inclui encargos (INSS, FGTS) nem reflexos das horas extras no descanso semanal, nas férias e no 13º, que aumentam o custo real. É uma estimativa.',
-    'respeitando os 2 dias de repouso e o limite de 2 horas extras por dia (CLT, art. 59), e paga como extra as horas acima do novo limite.',
-    'Regras de transição dependem de lei complementar ainda não aprovada.',
+  for (const t of [ // adendo do Advogado 113ef689: M-05, M-01 unificado (NR-1/Tributário), B-02 ajustado, B-03
+    'A conta mostra um cenário: a empresa mantém 44 horas por semana em 5 dias, respeitando os 2 dias de repouso semanal exigidos a partir de 16/12/2026 e o limite de 2 horas extras por dia (CLT, art. 59), e paga como extra as horas acima do novo limite. Não é uma recomendação: hora extra fixa todo mês tem efeitos trabalhistas e pode ser questionada. Reduzir a jornada, reorganizar escalas ou contratar são alternativas.',
+    'O valor não inclui os reflexos das horas extras habituais no descanso semanal remunerado, nas férias com 1/3, no 13º e no FGTS, nem os encargos sobre a folha (INSS patronal, RAT e terceiros). Por isso é um valor mínimo: o custo real tende a ser maior.',
+    'Para MEI, microempresas e empresas de pequeno porte, uma lei complementar ainda poderá criar regras de transição, ligadas à manutenção de empregos. Até lá, valem as datas acima.',
   ]) assert.ok(jor.includes(t), t);
-  assert.equal(jor.split('cálculo pelo método da CLT (art. 64))').length - 1, 2, 'CLT art. 64 nas linhas 210 e 200');
+  assert.ok(jor.includes('210</span> horas)<br><small>Divisor pelo método do art. 64 da CLT. A convenção coletiva da categoria pode adotar outro.</small>'), 'B-03');
+  assert.doesNotMatch(jor, /TST/);
   for (const t of [
     '<h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>',
     'MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.',
