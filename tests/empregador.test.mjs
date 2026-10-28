@@ -179,3 +179,10 @@ test('S-03: aviso de privacidade com fonte >= 14 px e sem corte', () => {
   const css = ler('assets/js/empregador/ed.css');
   assert.match(css, /\.ed-q-priv\{font-size:max\(1rem,14px\)[^}]*overflow:visible/);
 });
+
+test('B-05 (backlog v3 229abc9b): caso extra com divisor 220 reproduz a conta da v3.3 p. 19', () => {
+  const salario = 2500, horasMes = (2 * 52) / 12;
+  const porFunc = (salario / 220) * horasMes * 1.5;
+  const r = (x) => Math.round((x + Number.EPSILON) * 100) / 100;
+  assert.deepEqual([r(salario / 220), r(horasMes), r(porFunc), r(porFunc * 34)], [11.36, 8.67, 147.73, 5022.73]);
+});
