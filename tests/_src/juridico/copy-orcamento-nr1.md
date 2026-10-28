@@ -1,6 +1,6 @@
 # Copy: /empregador-em-dia/orcamento-nr1/ (B-07, decisão do CPO, 28/10/2026)
-Fontes: pedido do CPO (B-07); aviso LGPD v3 e caixa de marketing copiados palavra por palavra de /workspace/contacerta/textos-juridicos/aviso-lgpd-orcamento-nr1-v3.md (02a3adea; M-01 do Adendo 4 do Advogado). B-09: "Mais de 200 | Preço a definir".
-Status: rascunho para o mockup v4.3c (B-10/B-11: dec-ceo-orcamento-validade-sla-2026-10-28.md, d0c82e96). Nada publicado.
+Fontes: pedido do CPO (B-07); aviso LGPD v3 e caixa de marketing copiados palavra por palavra de /workspace/contacerta/textos-juridicos/aviso-lgpd-orcamento-nr1-v3.md (02a3adea; M-01 do Adendo 4 do Advogado). B-09 uniformizado; v4.3d: "Mais de 200 | Orçamento sob medida" (DEC CEO 95a76e17, pedido do CPO).
+Status: rascunho para o mockup v4.3d (B-10/B-11: dec-ceo-orcamento-validade-sla-2026-10-28.md, d0c82e96). Nada publicado.
 
 ## Título
 Orçamento do serviço NR-1
@@ -11,7 +11,7 @@ Orçamento do serviço NR-1
 | 20 a 50 | R$ 1.490 |
 | 51 a 100 | R$ 2.290 |
 | 101 a 200 | R$ 3.490 |
-| Mais de 200 | Preço a definir |
+| Mais de 200 | Orçamento sob medida |
 
 Pagamento: 50% no início e 50% na entrega, ou tudo à vista.
 Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.

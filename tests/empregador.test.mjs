@@ -305,9 +305,9 @@ test('orçamento NR-1: novidades separada, desmarcada e opcional; versão do avi
   assert.ok(ui.indexOf('toISOString') < ui.indexOf("fetch(form.action"), 'carimbo antes do envio');
 });
 
-test('orçamento NR-1: copy do Designer v4.3c (sha256 292e5ba6...) aplicada; preços vêm do config', () => {
+test('orçamento NR-1: copy do Designer v4.3d (sha256 1d65ac99...) aplicada; preços vêm do config', () => {
   const cp = readFileSync(new URL('_src/juridico/copy-orcamento-nr1.md', import.meta.url), 'utf8');
-  assert.equal(createHash('sha256').update(cp).digest('hex'), '292e5ba6ab590cf65b4d8684c39e8e178ba2df864ea7cafdf0948c83eaeccf43');
+  assert.equal(createHash('sha256').update(cp).digest('hex'), '1d65ac999d75783151e35b1572a7c189fd8cb8f538308a3581a9c2c57c409921');
   const h = ler(ORC);
   for (const t of ['<h1>Orçamento do serviço NR-1</h1>', 'Pagamento: 50% no início e 50% na entrega, ou tudo à vista.',
     'Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.', 'Preços válidos até 31/12/2026.', '>Nome da empresa</label>',
@@ -317,7 +317,8 @@ test('orçamento NR-1: copy do Designer v4.3c (sha256 292e5ba6...) aplicada; pre
     assert.ok(h.includes(t), t);
     assert.ok(cp.includes(t.replace(/<[^>]+>|^>|<\/?\w*$/g, '').replace(/<\/option><option>/g, ' / ')) || t.startsWith('<option'), `copy: ${t}`);
   }
-  // Desvio deliberado da v4.3c (DEC CPO 28/10, DEC CEO 95a76e17): linha >200 = 'Orçamento sob medida', não 'Preço a definir'.
+  // v4.3d (Adendo 10; DEC CPO rótulo >200, 28/10; DEC CEO 95a76e17): linha >200 = 'Orçamento sob medida', na copy e no HTML.
+  assert.ok(cp.includes('| Mais de 200 | Orçamento sob medida |') && !cp.includes('Preço a definir |'));
   assert.ok(h.includes('<tr><th scope="row">Mais de 200</th><td>Orçamento sob medida</td></tr>'));
   assert.ok(!h.includes('Preço a definir'));
   assert.ok(!h.includes('R$'), 'preço só por JS, a partir de FAIXAS');
