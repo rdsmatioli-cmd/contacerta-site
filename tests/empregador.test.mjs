@@ -249,8 +249,8 @@ export function avisoRenderizado(h) {
   const sec = h.match(/<section class="nota le-privacidade" id="orc-aviso"[^>]*>([^]*?)<\/section>/)[1];
   return [...sec.matchAll(/<(h2|p)\b[^>]*>([^]*?)<\/\1>/g)].map((m) => semTags(m[2])).join('\n\n');
 }
-export const AVISO_SHA256_FONTE_ARQUIVO = '17510609b25282c478043f8a1672e600fac283dc841eaaf76856aace5df1bbbc';
-export const AVISO_SHA256_TEXTO = 'b5669b8101dfb4cc064a2d2cd9b4759d28139b5f0be58788b555a9ce5ad40968';
+export const AVISO_SHA256_FONTE_ARQUIVO = '02a3adead4672b13233758f8135838d44dfe21bf5f0550960d83321684652601';
+export const AVISO_SHA256_TEXTO = 'f6f58abc4ead701702523ff5bf735705e35ac6b7ea8433fa59a6b495980f07ce';
 
 test('orçamento NR-1: placeholders do Designer e do destino ED-Orcamento impedem ED_CHECKOUT ON', async () => {
   const { TEXTOS_ORCAMENTO, ED_ORCAMENTO, conferirOrcamento } = await import('../assets/js/empregador/orcamento-textos.js');
@@ -280,7 +280,7 @@ test('orçamento NR-1: destino é o ED-Orcamento, não o CC-Leads; sem flag nada
 test('orçamento NR-1: aviso LGPD literal do Advogado, logo acima do Enviar', () => {
   const md = readFileSync(AVISO_MD, 'utf8');
   assert.equal(createHash('sha256').update(md).digest('hex'), AVISO_SHA256_FONTE_ARQUIVO, 'fonte do Advogado mudou');
-  const fonte = md.split('Caixa opcional')[0].split('\n').slice(2).join('\n').trim();
+  const fonte = md.split('Caixa opcional')[0].split('\n').filter((l) => !l.startsWith('#')).join('\n').trim();
   const h = ler(ORC);
   const r = avisoRenderizado(h);
   assert.equal(r, fonte);
@@ -305,12 +305,12 @@ test('orçamento NR-1: novidades separada, desmarcada e opcional; versão do avi
   assert.ok(ui.indexOf('toISOString') < ui.indexOf("fetch(form.action"), 'carimbo antes do envio');
 });
 
-test('orçamento NR-1: copy do Designer v4 (sha256 407baa4a...) aplicada; preços vêm do config', () => {
+test('orçamento NR-1: copy do Designer v4.3c (sha256 292e5ba6...) aplicada; preços vêm do config', () => {
   const cp = readFileSync(new URL('_src/juridico/copy-orcamento-nr1.md', import.meta.url), 'utf8');
-  assert.equal(createHash('sha256').update(cp).digest('hex'), '407baa4a7e699f5f0ef7157386f09f57df0e389864eb4a2384d10d70841f4f13');
+  assert.equal(createHash('sha256').update(cp).digest('hex'), '292e5ba6ab590cf65b4d8684c39e8e178ba2df864ea7cafdf0948c83eaeccf43');
   const h = ler(ORC);
   for (const t of ['<h1>Orçamento do serviço NR-1</h1>', 'Pagamento: 50% no início e 50% na entrega, ou tudo à vista.',
-    'Prazo: proposta em até 5 dias úteis.', 'Orçamento sob medida', '>Nome da empresa</label>',
+    'Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.', 'Preços válidos até 31/12/2026.', 'Preço a definir', '>Nome da empresa</label>',
     'Digite o nome da empresa. Não consultamos o CNPJ em nenhuma base.', '>CNPJ da empresa</label>',
     'Opcional. Ajuda a preparar a proposta.', '<option>20 a 50</option><option>51 a 100</option><option>101 a 200</option><option>Mais de 200</option>',
     '>Seu nome</label>', '>Telefone (opcional)</label>', '>Pedir orçamento do serviço NR-1</button>']) {
@@ -321,15 +321,4 @@ test('orçamento NR-1: copy do Designer v4 (sha256 407baa4a...) aplicada; preço
   assert.deepEqual(FAIXAS.filter((f) => f.preco).map((f) => f.preco), [1490, 2290, 3490]);
   // aviso v2 da copy não entra: vale o do Advogado (v3)
   assert.ok(!h.includes('hospedagem e e-mail, que só podem usá-los'));
-});
-
-test('privacidade: seção do pedido de orçamento NR-1 com o texto do Advogado', () => {
-  const p = ler('privacidade/index.html');
-  const sec = p.match(/<h2 id="orcamento-nr1">[^]*?(?=<h2>)/)[0];
-  for (const t of ['RODRIGO DE SIMONE MATIOLI LTDA (LCM GLOBAL SERVICES), CNPJ 61.193.879/0001-20',
-    'Usamos seu nome, e-mail, telefone, empresa, CNPJ e faixa de número de funcionários só para responder ao seu pedido de orçamento e enviar a proposta. A base legal é a LGPD, art. 7º, V: passos anteriores a um contrato, feitos a seu pedido.',
-    'Guardamos esses dados por até 6 meses depois do envio da proposta.',
-    'Essa transferência é necessária para atender ao seu pedido (LGPD, art. 33, IX, e art. 7º, V).',
-    'Quero receber novidades do Conta Certa por e-mail.']) assert.ok(sec.includes(t), t);
-  assert.ok(!sec.includes('Tally'));
 });

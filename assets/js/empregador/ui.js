@@ -1,6 +1,6 @@
 // Empregador em Dia: interface das páginas E2. Nada sai do navegador: respostas só em sessionStorage (T02).
 import { FLAGS, ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, FAIXAS, NOTA_DOMESTICO } from './config.js?v=04a97dcdba';
-import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=f6526c07d5';
+import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=0a40d19e5c';
 import { destino, oferta, pontosAtencao, textoPgr, validarPasso, faixaPorId, jornada } from './motor.js?v=2a8eac4c08';
 
 const CHAVE = 'ed-diagnostico';

@@ -1,6 +1,6 @@
 # Copy: /empregador-em-dia/orcamento-nr1/ (B-07, decisão do CPO, 28/10/2026)
-Fontes: pedido do CPO (B-07); aviso LGPD v2 e caixa de marketing copiados palavra por palavra de /workspace/contacerta/empregador/form-orcamento-spec.md.
-Status: rascunho para o mockup v4.3. Nada publicado.
+Fontes: pedido do CPO (B-07); aviso LGPD v3 e caixa de marketing copiados palavra por palavra de /workspace/contacerta/textos-juridicos/aviso-lgpd-orcamento-nr1-v3.md (02a3adea; M-01 do Adendo 4 do Advogado). B-09: "Mais de 200 | Preço a definir".
+Status: rascunho para o mockup v4.3c (B-10/B-11: dec-ceo-orcamento-validade-sla-2026-10-28.md, d0c82e96). Nada publicado.
 
 ## Título
 Orçamento do serviço NR-1
@@ -11,10 +11,11 @@ Orçamento do serviço NR-1
 | 20 a 50 | R$ 1.490 |
 | 51 a 100 | R$ 2.290 |
 | 101 a 200 | R$ 3.490 |
-| Mais de 200 | Orçamento sob medida |
+| Mais de 200 | Preço a definir |
 
 Pagamento: 50% no início e 50% na entrega, ou tudo à vista.
-Prazo: proposta em até 5 dias úteis.
+Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.
+Preços válidos até 31/12/2026.
 
 ## Campos
 | Campo | Ajuda |
@@ -26,13 +27,13 @@ Prazo: proposta em até 5 dias úteis.
 | E-mail | |
 | Telefone (opcional) | |
 
-## Como usamos seus dados (aviso v2, literal da spec)
-Quem cuida dos seus dados é RODRIGO DE SIMONE MATIOLI LTDA (LCM GLOBAL SERVICES), CNPJ 61.193.879/0001-20.
-Usamos seu nome, e-mail, telefone, empresa, CNPJ (se informado), número de funcionários e de grupos só para responder ao seu pedido de orçamento e enviar a proposta. A base legal é a LGPD, art. 7º, V, que trata dos passos anteriores a um contrato pedidos por você.
+## Como usamos seus dados (aviso v3, literal)
+Quem cuida dos seus dados é RODRIGO DE SIMONE MATIOLI LTDA (LCM GLOBAL SERVICES), CNPJ 61.193.879/0001-20, responsável pelo Conta Certa.
+Usamos seu nome, e-mail, telefone (se informado), empresa, CNPJ (se informado) e faixa de número de funcionários só para responder ao seu pedido de orçamento e enviar a proposta. A base legal é a LGPD, art. 7º, V: passos anteriores a um contrato, feitos a seu pedido.
 Guardamos esses dados por até 6 meses depois do envio da proposta. Se você fechar contrato, eles passam a seguir o contrato. Depois disso, apagamos.
-Não vendemos seus dados. Eles ficam em serviços que contratamos para hospedagem e e-mail, que só podem usá-los para nos atender. Alguns ficam fora do Brasil, com as garantias da LGPD.
-Você pode pedir acesso, correção, cópia ou exclusão dos seus dados, e também saber com quem os compartilhamos (LGPD, art. 18). Escreva para contato@contacertabr.com.br.
-Mais detalhes na nossa Política de Privacidade.
+As respostas ficam no Google Forms e no Google Sheets, serviços do Google LLC, que pode tratá-las em servidores fora do Brasil. Essa transferência é necessária para atender ao seu pedido (LGPD, art. 33, IX, e art. 7º, V). Não vendemos nem cedemos seus dados.
+Você pode pedir confirmação, acesso, correção, cópia, exclusão e informação sobre com quem compartilhamos seus dados (LGPD, art. 18). Escreva para contato@contacertabr.com.br.
+Mais detalhes na nossa Política de Privacidade: https://contacertabr.com.br/privacidade/
 
 ## Caixa de marketing (desmarcada; o envio funciona sem ela; literal da spec)
 Quero receber novidades do Conta Certa por e-mail. Sei que meus dados passam por servidores do Google e do ImprovMX fora do Brasil. Posso cancelar quando quiser.

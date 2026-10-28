@@ -174,10 +174,11 @@ pagina({
 <tr><th scope="row">20 a 50</th><td data-ed="orc-preco-20-50"></td></tr>
 <tr><th scope="row">51 a 100</th><td data-ed="orc-preco-51-100"></td></tr>
 <tr><th scope="row">101 a 200</th><td data-ed="orc-preco-101-200"></td></tr>
-<tr><th scope="row">Mais de 200</th><td>Orçamento sob medida</td></tr>
+<tr><th scope="row">Mais de 200</th><td>Preço a definir</td></tr>
 </tbody></table>
 <p>Pagamento: 50% no início e 50% na entrega, ou tudo à vista.</p>
-<p>Prazo: proposta em até 5 dias úteis.</p>
+<p>Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.</p>
+<p>Preços válidos até 31/12/2026.</p>
 <form class="ed-form le-form" id="ed-orc" action="#" method="post" accept-charset="UTF-8" novalidate>
 <label for="orc-empresa">Nome da empresa</label><input id="orc-empresa" data-orc-campo="empresa" autocomplete="organization" required aria-describedby="orc-empresa-ajuda"><small id="orc-empresa-ajuda">Digite o nome da empresa. Não consultamos o CNPJ em nenhuma base.</small>
 <label for="orc-cnpj">CNPJ da empresa</label><input id="orc-cnpj" data-orc-campo="cnpj" inputmode="numeric" aria-describedby="orc-cnpj-ajuda"><small id="orc-cnpj-ajuda">Opcional. Ajuda a preparar a proposta.</small>
@@ -192,11 +193,11 @@ pagina({
 <section class="nota le-privacidade" id="orc-aviso" aria-labelledby="orc-aviso-titulo">
 <h2 id="orc-aviso-titulo">Como usamos seus dados</h2>
 <p>Quem cuida dos seus dados é RODRIGO DE SIMONE MATIOLI LTDA (LCM GLOBAL SERVICES), CNPJ 61.193.879/0001-20, responsável pelo Conta Certa.</p>
-<p>Usamos seu nome, e-mail, telefone, empresa, CNPJ e faixa de número de funcionários só para responder ao seu pedido de orçamento e enviar a proposta. A base legal é a LGPD, art. 7º, V: passos anteriores a um contrato, feitos a seu pedido.</p>
+<p>Usamos seu nome, e-mail, telefone (se informado), empresa, CNPJ (se informado) e faixa de número de funcionários só para responder ao seu pedido de orçamento e enviar a proposta. A base legal é a LGPD, art. 7º, V: passos anteriores a um contrato, feitos a seu pedido.</p>
 <p>Guardamos esses dados por até 6 meses depois do envio da proposta. Se você fechar contrato, eles passam a seguir o contrato. Depois disso, apagamos.</p>
 <p>As respostas ficam no Google Forms e no Google Sheets, serviços do Google LLC, que pode tratá-las em servidores fora do Brasil. Essa transferência é necessária para atender ao seu pedido (LGPD, art. 33, IX, e art. 7º, V). Não vendemos nem cedemos seus dados.</p>
 <p>Você pode pedir confirmação, acesso, correção, cópia, exclusão e informação sobre com quem compartilhamos seus dados (LGPD, art. 18). Escreva para contato@contacertabr.com.br.</p>
-<p>Mais detalhes na nossa Política de Privacidade: <a href="/privacidade/#orcamento-nr1">https://contacertabr.com.br/privacidade/</a></p>
+<p>Mais detalhes na nossa Política de Privacidade: <a href="/privacidade/">https://contacertabr.com.br/privacidade/</a></p>
 </section>
 <button type="submit" disabled class="btn">Pedir orçamento do serviço NR-1</button>
 </form>

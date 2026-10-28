@@ -1,8 +1,8 @@
 // Empregador em Dia: textos e destino do formulário /empregador-em-dia/orcamento-nr1/ (PR próprio, CPO OK, 28/10).
-// O aviso LGPD do Advogado (textos-juridicos/aviso-lgpd-orcamento-nr1.md, MINUTA v3, sha256 17510609b25282c4...)
+// O aviso LGPD do Advogado (textos-juridicos/aviso-lgpd-orcamento-nr1-v3.md, v3 final, sha256 02a3adead4672b13...)
 // já está no HTML, literal, acima do botão Enviar (gerado por tests/_src/empregador/gerar.mjs).
 // Placeholders que ainda chegam (tudo entre colchetes):
-// Copy do Designer (v4, copy-orcamento-nr1.md, sha256 407baa4a7e699f5f...; aguarda DE ACORDO do Advogado) já está
+// Copy do Designer (v4.3c, copy-orcamento-nr1.md, sha256 292e5ba6ab590cf6...; aguarda DE ACORDO do Advogado) já está
 // no HTML. O aviso LGPD do Advogado prevalece sobre o aviso v2 citado na copy.
 //   [TEXTO DO DESIGNER: ...]  -> mensagens de sucesso e de erro (a copy v4 não traz)
 //   [ED-ORCAMENTO: ...]       -> action e ids "entry.N" do Google Form dedicado ED-Orcamento (CPO: conta Google

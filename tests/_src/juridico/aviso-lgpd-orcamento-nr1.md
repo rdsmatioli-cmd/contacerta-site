@@ -1,11 +1,14 @@
-# Aviso LGPD — formulário /empregador-em-dia/orcamento-nr1/ (MINUTA v3, Advogado, 28/10/2026)
-# Texto exato para exibir abaixo do formulário, acima do botão Enviar. Não publicar sem OK do Rodrigo via CEO.
+# Aviso LGPD — formulário /empregador-em-dia/orcamento-nr1/ (v3 final, Advogado, 28/10/2026)
+# Substitui, para esta página, o aviso v2 da spec form-orcamento-spec.md (69db50e6), que cita "número de grupos". Arquivo anterior mantido: aviso-lgpd-orcamento-nr1.md (17510609).
+# Decisões do CPO aplicadas: M-01 formulário dedicado ED-Orcamento (não CC-Leads); M-02 Google Forms (parágrafo Tally excluído); M-03 seção em /privacidade/ vem no PR do Dev.
+# Campos coletados, exatamente seis: nome, e-mail, telefone (opcional), empresa, CNPJ (opcional), faixa de número de funcionários. Nenhum outro.
+# Texto exato para exibir abaixo do formulário, acima do botão. Não publicar sem OK do Rodrigo via CEO.
 
 Como usamos seus dados
 
 Quem cuida dos seus dados é RODRIGO DE SIMONE MATIOLI LTDA (LCM GLOBAL SERVICES), CNPJ 61.193.879/0001-20, responsável pelo Conta Certa.
 
-Usamos seu nome, e-mail, telefone, empresa, CNPJ e faixa de número de funcionários só para responder ao seu pedido de orçamento e enviar a proposta. A base legal é a LGPD, art. 7º, V: passos anteriores a um contrato, feitos a seu pedido.
+Usamos seu nome, e-mail, telefone (se informado), empresa, CNPJ (se informado) e faixa de número de funcionários só para responder ao seu pedido de orçamento e enviar a proposta. A base legal é a LGPD, art. 7º, V: passos anteriores a um contrato, feitos a seu pedido.
 
 Guardamos esses dados por até 6 meses depois do envio da proposta. Se você fechar contrato, eles passam a seguir o contrato. Depois disso, apagamos.
 
@@ -18,5 +21,4 @@ Mais detalhes na nossa Política de Privacidade: https://contacertabr.com.br/pri
 Caixa opcional, separada, DESMARCADA (o envio funciona sem ela):
 ☐ Quero receber novidades do Conta Certa por e-mail. Sei que meus dados passam por servidores do Google e do ImprovMX fora do Brasil. Posso cancelar quando quiser.
 
-# Variante, só se a plataforma for Tally (spec 69db50e6), trocar o 4º parágrafo por:
-As respostas ficam na Tally BV, na Bélgica (União Europeia), que só pode usá-las para nos atender. A transferência segue a decisão de adequação da ANPD (LGPD, art. 33, I). Os avisos de novo pedido chegam ao nosso e-mail, que passa pelo ImprovMX e pelo Google, fora do Brasil, porque isso é necessário para atender ao seu pedido (LGPD, art. 33, IX). Não vendemos nem cedemos seus dados.
+# Campo oculto do formulário ED-Orcamento: versao_aviso = "aviso-orcamento-nr1-v3-20261028"
