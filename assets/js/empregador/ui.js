@@ -124,7 +124,11 @@ function simulador() {
   const calcular = () => {
     const txt = form.funcionarios.value.trim();
     const n = /^\d+$/.test(txt) ? Number(txt) : NaN;
-    if (!Number.isInteger(n) || n < 1) { msg.textContent = 'Digite um número inteiro de funcionários, a partir de 1.'; msg.hidden = false; return; }
+    if (!Number.isInteger(n) || n < 1) { msg.textContent = 'Digite um número inteiro de funcionários, a partir de 1.'; msg.hidden = false;
+      // NB-05 (Bugbot 4396487606): limpa a conta anterior para não mostrar valores de outro número de funcionários.
+      for (const k of ['salario', 'hora42', 'horas42', 'func42', 'total42', 'hora40', 'horas40', 'func40', 'total40', 'n', 'n2', 'div42', 'div40']) set(k, '—');
+      return;
+    }
     msg.hidden = true;
     const [e42, e40] = jornada({ funcionarios: n, faixaSalario: form.faixaSalario.value });
     set('salario', brl2(e42.salario));

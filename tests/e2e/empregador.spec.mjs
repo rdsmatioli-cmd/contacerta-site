@@ -91,6 +91,7 @@ test('flag ON jornada 42h: conta aberta com divisor 210 e etapa de 40 h', async 
   await page.locator('#f-func').fill('0');
   await page.getByRole('button', { name: 'Calcular' }).click();
   await expect(page.locator('#f-func-msg')).toBeVisible();
+  await expect(conta).not.toContainText('R$ 11.050,00'); // NB-05: conta anterior limpa
   await semRolagemHorizontal(page);
   semRedeExterna(rede);
   semErros(erros, rede);
