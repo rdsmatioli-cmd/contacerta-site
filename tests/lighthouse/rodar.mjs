@@ -12,7 +12,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { LIGHTHOUSE, URLS, PERFIS, METAS, avaliar, nomeRelatorio, resumo } from './metas.mjs';
+import { LIGHTHOUSE, TODAS_URLS as URLS, ehNoindex, PERFIS, METAS, avaliar, nomeRelatorio, resumo } from './metas.mjs';
 
 const args = process.argv.slice(2);
 const opcao = (nome, padrao) => {
@@ -65,7 +65,7 @@ for (const perfil of perfis) {
   for (const url of URLS) {
     const arq = join(saida, nomeRelatorio(url, perfil));
     const lhr = lerJson(arq);
-    const falhas = lhr ? avaliar(lhr) : [`relatório ausente ou ilegível: ${arq}`];
+    const falhas = lhr ? avaliar(lhr, undefined, { noindex: ehNoindex(url) }) : [`relatório ausente ou ilegível: ${arq}`];
     console.log(`${falhas.length ? 'FALHA' : 'ok   '} ${url} (${perfil}) ${lhr ? resumo(lhr) : ''}`);
     for (const f of falhas) console.log(`      - ${f}`);
     if (falhas.length) falhou = true;

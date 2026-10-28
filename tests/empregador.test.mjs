@@ -37,12 +37,12 @@ test('termos NR-1 proibidos e "se aprovada"/44h-divisor fora das páginas', () =
   }
 });
 
-test('T01 CA2: textos literais da v3.3 p. 2', () => {
+test('T01 CA2: textos literais da v3.3 p. 2 (com as reescritas do Advogado 38ccc6e0)', () => {
   const h = ler(PAGINAS[0]);
   for (const t of ['NR-1: riscos psicossociais no PGR', 'Sua empresa em dia com a NR-1, sem montar planilha',
-    'A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho. A gente aplica o questionário anônimo, o profissional de segurança do trabalho analisa e você recebe o inventário e o plano de ação prontos.',
+    'A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026;',
     'Questionário anônimo para os funcionários, por link', 'Inventário de riscos psicossociais para o PGR',
-    'Plano de ação com prazos e responsáveis', 'Relatório assinado pelo profissional de SST',
+    'Plano de ação com prazos e responsáveis', // 4º item e abertura: Advogado M-03 e B-01, teste abaixo
     'Preço fechado pela faixa de funcionários.', 'Você só paga o resto quando receber o relatório.',
     'Veja quanto custaria reduzir a jornada.', 'href="/empregador-em-dia/diagnostico/"', 'href="/empregador-em-dia/jornada-42h/"']) {
     assert.ok(h.includes(t), t);
@@ -185,4 +185,32 @@ test('B-05 (backlog v3 229abc9b): caso extra com divisor 220 reproduz a conta da
   const porFunc = (salario / 220) * horasMes * 1.5;
   const r = (x) => Math.round((x + Number.EPSILON) * 100) / 100;
   assert.deepEqual([r(salario / 220), r(horasMes), r(porFunc), r(porFunc * 34)], [11.36, 8.67, 147.73, 5022.73]);
+});
+
+// Correções de texto do PR #36 (28/10): NR-1 a5488be6 (achados 1 e 2), Advogado 38ccc6e0 (M-01 a M-04-E2, B-01, B-02),
+// Tributário 93bf69ba (F-01 unificado no M-01 do Advogado, F-02). Literais: qualquer mudança exige nova revisão.
+test('PR #36 revisões: textos literais travados nas páginas', () => {
+  const pg = (c) => readFileSync(new URL(`../empregador-em-dia/${c}index.html`, import.meta.url), 'utf8');
+  const jor = pg('jornada-42h/'), res = pg('diagnostico/resultado/'), lan = pg('');
+  for (const t of [
+    'O valor não inclui encargos (INSS, FGTS) nem reflexos das horas extras no descanso semanal, nas férias e no 13º, que aumentam o custo real. É uma estimativa.',
+    'respeitando os 2 dias de repouso e o limite de 2 horas extras por dia (CLT, art. 59), e paga como extra as horas acima do novo limite.',
+    'Regras de transição dependem de lei complementar ainda não aprovada.',
+  ]) assert.ok(jor.includes(t), t);
+  assert.equal(jor.split('cálculo pelo método da CLT (art. 64))').length - 1, 2, 'CLT art. 64 nas linhas 210 e 200');
+  for (const t of [
+    '<h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>',
+    'MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.',
+    '<h1>Sua empresa deve avaliar os riscos psicossociais no PGR</h1>',
+    'Usamos seu e-mail só para avisar quando a adequação fizer sentido para a sua empresa. Você pode pedir para sair a qualquer momento. Detalhes na <a href="/privacidade/">Política de privacidade</a>.',
+  ]) assert.ok(res.includes(t), t);
+  assert.match(res, /<input type="email"[^>]*aria-describedby="aj-email aviso-lgpd-avise"/);
+  assert.doesNotMatch(res, /type="checkbox"[^>]*checked/);
+  assert.doesNotMatch(res, /menos de 20 funcionários, você pode|precisa incluir os riscos/i);
+  for (const t of [
+    '<li>Relatório com o resultado do grupo para anexar ao PGR</li>',
+    'A gente aplica o questionário anônimo e você recebe o inventário e o plano de ação para o PGR. A validação por profissional de segurança do trabalho está em definição.',
+    '(desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua)',
+  ]) assert.ok(lan.includes(t), t);
+  assert.doesNotMatch(lan, /assinado|profissional de segurança do trabalho analisa/i);
 });

@@ -18,6 +18,18 @@ export const URLS = [
   '/blog/salario-liquido-2026/',
 ];
 
+// Páginas noindex do Conta Certa Empregador (E2, flags OFF): mesmas metas, mas o SEO não usa a nota da categoria,
+// que o noindex derruba de propósito (audit is-crawlable). Passa se todo audit de SEO com peso tirou 1, menos o
+// is-crawlable.
+export const URLS_NOINDEX = [
+  '/empregador-em-dia/',
+  '/empregador-em-dia/diagnostico/',
+  '/empregador-em-dia/diagnostico/resultado/',
+  '/empregador-em-dia/jornada-42h/',
+];
+export const TODAS_URLS = [...URLS, ...URLS_NOINDEX];
+export const ehNoindex = (url) => URLS_NOINDEX.includes(url);
+
 // mobile = padrão do Lighthouse (Moto G Power, 4G lento simulado); desktop = --preset=desktop.
 export const PERFIS = ['mobile', 'desktop'];
 
@@ -37,7 +49,7 @@ function reprovados(lhr, categoria) {
 }
 
 // Devolve a lista de metas violadas (vazia = passou), em texto para o log do CI.
-export function avaliar(lhr, metas = METAS) {
+export function avaliar(lhr, metas = METAS, { noindex = false } = {}) {
   if (!lhr || typeof lhr !== 'object') return ['relatório ilegível'];
   const falhas = [];
   if (lhr.lighthouseVersion !== LIGHTHOUSE) falhas.push(`Lighthouse ${lhr.lighthouseVersion ?? '?'}, esperado ${LIGHTHOUSE}`);
@@ -45,7 +57,10 @@ export function avaliar(lhr, metas = METAS) {
   for (const [id, nome, min] of [['seo', 'SEO', metas.seo], ['accessibility', 'Acessibilidade', metas.acessibilidade]]) {
     const s = lhr.categories?.[id]?.score;
     if (typeof s !== 'number') falhas.push(`${nome}: sem nota`);
-    else if (s < min) {
+    else if (noindex && id === 'seo') {
+      const r = reprovados(lhr, id).filter((a) => a !== 'is-crawlable');
+      if (r.length) falhas.push(`SEO (noindex): audits abaixo de 1 além do is-crawlable: ${r.join(', ')}`);
+    } else if (s < min) {
       const r = reprovados(lhr, id);
       falhas.push(`${nome} ${num(s)} < ${num(min)}${r.length ? ` (audits abaixo de 1: ${r.join(', ')})` : ''}`);
     }

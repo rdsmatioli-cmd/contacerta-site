@@ -1,7 +1,7 @@
 // Empregador em Dia: abertura do questionário de 12 fatores (P-08 v4, mockup 3e03e516 p. 2; DE ACORDO do Advogado
 // 34e72bad). UI atrás de FLAGS.ED_QUIZ_12 (OFF). [PRAZO] preenchido com o texto literal do parecer 1da103db (opção A).
 // [CONTATO DO ENCARREGADO] e [CANAL DA EMPRESA / CIPA] seguem em aberto: com placeholder, renderizar falha.
-import { FLAGS } from './config.js?v=04a97dcdba';
+import { FLAGS } from './config.js?v=293d7b1e73';
 
 export const PRAZO_RETENCAO = 'até 30 dias depois que a empresa recebe o resultado do grupo (no máximo 90 dias depois que o questionário fecha)';
 export const PLACEHOLDER = /\[[^\]\n]*[A-ZÇÃÕÁÉÍÓÚ]{3,}[^\]\n]*\]/;

@@ -58,10 +58,10 @@ pagina({
   conteudo: `<section class="ed-hero" data-ed-tela="1">
 <p class="cat-pill">NR-1: riscos psicossociais no PGR</p>
 <h1>Sua empresa em dia com a NR-1, sem montar planilha</h1>
-<p class="lead">A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho. A gente aplica o questionário anônimo, o profissional de segurança do trabalho analisa e você recebe o inventário e o plano de ação prontos.</p>
+<p class="lead">A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua). A gente aplica o questionário anônimo e você recebe o inventário e o plano de ação para o PGR. A validação por profissional de segurança do trabalho está em definição.</p>
 <p><a class="btn" href="/empregador-em-dia/diagnostico/">Ver o que minha empresa precisa</a></p>
 <h2>O que você recebe</h2>
-<ul class="ed-lista"><li>Questionário anônimo para os funcionários, por link</li><li>Inventário de riscos psicossociais para o PGR</li><li>Plano de ação com prazos e responsáveis</li><li>Relatório assinado pelo profissional de SST</li></ul>
+<ul class="ed-lista"><li>Questionário anônimo para os funcionários, por link</li><li>Inventário de riscos psicossociais para o PGR</li><li>Plano de ação com prazos e responsáveis</li><li>Relatório com o resultado do grupo para anexar ao PGR</li></ul>
 <p class="ed-sst" data-ed-sst></p>
 </section>
 <ul class="ed-cartoes" id="preco">
@@ -112,16 +112,16 @@ pagina({
   desc: 'O que sua empresa precisa para incluir os riscos psicossociais no PGR.',
   conteudo: `<p class="ed-rotulo">Resultado do diagnóstico</p>
 <section data-ed-res="vazio"><h1>Faça o diagnóstico primeiro</h1><p><a class="btn" href="/empregador-em-dia/diagnostico/">Ver o que minha empresa precisa</a></p></section>
-<section data-ed-res="oferta" hidden><h1>Sua empresa precisa incluir os riscos psicossociais no PGR</h1>
+<section data-ed-res="oferta" hidden><h1>Sua empresa deve avaliar os riscos psicossociais no PGR</h1>
 <ul class="ed-cartoes"><li><strong>Seu porte</strong><span data-ed="porte"></span></li><li><strong>Pontos de atenção</strong><span data-ed="pontos"></span></li><li><strong>PGR</strong><span data-ed="pgr"></span></li></ul>
 <div class="ed-oferta"><h2>Adequação NR-1 para <span data-ed="porte2"></span></h2><p class="ed-preco" data-ed="preco"></p><p data-ed="parcelas"></p><p class="ed-sst" data-ed-sst></p>
 <p><button type="button" class="btn" data-ed-contratar disabled>Contratar</button></p></div>
 <p>Prazo: definido com o profissional de SST após o questionário.</p></section>
-<section data-ed-res="simplificada" hidden><h1>Com menos de 20 funcionários, você pode usar a versão simplificada</h1>
-<p>A NR-1 também vale para a sua empresa, mas o inventário pode ser mais simples. Este serviço foi pensado para 20 a 200 funcionários.</p>
+<section data-ed-res="simplificada" hidden><h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>
+<p>MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.</p>
 <ul class="ed-cartoes"><li><strong>Guia gratuito para pequenas empresas</strong><span>Checklist de 1 página com o que avaliar, um modelo de plano de ação e como anexar ao PGR.</span><button type="button" class="btn" disabled>Receber o guia por e-mail</button></li>
 <li><form class="ed-form" id="ed-avise" novalidate><strong>Vai passar de 20 funcionários?</strong><span>Avisamos quando fizer sentido contratar a adequação completa.</span>
-<label for="ed-email">Seu e-mail</label><input type="email" id="ed-email" name="email" autocomplete="email" placeholder="dono@lojaexemplo.com.br" aria-describedby="aj-email"><small id="aj-email">Exemplo: o e-mail que você mais usa.</small>
+<label for="ed-email">Seu e-mail</label><input type="email" id="ed-email" name="email" autocomplete="email" placeholder="dono@lojaexemplo.com.br" aria-describedby="aj-email aviso-lgpd-avise"><small id="aj-email">Exemplo: o e-mail que você mais usa.</small><small id="aviso-lgpd-avise">Usamos seu e-mail só para avisar quando a adequação fizer sentido para a sua empresa. Você pode pedir para sair a qualquer momento. Detalhes na <a href="/privacidade/">Política de privacidade</a>.</small>
 <button type="submit" disabled class="btn">Me avise</button></form></li></ul>
 <p><a href="/contato/">Quer mesmo assim a adequação completa? Fale com a gente.</a></p></section>
 <section data-ed-res="sob-consulta" hidden><h1>Para mais de 200 funcionários, fazemos um orçamento</h1>
@@ -148,18 +148,18 @@ pagina({
 <section class="ed-conta" aria-live="polite"><h2>Como chegamos no valor</h2>
 <table class="ed-tab"><caption>Etapa de 42 horas, a partir de 16/12/2026</caption><tbody>
 <tr><th scope="row">Salário médio (meio da faixa)</th><td data-ed="salario"></td></tr>
-<tr><th scope="row">Valor da hora (salário ÷ <span data-ed="div42">210</span> horas)</th><td data-ed="hora42"></td></tr>
+<tr><th scope="row">Valor da hora (salário ÷ <span data-ed="div42">210</span> horas, cálculo pelo método da CLT (art. 64))</th><td data-ed="hora42"></td></tr>
 <tr><th scope="row">Horas a cobrir por mês (2h × 52 semanas ÷ 12)</th><td data-ed="horas42"></td></tr>
 <tr><th scope="row">Custo por funcionário, como hora extra (+50%)</th><td data-ed="func42"></td></tr>
 <tr><th scope="row">Total para <span data-ed="n"></span> funcionários</th><td data-ed="total42"></td></tr>
 </tbody></table>
 <table class="ed-tab"><caption>Etapa de 40 horas, a partir de 16/12/2027</caption><tbody>
-<tr><th scope="row">Valor da hora (salário ÷ <span data-ed="div40">200</span> horas)</th><td data-ed="hora40"></td></tr>
+<tr><th scope="row">Valor da hora (salário ÷ <span data-ed="div40">200</span> horas, cálculo pelo método da CLT (art. 64))</th><td data-ed="hora40"></td></tr>
 <tr><th scope="row">Horas a cobrir por mês (4h × 52 semanas ÷ 12)</th><td data-ed="horas40"></td></tr>
 <tr><th scope="row">Custo por funcionário, como hora extra (+50%)</th><td data-ed="func40"></td></tr>
 <tr><th scope="row">Total para <span data-ed="n2"></span> funcionários</th><td data-ed="total40"></td></tr>
 </tbody></table>
-<p><small>O adicional de 50% é o mínimo da Constituição (art. 7º, XVI); a convenção coletiva pode prever um adicional maior. A conta supõe que a empresa mantém as horas trabalhadas e paga como extra as horas acima do novo limite. Para "Acima de R$ 5 mil" usamos R$ 5.000,00. Nenhuma faixa fica abaixo do salário mínimo de 2026 (R$ 1.621,00).</small></p>
+<p><small>O adicional de 50% é o mínimo da Constituição (art. 7º, XVI); a convenção coletiva pode prever um adicional maior. A conta supõe que a empresa mantém as horas trabalhadas, respeitando os 2 dias de repouso e o limite de 2 horas extras por dia (CLT, art. 59), e paga como extra as horas acima do novo limite. O valor não inclui encargos (INSS, FGTS) nem reflexos das horas extras no descanso semanal, nas férias e no 13º, que aumentam o custo real. É uma estimativa. Para "Acima de R$ 5 mil" usamos R$ 5.000,00. Nenhuma faixa fica abaixo do salário mínimo de 2026 (R$ 1.621,00). Regras de transição dependem de lei complementar ainda não aprovada.</small></p>
 </section>
 <section class="ed-oferta"><h2>Já que está revendo a jornada, a NR-1 também mudou</h2>
 <p>Avalie riscos de sobrecarga no PGR. A partir de <span data-ed="preco-min"></span> para 20 a 50 funcionários.</p>

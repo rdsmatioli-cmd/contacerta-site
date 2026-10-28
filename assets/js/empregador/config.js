@@ -45,5 +45,5 @@ export const FAIXAS_SALARIO = Object.freeze([
 export const ANONIMATO = Object.freeze({ minimoRespostas: 5, tipoToken: 'individual' });
 // D-08 / backlog v2 24577443: escala de 5 pontos (0 a 4) do questionário de 12 fatores (UI atrás de ED_QUIZ_12).
 export const ESCALA_5 = Object.freeze(['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre']);
-// Adendo 2 do Advogado (02eb5fb1): nota para empregador doméstico no simulador 42h (EC 141; CF art. 7º, § 1º).
+// Adendo 2 do Advogado (02eb5fb1): nota para empregador doméstico no simulador 42h (EC 141; CF art. 7º, parágrafo único).
 export const NOTA_DOMESTICO = 'Para empregado doméstico, a lei específica (LC 150/2015) ainda fala em 44 horas, mas a Emenda Constitucional 141/2026 também vale para ele.';

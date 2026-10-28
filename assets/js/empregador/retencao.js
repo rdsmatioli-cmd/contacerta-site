@@ -2,7 +2,7 @@
 // M-01: respostas individuais apagadas 30 dias após a empresa receber o resultado do grupo, no máximo 90 dias após o
 // fechamento do questionário; exclusão automática registrada em log (sem conteúdo de resposta).
 // M-02: corte com n<5 é suprimido; sem texto livre; sem data/hora de resposta.
-import { ANONIMATO } from './config.js?v=04a97dcdba';
+import { ANONIMATO } from './config.js?v=293d7b1e73';
 
 const DIA = 86400000;
 const data = (iso) => { const d = new Date(iso); if (Number.isNaN(+d)) throw new RangeError(`data: ${iso}`); return d; };
