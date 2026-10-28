@@ -51,7 +51,7 @@ test('política: G-02, G-03, B-01 e M-01; sem AdSense em uso e sem o contador fo
   assert.match(priv, /O Google Analytics é fornecido pelo Google LLC, que atua como operador e pode tratar esses dados nos Estados Unidos e em outros países, com base nas cláusulas contratuais do Google para transferência internacional \(LGPD, art\. 33, II\)\. Os dados de eventos ficam guardados no Google Analytics por 2 meses\. Sua escolha no aviso de cookies vale por 6 meses; depois disso, perguntaremos de novo\./);
   assert.doesNotMatch(priv, /adssettings|aboutads|Este site pode exibir anúncios|link_interno|uso da busca/);
   assert.match(priv, /a conclusão de um cálculo \(só o nome da calculadora\) e cliques em botões de chamada e em links de parceiros \(só o caminho da página ou o domínio do parceiro\)/);
-  const nota = '<p><em>Última atualização: 23/10/2026. Nesta versão: incluímos a seção 3, sobre o formulário Tabelas oficiais 2026 (Google Forms e Google Sheets), e a seção 4, sobre as respostas a propostas enviadas por formulário de contato (Tally BV, Bélgica), e renumeramos as seções seguintes.</em></p>'; // PR #7
+  const nota = '<p><em>Última atualização: 28/10/2026. Nesta versão: incluímos a seção 5, sobre o pedido de orçamento do Conta Certa Empregador, atualizamos a seção 4 sobre o aviso por e-mail do Tally e renumeramos as seções seguintes.</em></p>'; // seção Empregador (a9e8ba0e)
   assert.ok(priv.includes(nota));
   assert.doesNotMatch(priv.replace(nota, ''), /abacus/i);
 });
