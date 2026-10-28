@@ -98,6 +98,18 @@ node tests/lighthouse/rodar.mjs --base http://127.0.0.1:8080 --saida /tmp/lighth
 
 `CHROME_PATH` escolhe o Chrome. `--perfis mobile` roda só um perfil; `--so-verificar` só confere os JSON já gerados.
 
+## Runbook: publicação da política de privacidade
+
+A publicação (`.github/workflows/pages.yml`, só a partir da main) roda a trava da data da política antes do upload:
+data `<=` hoje (America/Sao_Paulo) num push que não altera `privacidade/index.html`; data `=` hoje num push que a
+altera, num `workflow_dispatch` ou num push sem base conhecida. O log do passo mostra a regra aplicada e os SHAs.
+
+Se a publicação de um push que alterou a política falhar (trava, upload ou deploy), não espere o próximo push: no
+mesmo dia, rode Actions > Pages > Run workflow na main (`workflow_dispatch`, regra `= hoje`). Em outro dia, ajuste
+antes a "Última atualização" para a data da republicação, num PR que altera a política (o CI cobra `= hoje`). Isso
+evita que um push posterior sem mudança na política publique a versão nova com data anterior à publicação real
+(B-PR34-05, Advogado 123a5499).
+
 ## Dependabot e workflows
 
 `.github/dependabot.yml` abre no dia 1 de cada mês PRs das actions e de `tests/e2e`, só com versão publicada há pelo

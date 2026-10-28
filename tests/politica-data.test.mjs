@@ -1,13 +1,25 @@
 // M-PR33-01 (Advogado): a "Última atualização" da política de privacidade é um literal fixo e precisa ser a data do
 // deploy. Como o GitHub Pages publica a main sem workflow de deploy, a trava fica no CI do PR: falha se a data da
 // política for diferente de hoje em America/Sao_Paulo (= TZ=America/Sao_Paulo date +%d/%m/%Y).
-// Obrigatória quando GITHUB_EVENT_NAME=pull_request ou REQUIRE_POLICY_DATE_TODAY=1; fora disso é pulada (para a main
-// não quebrar no dia seguinte ao merge). Antes do merge, reexecute o CI do PR no próprio dia e ajuste a data.
+// Obrigatória só com REQUIRE_POLICY_DATE_TODAY=1 (passo do ci.yml em PR que altera privacidade/index.html, e pages.yml);
+// fora disso é pulada (para a main e os PRs sem relação com a política não quebrarem no dia seguinte). Antes do merge, reexecute o CI do PR no próprio dia e ajuste a data.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const obrigatoria = process.env.GITHUB_EVENT_NAME === 'pull_request' || process.env.REQUIRE_POLICY_DATE_TODAY === '1';
+const obrigatoria = process.env.REQUIRE_POLICY_DATE_TODAY === '1';
+// Decisão do CPO (28/10): na publicação (pages.yml) basta a data não estar no futuro (<= hoje), salvo quando o push
+// altera privacidade/index.html, que volta a exigir = hoje (REQUIRE_POLICY_DATE_TODAY=1).
+const naoFutura = !obrigatoria && process.env.REQUIRE_POLICY_DATE_NOT_FUTURE === '1';
+const ordem = (d) => d.split('/').reverse().join('');
+// B-PR34-06 (Advogado 123a5499): só datas que existem no calendário (31/02, 00/10, 29/02 fora de ano bissexto falham).
+export function dataValida(d) {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d);
+  if (!m) return false;
+  const [dia, mes, ano] = [+m[1], +m[2], +m[3]];
+  const x = new Date(Date.UTC(ano, mes - 1, dia));
+  return x.getUTCFullYear() === ano && x.getUTCMonth() === mes - 1 && x.getUTCDate() === dia;
+}
 
 export function hojeSaoPaulo(agora = new Date()) {
   const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -16,16 +28,33 @@ export function hojeSaoPaulo(agora = new Date()) {
 }
 
 test('privacidade: "Última atualização" é a data de hoje em America/Sao_Paulo (M-PR33-01)', {
-  skip: obrigatoria ? false : 'trava da data da política pulada: só é obrigatória em pull_request (GITHUB_EVENT_NAME=pull_request) ou com REQUIRE_POLICY_DATE_TODAY=1',
+  skip: obrigatoria ? false : 'trava da data da política pulada: só é obrigatória com REQUIRE_POLICY_DATE_TODAY=1 (PR que altera privacidade/index.html e publicação)',
 }, () => {
   const html = readFileSync(new URL('../privacidade/index.html', import.meta.url), 'utf8');
   const datas = [...html.matchAll(/Última atualização: (\d{2}\/\d{2}\/\d{4})\./g)].map((m) => m[1]);
   assert.equal(datas.length, 1, 'esperada exatamente uma "Última atualização: dd/mm/aaaa." na política');
+  assert.ok(dataValida(datas[0]), `a política diz ${datas[0]}, que não é uma data válida`);
   const hoje = hojeSaoPaulo();
   assert.equal(datas[0], hoje, `a política diz ${datas[0]}, mas hoje em America/Sao_Paulo é ${hoje}: ajuste a data para o dia do merge/deploy e reexecute o CI`);
+});
+
+test('privacidade: "Última atualização" não está no futuro (publicação sem mudança na política)', {
+  skip: naoFutura ? false : 'só com REQUIRE_POLICY_DATE_NOT_FUTURE=1 (pages.yml, push que não altera privacidade/index.html)',
+}, () => {
+  const html = readFileSync(new URL('../privacidade/index.html', import.meta.url), 'utf8');
+  const datas = [...html.matchAll(/Última atualização: (\d{2}\/\d{2}\/\d{4})\./g)].map((m) => m[1]);
+  assert.equal(datas.length, 1, 'esperada exatamente uma "Última atualização: dd/mm/aaaa." na política');
+  assert.ok(dataValida(datas[0]), `a política diz ${datas[0]}, que não é uma data válida`);
+  const hoje = hojeSaoPaulo();
+  assert.ok(ordem(datas[0]) <= ordem(hoje), `a política diz ${datas[0]}, depois de hoje em America/Sao_Paulo (${hoje})`);
 });
 
 test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
   assert.equal(hojeSaoPaulo(new Date('2026-10-24T02:59:00Z')), '23/10/2026');
   assert.equal(hojeSaoPaulo(new Date('2026-10-24T03:00:00Z')), '24/10/2026');
+});
+
+test('dataValida rejeita datas impossíveis (B-PR34-06)', () => {
+  for (const d of ['28/10/2026', '29/02/2028', '31/12/2026', '01/01/2027']) assert.ok(dataValida(d), d);
+  for (const d of ['31/02/2026', '29/02/2026', '00/10/2026', '32/01/2026', '15/13/2026', '31/04/2026', '1/10/2026']) assert.ok(!dataValida(d), d);
 });
