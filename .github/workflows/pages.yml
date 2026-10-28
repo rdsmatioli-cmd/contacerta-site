@@ -40,11 +40,21 @@ jobs:
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       # Só o conteúdo do site: os mesmos arquivos que o Pages legado serve hoje, sem tests, node_modules, .github,
       # .git e os arquivos de configuração (.gitattributes, .htmlvalidate.json, .nvmrc). Mantém .nojekyll e CNAME.
+      # B-06 (CPO): as páginas de /empregador-em-dia/ ficam FORA do artefato até o OK de deploy do CEO. Chave única:
+      # DEPLOY_EMPREGADOR ('0' = fora, '1' = publica). Conferida por tests/pages-empregador.test.mjs e pelo passo abaixo.
       - name: Montar _site
+        env:
+          DEPLOY_EMPREGADOR: '0'
         run: |
           mkdir -p "$RUNNER_TEMP/_site"
+          EXTRA=()
+          if [ "$DEPLOY_EMPREGADOR" != 1 ]; then EXTRA+=(--exclude='/empregador-em-dia/'); fi
           rsync -a --exclude='.git/' --exclude='.github/' --exclude='tests/' --exclude='node_modules/' \
-            --exclude='.gitattributes' --exclude='.htmlvalidate.json' --exclude='.nvmrc' ./ "$RUNNER_TEMP/_site/"
+            --exclude='.gitattributes' --exclude='.htmlvalidate.json' --exclude='.nvmrc' "${EXTRA[@]}" ./ "$RUNNER_TEMP/_site/"
+          if [ "$DEPLOY_EMPREGADOR" != 1 ] && [ -e "$RUNNER_TEMP/_site/empregador-em-dia" ]; then
+            echo '/empregador-em-dia/ no artefato com DEPLOY_EMPREGADOR=0'; exit 1
+          fi
+          echo "DEPLOY_EMPREGADOR=$DEPLOY_EMPREGADOR; /empregador-em-dia/ no artefato: $([ -e "$RUNNER_TEMP/_site/empregador-em-dia" ] && echo sim || echo não)"
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: ${{ runner.temp }}/_site
