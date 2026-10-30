@@ -34,7 +34,17 @@ export const URLS_NOINDEX = [
   '/empregador-em-dia/pagamento/2/',
   '/empregador-em-dia/painel/',
 ];
-export const TODAS_URLS = [...URLS, ...URLS_NOINDEX];
+// A-PR35-18: páginas indexáveis do Licitações (/licitacoes/), mesmas metas das URLS.
+export const URLS_LICITACOES = [
+  '/licitacoes/',
+  '/licitacoes/politica.html',
+  '/licitacoes/cobranca/',
+  '/licitacoes/blog/',
+  '/licitacoes/blog/como-encontrar-licitacoes.html',
+  '/licitacoes/blog/pregoes-material-de-limpeza-pncp.html',
+  '/licitacoes/editais/material-de-limpeza.html',
+];
+export const TODAS_URLS = [...URLS, ...URLS_LICITACOES, ...URLS_NOINDEX];
 export const ehNoindex = (url) => URLS_NOINDEX.includes(url);
 
 // mobile = padrão do Lighthouse (Moto G Power, 4G lento simulado); desktop = --preset=desktop.
