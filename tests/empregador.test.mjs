@@ -216,7 +216,7 @@ test('PR #36 revisões: textos literais travados nas páginas', () => {
   assert.doesNotMatch(res, /type="checkbox"[^>]*checked/);
   assert.doesNotMatch(res, /menos de 20 funcionários, você pode|precisa incluir os riscos/i);
   for (const t of [
-    '<li>Relatório para o seu profissional de SST revisar</li>',
+    '<li>Relatório com o resultado do grupo para anexar ao PGR (pode ser revisado por um profissional de SST, se você quiser)</li>',
     'A gente aplica o questionário anônimo e você recebe o inventário e o plano de ação para o PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora.',
     '(desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua)',
   ]) assert.ok(lan.includes(t), t);
