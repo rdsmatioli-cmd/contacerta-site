@@ -1,0 +1,109 @@
+// Empregador em Dia E2: flag OFF (padrão) mostra só o aviso; com a flag ligada por rota (homologação simulada, sem
+// mudar o arquivo), o fluxo das 5 faixas, o bloqueio de "R$" em <20 e >200, a conta da jornada (EC 141) e nenhuma
+// requisição com dados das respostas.
+import { test, expect, semErros, semRedeExterna, semRolagemHorizontal, assentar } from './fixtures.mjs';
+
+const PAGS = ['/empregador-em-dia/', '/empregador-em-dia/avaliacao-rapida-nr1/', '/empregador-em-dia/avaliacao-rapida-nr1/resultado/', '/empregador-em-dia/jornada-42h/', '/empregador-em-dia/orcamento-nr1/'];
+const ligar = (page) => page.route(/\/assets\/js\/empregador\/config\.js/, async (route) => {
+  const r = await route.fetch();
+  const corpo = (await r.text()).replace('EMPREGADOR_EM_DIA: false', 'EMPREGADOR_EM_DIA: true');
+  await route.fulfill({ response: r, body: corpo });
+});
+
+for (const url of PAGS) {
+  test(`flag OFF ${url}: só o aviso, sem preço`, async ({ page, rede, erros }) => {
+    await page.goto(url);
+    await assentar(page);
+    await expect(page.locator('#ed-off')).toBeVisible();
+    await expect(page.locator('#ed-app')).toBeHidden();
+    expect(await page.locator('main').innerText()).not.toContain('R$');
+    semRedeExterna(rede);
+    semErros(erros, rede);
+  });
+}
+
+const CASOS = [
+  ['20-50', 'oferta', 'R$ 1.490', 'R$ 745 agora e R$ 745'],
+  ['51-100', 'oferta', 'R$ 2.290', 'R$ 1.145 agora e R$ 1.145'],
+  ['101-200', 'oferta', 'R$ 3.490', 'R$ 1.745 agora e R$ 1.745'],
+  ['lt20', 'simplificada', null, null],
+  ['gt200', 'sob-consulta', null, null],
+];
+for (const [faixa, destino, preco, parcelas] of CASOS) {
+  test(`flag ON avaliação rápida ${faixa} -> ${destino}`, async ({ page, rede, erros }) => {
+    await ligar(page);
+    const posts = [];
+    page.on('request', (r) => { if (r.method() !== 'GET') posts.push(r.url()); });
+    await page.goto('/empregador-em-dia/avaliacao-rapida-nr1/');
+    await expect(page.getByText('Passo 1 de 3')).toBeVisible();
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await expect(page.locator('#ed-msg')).toBeVisible();
+    await page.locator(`input[name="faixa"][value="${faixa}"]`).check();
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await expect(page.getByText('Passo 2 de 3')).toBeVisible();
+    await page.locator('input[name="onde[]"][value="loja"]').check();
+    await page.locator('input[name="metas"][value="sim"]').check();
+    await page.locator('input[name="reclamacao"][value="nao"]').check();
+    await page.getByRole('button', { name: 'Voltar' }).click();
+    await expect(page.locator(`input[name="faixa"][value="${faixa}"]`)).toBeChecked();
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await expect(page.locator('input[name="onde[]"][value="loja"]')).toBeChecked();
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.locator('input[name="pgr"][value="naosei"]').check();
+    await page.getByRole('button', { name: 'Continuar' }).click();
+    await page.waitForURL('**/avaliacao-rapida-nr1/resultado/');
+    await assentar(page);
+    const bloco = page.locator(`[data-ed-res="${destino}"]`);
+    await expect(bloco).toBeVisible();
+    const txt = await bloco.innerText();
+    if (preco) {
+      expect(txt).toContain(preco);
+      expect(txt).toContain(parcelas);
+      expect(txt).toContain('Metas de venda · atendimento ao público');
+      expect(txt).toContain('Não sabe se tem: incluímos orientação');
+      expect(txt).toContain('em definição');
+    } else {
+      expect(txt).not.toContain('R$');
+      await expect(bloco.getByRole('button', { name: 'Contratar' })).toHaveCount(0);
+    }
+    await semRolagemHorizontal(page);
+    expect(posts).toEqual([]);
+    semRedeExterna(rede);
+    semErros(erros, rede);
+  });
+}
+
+test('flag ON jornada 42h: conta aberta com divisor 210 e etapa de 40 h', async ({ page, rede, erros }) => {
+  await ligar(page);
+  await page.goto('/empregador-em-dia/jornada-42h/');
+  await assentar(page);
+  const conta = page.locator('.ed-conta');
+  await expect(conta).toContainText('R$ 2.500,00');
+  await expect(conta).toContainText('R$ 11,90');
+  await expect(conta).toContainText('8,67 h');
+  await expect(conta).toContainText('R$ 154,76');
+  await expect(conta).toContainText('R$ 5.261,90 por mês');
+  await expect(conta).toContainText('R$ 11.050,00 por mês');
+  await expect(page.locator('main')).toContainText('A partir de R$ 1.490 para 20 a 50 funcionários.');
+  await expect(page.locator('[data-ed="nota-dom"]')).toBeHidden();
+  await page.locator('#f-dom').check();
+  await expect(page.locator('[data-ed="nota-dom"]')).toContainText('LC 150/2015');
+  await page.locator('#f-func').fill('0');
+  await page.getByRole('button', { name: 'Calcular' }).click();
+  await expect(page.locator('#f-func-msg')).toBeVisible();
+  await expect(conta).not.toContainText('R$ 11.050,00'); // NB-05: conta anterior limpa
+  await semRolagemHorizontal(page);
+  semRedeExterna(rede);
+  semErros(erros, rede);
+});
+
+test('orçamento NR-1: EMPREGADOR_EM_DIA ON mas ED_CHECKOUT OFF continua indisponível', async ({ page, rede, erros }) => {
+  await ligar(page);
+  await page.goto('/empregador-em-dia/orcamento-nr1/');
+  await assentar(page);
+  await expect(page.locator('#ed-off')).toBeVisible();
+  await expect(page.locator('#ed-app')).toBeHidden();
+  await expect(page.locator('#ed-orc button[type="submit"]')).toBeDisabled();
+  semRedeExterna(rede);
+  semErros(erros, rede);
+});

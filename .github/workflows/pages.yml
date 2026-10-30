@@ -1,8 +1,9 @@
 name: Pages
 # Publica o site no GitHub Pages por Actions (plano gratuito). Só passa a valer quando a fonte do Pages for trocada
 # para "GitHub Actions" nas configurações do repositório (Novos Negócios, no merge); até lá o Pages segue publicando a
-# main pelo modo legado. Antes do upload roda a trava da data da política (M-PR33-01, tests/politica-data.test.mjs):
-# se "Última atualização" for diferente de hoje em America/Sao_Paulo, a publicação falha.
+# main pelo modo legado. Antes do upload roda a trava da data da política (M-PR33-01, tests/politica-data.test.mjs,
+# decisão do CPO de 28/10): a "Última atualização" não pode estar no futuro (<= hoje em America/Sao_Paulo); se o push
+# alterar privacidade/index.html (ou não der para saber, como no workflow_dispatch ou no primeiro push), tem de ser = hoje.
 on:
   push:
     branches: [main]
@@ -22,23 +23,45 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
-      - name: Trava da data da política (falha a publicação se não for hoje em America/Sao_Paulo)
+      - name: Trava da data da política (<= hoje; = hoje se o push alterou privacidade/index.html)
         env:
-          REQUIRE_POLICY_DATE_TODAY: '1'
-        run: node --test tests/politica-data.test.mjs
+          ANTES: ${{ github.event.before }}
+        run: |
+          git fetch --no-tags --quiet --depth=1 origin "$ANTES" 2>/dev/null || true
+          echo "Evento: $GITHUB_EVENT_NAME | ref: $GITHUB_REF | SHA anterior (before): ${ANTES:-nenhum} | SHA publicado: $(git rev-parse HEAD)"
+          if [ "$GITHUB_EVENT_NAME" = push ] && git cat-file -e "$ANTES^{commit}" 2>/dev/null \
+            && ! git diff --name-only "$ANTES" HEAD | grep -qx 'privacidade/index.html'; then
+            echo 'Regra aplicada: data da política <= hoje (privacidade/index.html não alterada neste push).'
+            REQUIRE_POLICY_DATE_NOT_FUTURE=1 node --test tests/politica-data.test.mjs
+          else
+            echo 'Regra aplicada: data da política = hoje (privacidade/index.html alterada, workflow_dispatch ou push sem base conhecida).'
+            REQUIRE_POLICY_DATE_TODAY=1 node --test tests/politica-data.test.mjs
+          fi
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       # Só o conteúdo do site: os mesmos arquivos que o Pages legado serve hoje, sem tests, node_modules, .github,
       # .git e os arquivos de configuração (.gitattributes, .htmlvalidate.json, .nvmrc). Mantém .nojekyll e CNAME.
+      # B-06 (CPO): as páginas de /empregador-em-dia/ ficam FORA do artefato até o OK de deploy do CEO. Chave única:
+      # DEPLOY_EMPREGADOR ('0' = fora, '1' = publica). Conferida por tests/pages-empregador.test.mjs e pelo passo abaixo.
       - name: Montar _site
+        env:
+          DEPLOY_EMPREGADOR: '0'
         run: |
           mkdir -p "$RUNNER_TEMP/_site"
+          EXTRA=()
+          if [ "$DEPLOY_EMPREGADOR" != 1 ]; then EXTRA+=(--exclude='/empregador-em-dia/'); fi
           rsync -a --exclude='.git/' --exclude='.github/' --exclude='tests/' --exclude='node_modules/' \
-            --exclude='.gitattributes' --exclude='.htmlvalidate.json' --exclude='.nvmrc' ./ "$RUNNER_TEMP/_site/"
+            --exclude='.gitattributes' --exclude='.htmlvalidate.json' --exclude='.nvmrc' "${EXTRA[@]}" ./ "$RUNNER_TEMP/_site/"
+          if [ "$DEPLOY_EMPREGADOR" != 1 ] && [ -e "$RUNNER_TEMP/_site/empregador-em-dia" ]; then
+            echo '/empregador-em-dia/ no artefato com DEPLOY_EMPREGADOR=0'; exit 1
+          fi
+          echo "DEPLOY_EMPREGADOR=$DEPLOY_EMPREGADOR; /empregador-em-dia/ no artefato: $([ -e "$RUNNER_TEMP/_site/empregador-em-dia" ] && echo sim || echo não)"
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: ${{ runner.temp }}/_site
+  # Só publica a partir da main: um workflow_dispatch ou teste em outra branch roda a trava e monta o _site, sem deploy.
   deploy:
     needs: build
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       pages: write
