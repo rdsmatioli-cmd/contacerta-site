@@ -47,3 +47,6 @@ export const ANONIMATO = Object.freeze({ minimoRespostas: 5, tipoToken: 'individ
 export const ESCALA_5 = Object.freeze(['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre']);
 // Adendo 2 do Advogado (02eb5fb1): nota para empregador doméstico no simulador 42h (EC 141; CF art. 7º, § 1º).
 export const NOTA_DOMESTICO = 'Para empregado doméstico, a lei específica (LC 150/2015) ainda fala em 44 horas, mas a Emenda Constitucional 141/2026 também vale para ele.';
+// E3 (backlog v3 T07, T10): checkout só em mock (D-22); limiar de respostas para a análise vem daqui (T10 CA 2).
+export const ED_PAGAMENTO_MODO = 'mock'; // 'mock' até a ativação live aprovada (E6); nenhuma chave no repositório
+export const LIMIAR_ANALISE = 0.7;

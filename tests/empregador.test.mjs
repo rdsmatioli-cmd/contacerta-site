@@ -12,7 +12,9 @@ const raiz = new URL('../', import.meta.url);
 const ler = (p) => readFileSync(new URL(p, raiz), 'utf8');
 const PAGINAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
   'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html',
-  'empregador-em-dia/orcamento-nr1/index.html'];
+  'empregador-em-dia/orcamento-nr1/index.html', 'empregador-em-dia/precos/index.html', 'empregador-em-dia/contratar/index.html',
+  'empregador-em-dia/pagamento/index.html', 'empregador-em-dia/pagamento/ok/index.html', 'empregador-em-dia/pagamento/2/index.html',
+  'empregador-em-dia/painel/index.html'];
 
 test('flags todas desligadas e SST em definição', () => {
   for (const [k, v] of Object.entries(FLAGS)) assert.equal(v, false, k);

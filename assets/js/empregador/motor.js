@@ -1,5 +1,5 @@
 // Empregador em Dia: motor puro (sem DOM, sem rede). Testado em tests/empregador.test.mjs.
-import { FAIXAS, JORNADA, SALARIO_MINIMO, FAIXAS_SALARIO } from './config.js?v=04a97dcdba';
+import { FAIXAS, JORNADA, SALARIO_MINIMO, FAIXAS_SALARIO } from './config.js?v=56bd0dd4ca';
 
 export const r2 = (x) => Math.round((x + Number.EPSILON) * 100) / 100;
 export const faixaPorId = (id) => FAIXAS.find((f) => f.id === id) || null;
@@ -70,4 +70,31 @@ export function jornada({ funcionarios, faixaSalario }) {
       porFuncionario: r2(porFuncionario), total: r2(porFuncionario * funcionarios),
     };
   });
+}
+
+// T06 CA 1: dígitos verificadores do CNPJ (só a conta; sem Receita nem BrasilAPI, D-07).
+export function cnpjValido(txt) {
+  const d = String(txt || '').replace(/\D/g, '');
+  if (d.length !== 14 || /^(\d)\1{13}$/.test(d)) return false;
+  const dv = (n) => {
+    const pesos = n === 12 ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    const s = pesos.reduce((a, p, i) => a + p * Number(d[i]), 0) % 11;
+    return s < 2 ? 0 : 11 - s;
+  };
+  return dv(12) === Number(d[12]) && dv(13) === Number(d[13]);
+}
+export const formatarCnpj = (txt) => String(txt).replace(/\D/g, '').replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+
+// T07 CA 1 / T12 CA 2: à vista = preço cheio agora e nada na entrega; 50/50 = metade em cada, soma = preço.
+export function pagamento(faixaId, forma) {
+  const o = oferta(faixaId);
+  if (!o || !['avista', 'metade'].includes(forma)) return null;
+  return forma === 'avista' ? { preco: o.preco, agora: o.preco, entrega: 0 } : { preco: o.preco, agora: o.parcela1, entrega: o.parcela2 };
+}
+
+// T10 CA 1-2: percentual = respostas/funcionários arredondado para baixo; "já dá para analisar" a partir do limiar.
+export function andamento(respostas, funcionarios, limiar) {
+  if (!Number.isInteger(respostas) || !Number.isInteger(funcionarios) || funcionarios < 1 || respostas < 0) return null;
+  const pct = Math.floor((Math.min(respostas, funcionarios) * 100) / funcionarios);
+  return { pct, podeAnalisar: pct >= Math.round(limiar * 100) };
 }

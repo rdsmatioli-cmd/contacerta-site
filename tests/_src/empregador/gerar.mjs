@@ -1,4 +1,4 @@
-// Gera as 4 páginas do Empregador em Dia E2 (T01, T02, T03, T15) a partir do molde de
+// Gera as páginas do Empregador em Dia E2 (T01, T02, T03, T15) e E3 (T05-T08, T10, T12) a partir do molde de
 // tabelas-oficiais-2026/obrigado/index.html (cabeçalho, consentimento, rodapé). Rodar: node tests/_src/empregador/gerar.mjs
 // Textos literais da v3.3 (4c21797f, p. 2-7 e 19) com as decisões do CEO (becbf681, 95a76e17), o parecer do
 // Advogado (c23c3792) e o CFO (0619d010). Páginas noindex, fora do sitemap; com a flag OFF só o aviso aparece.
@@ -206,4 +206,132 @@ pagina({
 </form>
 <p id="ed-orc-msg" class="nota" role="alert" aria-live="assertive" hidden></p>`,
 });
+
+// ---- E3 (backlog v3 T05, T06, T07, T08, T10, T12; v3.3 telas 8-11, 13 e 15). Tudo dentro de #ed-app (hidden):
+// com EMPREGADOR_EM_DIA/ED_CHECKOUT OFF (e ED_LOGIN OFF no painel) só o aviso aparece. Pagamento só em mock (D-22).
+// DEC CPO 70f7c62a / CEO 95a76e17: ">200" = "Orçamento sob medida" (substitui o "sob consulta" da v3.3).
+const card = (id) => { const f = FAIXAS.find((x) => x.id === id); const m = f.preco / 2;
+  const r = (v) => `R$ ${v.toLocaleString('pt-BR')}`;
+  return `<li data-ed-faixa="${id}"><span class="ed-sua" hidden>Sua faixa</span><strong>${f.rotulo} funcionários</strong><span class="ed-preco">${r(f.preco)}</span><span>à vista, ou ${r(m)} agora + ${r(m)} na entrega</span></li>`; };
+const MOCK = '<p class="ed-aviso" data-ed-mock>Modo teste: nenhum pagamento é cobrado nesta tela.</p>';
+const formaPg = `<fieldset><legend class="ed-rotulo">Forma de pagamento</legend><div class="ed-ops">${radio('meio', [['pix', 'Pix'], ['cartao', 'Cartão de crédito'], ['boleto', 'Boleto']], 'aj-meio')}</div>
+<p class="ajuda" id="aj-meio"><small>Pix confirma na hora. Exemplo: abra o app do banco, escolha "Pix copia e cola" ou leia o QR Code.</small></p></fieldset>
+<section class="ed-oferta" data-ed-pix hidden><h2>Pague com Pix</h2><p>O QR Code vale por 30 minutos. A confirmação aparece nesta tela sozinha.</p><p><code data-ed="pix">código Pix de teste</code></p><p><button type="button" class="btn sec" data-ed-copiar="pix">Copiar código Pix</button></p></section>
+<label for="pg-nf">Recibo e nota fiscal para</label><input id="pg-nf" name="nf" type="email" autocomplete="email" required aria-describedby="aj-nf"><small id="aj-nf">Mandamos a nota fiscal neste e-mail. Exemplo: o e-mail do financeiro.</small>`;
+const selos = '<ul class="ed-lista"><li>Conexão segura</li><li>Nota fiscal por e-mail</li><li>Cancele pelo painel</li></ul>';
+
+pagina({
+  caminho: 'empregador-em-dia/precos/',
+  titulo: 'Preço da adequação NR-1 por faixa de funcionários | Empregador em Dia',
+  desc: 'Preço fechado pela faixa de funcionários, à vista ou metade agora e metade na entrega.',
+  conteudo: `<h1 data-ed-e3="checkout">Preço fechado pela faixa de funcionários</h1>
+<ul class="ed-cartoes">${card('20-50')}${card('51-100')}${card('101-200')}</ul>
+<p>Menos de 20 funcionários: <a href="/empregador-em-dia/avaliacao-rapida-nr1/">veja a opção gratuita</a>. Mais de 200: <a href="/empregador-em-dia/orcamento-nr1/">Orçamento sob medida</a>.</p>
+<h2>Incluído em todas as faixas</h2>
+<ul class="ed-lista"><li>Questionário anônimo por link e QR Code</li><li data-ed-sst-item>Análise por profissional de segurança do trabalho</li><li>Inventário de riscos psicossociais para o PGR</li><li>Plano de ação com prazos e responsáveis</li><li>Lembrete de revisão em 12 meses</li></ul>
+<p class="ed-sst" data-ed-sst></p>`,
+});
+
+pagina({
+  caminho: 'empregador-em-dia/contratar/',
+  titulo: 'Dados para o contrato | Empregador em Dia',
+  desc: 'Dados da empresa para o contrato da adequação NR-1.',
+  conteudo: `<form class="ed-form" id="ed-contratar" data-ed-e3="checkout" novalidate>
+<h1>Dados para o contrato</h1>
+<label for="ct-cnpj">CNPJ da empresa</label><input id="ct-cnpj" name="cnpj" inputmode="numeric" required placeholder="11.222.333/0001-81" aria-describedby="aj-cnpj"><small id="aj-cnpj">Exemplo: o CNPJ da nota fiscal.</small>
+<label for="ct-razao">Razão social</label><input id="ct-razao" name="razao" autocomplete="organization" required aria-describedby="aj-razao"><small id="aj-razao">Digite como está no cartão CNPJ. Não consultamos o CNPJ em nenhuma base.</small>
+<label for="ct-nome">Seu nome</label><input id="ct-nome" name="nome" autocomplete="name" required aria-describedby="aj-nome"><small id="aj-nome">Quem responde pela empresa neste serviço. Exemplo: o dono ou o gerente de RH.</small>
+<label for="ct-email">E-mail</label><input id="ct-email" name="email" type="email" autocomplete="email" required aria-describedby="aj-email"><small id="aj-email">Recebe o link do questionário e o relatório. Exemplo: o e-mail do RH.</small>
+<label for="ct-whats">WhatsApp (opcional)</label><input id="ct-whats" name="whatsapp" type="tel" autocomplete="tel" aria-describedby="aj-whats"><small id="aj-whats">Só para avisos do andamento. Exemplo: celular do RH.</small>
+<p class="campo-msg" id="ct-msg" role="alert" hidden></p>
+<button type="submit" disabled class="btn">Continuar para pagamento</button>
+</form>`,
+});
+
+pagina({
+  caminho: 'empregador-em-dia/pagamento/',
+  titulo: 'Pagamento | Empregador em Dia',
+  desc: 'Pagamento da adequação NR-1: à vista ou metade agora e metade na entrega.',
+  conteudo: `<form class="ed-form" id="ed-pagamento" data-ed-e3="checkout" data-ed-parcela="1" novalidate>
+<p class="ed-passo">Dados ✓ › Pagamento › Confirmação</p>
+<h1>Pagamento</h1>
+${MOCK}
+<fieldset><legend class="ed-rotulo">Como quer pagar</legend><div class="ed-ops">${radio('forma', [['metade', 'Metade agora e metade na entrega'], ['avista', 'À vista']], 'aj-forma')}</div>
+<p class="ajuda" id="aj-forma"><small>O valor total é o mesmo nas duas formas. Exemplo: quem prefere fechar a conta de uma vez escolhe à vista.</small></p></fieldset>
+${formaPg}
+<section class="ed-oferta" aria-labelledby="pg-resumo"><h2 id="pg-resumo">Resumo do pedido</h2><p data-ed="pg-empresa"></p>
+<table class="ed-tab"><caption>Valores</caption><tbody>
+<tr><th scope="row">Adequação NR-1 · <span data-ed="pg-faixa"></span></th><td data-ed="pg-preco"></td></tr>
+<tr><th scope="row">1ª parcela, agora</th><td data-ed="pg-agora"></td></tr>
+<tr data-ed-linha2><th scope="row">2ª parcela, na entrega do relatório</th><td data-ed="pg-entrega"></td></tr>
+<tr><th scope="row">Total agora</th><td data-ed="pg-total"></td></tr>
+</tbody></table><p data-ed="pg-nota-avista" hidden>À vista: o valor inteiro hoje e nada na entrega. O contrato vai por e-mail junto com o recibo.</p></section>
+${selos}
+<p class="campo-msg" id="pg-msg" role="alert" hidden></p>
+<button type="submit" disabled class="btn">Confirmar pagamento</button>
+</form>`,
+});
+
+pagina({
+  caminho: 'empregador-em-dia/pagamento/ok/',
+  titulo: 'Pagamento recebido | Empregador em Dia',
+  desc: 'Próximo passo: enviar o link do questionário anônimo aos funcionários.',
+  conteudo: `<section data-ed-e3="checkout" id="ed-pg-ok">
+${MOCK}
+<h1>Pagamento recebido. Agora é com seus funcionários.</h1>
+<p>Mande o link para os <span data-ed="ok-n"></span> funcionários. As respostas são anônimas: nem você nem nós vemos quem respondeu o quê.</p>
+<p><code data-ed="ok-link"></code></p>
+<p class="ed-acoes"><button type="button" class="btn sec" data-ed-copiar="ok-link">Copiar link</button><button type="button" class="btn sec" disabled>Baixar cartaz com QR Code</button><button type="button" class="btn sec" disabled>Mensagem pronta para WhatsApp</button></p>
+<h2>O que acontece agora</h2>
+<ol class="ed-lista"><li><strong>Agora:</strong> envie o link ou imprima o cartaz com QR Code</li><li><strong>Em 10 dias:</strong> meta de pelo menos 70% de respostas. Avisamos quando chegar lá</li><li><strong>Depois:</strong> o profissional de SST analisa e monta o plano de ação</li><li><strong>Na entrega:</strong> <span data-ed="ok-entrega"></span></li></ol>
+<p class="ed-sst" data-ed-sst></p>
+<h2>Recibo</h2>
+<table class="ed-tab"><caption>Recibo</caption><tbody><tr><th scope="row">Serviço</th><td>Adequação NR-1</td></tr><tr><th scope="row">Pago agora</th><td data-ed="ok-pago"></td></tr><tr><th scope="row">Pedido</th><td data-ed="ok-pedido"></td></tr></tbody></table>
+<p><a class="btn" href="/empregador-em-dia/painel/">Ir para o acompanhamento</a></p>
+</section>`,
+});
+
+pagina({
+  caminho: 'empregador-em-dia/painel/',
+  titulo: 'Acompanhamento | Empregador em Dia',
+  desc: 'Acompanhamento do pedido de adequação NR-1.',
+  conteudo: `<section data-ed-e3="login" id="ed-painel">
+<p class="ed-selo">dados de exemplo</p>
+<h1>Adequação NR-1 · <span data-ed="pn-empresa">Farmácia Boa</span></h1>
+<p>Pedido <span data-ed="pn-pedido">ED-2026-10-0087</span> · iniciado em <span data-ed="pn-inicio">27/10/2026</span> <button type="button" class="btn sec" disabled>Reenviar link</button></p>
+<nav class="ed-menu" aria-label="Painel"><a href="#andamento">Andamento</a><a href="#respostas">Respostas</a><a href="#relatorio">Relatório</a><a href="#pagamentos">Pagamentos</a><a href="/contato/">Ajuda</a></nav>
+<ul class="ed-cartoes" id="andamento">
+<li id="respostas"><strong>Respostas</strong><span data-ed="pn-resp">26 de 34</span><span data-ed="pn-pct"></span></li>
+<li><strong>Etapa</strong><span>Análise do SST</span></li>
+<li id="relatorio"><strong>Entrega prevista</strong><span data-ed="pn-entrega">conforme o prazo do contrato</span></li>
+<li id="pagamentos"><strong>Pagamento</strong><span>1ª paga · 2ª na entrega</span></li>
+</ul>
+<h2>Linha do tempo</h2>
+<ol class="ed-lista"><li>Contratado</li><li>Questionário enviado</li><li>70% de respostas</li><li>Análise e plano de ação</li><li>Relatório entregue</li></ol>
+<p class="ed-sst" data-ed-sst></p>
+</section>`,
+});
+
+pagina({
+  caminho: 'empregador-em-dia/pagamento/2/',
+  titulo: 'Pagamento da 2ª parcela | Empregador em Dia',
+  desc: 'Relatório pronto: pagamento da 2ª parcela da adequação NR-1.',
+  conteudo: `<form class="ed-form" id="ed-pagamento" data-ed-e3="checkout" data-ed-parcela="2" novalidate>
+<p class="ed-passo">Dados ✓ › Pagamento › Confirmação</p>
+<h1>Relatório pronto. Falta a 2ª parcela.</h1>
+${MOCK}
+${formaPg}
+<section class="ed-oferta" aria-labelledby="pg2-resumo"><h2 id="pg2-resumo">Resumo do pedido</h2><p data-ed="pg-empresa"></p>
+<table class="ed-tab"><caption>Valores</caption><tbody>
+<tr><th scope="row">Adequação NR-1 · <span data-ed="pg-faixa"></span></th><td data-ed="pg-preco"></td></tr>
+<tr><th scope="row">1ª parcela paga</th><td data-ed="pg-agora"></td></tr>
+<tr><th scope="row">2ª parcela, agora</th><td data-ed="pg-entrega"></td></tr>
+<tr><th scope="row">Total agora</th><td data-ed="pg-total"></td></tr>
+</tbody></table><p>O download do relatório libera assim que o Pix for confirmado.</p></section>
+${selos}
+<p class="campo-msg" id="pg-msg" role="alert" hidden></p>
+<button type="submit" disabled class="btn">Confirmar pagamento</button>
+</form>`,
+});
+
 console.log('ok', vUi, vCss);
