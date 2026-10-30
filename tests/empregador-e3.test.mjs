@@ -115,8 +115,8 @@ test('M-02: sem afirmação de SST incluído; texto exato de SST em definição'
 test('M-03/M-04/M-05: aviso LGPD em contratar e pagamento; Me avise com consentimento; fornecedor no rodapé', () => {
   for (const p of ['contratar', 'pagamento', 'pagamento/2']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.match(h, /art\. 7º, V/, p); assert.match(h, /art\. 18/, p); assert.ok(h.includes('href="/privacidade/"'), p); }
   const r = ler('empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html');
-  assert.match(r, /id="ed-avise-ok" name="consentimento" value="sim" required>/);
-  assert.ok(!/id="ed-avise-ok"[^>]*checked/.test(r));
+  // F-1 (Advogado d39ff580): com ED_ME_AVISE OFF, o resultado não tem formulário, campo de e-mail nem botão "Me avise".
+  assert.ok(!/id="ed-avise|type="email"|Me avise/.test(r));
   for (const p of ['empregador-em-dia/index.html', ...E3]) assert.ok(ler(p).includes('RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20'), p);
 });
 

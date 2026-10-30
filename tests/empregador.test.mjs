@@ -211,10 +211,8 @@ test('PR #36 revisões: textos literais travados nas páginas', () => {
     '<h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>',
     'MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.',
     '<h1>Sua empresa deve avaliar os riscos psicossociais no PGR</h1>',
-    // M-04 do Advogado (31f8fa10, PR #42): aviso do Me avise com controlador, base (consentimento), retenção e caixa própria.
-    'Usamos o e-mail só para um aviso sobre a adequação NR-1, com o seu consentimento (LGPD, art. 7º, I). Não vendemos nem cedemos seus dados e não ligamos nem mandamos WhatsApp.',
   ]) assert.ok(res.includes(t), t);
-  assert.match(res, /<input type="email"[^>]*aria-describedby="aj-email aviso-lgpd-avise"/);
+  assert.doesNotMatch(res, /<input type="email"|id="ed-avise"/); // F-1 (d39ff580): Me avise fora com ED_ME_AVISE OFF
   assert.doesNotMatch(res, /type="checkbox"[^>]*checked/);
   assert.doesNotMatch(res, /menos de 20 funcionários, você pode|precisa incluir os riscos/i);
   for (const t of [

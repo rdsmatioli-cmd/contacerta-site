@@ -34,7 +34,6 @@ function pagina({ caminho, titulo, desc, conteudo }) {
 <nav class="ed-menu" aria-label="Empregador em Dia"><a href="/nr1-riscos-psicossociais/">NR-1</a><a href="/empregador-em-dia/jornada-42h/">Jornada 42h</a><a href="/empregador-em-dia/#preco">Preço</a></nav>
 ${conteudo}
 <nav class="ed-rodape" aria-label="Empregador em Dia: links"><span>Conta Certa · Empregador em Dia</span><a href="/termos/">Termos de uso</a><a href="/privacidade/">Privacidade</a><a href="/contato/">Ajuda</a><a href="/contato/">Contato</a></nav>
-<p class="ed-fornecedor">RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20 · <a href="mailto:contato@contacertabr.com.br">contato@contacertabr.com.br</a></p>
 </div>
 <script>(()=>{let f=0;const ir=()=>{if(f++)return;import('/assets/js/empregador/ui.js?v=${vUi}')},ocioso=()=>window.requestIdleCallback?requestIdleCallback(ir,{timeout:1500}):setTimeout(ir,1);addEventListener('load',()=>{let t=setTimeout(ocioso,600);try{new PerformanceObserver(()=>{clearTimeout(t);t=setTimeout(ocioso,600)}).observe({type:'largest-contentful-paint',buffered:true})}catch{}setTimeout(ir,3000)},{once:true})})()</script>
 </main>`;
@@ -122,11 +121,7 @@ pagina({
 <p>Prazo: definido no contrato, após o questionário.</p></section>
 <section data-ed-res="simplificada" hidden><h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>
 <p>MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.</p>
-<ul class="ed-cartoes"><li><strong>Guia gratuito para pequenas empresas</strong><span>Checklist de 1 página com o que avaliar, um modelo de plano de ação e como anexar ao PGR.</span><button type="button" class="btn" disabled>Receber o guia por e-mail</button></li>
-<li><form class="ed-form" id="ed-avise" novalidate><strong>Vai passar de 20 funcionários?</strong><span>Avisamos quando fizer sentido contratar a adequação completa.</span>
-<label for="ed-email">Seu e-mail</label><input type="email" id="ed-email" name="email" autocomplete="email" placeholder="dono@lojaexemplo.com.br" aria-describedby="aj-email aviso-lgpd-avise"><small id="aj-email">Exemplo: o e-mail que você mais usa.</small><small id="aviso-lgpd-avise">Quem cuida do seu e-mail é RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services), CNPJ 61.193.879/0001-20. Usamos o e-mail só para um aviso sobre a adequação NR-1, com o seu consentimento (LGPD, art. 7º, I). Não vendemos nem cedemos seus dados e não ligamos nem mandamos WhatsApp. Guardamos até você pedir para sair; para sair, responda ao aviso ou escreva para contato@contacertabr.com.br. Detalhes na <a href="/privacidade/">Política de privacidade</a>.</small>
-<label class="le-ok"><input type="checkbox" id="ed-avise-ok" name="consentimento" value="sim" required> Aceito receber esse aviso por e-mail.</label>
-<button type="submit" disabled class="btn">Me avise</button></form></li></ul>
+<ul class="ed-cartoes"><li><strong>Guia gratuito para pequenas empresas</strong><span>Checklist de 1 página com o que avaliar, um modelo de plano de ação e como anexar ao PGR.</span><button type="button" class="btn" disabled>Receber o guia por e-mail</button></li></ul>
 <p><a href="/contato/">Quer mesmo assim a adequação completa? Fale com a gente.</a></p></section>
 <section data-ed-res="sob-consulta" hidden><h1>Para mais de 200 funcionários, fazemos um orçamento</h1>
 <p>Com várias unidades ou turnos, o questionário e a análise mudam. Orçamento sob medida, caso a caso.</p>
