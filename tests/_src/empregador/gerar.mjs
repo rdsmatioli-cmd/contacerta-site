@@ -228,7 +228,7 @@ pagina({
 <ul class="ed-cartoes">${card('20-50')}${card('51-100')}${card('101-200')}</ul>
 <p>Menos de 20 funcionários: <a href="/empregador-em-dia/avaliacao-rapida-nr1/">veja a opção gratuita</a>. Mais de 200: <a href="/empregador-em-dia/orcamento-nr1/">Orçamento sob medida</a>.</p>
 <h2>Incluído em todas as faixas</h2>
-<ul class="ed-lista"><li>Questionário anônimo por link e QR Code</li><li data-ed-sst-item>Análise por profissional de segurança do trabalho</li><li>Inventário de riscos psicossociais para o PGR</li><li>Plano de ação com prazos e responsáveis</li><li>Lembrete de revisão em 12 meses</li></ul>
+<ul class="ed-lista"><li>Questionário anônimo por link e QR Code</li><li data-ed-sst-item>Análise por profissional de segurança do trabalho</li><li>Inventário de riscos psicossociais para o PGR</li><li>Plano de ação com prazos e responsáveis</li><li>Revisão do PGR: a NR-1 exige pelo menos a cada 2 anos</li></ul>
 <p class="ed-sst" data-ed-sst></p>`,
 });
 

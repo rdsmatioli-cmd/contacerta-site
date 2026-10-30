@@ -40,7 +40,7 @@ test('T05: preços e parcelas batem com a tabela; >200 = "Orçamento sob medida"
   }
   assert.ok(h.includes('Orçamento sob medida'));
   for (const p of E3) assert.ok(!ler(p).toLowerCase().includes('sob consulta'), p);
-  for (const t of ['Questionário anônimo por link e QR Code', 'Inventário de riscos psicossociais para o PGR', 'Plano de ação com prazos e responsáveis', 'Lembrete de revisão em 12 meses']) assert.ok(h.includes(t), t);
+  for (const t of ['Questionário anônimo por link e QR Code', 'Inventário de riscos psicossociais para o PGR', 'Plano de ação com prazos e responsáveis', 'Revisão do PGR: a NR-1 exige pelo menos a cada 2 anos']) assert.ok(h.includes(t), t);
 });
 
 test('T06: CNPJ por dígito verificador, exemplo fictício válido (D-09), sem Receita/BrasilAPI (D-07)', () => {
@@ -94,4 +94,9 @@ test('T10: percentual arredondado para baixo; "já dá para analisar" a partir d
   assert.deepEqual(andamento(23, 34, LIMIAR_ANALISE), { pct: 67, podeAnalisar: false });
   assert.deepEqual(andamento(7, 10, LIMIAR_ANALISE), { pct: 70, podeAnalisar: true });
   assert.equal(andamento(1, 0, LIMIAR_ANALISE), null);
+});
+
+test('G-1 (parecer NR-1 5243f004): sem "12 meses" nas telas E3; revisão do PGR pela regra de 2 anos', () => {
+  for (const p of E3) assert.ok(!ler(p).includes('12 meses'), p);
+  assert.ok(ler('empregador-em-dia/precos/index.html').includes('Revisão do PGR: a NR-1 exige pelo menos a cada 2 anos'));
 });
