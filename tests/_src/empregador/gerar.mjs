@@ -16,7 +16,6 @@ const corpoIni = resto.slice(0, resto.indexOf('<main'));
 const rodape = resto.slice(resto.indexOf('</main>') + '</main>'.length);
 const ORIG = 'https://contacertabr.com.br';
 const vUi = ver('assets/js/empregador/ui.js');
-const vCarregar = ver('assets/js/empregador/carregar.js');
 // ed.css vai inline (QA B-PR42-09: sem CSS extra bloqueando a renderização).
 const cssEd = readFileSync(join(raiz, 'assets/js/empregador/ed.css'), 'utf8').trim();
 
@@ -37,7 +36,7 @@ ${conteudo}
 <nav class="ed-rodape" aria-label="Empregador em Dia: links"><span>Conta Certa · Empregador em Dia</span><a href="/termos/">Termos de uso</a><a href="/privacidade/">Privacidade</a><a href="/contato/">Ajuda</a><a href="/contato/">Contato</a></nav>
 <p class="ed-fornecedor">RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20 · <a href="mailto:contato@contacertabr.com.br">contato@contacertabr.com.br</a></p>
 </div>
-<script src="/assets/js/empregador/carregar.js?v=${vCarregar}" data-ui="/assets/js/empregador/ui.js?v=${vUi}" defer></script>
+<script>addEventListener('load',()=>import('/assets/js/empregador/ui.js?v=${vUi}'),{once:true})</script>
 </main>`;
   let out = `${h}</head>${corpoIni}${main}${rodape}`;
   // Sprite só com os símbolos usados, na ordem do primeiro uso (fonte-seo.test.mjs, sprite()).
@@ -358,4 +357,4 @@ ${selos}
 </form>`,
 });
 
-console.log('ok', vUi, vCarregar);
+console.log('ok', vUi);
