@@ -6,13 +6,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { PUBLICACAO_LICITACOES } from './publicacao-licitacoes.mjs';
 
 // DEC CPO (a) (A-PR35-14, 26/10/2026): as 3 datas (política, pílula e item 12 do aviso) e a dos Termos ficam como
 // [DATA DE PUBLICAÇÃO] até o commit do deploy; vermelho só por esse placeholder é aceito antes do deploy, sem bump diário.
-// "Data = hoje" só é obrigatória no deploy (workflow Pages na main) ou com REQUIRE_POLICY_DATE_TODAY=1 (pages.yml).
+// DEC CPO (Bugbot PR #48, 30/10/2026): "data = hoje" vale só para a política de privacidade e só quando o arquivo
+// legal muda (REQUIRE_POLICY_DATE_TODAY=1: ci.yml em PR que altera privacidade/index.html; pages.yml em push que a altera).
+// Termos e aviso do Licitações comparam com a constante PUBLICACAO_LICITACOES, nunca com o dia do build ou do deploy.
 const PH = '[DATA DE PUBLICAÇÃO]';
 const DATA_OU_PH = '(\\d{2}\\/\\d{2}\\/\\d{4}|\\[DATA DE PUBLICAÇÃO\\])';
-const obrigatoria = () => process.env.REQUIRE_POLICY_DATE_TODAY === '1' || ehDeploy();
+const obrigatoria = () => process.env.REQUIRE_POLICY_DATE_TODAY === '1';
 // Decisão do CPO (28/10): na publicação (pages.yml) basta a data não estar no futuro (<= hoje), salvo quando o push
 // altera privacidade/index.html, que volta a exigir = hoje (REQUIRE_POLICY_DATE_TODAY=1).
 const naoFutura = () => !obrigatoria() && process.env.REQUIRE_POLICY_DATE_NOT_FUTURE === '1';
@@ -42,7 +45,7 @@ export function hojeSaoPaulo(agora = new Date()) {
   return `${p.day}/${p.month}/${p.year}`;
 }
 
-test('privacidade: "Última atualização" (placeholder até o deploy; = hoje no deploy) (M-PR33-01, A-PR35-14)', () => {
+test('privacidade: "Última atualização" válida; = hoje só quando privacidade/index.html muda (M-PR33-01)', () => {
   const html = readFileSync(new URL('../privacidade/index.html', import.meta.url), 'utf8');
   const datas = [...html.matchAll(new RegExp(`Última atualização: ${DATA_OU_PH}\\.`, 'g'))].map((m) => m[1]);
   assert.equal(datas.length, 1, 'esperada exatamente uma "Última atualização: dd/mm/aaaa." na política');
@@ -68,7 +71,7 @@ test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
 });
 
 // Mesma trava para o aviso do Licitações (AVISO-LICITACOES-1.11, item 12 e pílula do cabeçalho) e para os Termos de
-// Venda em /licitacoes/cobranca/ ("Data: dd/mm/aaaa"): as datas exibidas têm de ser a do dia da publicação.
+// Venda em /licitacoes/cobranca/ ("Data: dd/mm/aaaa"): as datas exibidas têm de ser PUBLICACAO_LICITACOES (constante).
 // Decisão do CPO (r11, 23/10/2026 19h17): o placeholder [DATA DE PUBLICAÇÃO] dos Termos fica no PR e só é preenchido
 // no commit do deploy, depois do OK do CEO. DEC CPO 19h33 (QA A-PR35-01): a trava de placeholder roda em todo CI e
 // fica vermelha SÓ por [DATA DE PUBLICAÇÃO] até o commit do deploy (aceito). A comparação "Data = hoje" dos Termos
@@ -79,32 +82,27 @@ export const PLACEHOLDER = /\[[A-ZÀ-Ý][A-ZÀ-Ý0-9 _,.\/-]*\]/g;
 export function placeholders(texto) {
   return texto.split('\n').flatMap((l, i) => [...l.matchAll(PLACEHOLDER)].map((m) => `${i + 1}: ${m[0]}`));
 }
-// Deploy = só o workflow Pages na main (GITHUB_WORKFLOW e GITHUB_REF são do próprio GitHub; nenhuma flag nossa).
-// O CI de push na main não conta, para não quebrar a main no dia seguinte ao deploy (Bugbot 4364730719).
-export function ehDeploy(e = process.env) {
-  return e.GITHUB_WORKFLOW === 'Pages' && e.GITHUB_REF === 'refs/heads/main';
-}
 const ler = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 
-// Devolve { erros, avisos }. Placeholder: erro sempre. Data dos Termos diferente de hoje: erro só com deploy=true.
-export function travaLicitacoes({ deploy, hoje, paginas }) {
-  const erros = []; const avisos = [];
+// Devolve { erros }. Placeholder: erro sempre. Data dos Termos diferente da constante de publicação: erro sempre.
+export function travaLicitacoes({ publicacao, paginas }) {
+  const erros = [];
   const achados = Object.entries(paginas).flatMap(([p, t]) => placeholders(t).map((x) => `${p}:${x}`));
   if (achados.length) erros.push(`placeholder pendente de deploy (preencher no commit do deploy, após OK do CEO):\n${achados.join('\n')}`);
   const termos = paginas['licitacoes/cobranca/index.html'];
   const dt = [...termos.matchAll(/ · Data: (\d{2}\/\d{2}\/\d{4})/g)].map((m) => m[1]);
   if (dt.length !== 1) { if (!achados.length) erros.push('esperada uma "Data: dd/mm/aaaa" nos Termos de Venda'); }
-  else if (dt[0] !== hoje) (deploy ? erros : avisos).push(`Termos de Venda dizem ${dt[0]}, mas hoje em America/Sao_Paulo é ${hoje}`);
-  return { erros, avisos };
+  else if (dt[0] !== publicacao) erros.push(`Termos de Venda dizem ${dt[0]}, mas PUBLICACAO_LICITACOES é ${publicacao}`);
+  return { erros };
 }
 
-test('licitações: datas do aviso (item 12 e pílula): placeholder até o deploy; = hoje no deploy (A-PR35-14)', () => {
+test('licitações: datas do aviso (item 12 e pílula) = PUBLICACAO_LICITACOES', () => {
   const aviso = ler('licitacoes/politica.html');
   const itens = [...aviso.matchAll(new RegExp(`Versão AVISO-LICITACOES-[\\d.]+, de ${DATA_OU_PH}\\.`, 'g'))].map((m) => m[1]);
   const pilula = [...aviso.matchAll(new RegExp(`Versão AVISO-LICITACOES-[\\d.]+<\\/span><span class="pill n">${DATA_OU_PH}<`, 'g'))].map((m) => m[1]);
   assert.equal(itens.length, 1, 'esperada uma "Versão AVISO-LICITACOES-x, de dd/mm/aaaa." no aviso');
   assert.equal(pilula.length, 1, 'esperada uma data na pílula de versão do aviso');
-  const erros = errosDatas([['aviso (item 12)', itens[0]], ['aviso (pílula)', pilula[0]]], { exigeHoje: obrigatoria(), hoje: hojeSaoPaulo() });
+  const erros = errosDatas([['aviso (item 12)', itens[0]], ['aviso (pílula)', pilula[0]]], { exigeHoje: true, hoje: PUBLICACAO_LICITACOES });
   assert.deepEqual(erros, [], erros.join('\n'));
 });
 
@@ -115,31 +113,23 @@ test('errosDatas: placeholder falha sempre; data != hoje só quando exigida', ()
   assert.deepEqual(errosDatas([['x', '27/10/2026']], { exigeHoje: true, hoje: '27/10/2026' }), []);
 });
 
-test('licitações: trava de publicação dos Termos (vermelha só por [DATA DE PUBLICAÇÃO] até o deploy, aceito pelo CPO 19h33)', (t) => {
+test('licitações: Termos = PUBLICACAO_LICITACOES, sem placeholder', () => {
   const paginas = Object.fromEntries(PAGINAS_TRAVADAS.map((p) => [p, ler(p)]));
-  const { erros, avisos } = travaLicitacoes({ deploy: ehDeploy(), hoje: hojeSaoPaulo(), paginas });
-  for (const a of avisos) { t.diagnostic('AVISO: ' + a); console.log('AVISO: ' + a); }
+  const { erros } = travaLicitacoes({ publicacao: PUBLICACAO_LICITACOES, paginas });
   assert.deepEqual(erros, [], erros.join('\n'));
 });
 
-test('trava dos Termos: placeholder falha em qualquer CI; data diferente de hoje só falha no deploy', () => {
-  assert.equal(ehDeploy({ GITHUB_WORKFLOW: 'Pages', GITHUB_REF: 'refs/heads/main' }), true);
-  assert.equal(ehDeploy({ GITHUB_WORKFLOW: 'CI', GITHUB_REF: 'refs/heads/main' }), false);
-  assert.equal(ehDeploy({ GITHUB_WORKFLOW: 'CI', GITHUB_REF: 'refs/pull/35/merge' }), false);
-  assert.equal(ehDeploy({ DEPLOY: '1' }), false);
-  // Fixture (não o arquivo real), para o teste continuar válido depois que a data for preenchida no deploy.
+test('trava dos Termos: compara com a constante, nunca com o dia do build (Bugbot PR #48)', () => {
+  assert.match(PUBLICACAO_LICITACOES, /^\d{2}\/\d{2}\/\d{4}$/);
+  assert.ok(dataValida(PUBLICACAO_LICITACOES));
   const termos = '<p>Versão: TERMOS-VENDA-LICITACOES-1.3 · Data: [DATA DE PUBLICAÇÃO]</p>';
   const pag = (tx) => ({ 'licitacoes/cobranca/index.html': tx, 'licitacoes/politica.html': '' });
-  const emDeploy = travaLicitacoes({ deploy: true, hoje: '24/10/2026', paginas: pag(termos) });
-  assert.ok(emDeploy.erros.some((e) => e.includes('[DATA DE PUBLICAÇÃO]')), 'deploy tem de falhar no placeholder');
-  const noPr = travaLicitacoes({ deploy: false, hoje: '24/10/2026', paginas: pag(termos) });
-  assert.equal(noPr.erros.length, 1, 'no PR o único erro é o placeholder');
-  assert.ok(noPr.erros[0].includes('[DATA DE PUBLICAÇÃO]'));
+  const ph = travaLicitacoes({ publicacao: '24/10/2026', paginas: pag(termos) });
+  assert.equal(ph.erros.length, 1);
+  assert.ok(ph.erros[0].includes('[DATA DE PUBLICAÇÃO]'));
   const preenchido = termos.replace('[DATA DE PUBLICAÇÃO]', '24/10/2026');
-  // main depois do deploy, em outro dia: não quebra (só o deploy compara com hoje)
-  assert.deepEqual(travaLicitacoes({ deploy: false, hoje: '30/10/2026', paginas: pag(preenchido) }).erros, []);
-  assert.deepEqual(travaLicitacoes({ deploy: true, hoje: '24/10/2026', paginas: pag(preenchido) }).erros, []);
-  assert.equal(travaLicitacoes({ deploy: true, hoje: '25/10/2026', paginas: pag(preenchido) }).erros.length, 1);
+  assert.deepEqual(travaLicitacoes({ publicacao: '24/10/2026', paginas: pag(preenchido) }).erros, []);
+  assert.equal(travaLicitacoes({ publicacao: '25/10/2026', paginas: pag(preenchido) }).erros.length, 1);
 });
 
 test('detector de placeholder: acusa [MAIÚSCULAS], ignora checkbox e minúsculas', () => {
