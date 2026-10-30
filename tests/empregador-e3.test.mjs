@@ -119,3 +119,10 @@ test('M-03/M-04/M-05: aviso LGPD em contratar e pagamento; Me avise com consenti
   assert.ok(!/id="ed-avise-ok"[^>]*checked/.test(r));
   for (const p of ['empregador-em-dia/index.html', ...E3]) assert.ok(ler(p).includes('RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20'), p);
 });
+
+test('G-3 NR-1 9f7f0070: prazo do resultado definido no contrato', () => {
+  const h = readFileSync(new URL('../empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', import.meta.url), 'utf8');
+  assert.ok(h.includes('Prazo: definido no contrato, após o questionário'));
+  assert.ok(!h.includes('profissional de SST após o questionário'));
+  assert.ok(!h.includes('conforme contratado pelo estabelecimento'));
+});
