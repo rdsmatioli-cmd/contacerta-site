@@ -16,9 +16,9 @@ const PAGINAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-ra
   'empregador-em-dia/pagamento/index.html', 'empregador-em-dia/pagamento/ok/index.html', 'empregador-em-dia/pagamento/2/index.html',
   'empregador-em-dia/painel/index.html'];
 
-test('flags todas desligadas e SST em definição', () => {
+test('flags todas desligadas e SST opcional (DEC CPO 30/10, Jurídico 5a441f81)', () => {
   for (const [k, v] of Object.entries(FLAGS)) assert.equal(v, false, k);
-  assert.equal(ED_SST_INCLUIDO, null);
+  assert.equal(ED_SST_INCLUIDO, false);
 });
 
 test('T01 CA1: páginas noindex, fora do sitemap, aviso visível e app escondido', () => {
@@ -216,8 +216,8 @@ test('PR #36 revisões: textos literais travados nas páginas', () => {
   assert.doesNotMatch(res, /type="checkbox"[^>]*checked/);
   assert.doesNotMatch(res, /menos de 20 funcionários, você pode|precisa incluir os riscos/i);
   for (const t of [
-    '<li>Relatório com o resultado do grupo para anexar ao PGR</li>',
-    'A gente aplica o questionário anônimo e você recebe o inventário e o plano de ação para o PGR. A validação por profissional de segurança do trabalho está em definição.',
+    '<li>Relatório para o seu profissional de SST revisar</li>',
+    'A gente aplica o questionário anônimo e você recebe o inventário e o plano de ação para o PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora.',
     '(desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua)',
   ]) assert.ok(lan.includes(t), t);
   assert.doesNotMatch(lan, /assinado|profissional de segurança do trabalho analisa/i);
