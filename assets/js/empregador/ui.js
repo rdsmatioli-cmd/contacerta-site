@@ -1,7 +1,7 @@
 // Empregador em Dia: interface das páginas E2. Nada sai do navegador: respostas só em sessionStorage (T02).
-import { FLAGS, ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, FAIXAS, NOTA_DOMESTICO } from './config.js?v=04a97dcdba';
-import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=0a40d19e5c';
-import { destino, oferta, pontosAtencao, textoPgr, validarPasso, faixaPorId, jornada } from './motor.js?v=b58d62d121';
+import { FLAGS, ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, FAIXAS, NOTA_DOMESTICO, ED_PAGAMENTO_MODO, LIMIAR_ANALISE } from './config.js?v=7827cd31ce';
+import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=1b919ef115';
+import { destino, oferta, pontosAtencao, textoPgr, validarPasso, faixaPorId, jornada, cnpjValido, formatarCnpj, pagamento, andamento } from './motor.js?v=6305142b49';
 
 const CHAVE = 'ed-diagnostico';
 const brl = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: v % 1 ? 2 : 0 }).replace(/\s/g, ' ');
@@ -15,6 +15,8 @@ const gravar = (r) => sessionStorage.setItem(CHAVE, JSON.stringify(r));
 function iniciar() {
   if (!FLAGS.EMPREGADOR_EM_DIA) return; // flag OFF: só o aviso "em preparação"
   if ($('#ed-orc') && !FLAGS.ED_CHECKOUT) return; // orçamento NR-1: também exige ED_CHECKOUT
+  if ($('[data-ed-e3="checkout"]') && !FLAGS.ED_CHECKOUT) return; // E3: preços, contratar, pagamentos
+  if ($('[data-ed-e3="login"]') && !FLAGS.ED_LOGIN) return; // E3: painel exige login (PR #7, D-14)
   $('#ed-off').hidden = true;
   $('#ed-app').hidden = false;
   const sst = ED_SST_INCLUIDO === null ? SST_TEXTO_EM_DEFINICAO : '';
@@ -23,6 +25,111 @@ function iniciar() {
   if ($('[data-ed-res]')) resultado();
   if ($('#ed-jornada')) simulador();
   if ($('#ed-orc')) orcamentoNr1();
+  if ($('[data-ed-faixa]')) precos();
+  if ($('#ed-contratar')) contratar();
+  if ($('#ed-pagamento')) pagar();
+  if ($('#ed-pg-ok')) pagamentoOk();
+  if ($('#ed-painel')) painel();
+}
+
+// ---- E3 (backlog v3 T05-T08, T10, T12). Pagamento só em mock (D-22): nada sai do navegador, nada é cobrado.
+const PEDIDO = 'ed-pedido';
+const lerPedido = () => { try { return JSON.parse(sessionStorage.getItem(PEDIDO)) || {}; } catch { return {}; } };
+const gravarPedido = (p) => sessionStorage.setItem(PEDIDO, JSON.stringify(p));
+// T08 regra: código aleatório, não sequencial, 6 caracteres, sem derivar do CNPJ.
+const ALFA = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+const codigo = (n) => [...crypto.getRandomValues(new Uint8Array(n))].map((b) => ALFA[b % ALFA.length]).join('');
+
+function precos() {
+  const f = ler().faixa;
+  if (f) { const c = $(`[data-ed-faixa="${f}"] .ed-sua`); if (c) c.hidden = false; } // T05 CA 2
+}
+
+function contratar() {
+  const form = $('#ed-contratar');
+  const msg = $('#ct-msg');
+  const faixa = new URLSearchParams(location.search).get('faixa') || ler().faixa;
+  form.querySelector('[type="submit"]').disabled = false;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!oferta(faixa)) { msg.textContent = 'Faça a avaliação rápida NR-1 primeiro.'; msg.hidden = false; return; }
+    if (!cnpjValido(form.cnpj.value)) { msg.textContent = 'Confira o CNPJ: os dígitos não batem.'; msg.hidden = false; return; }
+    if (!form.checkValidity()) { msg.textContent = 'Preencha razão social, nome e e-mail.'; msg.hidden = false; return; }
+    // T06 CA 4: os dados vão só para a sessão do navegador enquanto a flag estiver OFF.
+    gravarPedido({ faixa, cnpj: formatarCnpj(form.cnpj.value), razao: form.razao.value.trim(), nome: form.nome.value.trim(), email: form.email.value.trim() });
+    location.assign('/empregador-em-dia/pagamento/');
+  });
+}
+
+// B-PR42-08 (QA ebbc1144): copiar para a área de transferência com retorno visível e anunciado.
+function copiar(btn, texto) {
+  if (!btn) return;
+  const rotulo = btn.textContent;
+  btn.addEventListener('click', async () => {
+    let ok = false;
+    try { await navigator.clipboard.writeText(texto()); ok = true; } catch { ok = false; }
+    btn.textContent = ok ? 'Copiado' : 'Não deu para copiar. Selecione o texto e copie.';
+    setTimeout(() => { btn.textContent = rotulo; }, 2500);
+  });
+}
+
+function pagar() {
+  const form = $('#ed-pagamento');
+  const msg = $('#pg-msg');
+  const p = lerPedido();
+  const parcela = form.dataset.edParcela;
+  if (!oferta(p.faixa)) { msg.textContent = 'Pedido não encontrado. Comece pelos dados do contrato.'; msg.hidden = false; return; }
+  // T12 CA 1: à vista ou 2ª já paga volta ao painel.
+  if (parcela === '2' && (p.forma !== 'metade' || p.pago2)) { location.replace('/empregador-em-dia/painel/'); return; }
+  set('pg-empresa', `${p.razao} · CNPJ ${p.cnpj}`);
+  set('pg-faixa', `${faixaPorId(p.faixa).rotulo} funcionários`);
+  const mostrar = () => {
+    const forma = parcela === '2' ? 'metade' : (form.forma.value || 'metade');
+    const v = pagamento(p.faixa, forma);
+    set('pg-preco', brl2(v.preco));
+    set('pg-agora', brl2(v.agora));
+    set('pg-entrega', brl2(v.entrega));
+    set('pg-total', brl2(parcela === '2' ? v.entrega : v.agora));
+    const l2 = $('[data-ed-linha2]'); if (l2) l2.hidden = forma === 'avista';
+    const n = $('[data-ed="pg-nota-avista"]'); if (n) n.hidden = forma !== 'avista';
+    $('[data-ed-pix]').hidden = form.meio.value !== 'pix';
+  };
+  if (form.forma) form.forma.value = p.forma || 'metade';
+  form.addEventListener('change', mostrar);
+  mostrar();
+  copiar($('[data-ed-copiar="pix"]'), () => $('[data-ed="pix"]').textContent.trim());
+  form.querySelector('[type="submit"]').disabled = false;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!form.meio.value || !form.checkValidity()) { msg.textContent = 'Escolha a forma de pagamento e o e-mail da nota fiscal.'; msg.hidden = false; return; }
+    if (ED_PAGAMENTO_MODO !== 'mock') throw new Error('checkout live não liberado'); // D-22: só mock
+    if (parcela === '2') { gravarPedido({ ...p, pago2: true }); location.assign('/empregador-em-dia/painel/'); return; }
+    const forma = form.forma.value || 'metade';
+    const ano = new Date().getFullYear();
+    gravarPedido({ ...p, forma, meio: form.meio.value, pedido: `ED-${ano}-${codigo(4)}`, link: codigo(6) });
+    location.assign('/empregador-em-dia/pagamento/ok/');
+  });
+}
+
+function pagamentoOk() {
+  const p = lerPedido();
+  if (!p.pedido || !oferta(p.faixa)) return; // B-PR42-11: sem pedido não mostra 'Pagamento recebido'
+  $('[data-ed-ok-vazio]').hidden = true;
+  $('[data-ed-ok]').hidden = false;
+  const v = pagamento(p.faixa, p.forma);
+  set('ok-n', faixaPorId(p.faixa).rotulo);
+  set('ok-link', `contacertabr.com.br/q/${p.link}`);
+  set('ok-pago', brl2(v.agora));
+  set('ok-pedido', p.pedido);
+  // T08 CA 3 (D-11): no caminho à vista nada fala em 2ª parcela.
+  set('ok-entrega', p.forma === 'avista' ? 'você recebe o relatório' : 'você recebe o relatório e paga a 2ª parcela');
+  copiar($('[data-ed-copiar="ok-link"]'), () => `https://contacertabr.com.br/q/${p.link}`);
+}
+
+function painel() {
+  // Dados de exemplo da v3.3 (26 de 34) até o login do PR #7; o percentual e o limiar vêm do motor e da config.
+  const a = andamento(26, 34, LIMIAR_ANALISE);
+  set('pn-pct', a.podeAnalisar ? `${a.pct}%: já dá para analisar` : `${a.pct}%`);
 }
 
 // /empregador-em-dia/orcamento-nr1/: destino ED-Orcamento (Google Form dedicado) e textos do Designer vêm de

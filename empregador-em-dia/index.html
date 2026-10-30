@@ -27,7 +27,32 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/js/empregador/ed.css?v=4aca48709b">
+<style>/* Empregador em Dia (E2): complementos ao style.css */
+.ed-selo{display:inline-block;font-size:.8rem;padding:.15rem .5rem;border:1px dashed currentColor;border-radius:.4rem;margin:.75rem 0}
+.ed-menu,.ed-rodape{display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;margin:1rem 0}
+.ed-rodape{border-top:1px solid #8885;padding-top:1rem;margin-top:2rem}
+.ed-cartoes{list-style:none;padding:0;display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));margin:1.5rem 0}
+.ed-cartoes li{border:1px solid #8886;border-radius:.75rem;padding:1rem;display:flex;flex-direction:column;gap:.5rem}
+.ed-cartoes a{display:flex;flex-direction:column;gap:.5rem;color:inherit}
+.ed-ops{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0}
+.ed-op{display:flex;align-items:center;gap:.4rem;border:1px solid #8886;border-radius:.5rem;padding:.6rem .8rem;min-height:44px}
+.ed-form fieldset{border:0;padding:0;margin:0 0 1rem;min-width:0}
+.ed-form legend{font-size:1.35rem;font-weight:700}
+.ed-passo{display:block;font-size:.85rem;font-weight:400}
+.ed-rotulo{font-weight:600;margin:1rem 0 .25rem}
+.ed-acoes{display:flex;gap:1rem;justify-content:space-between}
+.ed-preco{font-size:2rem;font-weight:800;margin:.25rem 0}
+.ed-oferta{border:1px solid #8886;border-radius:.75rem;padding:1rem;margin:1.5rem 0}
+.ed-aviso{border-left:4px solid currentColor;padding:.5rem 1rem}
+.ed-tab{width:100%;border-collapse:collapse;margin:1rem 0}
+.ed-tab caption{text-align:left;font-weight:600}
+.ed-tab th,.ed-tab td{padding:.5rem;border-bottom:1px solid #8885;text-align:left}
+.ed-tab td{text-align:right;white-space:nowrap}
+.ed input[type=email],.ed-form input:not([type=radio]):not([type=checkbox]){width:100%;max-width:24rem;padding:.6rem;min-height:44px}
+/* P-08 S-02/S-03: aviso de privacidade inteiro no fluxo, antes de "Começar", com o corpo do texto principal (mín. 14 px) */
+.ed-q{display:flex;flex-direction:column;gap:.75rem;overflow:visible}
+.ed-q-priv{font-size:max(1rem,14px);line-height:1.5;max-height:none;overflow:visible;overflow-wrap:anywhere}
+.ed-fornecedor{font-size:.85rem;margin:.25rem 0 0}</style>
 <link rel="stylesheet" href="/assets/style.css?v=03383b6fea">
 
 
@@ -61,8 +86,9 @@
 </ul>
 <p><a class="btn" href="/empregador-em-dia/avaliacao-rapida-nr1/">Ver o que minha empresa precisa</a></p>
 <nav class="ed-rodape" aria-label="Empregador em Dia: links"><span>Conta Certa · Empregador em Dia</span><a href="/termos/">Termos de uso</a><a href="/privacidade/">Privacidade</a><a href="/contato/">Ajuda</a><a href="/contato/">Contato</a></nav>
+<p class="ed-fornecedor">RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20 · <a href="mailto:contato@contacertabr.com.br">contato@contacertabr.com.br</a></p>
 </div>
-<script type="module" src="/assets/js/empregador/ui.js?v=dec6c3ff63"></script>
+<script>(()=>{let f=0;const ir=()=>{if(f++)return;import('/assets/js/empregador/ui.js?v=8913d6f259')},ocioso=()=>window.requestIdleCallback?requestIdleCallback(ir,{timeout:1500}):setTimeout(ir,1);addEventListener('load',()=>{let t=setTimeout(ocioso,600);try{new PerformanceObserver(()=>{clearTimeout(t);t=setTimeout(ocioso,600)}).observe({type:'largest-contentful-paint',buffered:true})}catch{}setTimeout(ir,3000)},{once:true})})()</script>
 </main>
 <footer class="rodape"><div class="caixa">
 <div class="rod-grade">

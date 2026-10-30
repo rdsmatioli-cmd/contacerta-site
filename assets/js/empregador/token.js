@@ -1,7 +1,7 @@
 // Empregador em Dia: regras de anonimato do questionário (P-12, parecer c23c3792; M-01 resolvido: só token individual).
 // Backend-agnóstico (funções puras + armazenamento injetado). Guardar só o hash do token e o marcador "usado";
 // nunca a relação token-destinatário, IP, aparelho, nome ou e-mail; resposta sem vínculo com o token.
-import { ANONIMATO } from './config.js?v=04a97dcdba';
+import { ANONIMATO } from './config.js?v=7827cd31ce';
 
 const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
 export async function hashToken(token) {

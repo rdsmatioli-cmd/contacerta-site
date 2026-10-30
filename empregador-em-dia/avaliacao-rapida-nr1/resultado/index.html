@@ -27,7 +27,32 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/js/empregador/ed.css?v=4aca48709b">
+<style>/* Empregador em Dia (E2): complementos ao style.css */
+.ed-selo{display:inline-block;font-size:.8rem;padding:.15rem .5rem;border:1px dashed currentColor;border-radius:.4rem;margin:.75rem 0}
+.ed-menu,.ed-rodape{display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;margin:1rem 0}
+.ed-rodape{border-top:1px solid #8885;padding-top:1rem;margin-top:2rem}
+.ed-cartoes{list-style:none;padding:0;display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));margin:1.5rem 0}
+.ed-cartoes li{border:1px solid #8886;border-radius:.75rem;padding:1rem;display:flex;flex-direction:column;gap:.5rem}
+.ed-cartoes a{display:flex;flex-direction:column;gap:.5rem;color:inherit}
+.ed-ops{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0}
+.ed-op{display:flex;align-items:center;gap:.4rem;border:1px solid #8886;border-radius:.5rem;padding:.6rem .8rem;min-height:44px}
+.ed-form fieldset{border:0;padding:0;margin:0 0 1rem;min-width:0}
+.ed-form legend{font-size:1.35rem;font-weight:700}
+.ed-passo{display:block;font-size:.85rem;font-weight:400}
+.ed-rotulo{font-weight:600;margin:1rem 0 .25rem}
+.ed-acoes{display:flex;gap:1rem;justify-content:space-between}
+.ed-preco{font-size:2rem;font-weight:800;margin:.25rem 0}
+.ed-oferta{border:1px solid #8886;border-radius:.75rem;padding:1rem;margin:1.5rem 0}
+.ed-aviso{border-left:4px solid currentColor;padding:.5rem 1rem}
+.ed-tab{width:100%;border-collapse:collapse;margin:1rem 0}
+.ed-tab caption{text-align:left;font-weight:600}
+.ed-tab th,.ed-tab td{padding:.5rem;border-bottom:1px solid #8885;text-align:left}
+.ed-tab td{text-align:right;white-space:nowrap}
+.ed input[type=email],.ed-form input:not([type=radio]):not([type=checkbox]){width:100%;max-width:24rem;padding:.6rem;min-height:44px}
+/* P-08 S-02/S-03: aviso de privacidade inteiro no fluxo, antes de "Começar", com o corpo do texto principal (mín. 14 px) */
+.ed-q{display:flex;flex-direction:column;gap:.75rem;overflow:visible}
+.ed-q-priv{font-size:max(1rem,14px);line-height:1.5;max-height:none;overflow:visible;overflow-wrap:anywhere}
+.ed-fornecedor{font-size:.85rem;margin:.25rem 0 0}</style>
 <link rel="stylesheet" href="/assets/style.css?v=03383b6fea">
 
 
@@ -49,14 +74,15 @@
 <section data-ed-res="vazio"><h1>Faça a avaliação rápida NR-1 primeiro</h1><p><a class="btn" href="/empregador-em-dia/avaliacao-rapida-nr1/">Ver o que minha empresa precisa</a></p></section>
 <section data-ed-res="oferta" hidden><h1>Sua empresa deve avaliar os riscos psicossociais no PGR</h1>
 <ul class="ed-cartoes"><li><strong>Seu porte</strong><span data-ed="porte"></span></li><li><strong>Pontos de atenção</strong><span data-ed="pontos"></span></li><li><strong>PGR</strong><span data-ed="pgr"></span></li></ul>
-<div class="ed-oferta"><h2>Adequação NR-1 para <span data-ed="porte2"></span></h2><p class="ed-preco" data-ed="preco"></p><p data-ed="parcelas"></p><p class="ed-sst" data-ed-sst></p>
+<div class="ed-oferta"><h2>Adequação NR-1 para <span data-ed="porte2"></span></h2><p class="ed-preco" data-ed="preco"></p><p data-ed="parcelas"></p><p data-ed-validade>Preços válidos até 31/12/2026.</p><p class="ed-sst" data-ed-sst></p>
 <p><button type="button" class="btn" data-ed-contratar disabled>Contratar</button></p></div>
-<p>Prazo: definido com o profissional de SST após o questionário.</p></section>
+<p>Prazo: definido no contrato, após o questionário.</p></section>
 <section data-ed-res="simplificada" hidden><h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>
 <p>MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.</p>
 <ul class="ed-cartoes"><li><strong>Guia gratuito para pequenas empresas</strong><span>Checklist de 1 página com o que avaliar, um modelo de plano de ação e como anexar ao PGR.</span><button type="button" class="btn" disabled>Receber o guia por e-mail</button></li>
 <li><form class="ed-form" id="ed-avise" novalidate><strong>Vai passar de 20 funcionários?</strong><span>Avisamos quando fizer sentido contratar a adequação completa.</span>
-<label for="ed-email">Seu e-mail</label><input type="email" id="ed-email" name="email" autocomplete="email" placeholder="dono@lojaexemplo.com.br" aria-describedby="aj-email aviso-lgpd-avise"><small id="aj-email">Exemplo: o e-mail que você mais usa.</small><small id="aviso-lgpd-avise">Usamos seu e-mail só para avisar quando a adequação fizer sentido para a sua empresa. Você pode pedir para sair a qualquer momento. Detalhes na <a href="/privacidade/">Política de privacidade</a>.</small>
+<label for="ed-email">Seu e-mail</label><input type="email" id="ed-email" name="email" autocomplete="email" placeholder="dono@lojaexemplo.com.br" aria-describedby="aj-email aviso-lgpd-avise"><small id="aj-email">Exemplo: o e-mail que você mais usa.</small><small id="aviso-lgpd-avise">Quem cuida do seu e-mail é RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services), CNPJ 61.193.879/0001-20. Usamos o e-mail só para um aviso sobre a adequação NR-1, com o seu consentimento (LGPD, art. 7º, I). Não vendemos nem cedemos seus dados e não ligamos nem mandamos WhatsApp. Guardamos até você pedir para sair; para sair, responda ao aviso ou escreva para contato@contacertabr.com.br. Detalhes na <a href="/privacidade/">Política de privacidade</a>.</small>
+<label class="le-ok"><input type="checkbox" id="ed-avise-ok" name="consentimento" value="sim" required> Aceito receber esse aviso por e-mail.</label>
 <button type="submit" disabled class="btn">Me avise</button></form></li></ul>
 <p><a href="/contato/">Quer mesmo assim a adequação completa? Fale com a gente.</a></p></section>
 <section data-ed-res="sob-consulta" hidden><h1>Para mais de 200 funcionários, fazemos um orçamento</h1>
@@ -64,8 +90,9 @@
 <p class="ed-sst" data-ed-sst></p>
 <p><button type="button" class="btn" data-ed-orcamento disabled>Pedir orçamento</button></p></section>
 <nav class="ed-rodape" aria-label="Empregador em Dia: links"><span>Conta Certa · Empregador em Dia</span><a href="/termos/">Termos de uso</a><a href="/privacidade/">Privacidade</a><a href="/contato/">Ajuda</a><a href="/contato/">Contato</a></nav>
+<p class="ed-fornecedor">RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20 · <a href="mailto:contato@contacertabr.com.br">contato@contacertabr.com.br</a></p>
 </div>
-<script type="module" src="/assets/js/empregador/ui.js?v=dec6c3ff63"></script>
+<script>(()=>{let f=0;const ir=()=>{if(f++)return;import('/assets/js/empregador/ui.js?v=8913d6f259')},ocioso=()=>window.requestIdleCallback?requestIdleCallback(ir,{timeout:1500}):setTimeout(ir,1);addEventListener('load',()=>{let t=setTimeout(ocioso,600);try{new PerformanceObserver(()=>{clearTimeout(t);t=setTimeout(ocioso,600)}).observe({type:'largest-contentful-paint',buffered:true})}catch{}setTimeout(ir,3000)},{once:true})})()</script>
 </main>
 <footer class="rodape"><div class="caixa">
 <div class="rod-grade">
