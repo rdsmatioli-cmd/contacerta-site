@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LIGHTHOUSE, URLS, PERFIS, METAS, avaliar, nomeRelatorio, resumo } from './lighthouse/metas.mjs';
+import { LIGHTHOUSE, URLS, URLS_LICITACOES, TODAS_URLS, PERFIS, METAS, avaliar, nomeRelatorio, resumo } from './lighthouse/metas.mjs';
 
 const raiz = fileURLToPath(new URL('../', import.meta.url));
 const ler = (p) => readFileSync(join(raiz, p), 'utf8');
@@ -91,4 +91,16 @@ test('CI: job lighthouse roda o 13.5.0 por npx (sem @lhci/cli), com actions fixa
   const usos = [...ci.matchAll(/uses: ([^\s]+)/g)].map((m) => m[1]);
   assert.ok(usos.length >= 5);
   for (const u of usos) assert.match(u, /^[\w-]+\/[\w-]+@[0-9a-f]{40}$/, u);
+});
+
+test('A-PR35-18: Lighthouse cobre as páginas indexáveis do /licitacoes/ (existem e estão no sitemap)', () => {
+  const sitemap = ler('sitemap.xml');
+  assert.equal(URLS_LICITACOES.length, 7);
+  for (const u of URLS_LICITACOES) {
+    assert.ok(TODAS_URLS.includes(u), u);
+    const arq = u.endsWith('/') ? `${u.slice(1)}index.html` : u.slice(1);
+    assert.ok(existsSync(join(raiz, arq)), u);
+    assert.ok(sitemap.includes(`<loc>https://contacertabr.com.br${u}</loc>`), u);
+  }
+  assert.equal(new Set(TODAS_URLS).size, TODAS_URLS.length);
 });

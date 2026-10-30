@@ -41,7 +41,8 @@ jobs:
             echo 'privacidade/index.html não alterada neste PR: trava da data não se aplica.'
           fi
       - name: Trava da data da política (obrigatória em PR que altera privacidade/index.html)
-        if: github.event_name == 'pull_request' && steps.politica.outputs.alterada == 'true'
+        # A-PR35-12: roda mesmo com o passo de testes vermelho (só por [DATA], DEC CPO 19h33).
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && steps.politica.outputs.alterada == 'true' }}
         env:
           REQUIRE_POLICY_DATE_TODAY: '1'
         run: node --test tests/politica-data.test.mjs
@@ -52,6 +53,7 @@ jobs:
       # confere o comentário da versão ao lado do SHA, permissions de escrita no nível do job nem persist-credentials:
       # true explícito: isso fica para a revisão (README). Fora do Dependabot: versão e hash sobem à mão.
       - name: zizmor (segurança dos workflows)
+        if: ${{ !cancelled() }}
         run: |
           python3 -m venv "$RUNNER_TEMP/zizmor"
           echo 'zizmor==1.30.1 --hash=sha256:eee12266b793cb87ad4a7e3af2e72404f8a63e3de5eb099b80bf7b1cfd232a8e' >"$RUNNER_TEMP/zizmor.txt"
@@ -70,7 +72,7 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
-      - name: Lighthouse 13.5.0 (9 URLs + 4 noindex do Empregador, mobile e desktop) e metas
+      - name: Lighthouse 13.5.0 (9 URLs + 7 do Licitações + noindex do Empregador, mobile e desktop) e metas
         run: |
           python3 -m http.server 8080 --bind 127.0.0.1 >"$RUNNER_TEMP/http.log" 2>&1 &
           for _ in $(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:8080/ && break; sleep 1; done
