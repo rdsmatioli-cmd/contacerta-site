@@ -60,7 +60,8 @@ for (const p of scripts) {
   });
 }
 
-for (const p of paginas.filter((x) => !ehLicitacoes(x))) {
+// Stub estático do post movido (M-02 162a9503) fica sem GA4: coberto em retarget-simples-hibrido.test.mjs.
+for (const p of paginas.filter((x) => !ehLicitacoes(x) && x !== 'blog/simples-hibrido-ou-puro-2027/index.html')) {
   test(`${p}: GA4 só pelo lcm-consent, uma vez, e nenhum Google direto`, () => {
     const html = ler(p);
     assert.doesNotMatch(html, PROIBIDO);

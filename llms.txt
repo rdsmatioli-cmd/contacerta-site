@@ -50,10 +50,10 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 ## Reforma Tributária
 
 - [Calculadora CBS e IBS 2026-2033: transição ano a ano](https://contacertabr.com.br/transicao-cbs-ibs/): Calculadora CBS e IBS grátis: alíquotas de teste de 2026 e cronograma até 2033, ano a ano, no preço do seu serviço. Resultado imprimível, com fontes.
-- [Simples híbrido ou puro: simulador e prazo da opção](https://contacertabr.com.br/simples-hibrido/): Simples híbrido vale a pena? Informe faturamento, clientes B2B ou B2C, margem e compras e veja qual opção a simulação indica: puro ou híbrido. Opção até 30/10/2026.
+- [Simulador da opção de CBS e IBS no Simples Nacional](https://contacertabr.com.br/simples-hibrido/): Compare DAS e CBS/IBS fora do DAS no Simples Nacional: informe faturamento, clientes B2B ou B2C, margem e compras e veja a estimativa da opção.
 - [Calculadora de preço na Reforma Tributária](https://contacertabr.com.br/preco-reforma-tributaria/): Calcule o novo preço que mantém a sua margem quando PIS e Cofins saem e entram CBS e IBS. Veja o total da nota e o custo para o cliente com crédito.
 - [Calculadora de crédito travado de CBS e IBS](https://contacertabr.com.br/credito-travado/): Na reforma, o crédito de CBS e IBS só fica disponível quando o fornecedor quita o tributo. Estime quanto crédito pode ficar travado e o custo dessa espera.
-- [Calendário da Reforma Tributária 2026-2033](https://contacertabr.com.br/calendario-reforma-tributaria/): Datas da Reforma Tributária: teste em 2026, prazo do Simples híbrido em 30/10/2026, CBS em 2027, transição de ICMS e ISS de 2029 a 2032 e modelo final em 2033.
+- [Calendário da Reforma Tributária 2026-2033](https://contacertabr.com.br/calendario-reforma-tributaria/): Datas da Reforma Tributária: teste em 2026, opção do Simples pelo regime regular de CBS e IBS por semestre (setembro e março), CBS em 2027, ICMS e ISS de 2029 a 2032 e modelo final em 2033.
 
 ## Matemática
 
@@ -80,7 +80,6 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 - [Blog do Conta Certa](https://contacertabr.com.br/blog/): guias com resposta direta e links para as calculadoras.
 - [Pró-labore em 2026: o que é, quanto retirar e como fica no Simples](https://contacertabr.com.br/blog/pro-labore/): Pró-labore em 2026 com INSS de 11%, desconto máximo de R$ 932,31, IR com a redução da Lei 15.270, Fator R e exemplos com números. Fontes oficiais.
 - [NR-1 e riscos psicossociais: o que a pequena empresa precisa saber em 2026](https://contacertabr.com.br/blog/nr1-riscos-psicossociais-2026/): A NR-1 já exige que a empresa gerencie riscos psicossociais no PGR. Veja o que mudou, o que o STF suspendeu, o que fazer e como começar pelo autodiagnóstico grátis.
-- [Simples híbrido ou puro: como decidir até 30/10/2026](https://contacertabr.com.br/blog/simples-hibrido-ou-puro-2027/): Simples híbrido ou puro? Entenda a diferença, quem tende a ganhar, os prazos da opção para 2027 (até 30/10/2026) e simule as duas opções no simulador grátis.
 - [Como calcular a rescisão trabalhista em 2026: verbas, prazos e exemplo](https://contacertabr.com.br/blog/como-calcular-rescisao-2026/): Veja quais verbas entram na rescisão em cada tipo de desligamento, como calcular aviso prévio, 13º, férias e multa do FGTS e um exemplo completo com valores de 2026.
 - [Salário líquido 2026: como calcular com INSS, IR e o IR zero até R$ 5 mil](https://contacertabr.com.br/blog/salario-liquido-2026/): Veja como calcular o salário líquido em 2026: tabela do INSS, IR com a redução da Lei 15.270/2025, dependentes, exemplos de R$ 1.621 a R$ 10.000 e outros descontos.
 - [13º salário 2026: datas das parcelas e por que a 2ª parcela vem menor](https://contacertabr.com.br/blog/decimo-terceiro-2026/): 13º salário de 2026: 1ª parcela até 30/11 e 2ª até 20/12, que cai num domingo. Entenda por que a 2ª vem menor, com INSS, IR e exemplos.

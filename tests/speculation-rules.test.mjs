@@ -27,7 +27,7 @@ test('a varredura acha páginas da raiz, do blog e de /licitacoes/', () => {
   assert.ok(paginas.filter((p) => !ehLicitacoes(p)).length >= 50);
 });
 
-const fora = paginas.filter((p) => !ehLicitacoes(p));
+const fora = paginas.filter((p) => !ehLicitacoes(p) && p !== 'blog/simples-hibrido-ou-puro-2027/index.html'); // stub M-02 162a9503
 const primeira = regrasDe(ler('index.html'))[0];
 for (const p of fora) {
   test(`${p}: speculationrules só com prefetch moderate de URLs internas`, () => {

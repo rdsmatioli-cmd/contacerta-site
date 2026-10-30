@@ -35,8 +35,10 @@ const cards = (html) => [...html.matchAll(/<li><a class="card" href="([^"]+)">[^
 // Posts publicados, na ordem do índice do blog: título (= h1 do post), categoria e resumo do card.
 const indice = [...ler('blog/index.html').matchAll(/<li><a class="post-card" href="(\/blog\/[^"]+\/)"><small>([^<]+)<\/small><strong>([^<]+)<\/strong><span>([^<]+)<\/span>/g)]
   .map((m) => ({ href: m[1], categoria: m[2], titulo: m[3], resumo: m[4] }));
+// Posts movidos para outro site da mesma empresa viram stub estático noindex (retarget simples híbrido, M-02 162a9503).
+export const MOVIDOS = Object.freeze(['simples-hibrido-ou-puro-2027']);
 const posts = readdirSync(join(raiz, 'blog'), { withFileTypes: true })
-  .filter((d) => d.isDirectory() && d.name !== 'categoria' && existsSync(join(raiz, 'blog', d.name, 'index.html')))
+  .filter((d) => d.isDirectory() && d.name !== 'categoria' && !MOVIDOS.includes(d.name) && existsSync(join(raiz, 'blog', d.name, 'index.html')))
   .map((d) => `/blog/${d.name}/`);
 
 const RECENTES = 6; // posts no bloco da home; com mais posts no índice, a home mostra só os primeiros
@@ -47,7 +49,6 @@ const PARES = {
   'decimo-terceiro': '/blog/decimo-terceiro-2026/',
   'salario-liquido': '/blog/salario-liquido-2026/',
   'nr1-riscos-psicossociais': '/blog/nr1-riscos-psicossociais-2026/',
-  'simples-hibrido': '/blog/simples-hibrido-ou-puro-2027/',
 };
 
 test('o índice do blog lista todos os posts publicados e o título do card é o h1 do post', () => {
