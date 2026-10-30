@@ -1,8 +1,8 @@
 // M-PR33-01 (Advogado): a "Última atualização" da política de privacidade é um literal fixo e precisa ser a data do
 // deploy. Como o GitHub Pages publica a main sem workflow de deploy, a trava fica no CI do PR: falha se a data da
 // política for diferente de hoje em America/Sao_Paulo (= TZ=America/Sao_Paulo date +%d/%m/%Y).
-// Obrigatória quando GITHUB_EVENT_NAME=pull_request ou REQUIRE_POLICY_DATE_TODAY=1; fora disso é pulada (para a main
-// não quebrar no dia seguinte ao merge). Antes do merge, reexecute o CI do PR no próprio dia e ajuste a data.
+// Obrigatória só com REQUIRE_POLICY_DATE_TODAY=1 (passo do ci.yml em PR que altera privacidade/index.html, e pages.yml);
+// fora disso é pulada (para a main e os PRs sem relação com a política não quebrarem no dia seguinte). Antes do merge, reexecute o CI do PR no próprio dia e ajuste a data.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -13,11 +13,24 @@ import { readFileSync } from 'node:fs';
 const PH = '[DATA DE PUBLICAÇÃO]';
 const DATA_OU_PH = '(\\d{2}\\/\\d{2}\\/\\d{4}|\\[DATA DE PUBLICAÇÃO\\])';
 const obrigatoria = () => process.env.REQUIRE_POLICY_DATE_TODAY === '1' || ehDeploy();
+// Decisão do CPO (28/10): na publicação (pages.yml) basta a data não estar no futuro (<= hoje), salvo quando o push
+// altera privacidade/index.html, que volta a exigir = hoje (REQUIRE_POLICY_DATE_TODAY=1).
+const naoFutura = () => !obrigatoria() && process.env.REQUIRE_POLICY_DATE_NOT_FUTURE === '1';
+const ordem = (d) => d.split('/').reverse().join('');
+// B-PR34-06 (Advogado 123a5499): só datas que existem no calendário (31/02, 00/10, 29/02 fora de ano bissexto falham).
+export function dataValida(d) {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d);
+  if (!m) return false;
+  const [dia, mes, ano] = [+m[1], +m[2], +m[3]];
+  const x = new Date(Date.UTC(ano, mes - 1, dia));
+  return x.getUTCFullYear() === ano && x.getUTCMonth() === mes - 1 && x.getUTCDate() === dia;
+}
 // Devolve a lista de erros para um conjunto [nome, valor] de datas: placeholder sempre é erro; data != hoje só se exigida.
 export function errosDatas(pares, { exigeHoje, hoje }) {
   const e = [];
   for (const [nome, d] of pares) {
     if (d === PH) e.push(`${nome}: placeholder ${PH} pendente (preencher no commit do deploy, DEC CPO (a))`);
+    else if (!dataValida(d)) e.push(`${nome} diz ${d}, que não é uma data válida`);
     else if (exigeHoje && d !== hoje) e.push(`${nome} diz ${d}, mas hoje em America/Sao_Paulo é ${hoje}`);
   }
   return e;
@@ -35,6 +48,18 @@ test('privacidade: "Última atualização" (placeholder até o deploy; = hoje no
   assert.equal(datas.length, 1, 'esperada exatamente uma "Última atualização: dd/mm/aaaa." na política');
   const erros = errosDatas([['política', datas[0]]], { exigeHoje: obrigatoria(), hoje: hojeSaoPaulo() });
   assert.deepEqual(erros, [], erros.join('\n'));
+});
+
+test('privacidade: "Última atualização" não está no futuro (publicação sem mudança na política)', {
+  skip: naoFutura() ? false : 'só com REQUIRE_POLICY_DATE_NOT_FUTURE=1 (pages.yml, push que não altera privacidade/index.html)',
+}, () => {
+  const html = readFileSync(new URL('../privacidade/index.html', import.meta.url), 'utf8');
+  const datas = [...html.matchAll(new RegExp(`Última atualização: ${DATA_OU_PH}\\.`, 'g'))].map((m) => m[1]);
+  assert.equal(datas.length, 1, 'esperada exatamente uma "Última atualização: dd/mm/aaaa." na política');
+  const erros = errosDatas([['política', datas[0]]], { exigeHoje: false, hoje: hojeSaoPaulo() });
+  assert.deepEqual(erros, [], erros.join('\n'));
+  const hoje = hojeSaoPaulo();
+  assert.ok(ordem(datas[0]) <= ordem(hoje), `a política diz ${datas[0]}, depois de hoje em America/Sao_Paulo (${hoje})`);
 });
 
 test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
@@ -120,4 +145,9 @@ test('trava dos Termos: placeholder falha em qualquer CI; data diferente de hoje
 test('detector de placeholder: acusa [MAIÚSCULAS], ignora checkbox e minúsculas', () => {
   assert.deepEqual(placeholders('a [PREÇO] b [ ] c [x] d\n[PRAZO, NO MÁXIMO 5 DIAS ÚTEIS]'), ['1: [PREÇO]', '2: [PRAZO, NO MÁXIMO 5 DIAS ÚTEIS]']);
   assert.deepEqual(placeholders('action="[ORIGEM_CHECKOUT]/checkout"'), ['1: [ORIGEM_CHECKOUT]']);
+});
+
+test('dataValida rejeita datas impossíveis (B-PR34-06)', () => {
+  for (const d of ['28/10/2026', '29/02/2028', '31/12/2026', '01/01/2027']) assert.ok(dataValida(d), d);
+  for (const d of ['31/02/2026', '29/02/2026', '00/10/2026', '32/01/2026', '15/13/2026', '31/04/2026', '1/10/2026']) assert.ok(!dataValida(d), d);
 });
