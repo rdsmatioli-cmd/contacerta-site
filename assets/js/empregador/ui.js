@@ -61,6 +61,18 @@ function contratar() {
   });
 }
 
+// B-PR42-08 (QA ebbc1144): copiar para a área de transferência com retorno visível e anunciado.
+function copiar(btn, texto) {
+  if (!btn) return;
+  const rotulo = btn.textContent;
+  btn.addEventListener('click', async () => {
+    let ok = false;
+    try { await navigator.clipboard.writeText(texto()); ok = true; } catch { ok = false; }
+    btn.textContent = ok ? 'Copiado' : 'Não deu para copiar. Selecione o texto e copie.';
+    setTimeout(() => { btn.textContent = rotulo; }, 2500);
+  });
+}
+
 function pagar() {
   const form = $('#ed-pagamento');
   const msg = $('#pg-msg');
@@ -85,6 +97,7 @@ function pagar() {
   if (form.forma) form.forma.value = p.forma || 'metade';
   form.addEventListener('change', mostrar);
   mostrar();
+  copiar($('[data-ed-copiar="pix"]'), () => $('[data-ed="pix"]').textContent.trim());
   form.querySelector('[type="submit"]').disabled = false;
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -108,8 +121,7 @@ function pagamentoOk() {
   set('ok-pedido', p.pedido);
   // T08 CA 3 (D-11): no caminho à vista nada fala em 2ª parcela.
   set('ok-entrega', p.forma === 'avista' ? 'você recebe o relatório' : 'você recebe o relatório e paga a 2ª parcela');
-  const b = $('[data-ed-copiar="ok-link"]');
-  b.addEventListener('click', () => navigator.clipboard?.writeText(`https://contacertabr.com.br/q/${p.link}`));
+  copiar($('[data-ed-copiar="ok-link"]'), () => `https://contacertabr.com.br/q/${p.link}`);
 }
 
 function painel() {

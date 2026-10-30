@@ -126,3 +126,15 @@ test('G-3 NR-1 9f7f0070: prazo do resultado definido no contrato', () => {
   assert.ok(!h.includes('profissional de SST após o questionário'));
   assert.ok(!h.includes('conforme contratado pelo estabelecimento'));
 });
+
+test('B-PR42-08 QA ebbc1144: botões Copiar (Pix e link) têm listener com retorno', () => {
+  const js = readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8');
+  assert.match(js, /copiar\(\$\('\[data-ed-copiar="pix"\]'\), \(\) => \$\('\[data-ed="pix"\]'\)\.textContent\.trim\(\)\)/);
+  assert.match(js, /copiar\(\$\('\[data-ed-copiar="ok-link"\]'\)/);
+  assert.match(js, /navigator\.clipboard\.writeText/);
+  assert.match(js, /'Copiado'/);
+  for (const f of ['pagamento', 'pagamento/2']) {
+    const h = readFileSync(new URL(`../empregador-em-dia/${f}/index.html`, import.meta.url), 'utf8');
+    assert.ok(h.includes('<p aria-live="polite"><button type="button" class="btn sec" data-ed-copiar="pix">Copiar código Pix</button></p>'), f);
+  }
+});

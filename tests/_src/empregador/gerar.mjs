@@ -218,7 +218,7 @@ const card = (id) => { const f = FAIXAS.find((x) => x.id === id); const m = f.pr
 const MOCK = '<p class="ed-aviso" data-ed-mock>Modo teste: nenhum pagamento é cobrado nesta tela.</p>';
 const formaPg = `<fieldset><legend class="ed-rotulo">Forma de pagamento</legend><div class="ed-ops">${radio('meio', [['pix', 'Pix'], ['cartao', 'Cartão de crédito'], ['boleto', 'Boleto']], 'aj-meio')}</div>
 <p class="ajuda" id="aj-meio"><small>Pix confirma na hora. Exemplo: abra o app do banco, escolha "Pix copia e cola" ou leia o QR Code.</small></p></fieldset>
-<section class="ed-oferta" data-ed-pix hidden><h2>Pague com Pix</h2><p>O QR Code vale por 30 minutos. A confirmação aparece nesta tela sozinha.</p><p><code data-ed="pix">código Pix de teste</code></p><p><button type="button" class="btn sec" data-ed-copiar="pix">Copiar código Pix</button></p></section>
+<section class="ed-oferta" data-ed-pix hidden><h2>Pague com Pix</h2><p>O QR Code vale por 30 minutos. A confirmação aparece nesta tela sozinha.</p><p><code data-ed="pix">código Pix de teste</code></p><p aria-live="polite"><button type="button" class="btn sec" data-ed-copiar="pix">Copiar código Pix</button></p></section>
 <label for="pg-nf">Recibo e nota fiscal para</label><input id="pg-nf" name="nf" type="email" autocomplete="email" required aria-describedby="aj-nf"><small id="aj-nf">Mandamos a nota fiscal neste e-mail. Exemplo: o e-mail do financeiro.</small>`;
 const selos = '<ul class="ed-lista"><li>Nota fiscal por e-mail</li></ul>';
 
@@ -297,7 +297,7 @@ ${MOCK}
 <h1>Pagamento recebido. Agora é com seus funcionários.</h1>
 <p>Mande o link para os <span data-ed="ok-n"></span> funcionários. As respostas são anônimas: nem você nem nós vemos quem respondeu o quê.</p>
 <p><code data-ed="ok-link"></code></p>
-<p class="ed-acoes"><button type="button" class="btn sec" data-ed-copiar="ok-link">Copiar link</button><button type="button" class="btn sec" disabled>Baixar cartaz com QR Code</button><button type="button" class="btn sec" disabled>Mensagem pronta para WhatsApp</button></p>
+<p class="ed-acoes" aria-live="polite"><button type="button" class="btn sec" data-ed-copiar="ok-link">Copiar link</button><button type="button" class="btn sec" disabled>Baixar cartaz com QR Code</button><button type="button" class="btn sec" disabled>Mensagem pronta para WhatsApp</button></p>
 <h2>O que acontece agora</h2>
 <ol class="ed-lista"><li><strong>Agora:</strong> envie o link ou imprima o cartaz com QR Code</li><li><strong>Em 10 dias:</strong> meta de pelo menos 70% de respostas. Avisamos quando chegar lá</li><li><strong>Depois:</strong> analisamos as respostas e montamos o inventário e o plano de ação</li><li><strong>Na entrega:</strong> <span data-ed="ok-entrega"></span></li></ol>
 <p class="ed-sst">SST: em definição, não incluído no preço</p>
