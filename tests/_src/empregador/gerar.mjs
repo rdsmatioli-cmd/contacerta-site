@@ -36,7 +36,7 @@ ${conteudo}
 <nav class="ed-rodape" aria-label="Empregador em Dia: links"><span>Conta Certa · Empregador em Dia</span><a href="/termos/">Termos de uso</a><a href="/privacidade/">Privacidade</a><a href="/contato/">Ajuda</a><a href="/contato/">Contato</a></nav>
 <p class="ed-fornecedor">RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20 · <a href="mailto:contato@contacertabr.com.br">contato@contacertabr.com.br</a></p>
 </div>
-<script>addEventListener('load',()=>import('/assets/js/empregador/ui.js?v=${vUi}'),{once:true})</script>
+<script>addEventListener('load',()=>{const ir=()=>import('/assets/js/empregador/ui.js?v=${vUi}');window.requestIdleCallback?requestIdleCallback(ir,{timeout:1500}):setTimeout(ir,1)},{once:true})</script>
 </main>`;
   let out = `${h}</head>${corpoIni}${main}${rodape}`;
   // Sprite só com os símbolos usados, na ordem do primeiro uso (fonte-seo.test.mjs, sprite()).
