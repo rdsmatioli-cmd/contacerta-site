@@ -122,7 +122,7 @@ test('M-03/M-04/M-05: aviso LGPD em contratar e pagamento; Me avise com consenti
 
 test('G-3 NR-1 9f7f0070: prazo do resultado definido no contrato', () => {
   const h = readFileSync(new URL('../empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', import.meta.url), 'utf8');
-  assert.ok(h.includes('Prazo: definido no contrato, após o questionário'));
+  assert.ok(h.includes('Prazo estimado de entrega: 5 dias úteis após o pagamento confirmado e o encerramento do questionário (meta de respostas atingida)'));
   assert.ok(!h.includes('profissional de SST após o questionário'));
   assert.ok(!h.includes('conforme contratado pelo estabelecimento'));
 });
