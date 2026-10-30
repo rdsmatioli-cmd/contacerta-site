@@ -60,10 +60,10 @@ pagina({
   conteudo: `<section class="ed-hero" data-ed-tela="1">
 <p class="cat-pill">NR-1: riscos psicossociais no PGR</p>
 <h1>Sua empresa em dia com a NR-1, sem montar planilha</h1>
-<p class="lead">A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua). A gente aplica o questionário anônimo e você recebe o inventário e o plano de ação para o PGR. A validação por profissional de segurança do trabalho está em definição.</p>
+<p class="lead">A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua). A gente aplica o questionário anônimo e você recebe o inventário e o plano de ação para o PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora.</p>
 <p><a class="btn" href="/empregador-em-dia/avaliacao-rapida-nr1/">Ver o que minha empresa precisa</a></p>
 <h2>O que você recebe</h2>
-<ul class="ed-lista"><li>Questionário anônimo para os funcionários, por link</li><li>Inventário de riscos psicossociais para o PGR</li><li>Plano de ação com prazos e responsáveis</li><li>Relatório com o resultado do grupo para anexar ao PGR</li></ul>
+<ul class="ed-lista"><li>Questionário anônimo para os funcionários, por link</li><li>Inventário de riscos psicossociais para o PGR</li><li>Plano de ação com prazos e responsáveis</li><li>Relatório com o resultado do grupo para anexar ao PGR (pode ser revisado por um profissional de SST, se você quiser)</li></ul>
 <p class="ed-sst" data-ed-sst></p>
 </section>
 <ul class="ed-cartoes" id="preco">
@@ -116,7 +116,7 @@ pagina({
 <section data-ed-res="vazio"><h1>Faça a avaliação rápida NR-1 primeiro</h1><p><a class="btn" href="/empregador-em-dia/avaliacao-rapida-nr1/">Ver o que minha empresa precisa</a></p></section>
 <section data-ed-res="oferta" hidden><h1>Sua empresa deve avaliar os riscos psicossociais no PGR</h1>
 <ul class="ed-cartoes"><li><strong>Seu porte</strong><span data-ed="porte"></span></li><li><strong>Pontos de atenção</strong><span data-ed="pontos"></span></li><li><strong>PGR</strong><span data-ed="pgr"></span></li></ul>
-<div class="ed-oferta"><h2>Adequação NR-1 para <span data-ed="porte2"></span></h2><p class="ed-preco" data-ed="preco"></p><p data-ed="parcelas"></p><p data-ed-validade>Preços válidos até 31/12/2026.</p><p class="ed-sst" data-ed-sst></p>
+<div class="ed-oferta"><h2>Adequação NR-1 para <span data-ed="porte2"></span></h2><p class="ed-preco" data-ed="preco"></p><p data-ed="parcelas"></p><p data-ed-validade>Preços válidos até 31/12/2026.</p><p class="ed-sst" data-ed-sst></p><p class="ed-aviso-sst">O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.</p>
 <p><button type="button" class="btn" data-ed-contratar disabled>Contratar</button></p></div>
 <p>Prazo: definido no contrato, após o questionário.</p></section>
 <section data-ed-res="simplificada" hidden><h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>
@@ -229,7 +229,8 @@ pagina({
 <h2>O que o serviço entrega</h2>
 <ul class="ed-lista"><li>Questionário anônimo por link e QR Code</li><li>Inventário dos riscos psicossociais para apoiar o PGR da sua empresa</li><li>Plano de ação com prazos e responsáveis</li><li>Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos</li></ul>
 <p>O PGR continua com a sua empresa: o inventário e o plano de ação entram nele.</p>
-<p class="ed-sst">SST: em definição, não incluído no preço</p>`,
+<p class="ed-sst" data-ed-sst></p>
+<p class="ed-aviso-sst">O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.</p>`,
 });
 
 pagina({
@@ -271,7 +272,7 @@ ${formaPg}
 <tr><th scope="row">1ª parcela, agora</th><td data-ed="pg-agora"></td></tr>
 <tr data-ed-linha2><th scope="row">2ª parcela, na entrega do relatório</th><td data-ed="pg-entrega"></td></tr>
 <tr><th scope="row">Total agora</th><td data-ed="pg-total"></td></tr>
-</tbody></table><p data-ed-validade>Preços válidos até 31/12/2026.</p><p data-ed="pg-nota-avista" hidden>À vista: o valor inteiro hoje e nada na entrega. O contrato vai por e-mail junto com o recibo.</p></section>
+</tbody></table><p data-ed-validade>Preços válidos até 31/12/2026.</p><p data-ed="pg-nota-avista" hidden>À vista: o valor inteiro hoje e nada na entrega. O contrato vai por e-mail junto com o recibo.</p><p class="ed-aviso-sst">O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.</p></section>
 ${selos}
 <section class="nota le-privacidade" id="pg-aviso" aria-labelledby="pg-aviso-t"><h2 id="pg-aviso-t">Como usamos seus dados</h2>
 <p>Quem cuida dos seus dados é RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services), CNPJ 61.193.879/0001-20, responsável pelo Conta Certa.</p>
@@ -298,7 +299,7 @@ ${MOCK}
 <p class="ed-acoes" aria-live="polite"><button type="button" class="btn sec" data-ed-copiar="ok-link">Copiar link</button><button type="button" class="btn sec" disabled>Baixar cartaz com QR Code</button><button type="button" class="btn sec" disabled>Mensagem pronta para WhatsApp</button></p>
 <h2>O que acontece agora</h2>
 <ol class="ed-lista"><li><strong>Agora:</strong> envie o link ou imprima o cartaz com QR Code</li><li><strong>Em 10 dias:</strong> meta de pelo menos 70% de respostas. Avisamos quando chegar lá</li><li><strong>Depois:</strong> analisamos as respostas e montamos o inventário e o plano de ação</li><li><strong>Na entrega:</strong> <span data-ed="ok-entrega"></span></li></ol>
-<p class="ed-sst">SST: em definição, não incluído no preço</p>
+<p class="ed-sst" data-ed-sst></p>
 <h2>Recibo</h2>
 <table class="ed-tab"><caption>Recibo</caption><tbody><tr><th scope="row">Serviço</th><td>Adequação NR-1</td></tr><tr><th scope="row">Pago agora</th><td data-ed="ok-pago"></td></tr><tr><th scope="row">Pedido</th><td data-ed="ok-pedido"></td></tr></tbody></table>
 <p><a class="btn" href="/empregador-em-dia/painel/">Ir para o acompanhamento</a></p>
@@ -322,8 +323,8 @@ pagina({
 <li id="pagamentos"><strong>Pagamento</strong><span>1ª paga · 2ª na entrega</span></li>
 </ul>
 <h2>Linha do tempo</h2>
-<ol class="ed-lista"><li>Contratado</li><li>Questionário enviado</li><li>70% de respostas</li><li>Análise e plano de ação</li><li>Relatório entregue</li></ol>
-<p class="ed-sst">SST: em definição, não incluído no preço</p>
+<ol class="ed-lista"><li>Contratado</li><li>Questionário enviado</li><li>70% de respostas</li><li>Análise e plano de ação</li><li>Relatório entregue</li><li>Depois: relatório pronto; validação opcional pelo seu profissional de SST</li></ol>
+<p class="ed-sst" data-ed-sst></p>
 </section>`,
 });
 
@@ -342,7 +343,7 @@ ${formaPg}
 <tr><th scope="row">1ª parcela paga</th><td data-ed="pg-agora"></td></tr>
 <tr><th scope="row">2ª parcela, agora</th><td data-ed="pg-entrega"></td></tr>
 <tr><th scope="row">Total agora</th><td data-ed="pg-total"></td></tr>
-</tbody></table><p>O download do relatório libera assim que o Pix for confirmado.</p><p data-ed-validade>Preços válidos até 31/12/2026.</p></section>
+</tbody></table><p>O download do relatório libera assim que o Pix for confirmado.</p><p data-ed-validade>Preços válidos até 31/12/2026.</p><p class="ed-aviso-sst">O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.</p></section>
 ${selos}
 <section class="nota le-privacidade" id="pg-aviso" aria-labelledby="pg-aviso-t"><h2 id="pg-aviso-t">Como usamos seus dados</h2>
 <p>Quem cuida dos seus dados é RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services), CNPJ 61.193.879/0001-20, responsável pelo Conta Certa.</p>

@@ -1,7 +1,7 @@
 // Empregador em Dia: interface das páginas E2. Nada sai do navegador: respostas só em sessionStorage (T02).
-import { FLAGS, ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, FAIXAS, NOTA_DOMESTICO, ED_PAGAMENTO_MODO, LIMIAR_ANALISE } from './config.js?v=7827cd31ce';
-import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=1b919ef115';
-import { destino, oferta, pontosAtencao, textoPgr, validarPasso, faixaPorId, jornada, cnpjValido, formatarCnpj, pagamento, andamento } from './motor.js?v=6305142b49';
+import { FLAGS, ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, SST_TEXTO_OPCIONAL, FAIXAS, NOTA_DOMESTICO, ED_PAGAMENTO_MODO, LIMIAR_ANALISE } from './config.js?v=f4fca4765e';
+import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=d4802fd8b0';
+import { destino, oferta, pontosAtencao, textoPgr, validarPasso, faixaPorId, jornada, cnpjValido, formatarCnpj, pagamento, andamento } from './motor.js?v=f4aa75cadb';
 
 const CHAVE = 'ed-diagnostico';
 const brl = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: v % 1 ? 2 : 0 }).replace(/\s/g, ' ');
@@ -12,6 +12,9 @@ const set = (k, t) => { const e = $(`[data-ed="${k}"]`); if (e) e.textContent = 
 const ler = () => { try { return JSON.parse(sessionStorage.getItem(CHAVE)) || {}; } catch { return {}; } };
 const gravar = (r) => sessionStorage.setItem(CHAVE, JSON.stringify(r));
 
+// Jurídico 5a441f81 (T2/R8): com false o aviso aparece (SST opcional); só true, sem profissional contratado, não tem texto.
+export function textoSst(v) { return v === null ? SST_TEXTO_EM_DEFINICAO : v === false ? SST_TEXTO_OPCIONAL : ''; }
+
 function iniciar() {
   if (!FLAGS.EMPREGADOR_EM_DIA) return; // flag OFF: só o aviso "em preparação"
   if ($('#ed-orc') && !FLAGS.ED_CHECKOUT) return; // orçamento NR-1: também exige ED_CHECKOUT
@@ -19,7 +22,7 @@ function iniciar() {
   if ($('[data-ed-e3="login"]') && !FLAGS.ED_LOGIN) return; // E3: painel exige login (PR #7, D-14)
   $('#ed-off').hidden = true;
   $('#ed-app').hidden = false;
-  const sst = ED_SST_INCLUIDO === null ? SST_TEXTO_EM_DEFINICAO : '';
+  const sst = textoSst(ED_SST_INCLUIDO);
   document.querySelectorAll('[data-ed-sst]').forEach((e) => { e.textContent = sst; e.hidden = !sst; });
   if ($('#ed-diag')) diagnostico();
   if ($('[data-ed-res]')) resultado();

@@ -10,9 +10,10 @@ export const FLAGS = Object.freeze({
   ED_SEO: false, // páginas SEO (D-21)
   ED_CONTADOR_EMAIL: false, // M-04: e-mail ao contador (T14, D-18)
 });
-// D-03 / DEC 95a76e17 item 4-5: SST em definição até o pacote de 12/11.
-export const ED_SST_INCLUIDO = null; // null = "em definição"; true/false só após decisão do Rodrigo
+// D-03 / DEC 95a76e17 item 4-5; DEC CEO SST opcional 29/10 e DEC CPO 30/10 (Jurídico 5a441f81, T2): SST opcional.
+export const ED_SST_INCLUIDO = false; // null = "em definição"; false = opcional, não incluído (SST_TEXTO_OPCIONAL)
 export const SST_TEXTO_EM_DEFINICAO = 'SST: em definição, não incluído no preço';
+export const SST_TEXTO_OPCIONAL = 'SST: validação técnica opcional, não incluída no preço. Contratada e paga diretamente pela sua empresa.';
 
 // Tabela aprovada (16/10; CFO eb62ca5d). Única fonte de preço.
 export const FAIXAS = Object.freeze([
