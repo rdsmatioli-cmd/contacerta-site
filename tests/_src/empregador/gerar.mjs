@@ -16,7 +16,9 @@ const corpoIni = resto.slice(0, resto.indexOf('<main'));
 const rodape = resto.slice(resto.indexOf('</main>') + '</main>'.length);
 const ORIG = 'https://contacertabr.com.br';
 const vUi = ver('assets/js/empregador/ui.js');
-const vCss = ver('assets/js/empregador/ed.css');
+const vCarregar = ver('assets/js/empregador/carregar.js');
+// ed.css vai inline (QA B-PR42-09: sem CSS extra bloqueando a renderização).
+const cssEd = readFileSync(join(raiz, 'assets/js/empregador/ed.css'), 'utf8').trim();
 
 function pagina({ caminho, titulo, desc, conteudo }) {
   const url = `${ORIG}/${caminho}`;
@@ -25,7 +27,7 @@ function pagina({ caminho, titulo, desc, conteudo }) {
     .replaceAll('Planilha Tabelas oficiais 2026 | Conta Certa', titulo)
     .replaceAll('Download da planilha Tabelas oficiais 2026 do Conta Certa.', desc)
     .replaceAll(`${ORIG}/tabelas-oficiais-2026/obrigado/`, url);
-  h = h.replace('<link rel="stylesheet" href="/assets/style.css', `<link rel="stylesheet" href="/assets/js/empregador/ed.css?v=${vCss}">\n<link rel="stylesheet" href="/assets/style.css`);
+  h = h.replace('<link rel="stylesheet" href="/assets/style.css', `<style>${cssEd}</style>\n<link rel="stylesheet" href="/assets/style.css`);
   const main = `<main id="conteudo" class="caixa ed">
 <p class="ed-selo">simulação · dados de exemplo</p>
 <section id="ed-off" class="ed-off"><h1>Empregador em Dia</h1><p>Esta página está em preparação e ainda não está disponível.</p><p><a href="/nr1-riscos-psicossociais/">Leia sobre a NR-1 e os riscos psicossociais</a>.</p></section>
@@ -35,7 +37,7 @@ ${conteudo}
 <nav class="ed-rodape" aria-label="Empregador em Dia: links"><span>Conta Certa · Empregador em Dia</span><a href="/termos/">Termos de uso</a><a href="/privacidade/">Privacidade</a><a href="/contato/">Ajuda</a><a href="/contato/">Contato</a></nav>
 <p class="ed-fornecedor">RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20 · <a href="mailto:contato@contacertabr.com.br">contato@contacertabr.com.br</a></p>
 </div>
-<script type="module" src="/assets/js/empregador/ui.js?v=${vUi}"></script>
+<script src="/assets/js/empregador/carregar.js?v=${vCarregar}" data-ui="/assets/js/empregador/ui.js?v=${vUi}" defer></script>
 </main>`;
   let out = `${h}</head>${corpoIni}${main}${rodape}`;
   // Sprite só com os símbolos usados, na ordem do primeiro uso (fonte-seo.test.mjs, sprite()).
@@ -356,4 +358,4 @@ ${selos}
 </form>`,
 });
 
-console.log('ok', vUi, vCss);
+console.log('ok', vUi, vCarregar);
