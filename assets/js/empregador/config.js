@@ -12,7 +12,7 @@ export const FLAGS = Object.freeze({
 });
 // D-03 / DEC 95a76e17 item 4-5: SST em definição até o pacote de 12/11.
 export const ED_SST_INCLUIDO = null; // null = "em definição"; true/false só após decisão do Rodrigo
-export const SST_TEXTO_EM_DEFINICAO = 'Validação pelo profissional de SST: em definição';
+export const SST_TEXTO_EM_DEFINICAO = 'SST: em definição, não incluído no preço';
 
 // Tabela aprovada (16/10; CFO eb62ca5d). Única fonte de preço.
 export const FAIXAS = Object.freeze([

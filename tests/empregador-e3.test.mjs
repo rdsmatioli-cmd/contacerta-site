@@ -40,7 +40,7 @@ test('T05: preços e parcelas batem com a tabela; >200 = "Orçamento sob medida"
   }
   assert.ok(h.includes('Orçamento sob medida'));
   for (const p of E3) assert.ok(!ler(p).toLowerCase().includes('sob consulta'), p);
-  for (const t of ['Questionário anônimo por link e QR Code', 'Inventário de riscos psicossociais para o PGR', 'Plano de ação com prazos e responsáveis', 'Revisão do PGR: a NR-1 exige pelo menos a cada 2 anos']) assert.ok(h.includes(t), t);
+  for (const t of ['Questionário anônimo por link e QR Code', 'Inventário dos riscos psicossociais para apoiar o PGR da sua empresa', 'Plano de ação com prazos e responsáveis', 'Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos']) assert.ok(h.includes(t), t);
 });
 
 test('T06: CNPJ por dígito verificador, exemplo fictício válido (D-09), sem Receita/BrasilAPI (D-07)', () => {
@@ -98,5 +98,24 @@ test('T10: percentual arredondado para baixo; "já dá para analisar" a partir d
 
 test('G-1 (parecer NR-1 5243f004): sem "12 meses" nas telas E3; revisão do PGR pela regra de 2 anos', () => {
   for (const p of E3) assert.ok(!ler(p).includes('12 meses'), p);
-  assert.ok(ler('empregador-em-dia/precos/index.html').includes('Revisão do PGR: a NR-1 exige pelo menos a cada 2 anos'));
+  assert.ok(ler('empregador-em-dia/precos/index.html').includes('Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos'));
+});
+
+const SST = 'SST: em definição, não incluído no preço';
+const VAL = 'Preços válidos até 31/12/2026.';
+test('G-2 (NR-1 d8e801e9): revisão da avaliação de riscos (não do PGR), sem "Incluído em todas as faixas"', () => {
+  for (const p of E3) { const h = ler(p); assert.ok(!/Revisão do PGR|Incluído em todas as faixas|12 meses/i.test(h), p); }
+});
+test('M-01 (Advogado 31f8fa10): validade em toda superfície de preço', () => {
+  for (const p of ['precos', 'pagamento', 'pagamento/2', 'avaliacao-rapida-nr1/resultado', 'orcamento-nr1']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(VAL), p);
+});
+test('M-02: sem afirmação de SST incluído; texto exato de SST em definição', () => {
+  for (const p of ['precos', 'pagamento/ok', 'painel']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.ok(h.includes(SST), p); assert.ok(!/profissional de SST analisa|Análise do SST|Análise por profissional/.test(h), p); }
+});
+test('M-03/M-04/M-05: aviso LGPD em contratar e pagamento; Me avise com consentimento; fornecedor no rodapé', () => {
+  for (const p of ['contratar', 'pagamento', 'pagamento/2']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.match(h, /art\. 7º, V/, p); assert.match(h, /art\. 18/, p); assert.ok(h.includes('href="/privacidade/"'), p); }
+  const r = ler('empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html');
+  assert.match(r, /id="ed-avise-ok" name="consentimento" value="sim" required>/);
+  assert.ok(!/id="ed-avise-ok"[^>]*checked/.test(r));
+  for (const p of ['empregador-em-dia/index.html', ...E3]) assert.ok(ler(p).includes('RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20'), p);
 });

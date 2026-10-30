@@ -23,3 +23,4 @@
 /* P-08 S-02/S-03: aviso de privacidade inteiro no fluxo, antes de "Começar", com o corpo do texto principal (mín. 14 px) */
 .ed-q{display:flex;flex-direction:column;gap:.75rem;overflow:visible}
 .ed-q-priv{font-size:max(1rem,14px);line-height:1.5;max-height:none;overflow:visible;overflow-wrap:anywhere}
+.ed-fornecedor{font-size:.85rem;margin:.25rem 0 0}
