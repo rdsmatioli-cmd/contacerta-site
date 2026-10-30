@@ -31,10 +31,13 @@ test('B-05: endereço sem variantes ("Conjunto", "Paes Leme")', () => {
   for (const p of htmls()) assert.doesNotMatch(ler(p), /Paes Leme|Conjunto 1713/, p);
 });
 
-test('B-05 (C): rodapé do Empregador em Dia com o texto exato', () => {
-  for (const p of htmls('empregador-em-dia')) {
+test('B-05 (C): Empregador em Dia com a identificação uma única vez (rodapé do site; sem ed-fornecedor duplicado)', () => {
+  const ps = htmls('empregador-em-dia');
+  assert.ok(ps.length >= 10);
+  for (const p of ps) {
     const h = ler(p);
-    if (h.includes('class="ed-fornecedor"')) assert.ok(h.includes(`<p class="ed-fornecedor">${RODAPE}</p>`), p);
+    assert.ok(!h.includes('class="ed-fornecedor"'), p);
+    assert.equal(h.split('CNPJ 61.193.879/0001-20 · Rua Pais Leme').length - 1, 1, p);
   }
 });
 
