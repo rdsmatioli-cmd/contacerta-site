@@ -295,6 +295,8 @@ pagina({
   desc: 'Próximo passo: enviar o link do questionário anônimo aos funcionários.',
   conteudo: `<section data-ed-e3="checkout" id="ed-pg-ok">
 ${MOCK}
+<p class="campo-msg" data-ed-ok-vazio role="alert">Pedido não encontrado. Comece pelos dados do contrato.</p>
+<div data-ed-ok hidden>
 <h1>Pagamento recebido. Agora é com seus funcionários.</h1>
 <p>Mande o link para os <span data-ed="ok-n"></span> funcionários. As respostas são anônimas: nem você nem nós vemos quem respondeu o quê.</p>
 <p><code data-ed="ok-link"></code></p>
@@ -305,6 +307,7 @@ ${MOCK}
 <h2>Recibo</h2>
 <table class="ed-tab"><caption>Recibo</caption><tbody><tr><th scope="row">Serviço</th><td>Adequação NR-1</td></tr><tr><th scope="row">Pago agora</th><td data-ed="ok-pago"></td></tr><tr><th scope="row">Pedido</th><td data-ed="ok-pedido"></td></tr></tbody></table>
 <p><a class="btn" href="/empregador-em-dia/painel/">Ir para o acompanhamento</a></p>
+</div>
 </section>`,
 });
 

@@ -113,7 +113,9 @@ function pagar() {
 
 function pagamentoOk() {
   const p = lerPedido();
-  if (!p.pedido) return;
+  if (!p.pedido || !oferta(p.faixa)) return; // B-PR42-11: sem pedido não mostra 'Pagamento recebido'
+  $('[data-ed-ok-vazio]').hidden = true;
+  $('[data-ed-ok]').hidden = false;
   const v = pagamento(p.faixa, p.forma);
   set('ok-n', faixaPorId(p.faixa).rotulo);
   set('ok-link', `contacertabr.com.br/q/${p.link}`);
