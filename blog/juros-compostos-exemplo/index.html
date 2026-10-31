@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Juros compostos: fórmula e 3 exemplos práticos | Conta Certa</title>
+<meta name="description" content="Veja a fórmula dos juros compostos e 3 exemplos resolvidos: aplicação, dívida no cartão e aportes mensais. Inclui conversão de taxas e regra do 72.">
+<link rel="canonical" href="https://contacertabr.com.br/blog/juros-compostos-exemplo/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Conta Certa">
+<meta property="og:title" content="Juros compostos: fórmula e 3 exemplos práticos | Conta Certa">
+<meta property="og:description" content="Veja a fórmula dos juros compostos e 3 exemplos resolvidos: aplicação, dívida no cartão e aportes mensais. Inclui conversão de taxas e regra do 72.">
+<meta property="og:url" content="https://contacertabr.com.br/blog/juros-compostos-exemplo/">
+<meta property="og:image" content="https://contacertabr.com.br/og/padrao.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:alt" content="Juros compostos: fórmula e 3 exemplos práticos">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Juros compostos: fórmula e 3 exemplos práticos | Conta Certa">
+<meta name="twitter:description" content="Veja a fórmula dos juros compostos e 3 exemplos resolvidos: aplicação, dívida no cartão e aportes mensais. Inclui conversão de taxas e regra do 72.">
+<meta name="twitter:image" content="https://contacertabr.com.br/og/padrao.jpg">
+<meta name="theme-color" content="#f5f7f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a1210" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/style.css?v=03383b6fea">
+
+<link rel="alternate" type="application/rss+xml" title="Blog do Conta Certa" href="https://contacertabr.com.br/blog/feed.xml"><style>
+.blog.post :is(.resposta,.texto,.faq) a{padding:12px 17px;margin:0 -17px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.blog .tab-dica{margin:var(--s4) 0 calc(-1 * var(--s2));font-size:14px;line-height:1.5;color:var(--ds-texto-2)}
+.blog .texto .tab-rolar{background:linear-gradient(to right,var(--card) 30%,transparent) left center/40px 100% no-repeat local,linear-gradient(to left,var(--card) 30%,transparent) right center/40px 100% no-repeat local,radial-gradient(farthest-side at 0 50%,rgba(0,0,0,.16),transparent) left center/14px 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,rgba(0,0,0,.16),transparent) right center/14px 100% no-repeat scroll,var(--card)}
+@media (max-width:640px){
+.blog .tab-dica{display:none}
+.blog .texto .tab-rolar:has(.tab-pilha){overflow:visible;border:0;box-shadow:none;background:none}
+.blog table.tab-pilha,.blog table.tab-pilha tbody,.blog table.tab-pilha tr,.blog table.tab-pilha td{display:block;width:100%}
+.blog table.tab-pilha thead,.blog table.tab-pilha thead tr,.blog table.tab-pilha thead th{position:absolute;left:0;top:0;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.blog .texto .tab-rolar:has(.tab-pilha){position:relative}
+.blog table.tab-pilha tr{margin:0 0 var(--s3);border:1px solid var(--borda);border-radius:14px;background:var(--card);overflow:hidden}
+.blog table.tab-pilha td{display:grid;grid-template-columns:minmax(6.5em,38%) 1fr;gap:var(--s2);padding:10px 14px;border-bottom:1px solid var(--borda);font-size:16px}
+.blog table.tab-pilha td:last-child{border-bottom:0}
+.blog table.tab-pilha td::before{content:attr(data-label);font-weight:700;font-size:14px;color:var(--ds-texto-2)}
+}
+.blog{max-width:780px}
+.blog.post{max-width:880px}
+.blog.post h1,.blog.post .selo-modelo{max-width:780px}
+.blog .resposta{background:var(--ds-p50);box-shadow:none;border-color:var(--ds-p100)}
+.post-grade>*{min-width:0}
+.post-grade .resposta,.post-grade .sumario{max-width:32em}
+@media (min-width:1024px){.post-grade{display:grid;grid-template-columns:minmax(0,32em) 280px;column-gap:var(--s12);justify-content:start;align-items:start}.post-grade .resposta{grid-column:1;grid-row:1;margin-top:0}.post-grade .post-corpo{grid-column:1;grid-row:2}.post-grade .sumario{grid-column:2;grid-row:1/span 2;position:sticky;top:var(--s6);margin:0}.post-grade .sumario a{min-height:44px}}
+.blog .lead,.blog .texto,.blog .texto p,.blog .texto li,.blog .faq,.blog .fontes,.blog .post-meta{max-width:32em}
+.blog .fontes ul{padding-left:var(--s6)}
+.blog .fontes a{display:inline-flex;align-items:center;min-height:44px}
+.blog .migalhas{display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--s2)}
+.blog .selo-modelo{display:block;margin:var(--s4) 0 0;padding:var(--s3) var(--s4);border-radius:var(--r-s,8px);background:var(--ds-alerta-bg);color:var(--ds-alerta);font-size:14px;font-weight:700;line-height:1.5}
+.blog h1{margin:var(--s4) 0 var(--s3)}
+.blog .post-meta{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);margin:0 0 var(--s4);padding:0;list-style:none;font-size:14px;line-height:1.5;color:var(--ds-texto-2)}
+.blog .sumario{margin:var(--s6) 0;padding:var(--s4) var(--s6);border:1px solid var(--ds-borda);border-radius:var(--r-m,16px);background:var(--ds-sup)}
+.blog .sumario h2{margin:0 0 var(--s2);font-size:18px}
+.blog .sumario ol{margin:0;padding-left:var(--s6)}
+.blog .sumario a{display:inline-flex;align-items:center;min-height:44px}
+.blog .cat-lista{display:flex;flex-wrap:wrap;gap:var(--s2);margin:var(--s4) 0 var(--s6);padding:0;list-style:none}
+.blog .cat-lista a{display:inline-flex;align-items:center;min-height:44px;padding:0 var(--s4);border:1px solid var(--ds-borda-campo);border-radius:999px;color:var(--ds-texto);font-size:14px;font-weight:600;text-decoration:none;background:var(--ds-sup)}
+.blog .cat-lista a[aria-current]{background:var(--ds-p700);border-color:var(--ds-p700);color:var(--ds-on-primaria)}
+.blog .posts{list-style:none;margin:0;padding:0;display:grid;gap:var(--s4)}
+.blog .post-card{display:block;padding:var(--s4) var(--s6);border:1px solid var(--ds-borda);border-radius:var(--r-m,16px);background:var(--ds-sup);color:var(--ds-texto);text-decoration:none}
+.blog .post-card:hover{border-color:var(--ds-borda-campo)}
+.blog .post-card strong{display:block;font-size:18px;line-height:1.3;margin:var(--s2) 0}
+.blog .post-card span{display:block;font-size:16px;line-height:1.5;color:var(--ds-texto-2)}
+/* QA CC-V01: no post com coluna lateral (>=980px) a coluna de texto tem ~512px; 3 colunas quebravam o texto letra a letra. */
+@media (min-width:980px){.blog .relacionadas .cards{grid-template-columns:repeat(auto-fit,minmax(14em,1fr))}}
+.blog .post-card small{display:block;margin-top:var(--s2);font-size:14px;color:var(--ds-texto-2)}
+.blog .paginacao{display:flex;flex-wrap:wrap;gap:var(--s2);margin:var(--s8) 0 0;padding:0;list-style:none}
+.blog .paginacao a,.blog .paginacao span{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0 var(--s3);border-radius:var(--r-s,8px);border:1px solid var(--ds-borda);font-size:16px}
+.blog .paginacao [aria-current]{background:var(--ds-p700);color:var(--ds-on-primaria);border-color:var(--ds-p700)}
+.blog .vazio{padding:var(--s6);border:1px dashed var(--ds-borda-campo);border-radius:var(--r-m,16px)}
+.blog .texto h2{scroll-margin-top:var(--s16)}
+.blog .texto a,body .blog .texto li a{display:inline;min-height:0;padding-block:var(--s3)}
+.blog .texto ol li,.blog .texto ul li{margin:0;padding-block:var(--s2);line-height:1.6}
+.rodape nav h2,body .rodape .mini,body .rodape .mini *{font-size:14px}
+.blog .migalhas,.blog .migalhas *,body .blog .resposta h2{font-size:14px}
+body .cc-banner h2,body .cc-banner p,body .cc-banner a,body .cc-banner button{font-size:14px}
+@media (prefers-color-scheme:dark){.blog .resposta{background:transparent;border-color:var(--ds-borda-campo)}.blog .sumario,.blog .post-card,.blog .cat-lista a{background:transparent;color:inherit}.blog .post-card span,.blog .post-card small,.blog .post-meta,.blog .tab-dica,.blog table.tab-pilha td::before{color:inherit}.blog .texto .tab-rolar{background:linear-gradient(to right,var(--card) 30%,transparent) left center/40px 100% no-repeat local,linear-gradient(to left,var(--card) 30%,transparent) right center/40px 100% no-repeat local,radial-gradient(farthest-side at 0 50%,rgba(255,255,255,.28),transparent) left center/14px 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,rgba(255,255,255,.28),transparent) right center/14px 100% no-repeat scroll,var(--card)}.blog .selo-modelo{background:var(--ds-alerta-bg);color:var(--ds-alerta)}}
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Juros compostos: fórmula e 3 exemplos práticos","description":"Veja a fórmula dos juros compostos e 3 exemplos resolvidos: aplicação, dívida no cartão e aportes mensais. Inclui conversão de taxas e regra do 72.","url":"https://contacertabr.com.br/blog/juros-compostos-exemplo/","mainEntityOfPage":"https://contacertabr.com.br/blog/juros-compostos-exemplo/","inLanguage":"pt-BR","datePublished":"2026-10-30","dateModified":"2026-10-30","author":{"@type":"Person","name":"Equipe Conta Certa","jobTitle":"equipe editorial do Conta Certa (LCM Global Services)"},"reviewedBy":{"@type":"Organization","@id":"https://contacertabr.com.br/#organizacao"},"citation":[{"@type":"CreativeWork","name":"Banco Central do Brasil, Caderno de Educação Financeira, Gestão de Finanças Pessoais","url":"https://www.bcb.gov.br/content/cidadaniafinanceira/documentos_cidadania/Cuidando_do_seu_dinheiro_Gestao_de_Financas_Pessoais/caderno_cidadania_financeira.pdf"},{"@type":"CreativeWork","name":"Banco Central do Brasil, Calculadora do Cidadão","url":"https://www3.bcb.gov.br/CALCIDADAO/publico/exibirFormCorrecaoValores.do?method=exibirFormCorrecaoValores"},{"@type":"CreativeWork","name":"Banco Central do Brasil, Taxas de juros por modalidade e instituição","url":"https://www.bcb.gov.br/estatisticas/txjuros"},{"@type":"CreativeWork","name":"Banco Central do Brasil, Taxa Selic","url":"https://www.bcb.gov.br/controleinflacao/taxaselic"},{"@type":"CreativeWork","name":"Lei nº 14.690/2023, art. 28 (limite de juros e encargos do rotativo e do parcelamento da fatura)","url":"https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14690.htm"},{"@type":"CreativeWork","name":"Lei nº 9.430/1996, art. 61 (multa e juros de mora sobre tributos federais)","url":"https://www.planalto.gov.br/ccivil_03/leis/l9430compilada.htm"}],"publisher":{"@id":"https://contacertabr.com.br/#organizacao"},"image":"https://contacertabr.com.br/og/padrao.jpg"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://contacertabr.com.br/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://contacertabr.com.br/blog/"},{"@type":"ListItem","position":3,"name":"Juros compostos: fórmula e 3 exemplos práticos","item":"https://contacertabr.com.br/blog/juros-compostos-exemplo/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Qual é a fórmula dos juros compostos?","acceptedAnswer":{"@type":"Answer","text":"M = C × (1 + i)^n, com a taxa e o prazo na mesma unidade."}},{"@type":"Question","name":"Qual é a diferença entre juros simples e compostos?","acceptedAnswer":{"@type":"Answer","text":"Nos simples, os juros incidem só sobre o capital inicial. Nos compostos, incidem sobre o saldo acumulado."}},{"@type":"Question","name":"Como transformar taxa mensal em anual?","acceptedAnswer":{"@type":"Answer","text":"(1 + taxa mensal)^12 − 1. Por exemplo, 1% ao mês dá 12,68% ao ano."}},{"@type":"Question","name":"Em quanto tempo meu dinheiro dobra?","acceptedAnswer":{"@type":"Answer","text":"Use a regra dos 72: divida 72 pela taxa do período. A 1% ao mês, cerca de 6 anos."}},{"@type":"Question","name":"Quanto custa o rotativo do cartão?","acceptedAnswer":{"@type":"Answer","text":"Varia por instituição. As taxas médias por modalidade estão publicadas pelo Banco Central [S3]. Pelo art. 28 da Lei 14.690/2023, o total de juros e encargos financeiros cobrados no rotativo e no parcelamento da fatura do cartão não pode passar do valor original da dívida [S5]."}},{"@type":"Question","name":"Como calcular a parcela de um empréstimo?","acceptedAnswer":{"@type":"Answer","text":"Pela Tabela Price: parcela = valor × i ÷ [1 − (1 + i)^−n]. Exemplo: R$ 10.000 a 2% ao mês em 12 vezes dá R$ 945,60."}},{"@type":"Question","name":"Como calcular juros compostos no Excel?","acceptedAnswer":{"@type":"Answer","text":"Use =VF(taxa; períodos; aporte; −valor presente). Exemplo: =VF(1%; 12; 0; −1000) retorna 1.126,83."}},{"@type":"Question","name":"Juros compostos e taxa efetiva são a mesma coisa?","acceptedAnswer":{"@type":"Answer","text":"A taxa efetiva é a taxa realmente aplicada no período, considerando a capitalização. Converter 1% ao mês em 12,68% ao ano é calcular a taxa efetiva anual."}}]}</script>
+<meta property="article:published_time" content="2026-10-30">
+<meta property="article:modified_time" content="2026-10-30">
+
+<link rel="stylesheet" href="/assets/lcm-consent.css?v=00133ed53c">
+<script src="/assets/lcm-consent.js?v=ac527630b3" defer data-ga4="G-D9PCMD9Q2H" data-marca="Conta Certa" data-politica="/privacidade/" data-versao="AVISO-COOKIES-1.0" data-validade-dias="183" data-chaves-legadas="cc-consent-v1" data-eventos="calculo_concluido,cta_click" data-params="calculadora,destino"></script>
+<script src="/assets/js/medicao.js?v=c39ef9f885" defer></script>
+<script type="speculationrules">{"prefetch":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/licitacoes{/*}?"}},{"not":{"href_matches":"/*.xml"}},{"not":{"selector_matches":"[href*='?'],[href*='#']"}}]},"eagerness":"moderate"}]}</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<svg class="sprite" aria-hidden="true" focusable="false"><symbol id="i-carteira" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H17v3"/><path d="M3 7.5V17a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H5.5A2.5 2.5 0 0 1 3 7.5"/><circle cx="16" cy="13.5" r="1.3"/></symbol><symbol id="i-alta" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol><symbol id="i-seta" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-barras" viewBox="0 0 24 24"><path d="M4 20h16"/><rect x="5.5" y="12" width="3" height="6" rx=".8"/><rect x="10.5" y="8" width="3" height="10" rx=".8"/><rect x="15.5" y="4" width="3" height="14" rx=".8"/></symbol><symbol id="i-casa" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></symbol><symbol id="i-cartao" viewBox="0 0 24 24"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 10h19M6.5 15h4"/></symbol></svg>
+<header class="topo"><div class="caixa"><a class="marca" href="/" aria-label="Conta Certa: página inicial"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="16" fill="#0b2b20"/><path d="M16 24h32M16 40h14" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><path d="M37 39.5l4.5 4.5L50 35" fill="none" stroke="#c5f25c" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Conta <b>Certa</b></span></a><button type="button" class="menu-btn" aria-expanded="false" aria-controls="nav-principal" hidden><span class="menu-ic" aria-hidden="true"></span>Menu</button><nav id="nav-principal" aria-label="Principal"><a href="/#trabalho">Trabalho</a><a href="/#financas">Finanças</a><a href="/#impostos">Impostos</a><a href="/#reforma">Reforma</a><a href="/#tabelas">Tabelas</a><a href="/#outras">Outras</a><a class="nav-cta" href="/salario-liquido/">Calcular salário líquido</a></nav><a class="topo-cta" href="/salario-liquido/" aria-label="Calculadora de salário líquido"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-carteira"/></svg><span>Salário líquido</span></a></div></header><script>(function(){var h=document.currentScript.previousElementSibling,b=h.querySelector('.menu-btn');if(!b)return;b.hidden=false;h.classList.add('menu-fechado');function f(x){h.classList.toggle('menu-fechado',x);b.setAttribute('aria-expanded',String(!x))}b.addEventListener('click',function(){f(!h.classList.contains('menu-fechado'))});h.addEventListener('click',function(e){if(e.target.closest('nav a'))f(true)});document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!h.classList.contains('menu-fechado')){f(true);b.focus()}})})();</script>
+<main id="conteudo" class="caixa">
+<div class="blog post">
+<nav class="migalhas" aria-label="Você está em"><a href="/">Início</a> › <a href="/blog/">Blog</a> › <span aria-current="page">Juros compostos: fórmula e 3 exemplos práticos</span></nav>
+<article>
+<h1>Juros compostos: fórmula e 3 exemplos práticos</h1>
+<ul class="post-meta"><li>Publicado em <time datetime="2026-10-30">30 de outubro de 2026</time></li><li>Atualizado em <time datetime="2026-10-30">30 de outubro de 2026</time></li><li>Por Equipe Conta Certa, equipe editorial do Conta Certa (LCM Global Services)</li><li>Revisão jurídica interna</li></ul>
+<div class="post-grade">
+<section class="resposta" aria-labelledby="resposta-t"><h2 id="resposta-t">Resposta direta</h2><p><strong>Resumo:</strong> Nos juros compostos, os juros de cada período entram no saldo e passam a render juros também. A fórmula é <strong>M = C × (1 + i)^n</strong>. Abaixo há três exemplos resolvidos (investimento, dívida e aportes mensais), uma comparação com os juros simples, a regra dos 72, a conversão de taxa mensal para anual e os erros mais comuns. Para simular com os seus números, use a <a href="/juros-compostos/">calculadora de juros compostos</a>.</p>
+<p>Conteúdo revisado pela equipe técnica e tributária do Conta Certa. Exemplos ilustrativos; confirme sua situação com seu contador. Fontes ao final.</p></section>
+<nav class="sumario" aria-labelledby="sumario-t"><h2 id="sumario-t">Neste post</h2><ol><li><a href="#o-que-sao-juros-compostos">O que são juros compostos</a></li><li><a href="#a-formula">A fórmula</a></li><li><a href="#exemplo-1-investimento-de-r-1-000-a-1-ao-mes">Exemplo 1: investimento de R$ 1.000 a 1% ao mês</a></li><li><a href="#exemplo-2-divida-de-r-2-000-a-10-ao-mes">Exemplo 2: dívida de R$ 2.000 a 10% ao mês</a></li><li><a href="#exemplo-3-aportes-mensais-de-r-500-a-0-8-ao-mes-por-10-anos">Exemplo 3: aportes mensais de R$ 500 a 0,8% ao mês por 10 anos</a></li><li><a href="#taxa-mensal-x-taxa-anual-a-conversao-correta">Taxa mensal x taxa anual: a conversão correta</a></li><li><a href="#regra-dos-72">Regra dos 72</a></li><li><a href="#juros-reais-desconte-a-inflacao">Juros reais: desconte a inflação</a></li><li><a href="#onde-os-juros-compostos-aparecem">Onde os juros compostos aparecem</a></li><li><a href="#erros-comuns">Erros comuns</a></li><li><a href="#exemplo-extra-parcelamento-pela-tabela-price">Exemplo extra: parcelamento pela Tabela Price</a></li><li><a href="#tabela-de-crescimento-de-r-1-000">Tabela de crescimento de R$ 1.000</a></li><li><a href="#passo-a-passo-na-planilha">Passo a passo na planilha</a></li><li><a href="#juros-compostos-na-empresa-tres-decisoes">Juros compostos na empresa: três decisões</a></li><li><a href="#juros-simples-x-compostos-lado-a-lado">Juros simples x compostos lado a lado</a></li><li><a href="#checklist-antes-de-comparar-taxas">Checklist antes de comparar taxas</a></li><li><a href="#passo-a-passo-para-resolver-qualquer-exercicio">Passo a passo para resolver qualquer exercício</a></li><li><a href="#faq-t">Perguntas frequentes</a></li><li><a href="#fontes-t">Fontes</a></li><li><a href="#rel-t">Calculadoras relacionadas</a></li></ol></nav>
+<div class="post-corpo">
+<div class="texto">
+<section aria-labelledby="o-que-sao-juros-compostos"><h2 id="o-que-sao-juros-compostos">O que são juros compostos</h2><p>Juros são o preço do dinheiro no tempo. No regime <strong>simples</strong>, os juros incidem sempre sobre o valor inicial. No regime <strong>composto</strong>, incidem sobre o saldo acumulado, ou seja, valor inicial mais os juros já incorporados. É o regime usado em praticamente todas as aplicações financeiras e na maior parte do crédito no Brasil, como mostra o material de educação financeira do Banco Central [S1].</p></section>
+<section aria-labelledby="a-formula"><h2 id="a-formula">A fórmula</h2><p><strong>M = C × (1 + i)^n</strong></p>
+<ul>
+<li><strong>M</strong>: montante final (o valor total no fim: capital mais juros);</li>
+<li><strong>C</strong>: capital inicial;</li>
+<li><strong>i</strong>: taxa de juros por período, em forma decimal (1% = 0,01);</li>
+<li><strong>n</strong>: número de períodos, na mesma unidade da taxa.</li>
+</ul>
+<p>Os juros do período são J = M − C.</p>
+<p>Regra de ouro: <strong>taxa e prazo na mesma unidade</strong>. Taxa mensal com prazo em meses, taxa anual com prazo em anos.</p></section>
+<section aria-labelledby="exemplo-1-investimento-de-r-1-000-a-1-ao-mes"><h2 id="exemplo-1-investimento-de-r-1-000-a-1-ao-mes">Exemplo 1: investimento de R$ 1.000 a 1% ao mês</h2><div class="tab-rolar"><table>
+<thead>
+<tr>
+<th>Prazo</th>
+<th>Juros compostos</th>
+<th>Juros simples</th>
+<th>Diferença</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12 meses</td>
+<td>R$ 1.126,83</td>
+<td>R$ 1.120,00</td>
+<td>R$ 6,83</td>
+</tr>
+<tr>
+<td>60 meses</td>
+<td>R$ 1.816,70</td>
+<td>R$ 1.600,00</td>
+<td>R$ 216,70</td>
+</tr>
+<tr>
+<td>120 meses</td>
+<td>R$ 3.300,39</td>
+<td>R$ 2.200,00</td>
+<td>R$ 1.100,39</td>
+</tr>
+</tbody>
+</table></div>
+<p>Cálculo de 12 meses: 1.000 × 1,01^12 = 1.000 × 1,126825 = R$ 1.126,83.</p>
+<p>A diferença começa pequena e cresce com o tempo, porque cada mês rende sobre uma base maior. É por isso que prazo pesa tanto quanto taxa.</p></section>
+<section aria-labelledby="exemplo-2-divida-de-r-2-000-a-10-ao-mes"><h2 id="exemplo-2-divida-de-r-2-000-a-10-ao-mes">Exemplo 2: dívida de R$ 2.000 a 10% ao mês</h2><p>Linhas rotativas, como o rotativo do cartão e o cheque especial, costumam ter taxas mensais altas. As taxas médias de cada modalidade são publicadas pelo Banco Central [S3]. Com uma taxa ilustrativa de 10% ao mês e sem nenhum pagamento:</p>
+<div class="tab-rolar"><table>
+<thead>
+<tr>
+<th>Mês</th>
+<th>Saldo devedor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>R$ 2.000,00</td>
+</tr>
+<tr>
+<td>6</td>
+<td>R$ 3.543,12</td>
+</tr>
+<tr>
+<td>12</td>
+<td>R$ 6.276,86</td>
+</tr>
+</tbody>
+</table></div>
+<p>Em um ano, a dívida passa de três vezes o valor original. O mesmo mecanismo que faz um investimento crescer faz a dívida crescer. Por isso trocar uma dívida cara por uma mais barata, ou quitá-la, costuma valer mais do que qualquer aplicação.</p></section>
+<section aria-labelledby="exemplo-3-aportes-mensais-de-r-500-a-0-8-ao-mes-por-10-anos"><h2 id="exemplo-3-aportes-mensais-de-r-500-a-0-8-ao-mes-por-10-anos">Exemplo 3: aportes mensais de R$ 500 a 0,8% ao mês por 10 anos</h2><p>Para depósitos iguais no fim de cada mês, a fórmula do valor futuro é:</p>
+<p><strong>VF = P × [(1 + i)^n − 1] ÷ i</strong></p>
+<p>VF = 500 × [(1,008)^120 − 1] ÷ 0,008 = <strong>R$ 100.108,73</strong></p>
+<p>O total depositado foi R$ 60.000,00 (120 × 500). Os outros <strong>R$ 40.108,73</strong> vieram dos juros.</p></section>
+<section aria-labelledby="taxa-mensal-x-taxa-anual-a-conversao-correta"><h2 id="taxa-mensal-x-taxa-anual-a-conversao-correta">Taxa mensal x taxa anual: a conversão correta</h2><p>Não multiplique a taxa mensal por 12. A taxa nominal é a anunciada (por exemplo, "12% ao ano" dividida em 1% ao mês); a efetiva é a que de fato incide depois que os juros se acumulam. A conversão composta é:</p>
+<ul>
+<li>anual = (1 + mensal)^12 − 1;</li>
+<li>mensal = (1 + anual)^(1/12) − 1.</li>
+</ul>
+<div class="tab-rolar"><table>
+<thead>
+<tr>
+<th>Taxa mensal</th>
+<th>Taxa anual equivalente</th>
+<th>Errado (× 12)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0,5%</td>
+<td>6,17%</td>
+<td>6,00%</td>
+</tr>
+<tr>
+<td>0,8%</td>
+<td>10,03%</td>
+<td>9,60%</td>
+</tr>
+<tr>
+<td>1,0%</td>
+<td>12,68%</td>
+<td>12,00%</td>
+</tr>
+<tr>
+<td>2,0%</td>
+<td>26,82%</td>
+<td>24,00%</td>
+</tr>
+<tr>
+<td>5,0%</td>
+<td>79,59%</td>
+<td>60,00%</td>
+</tr>
+<tr>
+<td>10,0%</td>
+<td>213,84%</td>
+<td>120,00%</td>
+</tr>
+</tbody>
+</table></div>
+<p>Quanto maior a taxa, maior o erro de multiplicar por 12. Em crédito caro, a diferença é enorme.</p></section>
+<section aria-labelledby="regra-dos-72"><h2 id="regra-dos-72">Regra dos 72</h2><p>Para estimar em quanto tempo um valor dobra, divida 72 pela taxa percentual do período:</p>
+<ul>
+<li>a 1% ao mês, cerca de 72 meses (6 anos). Conferindo: 1,01^72 = 2,047;</li>
+<li>a 8% ao ano, cerca de 9 anos;</li>
+<li>a 10% ao mês (dívida), cerca de 7 meses.</li>
+</ul>
+<p>É uma aproximação que funciona bem para taxas de até cerca de 20% por período; acima disso, o erro cresce. É útil para comparar alternativas de cabeça.</p></section>
+<section aria-labelledby="juros-reais-desconte-a-inflacao"><h2 id="juros-reais-desconte-a-inflacao">Juros reais: desconte a inflação</h2><p>Se a aplicação rende 10% em um ano e a inflação foi de 4,5%, o ganho real não é 5,5%:</p>
+<p><strong>real = (1 + nominal) ÷ (1 + inflação) − 1 = 1,10 ÷ 1,045 − 1 = 5,26%</strong></p>
+<p>Para corrigir valores pela inflação ou pela Selic com dados oficiais, use a Calculadora do Cidadão do Banco Central [S2]. A meta e o histórico da Selic estão na página oficial do BC [S4].</p></section>
+<section aria-labelledby="onde-os-juros-compostos-aparecem"><h2 id="onde-os-juros-compostos-aparecem">Onde os juros compostos aparecem</h2><div class="tab-rolar"><table>
+<thead>
+<tr>
+<th>Situação</th>
+<th>Como incidem</th>
+<th>O que observar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Poupança, CDB, Tesouro</td>
+<td>Sobre o saldo, de forma diária ou mensal</td>
+<td>Taxa líquida de IR e de taxas</td>
+</tr>
+<tr>
+<td>Financiamento (Price e SAC)</td>
+<td>Sobre o saldo devedor a cada parcela</td>
+<td>Custo Efetivo Total (CET: custo total do crédito, com juros, tarifas, seguros e IOF, o Imposto sobre Operações Financeiras), e não só a taxa</td>
+</tr>
+<tr>
+<td>Cartão rotativo e cheque especial</td>
+<td>Sobre o saldo não pago</td>
+<td>Taxas mensais altas; a regra dos 72 mostra a velocidade</td>
+</tr>
+<tr>
+<td>Parcelado "sem juros"</td>
+<td>Os juros podem estar no preço</td>
+<td>Compare com o preço à vista</td>
+</tr>
+</tbody>
+</table></div>
+<p>Para decidir entre pagar à vista ou parcelar, use o simulador <a href="/parcelado-ou-a-vista/">parcelado ou à vista</a>. Para financiamentos, veja <a href="/financiamento/">financiamento</a>. Para aplicações, <a href="/investimentos/">investimentos</a>.</p></section>
+<section aria-labelledby="erros-comuns"><h2 id="erros-comuns">Erros comuns</h2><ol>
+<li>Multiplicar a taxa mensal por 12.</li>
+<li>Misturar unidades, como taxa anual com prazo em meses.</li>
+<li>Esquecer IR, taxas e inflação ao comparar aplicações.</li>
+<li>Comparar financiamentos pela taxa nominal e não pelo CET.</li>
+<li>Usar juros simples para prazos longos.</li>
+</ol></section>
+<section aria-labelledby="exemplo-extra-parcelamento-pela-tabela-price"><h2 id="exemplo-extra-parcelamento-pela-tabela-price">Exemplo extra: parcelamento pela Tabela Price</h2><p>A maior parte das compras parceladas e dos empréstimos com parcelas fixas usa a Tabela Price, que é juros compostos aplicados a uma série de pagamentos iguais:</p>
+<blockquote>
+<p>Parcela = Valor financiado × i ÷ [1 − (1 + i)^−n]</p>
+</blockquote>
+<p>Empréstimo de R$ 10.000,00 a 2% ao mês em 12 parcelas:</p>
+<ol>
+<li>(1,02)^−12 = 0,7885.</li>
+<li>1 − 0,7885 = 0,2115.</li>
+<li>0,02 ÷ 0,2115 = 0,09456.</li>
+<li>Parcela = 10.000 × 0,09456 = <strong>R$ 945,60</strong>.</li>
+<li>Total pago = 12 × 945,60 = <strong>R$ 11.347,20</strong>. Os juros somam R$ 1.347,20.</li>
+</ol>
+<p>Para comparar sistemas de amortização, use o <a href="/financiamento/">simulador SAC x Price</a>.</p></section>
+<section aria-labelledby="tabela-de-crescimento-de-r-1-000"><h2 id="tabela-de-crescimento-de-r-1-000">Tabela de crescimento de R$ 1.000</h2><div class="tab-rolar"><table>
+<thead>
+<tr>
+<th>Taxa mensal</th>
+<th>12 meses</th>
+<th>24 meses</th>
+<th>60 meses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0,5%</td>
+<td>R$ 1.061,68</td>
+<td>R$ 1.127,16</td>
+<td>R$ 1.348,85</td>
+</tr>
+<tr>
+<td>1,0%</td>
+<td>R$ 1.126,83</td>
+<td>R$ 1.269,73</td>
+<td>R$ 1.816,70</td>
+</tr>
+<tr>
+<td>2,0%</td>
+<td>R$ 1.268,24</td>
+<td>R$ 1.608,44</td>
+<td>R$ 3.281,03</td>
+</tr>
+</tbody>
+</table></div>
+<p>Valores calculados com M = 1.000 × (1 + i)^n. A diferença entre 1% e 2% ao mês parece pequena no primeiro ano e quase dobra o resultado em cinco anos. É o efeito do prazo.</p></section>
+<section aria-labelledby="passo-a-passo-na-planilha"><h2 id="passo-a-passo-na-planilha">Passo a passo na planilha</h2><p>Nas funções abaixo, VF é o valor futuro, PGTO é o valor da parcela, NPER é o número de períodos e VP é o valor presente (o capital de hoje).</p>
+<div class="tab-rolar"><table>
+<thead>
+<tr>
+<th>O que calcular</th>
+<th>Função (Excel/Google Planilhas, pt-BR)</th>
+<th>Exemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Valor futuro de um capital</td>
+<td>=VF(taxa; nper; 0; −VP)</td>
+<td>=VF(1%; 12; 0; −1000) → 1.126,83</td>
+</tr>
+<tr>
+<td>Valor futuro com aportes</td>
+<td>=VF(taxa; nper; −aporte)</td>
+<td>=VF(0,8%; 120; −500) → 100.108,73</td>
+</tr>
+<tr>
+<td>Parcela de um empréstimo</td>
+<td>=PGTO(taxa; nper; −VP)</td>
+<td>=PGTO(2%; 12; −10000) → 945,60</td>
+</tr>
+<tr>
+<td>Taxa equivalente anual</td>
+<td>=(1+taxa)^12−1</td>
+<td>=(1+1%)^12−1 → 12,68%</td>
+</tr>
+<tr>
+<td>Prazo para atingir um valor</td>
+<td>=NPER(taxa; 0; −VP; VF)</td>
+<td>=NPER(1%; 0; −1000; 2000) → 69,7 meses</td>
+</tr>
+</tbody>
+</table></div>
+<p>Para conferir com uma ferramenta oficial, a Calculadora do Cidadão do Banco Central tem módulos de aplicação com depósitos regulares e de financiamento com prestações fixas [S2]. A <a href="/juros-compostos/">calculadora de juros compostos</a> do Conta Certa faz o mesmo cálculo com aportes mensais.</p></section>
+<section aria-labelledby="juros-compostos-na-empresa-tres-decisoes"><h2 id="juros-compostos-na-empresa-tres-decisoes">Juros compostos na empresa: três decisões</h2><div class="tab-rolar"><table>
+<thead>
+<tr>
+<th>Decisão</th>
+<th>Como os juros compostos entram</th>
+<th>Pergunta a fazer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Antecipar recebíveis</td>
+<td>A taxa de desconto, mensal, é aplicada ao prazo antecipado</td>
+<td>A taxa efetiva anual cabe na margem?</td>
+</tr>
+<tr>
+<td>Pagar fornecedor à vista com desconto</td>
+<td>O desconto equivale a uma taxa de retorno no prazo</td>
+<td>Desconto de 3% para pagar 30 dias antes equivale a 3,09% ao mês (3 ÷ 97). Rende mais que o caixa aplicado? Veja o efeito do desconto no preço em <a href="/blog/como-calcular-markup/">como calcular markup</a>.</td>
+</tr>
+<tr>
+<td>Atrasar imposto ou boleto</td>
+<td>No boleto, multa e juros de mora conforme o contrato. Nos tributos federais, multa de 0,33% ao dia até 20% e juros pela Selic acumulada no período, mais 1% no mês do pagamento (Lei 9.430/1996, art. 61) [S6]</td>
+<td>Quanto custa cada mês de atraso?</td>
+</tr>
+</tbody>
+</table></div>
+<p>Para comparar com o rendimento do caixa, use a taxa Selic como referência [S4] e a <a href="/investimentos/">comparação CDB x Poupança x Tesouro</a>.</p></section>
+<section aria-labelledby="juros-simples-x-compostos-lado-a-lado"><h2 id="juros-simples-x-compostos-lado-a-lado">Juros simples x compostos lado a lado</h2><p>Capital de R$ 1.000 a 2% ao mês:</p>
+<div class="tab-rolar"><table>
+<thead>
+<tr>
+<th>Meses</th>
+<th>Juros simples</th>
+<th>Juros compostos</th>
+<th>Diferença</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>R$ 1.020,00</td>
+<td>R$ 1.020,00</td>
+<td>R$ 0,00</td>
+</tr>
+<tr>
+<td>12</td>
+<td>R$ 1.240,00</td>
+<td>R$ 1.268,24</td>
+<td>R$ 28,24</td>
+</tr>
+<tr>
+<td>24</td>
+<td>R$ 1.480,00</td>
+<td>R$ 1.608,44</td>
+<td>R$ 128,44</td>
+</tr>
+<tr>
+<td>60</td>
+<td>R$ 2.200,00</td>
+<td>R$ 3.281,03</td>
+<td>R$ 1.081,03</td>
+</tr>
+</tbody>
+</table></div>
+<p>No primeiro mês, os dois regimes empatam. A partir daí, os compostos se afastam, porque os juros de cada mês passam a render juros. Em aplicações e dívidas de longo prazo, é essa diferença que decide o resultado.</p></section>
+<section aria-labelledby="checklist-antes-de-comparar-taxas"><h2 id="checklist-antes-de-comparar-taxas">Checklist antes de comparar taxas</h2><ul>
+<li>[ ] As duas taxas estão no mesmo período (mês com mês, ano com ano)?</li>
+<li>[ ] A taxa é nominal ou efetiva?</li>
+<li>[ ] Há tarifas, seguros ou IOF fora da taxa? Compare pelo Custo Efetivo Total (CET).</li>
+<li>[ ] O rendimento é bruto ou líquido de imposto de renda?</li>
+<li>[ ] A comparação desconta a inflação do período?</li>
+<li>[ ] O prazo é o mesmo nas duas opções?</li>
+</ul></section>
+<section aria-labelledby="passo-a-passo-para-resolver-qualquer-exercicio"><h2 id="passo-a-passo-para-resolver-qualquer-exercicio">Passo a passo para resolver qualquer exercício</h2><ol>
+<li>Identifique o capital (C), a taxa (i), o prazo (n) e se há aportes ou parcelas.</li>
+<li>Coloque taxa e prazo na mesma unidade.</li>
+<li>Escolha a fórmula: montante (M = C × (1 + i)^n), aportes (valor futuro de uma série) ou parcela (Price).</li>
+<li>Calcule e confira na planilha ou na Calculadora do Cidadão [S2].</li>
+<li>Interprete: compare com a inflação e com uma alternativa de mesmo risco.</li>
+</ol></section>
+</div>
+<section class="faq" aria-labelledby="faq-t"><h2 id="faq-t">Perguntas frequentes</h2>
+<details><summary>Qual é a fórmula dos juros compostos?</summary><div><p>M = C × (1 + i)^n, com a taxa e o prazo na mesma unidade.</p></div></details>
+<details><summary>Qual é a diferença entre juros simples e compostos?</summary><div><p>Nos simples, os juros incidem só sobre o capital inicial. Nos compostos, incidem sobre o saldo acumulado.</p></div></details>
+<details><summary>Como transformar taxa mensal em anual?</summary><div><p>(1 + taxa mensal)^12 − 1. Por exemplo, 1% ao mês dá 12,68% ao ano.</p></div></details>
+<details><summary>Em quanto tempo meu dinheiro dobra?</summary><div><p>Use a regra dos 72: divida 72 pela taxa do período. A 1% ao mês, cerca de 6 anos.</p></div></details>
+<details><summary>Quanto custa o rotativo do cartão?</summary><div><p>Varia por instituição. As taxas médias por modalidade estão publicadas pelo Banco Central [S3]. Pelo art. 28 da Lei 14.690/2023, o total de juros e encargos financeiros cobrados no rotativo e no parcelamento da fatura do cartão não pode passar do valor original da dívida [S5].</p></div></details>
+<details><summary>Como calcular a parcela de um empréstimo?</summary><div><p>Pela Tabela Price: parcela = valor × i ÷ [1 − (1 + i)^−n]. Exemplo: R$ 10.000 a 2% ao mês em 12 vezes dá R$ 945,60.</p></div></details>
+<details><summary>Como calcular juros compostos no Excel?</summary><div><p>Use =VF(taxa; períodos; aporte; −valor presente). Exemplo: =VF(1%; 12; 0; −1000) retorna 1.126,83.</p></div></details>
+<details><summary>Juros compostos e taxa efetiva são a mesma coisa?</summary><div><p>A taxa efetiva é a taxa realmente aplicada no período, considerando a capitalização. Converter 1% ao mês em 12,68% ao ano é calcular a taxa efetiva anual.</p></div></details>
+</section>
+<section class="fontes" aria-labelledby="fontes-t"><h2 id="fontes-t">Fontes</h2><ul><li><a href="https://www.bcb.gov.br/content/cidadaniafinanceira/documentos_cidadania/Cuidando_do_seu_dinheiro_Gestao_de_Financas_Pessoais/caderno_cidadania_financeira.pdf" rel="noopener" target="_blank">[S1] Banco Central do Brasil, Caderno de Educação Financeira, &quot;Gestão de Finanças Pessoais&quot;</a></li><li><a href="https://www3.bcb.gov.br/CALCIDADAO/publico/exibirFormCorrecaoValores.do?method=exibirFormCorrecaoValores" rel="noopener" target="_blank">[S2] Banco Central do Brasil, Calculadora do Cidadão</a></li><li><a href="https://www.bcb.gov.br/estatisticas/txjuros" rel="noopener" target="_blank">[S3] Banco Central do Brasil, Taxas de juros por modalidade e instituição</a></li><li><a href="https://www.bcb.gov.br/controleinflacao/taxaselic" rel="noopener" target="_blank">[S4] Banco Central do Brasil, Taxa Selic</a></li><li>Exemplos numéricos: elaboração própria, reproduzíveis na calculadora /juros-compostos/ (todos os acessos em 29/10/2026).</li><li><a href="https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14690.htm" rel="noopener" target="_blank">[S5] Lei nº 14.690/2023, art. 28 (limite de juros e encargos do rotativo e do parcelamento da fatura)</a> (acesso em 29/10/2026)</li><li><a href="https://www.planalto.gov.br/ccivil_03/leis/l9430compilada.htm" rel="noopener" target="_blank">[S6] Lei nº 9.430/1996, art. 61 (multa e juros de mora sobre tributos federais)</a> (acesso em 29/10/2026)</li></ul></section>
+<section class="relacionadas" aria-labelledby="rel-t"><h2 id="rel-t">Calculadoras relacionadas</h2><ul class="cards"><li><a class="card" href="/juros-compostos/"><span class="tile t-financas"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-alta"/></svg></span><span class="card-txt"><strong>Calculadora de juros compostos</strong><span>Simule aplicações com aportes e taxa mensal ou anual.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/investimentos/"><span class="tile t-financas"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-barras"/></svg></span><span class="card-txt"><strong>Investimentos</strong><span>Compare rendimentos de aplicações.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/financiamento/"><span class="tile t-financas"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-casa"/></svg></span><span class="card-txt"><strong>Financiamento</strong><span>Parcelas pela Tabela Price ou SAC.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/parcelado-ou-a-vista/"><span class="tile t-financas"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-cartao"/></svg></span><span class="card-txt"><strong>Parcelado ou à vista</strong><span>Veja qual opção sai mais barata.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li></ul><p>Leia também: <a href="/blog/como-calcular-markup/">Como calcular markup: fórmula, exemplo e diferença para margem</a></p></section>
+</div>
+</div>
+</article>
+</div>
+<script>/* QA P13-04r: a tabela só fica focável (tabindex) quando rola de fato. */(function(){function f(){document.querySelectorAll('.tab-rolar').forEach(function(s){if(s.scrollWidth>s.clientWidth+1)s.setAttribute('tabindex','0');else s.removeAttribute('tabindex')})}addEventListener('load',f);addEventListener('resize',f)})();</script>
+</main>
+<footer class="rodape"><div class="caixa">
+<div class="rod-grade">
+<div class="rod-marca"><a class="marca" href="/" aria-label="Conta Certa: página inicial"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="16" fill="#0b2b20"/><path d="M16 24h32M16 40h14" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><path d="M37 39.5l4.5 4.5L50 35" fill="none" stroke="#c5f25c" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Conta <b>Certa</b></span></a>
+<p><strong>Conta Certa (contacertabr.com.br)</strong> — Calculadoras trabalhistas, financeiras e do dia a dia. Resultados estimativos; não substituem orientação de contador, advogado ou profissional de saúde.</p></div>
+<nav aria-label="Calculadoras mais usadas"><h2>Mais usadas</h2><a href="/salario-liquido/">Salário líquido</a><a href="/rescisao/">Rescisão trabalhista</a><a href="/decimo-terceiro/">13º salário</a><a href="/ferias/">Férias</a><a href="/imposto-de-renda/">Imposto de renda (IRRF)</a><a href="/das-mei/">DAS MEI 2026</a></nav>
+<nav aria-label="Tabelas oficiais 2026"><h2>Tabelas 2026</h2><a href="/tabela-inss-2026/">Tabela INSS 2026</a><a href="/tabela-ir-2026/">Tabela IR 2026</a><a href="/salario-minimo-2026/">Salário mínimo 2026</a><a href="/tabela-seguro-desemprego-2026/">Tabela seguro-desemprego 2026</a></nav>
+<nav aria-label="Institucional"><h2>Institucional</h2><a href="/blog/">Blog</a><a href="/sobre/">Sobre</a><a href="/contato/">Contato</a><a href="/privacidade/">Política de privacidade</a><a href="/termos/">Termos de uso</a><a href="/sitemap.xml">Mapa do site</a><button type="button" class="cc-rever" data-lcm-consent-abrir>Preferências de cookies</button></nav>
+</div>
+<p class="mini">Tabelas oficiais conferidas em <time datetime="2026-10-10">10/10/2026</time>. <a href="/sobre/">Como verificamos as fontes</a>. <span class="afiliado-aviso">Como participante do Programa de Associados da Amazon, sou remunerado pelas compras qualificadas efetuadas.</span><br><span class="rod-empresa">RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20 · Rua Pais Leme, 215, Conj. 1713, Pinheiros, São Paulo, SP, 05424-150 · contato@contacertabr.com.br</span></p>
+</div></footer>
+</body>
+</html>

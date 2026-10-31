@@ -4,6 +4,7 @@
 //   /licitacoes/ (CSP própria, seção separada), sem .xml e sem links com query (?) ou âncora (#).
 // - Nenhuma dessas páginas tem CSP; se passar a ter, a CSP precisa liberar 'inline-speculation-rules'.
 // - /licitacoes/ não recebe regras (a CSP de lá só aceita script do próprio site e não muda).
+import { PAGINAS_COMPRA, FORM_ACTION_COMPRA } from './config-checkout.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -62,7 +63,9 @@ const CSP_LICITACOES = /<meta http-equiv="Content-Security-Policy" content="defa
 function checarLicitacoes(p, html) {
   assert.equal(regrasDe(html).length, 0);
   assert.doesNotMatch(html, /speculationrules/);
-  assert.match(html, EXCECOES_REDIR.has(p) ? CSP_REDIR : CSP_LICITACOES);
+  // A-08: nas páginas de compra a form-action é a origem do checkout (coberta por checkout-botao.test.mjs).
+  const h = PAGINAS_COMPRA.includes(p) ? html.replace(`form-action ${FORM_ACTION_COMPRA}"`, "form-action 'none'\"") : html;
+  assert.match(h, EXCECOES_REDIR.has(p) ? CSP_REDIR : CSP_LICITACOES);
 }
 for (const p of paginas.filter(ehLicitacoes)) {
   test(`${p}: /licitacoes/ sem speculationrules e com a CSP intacta`, () => checarLicitacoes(p, ler(p)));

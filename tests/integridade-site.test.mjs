@@ -18,6 +18,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ORIGEM_CHECKOUT, PAGINAS_COMPRA } from './config-checkout.mjs';
 
 const raiz = fileURLToPath(new URL('../', import.meta.url));
 const ORIGEM = 'https://contacertabr.com.br';
@@ -77,7 +78,9 @@ const referencias = (html) => {
   const h = html.replace(/<!--[^]*?-->/g, '')
     .replace(/(<script\b[^>]*>)[^]*?<\/script>/gi, '$1</script>')
     .replace(/<style\b[^>]*>[^]*?<\/style>/gi, '');
-  const refs = [...h.matchAll(/\s(?:href|src|action|poster)="([^"]*)"/gi)].map((m) => m[1]);
+  const refs = [...h.matchAll(/\s(?:href|src|action|poster)="([^"]*)"/gi)].map((m) => m[1])
+    // A-08: o action do botão de compra aponta para a origem externa do checkout (coberto por checkout-botao.test.mjs).
+    .filter((r) => !r.startsWith(ORIGEM_CHECKOUT + '/checkout'));
   for (const m of h.matchAll(/<meta\b[^>]*\scontent="(https?:\/\/(?:www\.)?contacertabr\.com\.br[^"]*)"/gi)) refs.push(m[1]);
   return refs.map((r) => r.replace(/&amp;/g, '&'));
 };
@@ -219,6 +222,8 @@ for (const p of comForm) {
   test(`${p}: sem JS nenhum formulário envia campos (botões de envio desabilitados no HTML)`, () => {
     for (const f of formsDe(ler(p))) {
       if (ehBuscaDaHome(p, f)) continue;
+      // A-08: botão de compra sem campos (POST para <origem>/checkout), só nas páginas de compra.
+      if (PAGINAS_COMPRA.includes(p) && /^<form\b[^>]*\saction="([^"]+)"/.test(f) && ['radar', 'radar-anual'].some((x) => f.includes(`action="${ORIGEM_CHECKOUT}/checkout?produto=${x}"`)) && nomesDe(f).length === 0 && !/<(input|select|textarea)\b/i.test(f)) continue;
       assert.doesNotMatch(f, /<input\b[^>]*\stype="?(submit|image)\b/i);
       const botoes = f.match(/<button\b(?![^>]*\stype="button")[^>]*>/gi) || [];
       assert.ok(botoes.length >= 1, 'formulário sem botão de envio desabilitado');
