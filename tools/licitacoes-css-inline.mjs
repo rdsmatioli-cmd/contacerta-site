@@ -8,7 +8,7 @@ const raiz = fileURLToPath(new URL('../', import.meta.url));
 export const PAGINAS = [
   'licitacoes/index.html', 'licitacoes/politica.html', 'licitacoes/cobranca/index.html', 'licitacoes/blog/index.html',
   'licitacoes/blog/como-encontrar-licitacoes.html', 'licitacoes/blog/pregoes-material-de-limpeza-pncp.html',
-  'licitacoes/blog/licitacao-generos-alimenticios-pncp.html', 'licitacoes/blog/pregao-material-de-expediente-pncp.html',
+  'licitacoes/blog/pregao-material-de-expediente-pncp/index.html',
   'licitacoes/editais/material-de-limpeza.html',
 ];
 const ler = (p) => readFileSync(raiz + p, 'utf8');
