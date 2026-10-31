@@ -41,7 +41,7 @@ const semErroNoCampo = async (page, id) => {
   await expect(page.locator(`#${id}-msg`)).toBeHidden();
 };
 
-test('rescisão: data vazia, fora de ordem, incompleta e fora do intervalo dão erro no campo certo', async ({ page, rede, erros }) => {
+test('rescisão: data vazia, fora de ordem, incompleta e fora do intervalo dão erro no campo certo', async ({ page, rede, erros, isMobile }) => {
   const { resultado, calcular } = await abrir(page, '/rescisao/');
   for (const id of ['f-admissao', 'f-desligamento', 'f-dataPagamento']) {
     await expect(page.locator(`#${id}`)).toHaveAttribute('min', '1900-01-01');
@@ -57,12 +57,17 @@ test('rescisão: data vazia, fora de ordem, incompleta e fora do intervalo dão 
   await calcular();
   await semErroNoCampo(page, 'f-admissao');
   await erroNoCampo(page, resultado, 'f-desligamento', 'Data do desligamento (último dia)', 'A data não pode ser anterior à data de admissão (01/10/2026).');
-  // data digitada pela metade (o navegador deixa o value vazio): incompleta, não "em branco"
+  // data digitada pela metade (o navegador deixa o value vazio): incompleta, não "em branco".
+  // Só no desktop: com toque (projeto 390px, isMobile), o campo de data abre o seletor do sistema e não aceita data
+  // pela metade; o Chromium do CI ignora o Backspace ali e o valor fica inteiro. A regra (badInput) também está em
+  // tests/validacao-datas.test.mjs.
   await page.fill('#f-admissao', '2023-02-01');
-  await page.locator('#f-desligamento').focus();
-  await page.keyboard.press('Backspace');
-  await calcular();
-  await erroNoCampo(page, resultado, 'f-desligamento', 'Data do desligamento (último dia)', 'Data incompleta ou inexistente: confira dia, mês e ano.');
+  if (!isMobile) {
+    await page.locator('#f-desligamento').focus();
+    await page.keyboard.press('Backspace');
+    await calcular();
+    await erroNoCampo(page, resultado, 'f-desligamento', 'Data do desligamento (último dia)', 'Data incompleta ou inexistente: confira dia, mês e ano.');
+  }
   // fora do intervalo
   await page.fill('#f-desligamento', '2101-01-01');
   await calcular();
