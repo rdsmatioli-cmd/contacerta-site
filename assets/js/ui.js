@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=0622b12638';
+import * as C from './calc.js?v=d51ac5ce1d';
 import { INDICADORES } from './tabelas.js?v=2469a7d685';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=401ac75a59';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=ca94fc5eb6';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -224,7 +224,7 @@ const CALCS = {
       ['Subtotal de horas extras', R(r.totalHE), 'sub'],
       ['Reflexo no DSR', R(r.dsr)],
       ['Total bruto', R(r.total), 'total'],
-    ]);
+    ]) + `<p class="nota">Divisor usado: ${n2.format(d.jornada)} horas. Padrão pela EC 141/2026: 220 (44 horas semanais) até 15/12/2026, 210 (42 horas) a partir de 16/12/2026 e 200 (40 horas) a partir de 16/12/2027; o contrato ou a convenção coletiva podem prever outro.</p>`;
   },
   'seguro-desemprego'(d) {
     const r = C.seguroDesemprego({ salarios: [d.s1, d.s2, d.s3], solicitacao: d.solicitacao, mesesTrabalhados: d.meses });
@@ -320,7 +320,7 @@ const CALCS = {
       [`Adicional noturno (${pct(r.pct, 0)})`, R(r.adicional), 'sub'],
       ['Reflexo no DSR', R(r.dsr)],
       ['Total bruto a mais no mês', R(r.total), 'total'],
-    ]);
+    ]) + `<p class="nota">Divisor usado: ${n2.format(d.jornada)} horas. Padrão pela EC 141/2026: 220 (44 horas semanais) até 15/12/2026, 210 (42 horas) a partir de 16/12/2026 e 200 (40 horas) a partir de 16/12/2027; o contrato ou a convenção coletiva podem prever outro.</p>`;
   },
   'aviso-previo'(d) {
     const r = C.avisoPrevio({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo });
@@ -542,6 +542,12 @@ function iniciar() {
       if (v === '' || v === pisoTxt(tipoAnterior)) el.value = pisoTxt(form.elements.tipo.value);
       tipoAnterior = form.elements.tipo.value;
     });
+  }
+  // EC 141/2026: divisor padrão pela data de hoje (220; 210 a partir de 16/12/2026; 200 a partir de 16/12/2027), só se o
+  // campo ainda tem o valor do HTML. Sem jornadaPadrao (calc.js antigo vindo do cache), fica o valor do HTML.
+  if ((id === 'horas-extras' || id === 'adicional-noturno') && form.elements.jornada && typeof C.jornadaPadrao === 'function') {
+    const el = form.elements.jornada;
+    if (el.value.trim() === el.defaultValue) el.value = String(C.jornadaPadrao(hoje()).divisor);
   }
   if (id === 'conversor-de-medidas') {
     popularUnidades(form);

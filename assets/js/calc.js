@@ -139,6 +139,22 @@ export function ferias({ salario, mediaVariaveis = 0, dias = 30, venderDias = fa
   return { diasGozo, diasAbono, valorFerias, terco, abono, tercoAbono, bruto, inss, irrf: ir.irrf, ir, liquido: r2(bruto - inss - ir.irrf) };
 }
 
+// ---------------------------------------------------------------- Jornada (EC 141/2026)
+// Duração normal máxima de 44 h até 15/12/2026, 42 h a partir de 16/12/2026 e 40 h a partir de 16/12/2027 (EC 141/2026,
+// art. 6º, DOU de 16/10/2026: 2 meses e 1 ano depois). Divisor padrão = horas semanais × 5 (220, 210 e 200; para 40 h,
+// Súmula 431 do TST). Dois repousos semanais remunerados a partir de 16/12/2026 (art. 1º, inciso XV, e art. 10, I).
+// Mesmas datas e divisores de assets/js/empregador/config.js (JORNADA); tests/jornada-ec141.test.mjs confere.
+export const JORNADA_CLT = Object.freeze([
+  Object.freeze({ desde: '', horas: 44, divisor: 220, repousosSemanais: 1 }),
+  Object.freeze({ desde: '2026-12-16', horas: 42, divisor: 210, repousosSemanais: 2 }),
+  Object.freeze({ desde: '2027-12-16', horas: 40, divisor: 200, repousosSemanais: 2 }),
+]);
+// Jornada padrão na data (AAAA-MM-DD): a última etapa com desde <= data.
+export function jornadaPadrao(dataISO) {
+  const d = String(dataISO ?? '').slice(0, 10);
+  return JORNADA_CLT.reduce((atual, j) => (j.desde <= d ? j : atual), JORNADA_CLT[0]);
+}
+
 // ---------------------------------------------------------------- Horas extras
 export function horasExtras({ salario, jornadaMensal = 220, horas50 = 0, horas100 = 0, diasUteis = 0, domingosFeriados = 0, outroPercentual = 0, horasOutro = 0 }) {
   const valorHora = num(salario) / Math.max(1, num(jornadaMensal, 220));
