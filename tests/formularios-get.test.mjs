@@ -12,7 +12,7 @@ const formsDe = (html) => html.match(/<form\b[^]*?<\/form>/gi) || [];
 const botoes = (f) => f.match(/<button\b(?![^>]*type="button")[^>]*>/gi) || [];
 
 test('31 páginas com formulário fora da home (32 com a busca)', () => {
-  assert.equal(paginas.length, 31); // +tabelas-oficiais-2026 (PR #7)
+  assert.equal(paginas.length, 32); // +tabelas-oficiais-2026 (PR #7), +irpf (IRPF R2)
   assert.equal(formsDe(ler('index.html')).length, 1); // busca q: sem alteração
 });
 for (const p of paginas) {

@@ -40,11 +40,12 @@ jobs:
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       # Só o conteúdo do site: os mesmos arquivos que o Pages legado serve hoje, sem tests, node_modules, .github,
       # .git e os arquivos de configuração (.gitattributes, .htmlvalidate.json, .nvmrc). Mantém .nojekyll e CNAME.
-      # B-06 (CPO): as páginas de /empregador-em-dia/ ficam FORA do artefato até o OK de deploy do CEO. Chave única:
+      # B-06 (CPO): as páginas de /empregador-em-dia/ ficavam FORA do artefato até o OK de deploy do CEO; DEC CPO 31/10
+      # (PR #56, go-live 03/11): '1'. Chave única:
       # DEPLOY_EMPREGADOR ('0' = fora, '1' = publica). Conferida por tests/pages-empregador.test.mjs e pelo passo abaixo.
       - name: Montar _site
         env:
-          DEPLOY_EMPREGADOR: '0'
+          DEPLOY_EMPREGADOR: '1'
         run: |
           mkdir -p "$RUNNER_TEMP/_site"
           EXTRA=()

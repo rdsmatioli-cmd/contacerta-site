@@ -12,7 +12,7 @@ test('T2: textos literais e flag false', () => {
   assert.equal(ED_SST_INCLUIDO, false);
 });
 test('T2: ui.js mostra em definição para null e opcional para false', async () => {
-  globalThis.document ??= { readyState: 'loading', addEventListener() {}, querySelectorAll: () => [] };
+  globalThis.document ??= { readyState: 'loading', addEventListener() {}, querySelector: () => ({}), querySelectorAll: () => [] };
   const { textoSst } = await import('../assets/js/empregador/ui.js');
   assert.equal(textoSst(null), SST_TEXTO_EM_DEFINICAO);
   assert.equal(textoSst(false), T2);

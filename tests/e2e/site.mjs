@@ -26,11 +26,15 @@ const ehCalc = (form) => /^<form\b[^>]*\bclass="[^"]*\bcalc-form\b/i.test(form);
 // no HTML. Formulário de calculadora que não se encaixa em nenhum dos dois vai para SEM_CLASSIFICACAO e falha.
 export const CALCULADORAS = [];
 export const DESLIGADAS = [];
+// Simulador com motor próprio (hoje só /irpf/): <form class="calc-form" data-motor="proprio">, ligado pelo próprio JS da
+// página (não pelo ui.js). Tem spec dedicado (irpf.spec.mjs).
+export const PROPRIOS = [];
 export const SEM_CLASSIFICACAO = [];
 for (const arquivo of ARQUIVOS) {
   for (const form of formsDe(ler(arquivo)).filter(ehCalc)) {
     const id = (form.match(/^<form\b[^>]*\bdata-calc="([^"]+)"/i) || [])[1];
-    if (id) CALCULADORAS.push({ arquivo, url: urlDe(arquivo), id });
+    if (/^<form\b[^>]*\bdata-motor="proprio"/i.test(form)) PROPRIOS.push({ arquivo, url: urlDe(arquivo) });
+    else if (id) CALCULADORAS.push({ arquivo, url: urlDe(arquivo), id });
     else if (/<button type="submit" disabled[ >]/.test(form)) DESLIGADAS.push({ arquivo, url: urlDe(arquivo) });
     else SEM_CLASSIFICACAO.push(arquivo);
   }

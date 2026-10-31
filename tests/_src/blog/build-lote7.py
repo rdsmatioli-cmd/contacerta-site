@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Lote 7 (parcial): /blog/nr-1-pequenas-empresas/ e /blog/gro-pgr-nr-1/ a partir dos artigo.md + artigo.render.html aprovados.
+"""Lote 7: /blog/fator-r-simples-nacional/, /blog/nr-1-pequenas-empresas/ e /blog/gro-pgr-nr-1/ a partir dos artigo.md + artigo.render.html aprovados.
 Uso: python3 tests/_src/blog/build-lote7.py AAAA-MM-DD   (data REAL de publicação; rodar de novo no dia)
 Aborta se o sha256 do artigo.md ou do artigo.render.html divergir do aprovado. O texto do corpo vem do render
 aprovado, sem edição; só a estrutura (seções, FAQ em <details>, cards) segue o template dos posts do blog.
-fator-r-simples-nacional fica FORA (retido: Tributário-Conteúdo NÃO DE ACORDO, aguarda novo hash)."""
+Hashes finais: fator-r 755d7e45/aa35c422 (Advogado ADENDO 83ea0b2b + Tributário DE ACORDO), nr-1 2b817a60/83a0466e (FAQ restaurado), gro 057f7e06/0caf2a34."""
 import sys,re,json,hashlib,html,os,glob
 from bs4 import BeautifulSoup
 R=os.path.abspath(os.path.join(os.path.dirname(__file__),'..','..','..'))
@@ -12,7 +12,11 @@ DATA=sys.argv[1]
 MES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
 y,m,d=DATA.split('-'); DEXT=f'{int(d)} de {MES[int(m)-1]} de {y}'
 POSTS={
- 'nr-1-pequenas-empresas':dict(md='097fcd2f6216809ea7c29b7d475faa20011fc8449b2854d9ea521e34bffbea55',rd='dbb3de0e41bb9f1f86c8d6bddfeefc74eb650b2b14631fa0110f06d26b243076',
+ 'fator-r-simples-nacional':dict(md='755d7e455f93666c00c3f421d1250c7946037ced1497574564a0f51a3813799c',rd='aa35c4224ea8c5198546389f4897ad8c6028c3b4887e6fccb0e6b0a719eb36a7',
+   title='Fator R no Simples Nacional: como calcular e o Anexo III',
+   desc='Fator R no Simples Nacional: como calcular folha sobre receita de 12 meses, quando a empresa fica no Anexo III ou no V e o que entra na folha.',
+   cat='Impostos e MEI', irmao='pro-labore'),
+ 'nr-1-pequenas-empresas':dict(md='2b817a60df459eed93363879c3da9c53b0d898ae3007c554759ddf85cb4b0ded',rd='83a0466e10f96edabd39d313e094cda3ccf080ce6d0b233e0bb843f9b3e15772',
    title='NR-1 para pequenas empresas: o que ME, EPP e MEI fazem',
    desc='NR-1 para pequenas empresas: o que vale para MEI, ME e EPP, quando o PGR pode ser dispensado e o que fazer sobre riscos psicossociais.',
    cat='Trabalho e salário', irmao='gro-pgr-nr-1'),
@@ -123,7 +127,7 @@ for s,c in POSTS.items():
     toc_h=''.join(f'<li><a href="#{i}">{e(x)}</a></li>' for i,x in toc if i!='revisao-t')+'<li><a href="#faq-t">Perguntas frequentes</a></li><li><a href="#fontes-t">Fontes oficiais</a></li><li><a href="#revisao-t">Revisão</a></li><li><a href="#rel-t">Calculadoras relacionadas</a></li>'
     secs_txt=[x for x in secs if 'id="revisao-t"' not in x]; rev=[x for x in secs if 'id="revisao-t"' in x]
     pm=''.join(f'<li>{e(x)}</li>' for x in meta_li)
-    oh1={'nr-1-pequenas-empresas':'NR-1 para pequenas empresas: o que vale para MEI, ME e EPP','gro-pgr-nr-1':'GRO e PGR na NR-1: o que são e o que o PGR deve ter'}[c['irmao']]
+    oh1={'nr-1-pequenas-empresas':'NR-1 para pequenas empresas: o que vale para MEI, ME e EPP','gro-pgr-nr-1':'GRO e PGR na NR-1: o que são e o que o PGR deve ter','pro-labore':html.unescape(re.search(r'<h1>([^<]+)</h1>',tpl).group(1))}[c['irmao']]
     art=f'''<main id="conteudo" class="caixa">
 <div class="blog post">
 <nav class="migalhas" aria-label="Você está em"><a href="/">Início</a> › <a href="/blog/">Blog</a> › <span aria-current="page">{e(h1)}</span></nav>
