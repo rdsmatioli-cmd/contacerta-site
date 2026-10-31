@@ -199,7 +199,10 @@ footer .ver{margin-top:12px;font:450 11px/16px var(--mono);color:var(--ink-2);te
 .doc h1{font-size:38px;line-height:44px;margin:16px 0 10px}
 .doc h2{font-size:19px;line-height:26px;font-weight:650;letter-spacing:-.015em;margin:36px 0 10px;color:var(--n950);display:flex;gap:10px;align-items:baseline}
 .doc h2 .mono{font-size:12px;color:var(--ink-2)}
-.doc p,.doc li{font-size:15.5px;line-height:26px;color:var(--ink-2)}
+.doc p,.doc li{font-size:15.5px;line-height:26px;color:var(--ink-2);overflow-wrap:anywhere}
+/* URL longa em texto puro nas Fontes não alarga a página (laudos pncp 81a32cd7 e alimentos 513bff07) */
+/* Tabela sem invólucro .tab-rolar (posts live e política): rola dentro de si, não a página */
+@media(max-width:1023px){.doc table{display:block;max-width:100%;overflow-x:auto}}
 .doc ul{padding-left:20px}
 .doc table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;line-height:21px;border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--surface)}
 .doc th,.doc td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}

@@ -544,3 +544,5 @@ main p a,main li a,main dd a{overflow-wrap:anywhere}
 
 /* Guia completo nas calculadoras: um card só (post do blog), na largura do texto. */
 .relacionadas.guia-completo .cards{grid-template-columns:1fr;max-width:780px}
+/* Blog: URL longa em texto puro (Fontes) não alarga a página em 320-412 */
+main article p,main article li{overflow-wrap:anywhere}
