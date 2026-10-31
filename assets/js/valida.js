@@ -42,7 +42,9 @@ export function lerNumeroBR(raw, { decimal = false } = {}) {
   } else norm = s;
   const n = Number(norm);
   if (!Number.isFinite(n)) return { erro: 'Digite só números.' };
-  return alerta ? { n: neg ? -n : n, alerta } : { n: neg ? -n : n };
+  // "-0" vira 0 (CC-CALC-VALIDA-02): −0 passava no mínimo 0 (−0 < 0 é falso) e o Intl o mostra como "-R$ 0,00".
+  const v = neg && n !== 0 ? -n : n;
+  return alerta ? { n: v, alerta } : { n: v };
 }
 
 // Inteiro de 0 a 999.999 por extenso, para o alerta de leitura ("1125" → "mil cento e vinte e cinco").
