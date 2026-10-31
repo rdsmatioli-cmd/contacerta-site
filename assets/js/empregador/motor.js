@@ -1,5 +1,5 @@
 // Empregador em Dia: motor puro (sem DOM, sem rede). Testado em tests/empregador.test.mjs.
-import { FAIXAS, JORNADA, SALARIO_MINIMO, FAIXAS_SALARIO } from './config.js?v=f4fca4765e';
+import { FAIXAS, JORNADA, SALARIO_MINIMO, FAIXAS_SALARIO } from './config.js?v=678a5768a3';
 
 export const r2 = (x) => Math.round((x + Number.EPSILON) * 100) / 100;
 export const faixaPorId = (id) => FAIXAS.find((f) => f.id === id) || null;
