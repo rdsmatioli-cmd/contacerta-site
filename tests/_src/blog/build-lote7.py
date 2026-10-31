@@ -30,11 +30,12 @@ for P in POSTS:
   # ids dos h2 pelo "Neste post" do próprio artigo; demais por slug
   toc=dict((html.unescape(t),a) for a,t in re.findall(r'<a href="#([^"]+)">([^<]+)</a>',corpo))
   def slug(t): return re.sub(r'[^a-z0-9]+','-',unicodedata.normalize('NFKD',t).encode('ascii','ignore').decode().lower()).strip('-')
-  FIX={'Resposta direta':'resposta-t','Neste post':'sumario-t'}
+  FIX={'Resposta direta':'resposta-t','Neste post':'sumario-t','Revisão':'revisao-t'}
   def hid(mo):
       n,t=mo.group(1),mo.group(2); tt=html.unescape(t)
       return f'<h{n} id="{FIX.get(tt) or toc.get(tt) or slug(tt)}">{t}</h{n}>'
   corpo=re.sub(r'<h([23])>(.*?)</h\1>',hid,corpo)
+  corpo=corpo.replace('id="conteudo"','id="conteudo-pgr"').replace('href="#conteudo"','href="#conteudo-pgr"')  # id reservado pelo site (Pular para o conteúdo)
   corpo=re.sub(r'<a href="(https?://[^"]+)">',r'<a href="\1" rel="noopener" target="_blank">',corpo)
   corpo=re.sub(r'<table>(.*?)</table>',r'<div class="tab-rolar"><table>\1</table></div>',corpo,flags=re.S)
   cit=[{"@type":"CreativeWork","name":html.unescape(re.sub(r'<[^>]+>','',n)),"url":u} for u,n in re.findall(r'<a href="(https?://[^"]+)" rel="noopener" target="_blank">(.*?)</a>',corpo)]
