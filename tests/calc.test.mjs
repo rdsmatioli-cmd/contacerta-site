@@ -358,8 +358,9 @@ test('Crédito travado: crédito, parcela em risco e custo financeiro', () => {
 
 test('Calendário da reforma: próximo marco e fase', () => {
   const r = C.calendarioReforma('2026-10-10');
-  assert.equal(r.proximo.data, '2026-10-30');
-  assert.equal(r.proximo.dias, 20);
+  assert.equal(r.proximo.data, '2026-10-28'); // cálculo do TCU da CBS de 2027 (marco incluído em 31/10/2026)
+  assert.equal(r.proximo.dias, 18);
+  assert.equal(C.calendarioReforma('2026-10-29').proximo.data, '2026-10-30');
   assert.equal(r.fase, 'Teste');
   assert.equal(C.calendarioReforma('2027-06-01').proximo.data, '2029-01-01');
   assert.equal(C.calendarioReforma('2034-01-01').proximo, null);

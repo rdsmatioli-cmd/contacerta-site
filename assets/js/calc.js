@@ -858,11 +858,14 @@ export function creditoTravado({ comprasMensais, cbsPct, ibsPct, pctInadimplente
 // Calendário oficial: marcos e situação em relação a uma data (AAAA-MM-DD).
 export const MARCOS_REFORMA = [
   { data: '2026-01-01', t: 'Início do ano de teste: CBS de 0,9% e IBS de 0,1% destacados nos documentos fiscais, compensáveis com PIS/Cofins ou dispensados para quem cumpre as obrigações acessórias' },
-  { data: '2026-10-30', t: 'Fim do prazo para o Simples Nacional optar por apurar IBS/CBS por fora (regime regular) no 1º semestre de 2027; prazo do TCU para enviar ao Senado o cálculo da alíquota de referência da CBS' },
+  { data: '2026-10-28', t: 'TCU aprova o cálculo da alíquota de referência da CBS de 2027: 11,3% (TC 006.529/2026-7); a fixação cabe ao Senado' },
+  { data: '2026-10-30', t: 'Fim do prazo (aberto em 01/09/2026) para o Simples Nacional optar por apurar IBS/CBS por fora (regime regular) no 1º semestre de 2027; prazo legal do TCU para enviar ao Senado o cálculo da alíquota de referência da CBS' },
+  { data: '2026-11-03', t: 'Começa o prazo para cancelar, em caráter irretratável, a opção do Simples pelo regime regular de IBS/CBS feita para o 1º semestre de 2027 (até 20/12/2026; Resolução CGSN nº 194/2026)' },
   { data: '2026-11-16', t: 'Novas regras de validação de IBS/CBS da NF-e em produção (NT 2025.002-RTC, cronograma sujeito a mudança)' },
-  { data: '2026-12-15', t: 'Prazo do Senado para fixar a alíquota de referência da CBS de 2027' },
+  { data: '2026-12-15', t: 'Prazo do Senado para fixar a alíquota de referência da CBS de 2027 (o TCU calculou 11,3%)' },
+  { data: '2026-12-20', t: 'Fim do prazo para cancelar a opção do Simples pelo regime regular de IBS/CBS do 1º semestre de 2027' },
   { data: '2027-01-01', t: 'CBS entra na alíquota de referência (menos 0,1 ponto em 2027-2028); PIS e Cofins extintos; começa o Imposto Seletivo; IBS de 0,1%; IPI zerado, exceto para produtos com industrialização incentivada na Zona Franca de Manaus; apuração assistida da CBS' },
-  { data: '2027-03-01', t: 'Abre a janela (1º a 31/03/2027) para o Simples optar pelo regime regular de IBS/CBS no 2º semestre de 2027' },
+  { data: '2027-03-01', t: 'Abre a janela de março de 2027 para o Simples optar pelo regime regular de IBS/CBS no 2º semestre de 2027 (LC 123/2006, art. 13, § 10; datas na forma regulamentada pelo CGSN)' },
   { data: '2029-01-01', t: 'ICMS e ISS caem para 90% das alíquotas; IBS sobe na mesma proporção' },
   { data: '2030-01-01', t: 'ICMS e ISS em 80%' },
   { data: '2031-01-01', t: 'ICMS e ISS em 70%' },
