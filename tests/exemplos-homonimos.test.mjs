@@ -25,3 +25,17 @@ test('13º admitido em junho (R$ 2.500,00): página, post e calc.js iguais', () 
   const txt = `a 1ª parcela, paga em novembro, conta os 6 meses até ali: ${BRL(f.primeira)}; a 2ª, após INSS e IR, é de ${BRL(f.segunda)}.`;
   assert.equal(pag.split(txt).length - 1, 2);
 });
+
+test('rescisão da Carla: post e /rescisao/ com depósito da rescisão e multa de 40% do calc.js', () => {
+  const r = C.rescisao({ salario: 4000, admissao: '2023-02-01', desligamento: '2026-09-15', tipo: 'semJustaCausa', aviso: 'indenizado', saldoFgts: 12000 });
+  const post = ler('blog/como-calcular-rescisao-2026/index.html');
+  const pag = ler('rescisao/index.html');
+  for (const v of [r.saldoSalario, r.avisoIndenizado, r.decimo, r.liquido, r.depositoFgtsRescisao, r.multaFgts]) {
+    assert.ok(post.includes(BRL(v)), `post sem ${BRL(v)}`);
+    assert.ok(pag.includes(BRL(v)), `/rescisao/ sem ${BRL(v)}`);
+  }
+  assert.ok(post.includes(`40% × (R$ 12.000,00 + ${BRL(r.depositoFgtsRescisao)}): depósitos do contrato, atualizados, mais o depósito da rescisão</td><td data-label="Valor">${BRL(r.multaFgts)}`));
+  assert.ok(post.includes(`8% × (${BRL(r.saldoSalario)} + ${BRL(r.avisoIndenizado)} + ${BRL(r.decimo)})`));
+  assert.ok(post.includes(`saldo do FGTS (${BRL(r.baseFgts)}, já com o depósito da rescisão)`));
+  assert.ok(!post.includes('R$ 4.800,00') && !pag.includes('R$ 4.800,00'), 'multa sem o depósito da rescisão');
+});
