@@ -103,8 +103,6 @@ node tests/lighthouse/rodar.mjs --base http://127.0.0.1:8080 --saida /tmp/lighth
 A publicação (`.github/workflows/pages.yml`, só a partir da main) roda a trava da data da política antes do upload:
 data `<=` hoje (America/Sao_Paulo) num push que não altera `privacidade/index.html`; data `=` hoje num push que a
 altera, num `workflow_dispatch` ou num push sem base conhecida. O log do passo mostra a regra aplicada e os SHAs.
-"Altera" é mudança de conteúdo: a troca do `?v=` que o `cache.mjs` faz em todas as páginas quando um CSS ou JS muda
-não conta (`tests/manutencao/politica-alterada.mjs`, o mesmo critério no `ci.yml` e no `pages.yml`).
 
 Se a publicação de um push que alterou a política falhar (trava, upload ou deploy), não espere o próximo push: no
 mesmo dia, rode Actions > Pages > Run workflow na main (`workflow_dispatch`, regra `= hoje`). Em outro dia, ajuste

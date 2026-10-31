@@ -30,7 +30,7 @@ jobs:
           git fetch --no-tags --quiet --depth=1 origin "$ANTES" 2>/dev/null || true
           echo "Evento: $GITHUB_EVENT_NAME | ref: $GITHUB_REF | SHA anterior (before): ${ANTES:-nenhum} | SHA publicado: $(git rev-parse HEAD)"
           if [ "$GITHUB_EVENT_NAME" = push ] && git cat-file -e "$ANTES^{commit}" 2>/dev/null \
-            && [ "$(node tests/manutencao/politica-alterada.mjs "$ANTES")" = false ]; then
+            && ! git diff --name-only "$ANTES" HEAD | grep -qx 'privacidade/index.html'; then
             echo 'Regra aplicada: data da política <= hoje (privacidade/index.html não alterada neste push).'
             REQUIRE_POLICY_DATE_NOT_FUTURE=1 node --test tests/politica-data.test.mjs
           else
