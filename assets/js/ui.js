@@ -124,6 +124,19 @@ const msgCampo = (id, texto) => {
   if (msg && texto) { msg.textContent = texto; msg.hidden = false; msg.className = 'campo-msg'; }
 };
 
+// CC-CALC-A11Y-01: frase curta do resultado para o leitor de tela (#resultado-anuncio, role="status"): rótulo e valor do
+// destaque. Com a lista de erros (role="alert", que se anuncia sozinha), nada; sem destaque, a mensagem de erro do
+// resultado ou "Resultado atualizado.".
+const textoLimpo = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
+function fraseResultado(out) {
+  if (!out || typeof out.querySelector !== 'function' || out.querySelector('[role="alert"]')) return '';
+  const dq = out.querySelector('.destaque');
+  const rot = textoLimpo(dq && dq.querySelector(':scope > span')).replace(/:$/, '');
+  const val = textoLimpo(dq && dq.querySelector(':scope > strong'));
+  if (rot && val) return `${rot}: ${val}`;
+  return textoLimpo(out.querySelector('.erro')) || 'Resultado atualizado.';
+}
+
 const hoje = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
 const CALCS = {
@@ -598,7 +611,7 @@ function iniciar() {
   const id = form.dataset.calc;
   const out = document.getElementById('resultado');
   // M01: o bloqueio do envio nativo é registrado ANTES de restaurar os names e habilitar o botão.
-  form.addEventListener('submit', (e) => { e.preventDefault(); rodar(true); out.focus(); });
+  form.addEventListener('submit', (e) => { e.preventDefault(); rodar('envio'); out.focus(); });
   // Campos sem name no HTML (sem envio nativo sem JS); o nome vem de data-name.
   for (const el of form.querySelectorAll('[data-name]')) if (!el.name) el.name = el.dataset.name;
   for (const el of form.querySelectorAll('[data-requer-js]')) el.disabled = false;
@@ -699,24 +712,45 @@ function iniciar() {
     inssIr.value = C.inssEmpregado(rend.valor).inss.toFixed(2).replace('.', ',');
     inssIr.dataset.padrao = inssIr.value;
   };
-  const rodar = (enviado = false) => {
+  // CC-CALC-A11Y-01: o #resultado tem aria-live="off" e é reescrito a cada pausa da digitação sem anúncio; o leitor de
+  // tela recebe a frase curta (fraseResultado) no #resultado-anuncio só no envio (Calcular) e na troca de uma opção
+  // (select, caixa de seleção), nunca ao digitar nem ao carregar, e só quando o texto muda. Saída igual à anterior não
+  // é reescrita (fora do envio): a lista de erros (role="alert") não volta a ser anunciada a cada tecla com o mesmo erro.
+  const anuncio = document.getElementById('resultado-anuncio');
+  let ultimoHtml = null;
+  // motivo: 'carga' | 'digitacao' | 'escolha' | 'envio'
+  const rodar = (motivo = 'digitacao') => {
+    const enviado = motivo === 'envio';
     ajustaDobro();
     ajustaAviso();
     ajustaParcela13();
     ajustaInssIr();
+    let html;
     try {
       const { d, erros, avisos, alertas } = ler(form);
-      out.innerHTML = erros.length ? listaErros(erros) : listaAvisos(avisos) + listaAlertas(alertas) + fn(d);
+      html = erros.length ? listaErros(erros) : listaAvisos(avisos) + listaAlertas(alertas) + fn(d);
       // GA4 (E-03): só o fato de o cálculo ter sido concluído pelo usuário; nenhum valor sai daqui.
       if (enviado && !erros.length && !d._semResultadoTotal) form.dispatchEvent(new CustomEvent('cc:calculo-concluido', { bubbles: true }));
     } catch (e) {
-      out.innerHTML = '<p class="erro">Não foi possível calcular. Confira os valores informados.</p>';
+      html = '<p class="erro">Não foi possível calcular. Confira os valores informados.</p>';
       console.error(e);
+    }
+    if (enviado || html !== ultimoHtml) { out.innerHTML = html; ultimoHtml = html; }
+    if (anuncio && (enviado || motivo === 'escolha')) {
+      const frase = fraseResultado(out);
+      if (anuncio.textContent !== frase) anuncio.textContent = frase;
     }
   };
   let t;
   form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(rodar, 250); });
-  rodar();
+  // Troca de opção: cálculo na hora, com anúncio. Texto e data seguem o atraso do evento input, sem anúncio.
+  form.addEventListener('change', (e) => {
+    const el = e.target;
+    if (!el || !(el.tagName === 'SELECT' || el.type === 'checkbox' || el.type === 'radio')) return;
+    clearTimeout(t);
+    rodar('escolha');
+  });
+  rodar('carga');
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
 else iniciar();

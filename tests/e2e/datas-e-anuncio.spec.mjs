@@ -110,3 +110,99 @@ test('aviso prévio e calendário: mesmas regras de data', async ({ page, rede, 
   semRedeExterna(rede);
   semErros(erros, rede);
 });
+
+// CC-CALC-A11Y-01: o #resultado (aria-live="off") muda ao digitar sem anúncio; o leitor de tela recebe uma frase curta
+// no #resultado-anuncio (role="status") no envio e na troca de opção, sem repetir quando o texto não muda. Os
+// observadores contam as trocas do resultado e cada texto não vazio que a região de anúncio recebe.
+const observar = (page) => page.evaluate(() => {
+  const anuncio = document.getElementById('resultado-anuncio');
+  window.__anuncios = [];
+  window.__trocas = 0;
+  new MutationObserver(() => { if (anuncio.textContent) window.__anuncios.push(anuncio.textContent); })
+    .observe(anuncio, { childList: true, characterData: true, subtree: true });
+  new MutationObserver(() => { window.__trocas++; }).observe(document.getElementById('resultado'), { childList: true });
+});
+const anuncios = (page) => page.evaluate(() => window.__anuncios);
+const trocas = (page) => page.evaluate(() => window.__trocas);
+
+test('salário líquido: digitar atualiza o resultado sem anúncio; Calcular e a caixa de seleção anunciam uma frase curta', async ({ page, rede, erros }) => {
+  const { resultado, calcular } = await abrir(page, '/salario-liquido/');
+  await expect(resultado).toHaveAttribute('aria-live', 'off');
+  const anuncio = page.locator('#resultado-anuncio');
+  await expect(anuncio).toHaveAttribute('role', 'status');
+  await expect(anuncio).toHaveClass('vh');
+  await expect(anuncio).toHaveText(''); // a carga não anuncia
+  await page.fill('#f-bruto', '');
+  await expect(resultado.locator('.erro[role="alert"]')).toHaveCount(1);
+  await observar(page);
+  // digitação lenta (cada tecla depois do atraso de 250 ms): o resultado muda a cada pausa, a região de anúncio não
+  await page.locator('#f-bruto').pressSequentially('4500', { delay: 350 });
+  await expect(resultado.locator('.destaque strong')).toHaveText(/^R\$\s4\.068,49$/);
+  expect(await trocas(page)).toBeGreaterThanOrEqual(3);
+  expect(await anuncios(page)).toEqual([]);
+  // espaços do Intl (não separável depois de R$) viram espaço comum na frase
+  const frase = 'Salário líquido estimado: R$ 4.068,49';
+  // envio: uma frase curta (rótulo e valor do destaque), não a tabela
+  await calcular();
+  await expect.poll(() => anuncios(page)).toEqual([frase]);
+  await expect(anuncio).toHaveText(frase);
+  // envio sem mudança e Tab para fora do campo: nada repetido
+  await calcular();
+  await page.locator('#f-dependentes').focus();
+  await page.keyboard.press('Tab');
+  await page.waitForTimeout(400);
+  expect(await anuncios(page)).toEqual([frase]);
+  // troca de opção (vale-transporte): resultado e anúncio na hora
+  await page.locator('#f-vt').check();
+  await expect.poll(() => anuncios(page)).toEqual([frase, 'Salário líquido estimado: R$ 3.798,49']);
+  await expect(resultado.locator('.destaque strong')).toHaveText(/^R\$\s3\.798,49$/);
+  // campo de texto alterado e Tab para fora: o resultado muda, sem anúncio até o próximo Calcular
+  await page.locator('#f-outros').fill('100');
+  await page.keyboard.press('Tab');
+  await expect(resultado.locator('.destaque strong')).toHaveText(/^R\$\s3\.698,49$/);
+  await page.waitForTimeout(400);
+  expect(await anuncios(page)).toHaveLength(2);
+  await calcular();
+  await expect.poll(() => anuncios(page)).toHaveLength(3);
+  expect((await anuncios(page))[2]).toBe('Salário líquido estimado: R$ 3.698,49');
+  semRedeExterna(rede);
+  semErros(erros, rede);
+});
+
+test('lista de erros: continua role="alert" e não é reescrita enquanto o erro é o mesmo', async ({ page, rede, erros }) => {
+  const { resultado, calcular } = await abrir(page, '/salario-liquido/');
+  await observar(page);
+  await page.fill('#f-bruto', 'a');
+  const alerta = resultado.locator('.erro[role="alert"]');
+  await expect(alerta).toContainText('Digite só números.');
+  await alerta.evaluate((el) => { el.dataset.marca = '1'; });
+  // mais letras, o mesmo erro: o mesmo nó (nada reanunciado)
+  await page.locator('#f-bruto').pressSequentially('bc', { delay: 350 });
+  await page.waitForTimeout(400);
+  await expect(resultado.locator('.erro[role="alert"][data-marca="1"]')).toHaveCount(1);
+  // envio com erro: a lista de erros se anuncia sozinha; a região de anúncio fica vazia
+  await calcular();
+  await expect(alerta).toHaveCount(1);
+  await expect(page.locator('#resultado-anuncio')).toHaveText('');
+  expect(await anuncios(page)).toEqual([]);
+  // corrigido e enviado: a frase volta
+  await page.fill('#f-bruto', '3500');
+  await calcular();
+  await expect.poll(() => anuncios(page)).toEqual(['Salário líquido estimado: R$ 3.191,40']);
+  semRedeExterna(rede);
+  semErros(erros, rede);
+});
+
+test('troca do motivo na rescisão anuncia o novo líquido; sem destaque, a frase é a do erro', async ({ page, rede, erros }) => {
+  const { resultado } = await abrir(page, '/rescisao/');
+  await observar(page);
+  await page.selectOption('#f-tipo', 'acordo');
+  await expect.poll(() => anuncios(page)).toEqual(['Valor líquido estimado da rescisão: R$ 10.751,27']);
+  // erro de campo pela troca (aviso fora do motivo): só a lista de erros, sem frase
+  await page.selectOption('#f-tipo', 'pedidoDemissao');
+  await expect(resultado.locator('.erro[role="alert"] a[href="#f-aviso"]')).toBeVisible();
+  await expect(page.locator('#resultado-anuncio')).toHaveText('');
+  expect(await anuncios(page)).toHaveLength(1);
+  semRedeExterna(rede);
+  semErros(erros, rede);
+});
