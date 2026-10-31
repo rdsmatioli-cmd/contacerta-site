@@ -450,7 +450,7 @@ export function diasSaldoSalario(admissao, desligamento) {
  * aviso: indenizado | trabalhado | naoCumprido (pedido de demissão sem cumprir: desconto de 30 dias)
  * Desligamento antes de PRIMEIRO_ANO_TABELAS: devolve { anteriorTabelas: true, primeiroAno } sem calcular.
  */
-export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso = 'indenizado', feriasVencidas = 0, vencidasEmDobro = [], saldoFgts = 0, dependentes = 0, dataPagamento = '' }) {
+export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso = 'indenizado', feriasVencidas = 0, vencidasEmDobro = [], saldoFgts = 0, saquesFgts = 0, dependentes = 0, dataPagamento = '' }) {
   salario = num(salario);
   const dAdm = parseData(admissao);
   const dDes = parseData(desligamento);
@@ -538,9 +538,11 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
 
   // FGTS (Lei 8.036/1990, arts. 15 e 18): o depósito de 8% sobre saldo de salário, aviso indenizado (Súmula 305 do TST)
   // e 13º da rescisão ainda não aparece no app quando o saldo é consultado; entra na base da multa e do saque.
-  // Férias indenizadas não têm depósito.
+  // Férias indenizadas não têm depósito. A multa incide sobre todos os depósitos do contrato, sem descontar saques
+  // (art. 18, § 1º): os saques informados entram na base da multa, mas não no valor a sacar.
   const depositoFgtsRescisao = r2(FGTS.aliquota * (saldoSalario + avisoIndenizado + decimo));
-  const baseFgts = r2(num(saldoFgts) + depositoFgtsRescisao);
+  const saldoFgtsFinal = r2(num(saldoFgts) + depositoFgtsRescisao);
+  const baseFgts = r2(saldoFgtsFinal + Math.max(0, num(saquesFgts)));
   const multaPct = tipo === 'semJustaCausa' ? 0.4 : tipo === 'acordo' ? 0.2 : 0;
   const multaFgts = r2(baseFgts * multaPct);
   const saqueFgtsPct = tipo === 'semJustaCausa' ? 1 : tipo === 'acordo' ? 0.8 : 0;
@@ -551,7 +553,7 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
     diasNoMes, saldoSalario, diasAviso, diasProjecao, avisoIndenizado, avos13, avos13Anterior, avos13Atual, anoDes, anoFim, decimoAnterior, decimoAtual, decimo,
     avosFerias: avosF, feriasProp, feriasVenc, periodosVenc, periodosEmDobro, periodosProjecao, feriasVencSimples, dobraFeriasVenc, feriasProjecao, tercoFerias,
     dataPagamento: dataPag, pagamentoInformado, inssSaldo, inssSaldoSubstituida, irSaldo, inss13, inss13Anterior, inss13Atual, tabelasSubstituidas, ir13, ir13Base: ir13R.base, ir13Reducao: ir13R.reducao, irSaldoBase: irSaldoR.base, tabelaIrrf: { vigencia: irTab.tabela.vigencia, rotulo: irTab.tabela.rotulo, ano: irTab.ano, anoPagamento: irTab.anoPagamento, substituida: irTab.substituida }, descontoAviso, verbas, descontos, liquido: r2(verbas - descontos),
-    depositoFgtsRescisao, baseFgts, multaFgts, saqueFgts: r2(baseFgts * saqueFgtsPct), fimProjetado: fimProjetado.toISOString().slice(0, 10),
+    depositoFgtsRescisao, saldoFgtsFinal, baseFgts, multaFgts, saqueFgts: r2(saldoFgtsFinal * saqueFgtsPct), fimProjetado: fimProjetado.toISOString().slice(0, 10),
   };
 }
 const avos13Fn = avos13;

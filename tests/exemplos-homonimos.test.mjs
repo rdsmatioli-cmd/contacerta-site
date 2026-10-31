@@ -46,3 +46,21 @@ test('13º: nota da 1ª parcela supõe pagamento na 2ª quinzena de novembro e d
   assert.match(ui, /Na 1ª parcela, conta como mês a fração de mais de 15 dias \(art\. 78, § 4º\); no 13º, a de 15 dias ou mais \(art\. 76, § 2º\)/);
   assert.doesNotMatch(ui, /supõe o pagamento em novembro/);
 });
+
+// Multa do FGTS: 40% de todos os depósitos do contrato, atualizados, sem descontar saques (Lei 8.036/1990, art. 18, § 1º).
+test('FGTS: nenhuma página diz "40% sobre o saldo"; saques entram na base da multa, não no valor a sacar', () => {
+  const proibido = /(?:multa|40%|20%)[^.<"]{0,40}sobre o saldo(?! atual\?)/;
+  for (const p of ['rescisao', 'fgts', 'custo-funcionario', 'blog/como-calcular-rescisao-2026']) assert.doesNotMatch(ler(`${p}/index.html`).replace(/A multa de 40% é calculada sobre o saldo atual\?|Calcular a multa sobre o saldo após saques:/g, ''), proibido, p);
+  assert.ok(proibido.test('recebe multa de 40% sobre o saldo do fundo'));
+  const base = { salario: 4000, admissao: '2023-02-01', desligamento: '2026-09-15', tipo: 'semJustaCausa', aviso: 'indenizado', saldoFgts: 12000 };
+  const sem = C.rescisao(base);
+  const com = C.rescisao({ ...base, saquesFgts: 1000 });
+  assert.equal(com.baseFgts, Math.round((sem.baseFgts + 1000) * 100) / 100);
+  assert.equal(com.multaFgts, Math.round(com.baseFgts * 0.4 * 100) / 100);
+  assert.equal(com.saqueFgts, sem.saqueFgts); // o valor a sacar continua sendo o saldo
+  const acordo = C.rescisao({ ...base, tipo: 'acordo', saquesFgts: 1000 });
+  assert.equal(acordo.multaFgts, Math.round(acordo.baseFgts * 0.2 * 100) / 100);
+  const rs = ler('rescisao/index.html');
+  assert.match(rs, /<label for="f-saquesFgts">Saques do FGTS durante o contrato<\/label>/);
+  assert.match(rs, /id="f-saquesFgts" name="saquesFgts" data-num data-min="0" data-teto="100000000" value="0" aria-describedby="f-saquesFgts-ajuda f-saquesFgts-msg"/);
+});

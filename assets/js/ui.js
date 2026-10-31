@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=702562e1a8';
+import * as C from './calc.js?v=fd3a687ff9';
 import { INDICADORES } from './tabelas.js?v=2469a7d685';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=381e1d612a';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=c02568845a';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -98,7 +98,7 @@ const CALCS = {
     ]) + (s.liquido < 0 ? '<p class="erro">Os descontos informados são maiores que o salário bruto. Confira pensão e outros descontos.</p>' : '') + `<p class="nota">IR calculado com ${s.ir.usaSimplificado ? 'desconto simplificado de R$ 607,20' : 'deduções legais'} (a opção mais vantajosa). Imposto pela tabela: ${R(s.ir.impostoTabela)}; redução da Lei 15.270/2025: ${R(s.ir.reducao)}.</p>`;
   },
   rescisao(d) {
-    const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, vencidasEmDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'], saldoFgts: d.saldoFgts, dependentes: d.dependentes, dataPagamento: d.dataPagamento });
+    const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, vencidasEmDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'], saldoFgts: d.saldoFgts, saquesFgts: d.saquesFgts, dependentes: d.dependentes, dataPagamento: d.dataPagamento });
     if (!r) return '<p class="erro">Confira as datas: o desligamento deve ser depois da admissão.</p>';
     const elD = document.getElementById('f-desligamento');
     if (elD) elD.removeAttribute('aria-invalid');
@@ -146,6 +146,7 @@ const CALCS = {
       r.descontoAviso ? ['Desconto do aviso prévio não cumprido', `− ${R(r.descontoAviso)}`] : null,
       ['Líquido a receber na rescisão', R(r.liquido), 'total'],
       (r.multaFgts || r.saqueFgts) && r.depositoFgtsRescisao ? ['Depósito do FGTS sobre as verbas da rescisão (8%, somado ao saldo informado)', R(r.depositoFgtsRescisao)] : null,
+      r.multaFgts && r.baseFgts > r.saldoFgtsFinal ? ['Base da multa: depósitos do contrato, sem descontar os saques', R(r.baseFgts)] : null,
       r.multaFgts ? [`Multa do FGTS (depositada na conta do FGTS)`, R(r.multaFgts)] : null,
       r.saqueFgts ? ['Saque do saldo do FGTS', R(r.saqueFgts)] : null,
     ]) + (d.tipo === 'justaCausa' ? '' : `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`) + (r.avos13Anterior ? `<p class="nota">Quando o 13º abrange dois anos pela projeção do aviso, o INSS é calculado separadamente por ano, com a tabela de cada ano, e o IR incide sobre o total, num pagamento único. A prática de folha varia nesse ponto.${r.tabelasSubstituidas.map(([a, b]) => ` A tabela do INSS de ${a} ainda não está disponível no site; foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`).join('')}</p>` : '') + `<p class="nota">IRRF pela data de pagamento (${r.dataPagamento.split('-').reverse().join('/')}${r.pagamentoInformado ? '' : ', data do desligamento, pois não foi informada outra'}): tabela de ${r.tabelaIrrf.rotulo}${r.tabelaIrrf.ano >= 2026 ? ', com a redução da Lei 15.270/2025' : ', sem a redução da Lei 15.270/2025 (vigente a partir de 2026)'}.${r.inssSaldoSubstituida ? ` A tabela do INSS de ${r.inssSaldoSubstituida[0]} ainda não está disponível no site; para o saldo de salário foi usada a de ${r.inssSaldoSubstituida[1]}, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}${r.avos13Anterior ? '' : r.tabelasSubstituidas.map(([a, b]) => (r.inssSaldoSubstituida && r.inssSaldoSubstituida[0] === a ? ` A mesma tabela foi usada no INSS do 13º.` : ` A tabela do INSS de ${a} ainda não está disponível no site; para o 13º foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`)).join('')}${r.tabelaIrrf.substituida ? ` Ainda não há tabela do IR de ${r.tabelaIrrf.anoPagamento} no site; foi usada a mais recente, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}</p>` + (d.tipo === 'acordo' ? '<p class="nota">No acordo (CLT, art. 484-A), o aviso indenizado é pago pela metade, e a calculadora projeta também metade do prazo no tempo de serviço, que é o entendimento predominante. A lei não trata expressamente da projeção, e há decisões que projetam o aviso inteiro.</p>' : '');

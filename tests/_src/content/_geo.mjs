@@ -66,7 +66,7 @@ export const GEO = {
   },
   rescisao: {
     topo: bloco(
-      `<p><strong>Na demissão sem justa causa, você recebe saldo de salário, aviso prévio (30 dias mais 3 por ano completo, até 90), 13º proporcional, férias vencidas e proporcionais com 1/3, saque do FGTS e multa de 40% sobre o saldo do fundo.</strong></p>
+      `<p><strong>Na demissão sem justa causa, você recebe saldo de salário, aviso prévio (30 dias mais 3 por ano completo, até 90), 13º proporcional, férias vencidas e proporcionais com 1/3, saque do FGTS e multa de 40% sobre todos os depósitos do contrato, atualizados, sem descontar saques.</strong></p>
 <p>No pedido de demissão não há aviso indenizado, multa nem saque do FGTS. No acordo (art. 484-A da CLT), o aviso indenizado e a multa caem pela metade e o saque do FGTS fica limitado a 80%. Na justa causa, restam apenas saldo de salário e férias vencidas com 1/3. O empregador tem até 10 dias corridos após o fim do contrato para pagar.</p>`,
       [
         'Escolha o motivo do desligamento e o tipo de aviso prévio.',
@@ -112,7 +112,7 @@ export const GEO = {
   },
   fgts: {
     topo: bloco(
-      `<p><strong>O empregador deposita todo mês 8% do salário bruto no FGTS (2% para aprendiz), sem descontar nada do trabalhador.</strong> O saldo rende 3% ao ano mais TR e pode receber distribuição de lucros. Na demissão sem justa causa, você saca tudo e recebe multa de 40% sobre o saldo; no acordo, a multa é de 20% e o saque, de 80%.</p>
+      `<p><strong>O empregador deposita todo mês 8% do salário bruto no FGTS (2% para aprendiz), sem descontar nada do trabalhador.</strong> O saldo rende 3% ao ano mais TR e pode receber distribuição de lucros. Na demissão sem justa causa, você saca tudo e recebe multa de 40% sobre todos os depósitos do contrato, atualizados, sem descontar saques; no acordo, a multa é de 20% e o saque, de 80%.</p>
 <p>Exemplo: salário de R$ 3.000,00 gera depósito de ${R(fg.deposito)} por mês. Em 12 meses, com os depósitos sobre o 13º e o 1/3 de férias, o total é de ${R(fg.depositado)}, antes do rendimento.</p>`,
       [
         'Digite o salário bruto mensal e os meses de contrato que quer projetar.',
