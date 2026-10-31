@@ -9,6 +9,7 @@ export const PAGINAS = [
   'licitacoes/index.html', 'licitacoes/politica.html', 'licitacoes/cobranca/index.html', 'licitacoes/blog/index.html',
   'licitacoes/blog/como-encontrar-licitacoes.html', 'licitacoes/blog/pregoes-material-de-limpeza-pncp.html',
   'licitacoes/editais/material-de-limpeza.html', 'licitacoes/contratos/index.html',
+  'licitacoes/contratos/termos.html', 'licitacoes/contratos/privacidade.html',
 ];
 const ler = (p) => readFileSync(raiz + p, 'utf8');
 export function cssInline() {
