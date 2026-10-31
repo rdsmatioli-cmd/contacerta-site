@@ -52,7 +52,7 @@
 <h2 id="titulo-calc" class="vh">Calculadora</h2>
 <form class="calc-form" data-calc="calendario-reforma-tributaria" novalidate>
 <p class="calc-rot" aria-hidden="true">Preencha os dados</p>
-<div class="grade-campos"><div class="campo"><label for="f-data">Data de referência</label><input type="date" id="f-data" name="data" data-hoje required aria-describedby="f-data-ajuda"><div id="f-data-ajuda" class="ajuda"><small>Padrão: hoje.</small></div></div></div>
+<div class="grade-campos"><div class="campo"><label for="f-data">Data de referência</label><input type="date" id="f-data" name="data" data-hoje min="1900-01-01" max="2100-12-31" required data-data aria-describedby="f-data-ajuda f-data-msg"><div id="f-data-ajuda" class="ajuda"><small>Padrão: hoje.</small></div><p class="campo-msg" id="f-data-msg" hidden></p></div></div>
 <button type="submit" disabled data-requer-js>Calcular</button>
 </form>
 <div class="calc-saida">
@@ -115,7 +115,7 @@
 <ul class="cards"><li><a class="card" href="/transicao-cbs-ibs/"><span class="tile t-impostos"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-escada"/></svg></span><span class="card-txt"><strong>Calculadora CBS e IBS 2026-2033</strong><span>Carga de PIS, Cofins, ISS, CBS e IBS ano a ano na sua venda.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/simples-hibrido/"><span class="tile t-impostos"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-divisao"/></svg></span><span class="card-txt"><strong>Simulador da opção de CBS e IBS no Simples</strong><span>Ficar no DAS ou apurar CBS e IBS por fora para dar crédito aos clientes.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/preco-reforma-tributaria/"><span class="tile t-impostos"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-etiquetapct"/></svg></span><span class="card-txt"><strong>Preço na reforma tributária</strong><span>Novo preço para manter a margem com CBS e IBS.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/credito-travado/"><span class="tile t-impostos"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></span><span class="card-txt"><strong>Crédito travado de CBS/IBS</strong><span>Crédito em risco quando o fornecedor não paga o tributo.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li><li><a class="card" href="/das-mei/"><span class="tile t-impostos"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-loja"/></svg></span><span class="card-txt"><strong>DAS MEI 2026</strong><span>Valor do boleto mensal e limite de faturamento.</span></span><svg class="ic seta" aria-hidden="true" focusable="false"><use href="#i-seta"/></svg></a></li></ul>
 </section>
 </article>
-<script type="module" src="/assets/js/ui.js?v=28291e26de"></script>
+<script type="module" src="/assets/js/ui.js?v=b6506ec824"></script>
 <link rel="modulepreload" href="/assets/js/calc.js?v=74fbbaaa6a">
 </main>
 <footer class="rodape"><div class="caixa">

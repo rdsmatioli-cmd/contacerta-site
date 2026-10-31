@@ -1,7 +1,8 @@
 // Formulário (ui.js) com um document mínimo, para testar o comportamento do formulário no Node (usado por
-// trabalhistas-revisao.test.mjs e rescisao-motivo-aviso.test.mjs). Monta o formulário publicado da página (inputs,
-// selects com as opções e mensagens dos campos), instala um document mínimo e importa ui.js numa instância nova (query
-// na URL), que roda iniciar() e o primeiro cálculo.
+// trabalhistas-revisao.test.mjs, rescisao-motivo-aviso.test.mjs, outras-calculadoras.test.mjs e
+// validacao-datas.test.mjs). Monta o formulário publicado da página (inputs, selects com as opções, rótulos e mensagens
+// dos campos), instala um document mínimo e importa ui.js numa instância nova (query na URL), que roda iniciar() e o
+// primeiro cálculo.
 import { readFileSync } from 'node:fs';
 
 export const atributos = (tag) => Object.fromEntries([...tag.replace(/^<\w+/, '').matchAll(/([\w-]+)(?:="([^"]*)")?/g)].map(([, k, v]) => [k, v ?? '']));
@@ -40,17 +41,20 @@ export async function abrirCalculadora(pag, valores = {}) {
     campos.push(el); porId[el.id] = el;
   }
   for (const [p] of formHtml.matchAll(/<p class="campo-msg"[^>]*>/g)) { const at = atributos(p); porId[at.id] = elemento('P', at, ''); }
+  // Rótulos dos campos (label[for]), para a lista de erros e a mensagem do campo usarem o texto da página.
+  const rotulos = Object.fromEntries([...formHtml.matchAll(/<label for="([^"]+)">([^<]*)<\/label>/g)].map(([, id, t]) => [`label[for="${id}"]`, { textContent: t }]));
+  const consulta = (sel) => (sel === 'form[data-calc]' ? form : rotulos[sel] || null);
   const out = elemento('DIV', { id: 'resultado' }, '');
   out.innerHTML = '';
   porId.resultado = out;
   const form = elemento('FORM', { 'data-calc': atributos(formHtml.match(/^<form[^>]*>/)[0])['data-calc'] }, '');
   form.elements = Object.assign([...campos], Object.fromEntries(campos.map((c) => [c.name, c])));
-  form.querySelector = () => null;
+  form.querySelector = (sel) => rotulos[sel] || null;
   form.querySelectorAll = (sel) => { const m = sel.match(/^\[([\w-]+)\]$/); return m ? campos.filter((c) => c.hasAttribute(m[1])) : []; };
   globalThis.document = {
     readyState: 'complete',
     addEventListener() {},
-    querySelector: (sel) => (sel === 'form[data-calc]' ? form : null),
+    querySelector: consulta,
     getElementById: (id) => porId[id] || null,
   };
   try {
@@ -59,6 +63,6 @@ export async function abrirCalculadora(pag, valores = {}) {
     delete globalThis.document;
   }
   // Envio pelo botão Calcular (cálculo imediato, sem o atraso do evento input).
-  const calcular = () => { globalThis.document = { getElementById: (id) => porId[id] || null, querySelector: () => null }; try { form.disparar('submit'); } finally { delete globalThis.document; } return out.innerHTML; };
+  const calcular = () => { globalThis.document = { getElementById: (id) => porId[id] || null, querySelector: consulta }; try { form.disparar('submit'); } finally { delete globalThis.document; } return out.innerHTML; };
   return { form, campo: (n) => form.elements[n], el: (id) => porId[id], out, calcular };
 }

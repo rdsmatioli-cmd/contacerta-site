@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
 import * as C from './calc.js?v=74fbbaaa6a';
 import { INDICADORES } from './tabelas.js?v=2469a7d685';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas, validarDiasFerias } from './valida.js?v=cd838180bb';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas, validarDiasFerias, validarData, validarOrdemDatas } from './valida.js?v=5dc88aefda';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -35,8 +35,15 @@ function validarCampo(el) {
   return validarNumero({ raw: el.value, min: attrNum(ds.min), max: attrNum(ds.max), teto: attrNum(ds.teto), obrig: 'obrig' in ds, positivo: 'positivo' in ds, inteiro: 'inteiro' in ds, decimal: 'decimal' in ds, dicaCasas: !moeda && !('inteiro' in ds) });
 }
 
-// Lê o formulário validando os campos numéricos (laudo QA CC-01 a CC-05):
-// erros (vazio obrigatório, texto, negativo, abaixo do mínimo) bloqueiam o cálculo;
+// Valida um campo de data (data-data) pelos atributos dele: required, min e max (CC-CALC-VALIDA-01). validity.badInput
+// marca a data digitada pela metade ou inexistente, que o navegador entrega com o value vazio.
+function validarCampoData(el) {
+  return validarData({ raw: el.value, badInput: !!(el.validity && el.validity.badInput), obrig: el.hasAttribute('required'), min: el.getAttribute('min') ?? undefined, max: el.getAttribute('max') ?? undefined });
+}
+
+// Lê o formulário validando os campos numéricos (laudo QA CC-01 a CC-05) e os de data (CC-CALC-VALIDA-01):
+// erros (vazio obrigatório, texto, negativo, abaixo do mínimo, data incompleta ou fora do intervalo, data anterior à do
+// campo de data-nao-antes-de) bloqueiam o cálculo;
 // valor acima do máximo é limitado ao máximo, com aviso visível no campo e no resultado.
 function ler(form) {
   const d = { _orig: {}, _vazio: {}, _invalidos: {} };
@@ -71,6 +78,16 @@ function ler(form) {
         marca(el, t, false); alertas.push([rotulo(el), t]);
       }
       d[el.name] = r.valor ?? 0;
+    } else if (el.hasAttribute('data-data')) {
+      // Data: mesma marcação dos numéricos. data-nao-antes-de="outro" confere a ordem contra o campo de data com esse
+      // name, que vem antes no formulário (desligamento x admissão); o erro fica neste campo.
+      const r = validarCampoData(el);
+      const outro = el.dataset.naoAntesDe;
+      const ordem = !r.erro && outro && form.elements[outro] ? validarOrdemDatas({ inicio: d[outro], fim: r.valor, rotuloInicio: rotulo(form.elements[outro]) }) : null;
+      const erro = r.erro || (ordem && ordem.erro);
+      marca(el, erro, !!erro);
+      if (erro) erros.push([rotulo(el), erro, el.id]);
+      d[el.name] = r.valor;
     } else {
       d[el.name] = el.value;
       if (el.tagName === 'SELECT' && document.getElementById(`${el.id}-msg`)) marca(el, '', false);
@@ -134,20 +151,13 @@ const CALCS = {
       return listaErros([[(document.querySelector(`label[for="f-${va.campo}"]`) || {}).textContent || '', va.erro, `f-${va.campo}`]]);
     }
     const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, vencidasEmDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'], saldoFgts: d.saldoFgts, dependentes: d.dependentes, dataPagamento: d.dataPagamento, primeiraParcela13: d.primeiraParcela13, saqueAniversario: d.saqueAniversario === 'sim' });
-    if (!r) return '<p class="erro">Confira as datas: o desligamento deve ser depois da admissão.</p>';
-    const elD = document.getElementById('f-desligamento');
-    if (elD) elD.removeAttribute('aria-invalid');
-    if (r.anteriorTabelas) {
-      if (elD) elD.setAttribute('aria-invalid', 'true');
-      return `<div class="erro" role="alert"><p><strong>Confira o campo antes de calcular:</strong></p><ul><li><a href="#f-desligamento">Data do desligamento (último dia)</a>: ${esc(`A calculadora tem as tabelas de INSS e de IR a partir de janeiro de ${r.primeiroAno}. Para desligamento anterior, o cálculo precisa ser feito com as tabelas da época.`)}</li></ul></div>`;
-    }
+    // Datas vazias, inválidas ou fora de ordem já são erro de campo no ler() (CC-CALC-VALIDA-01); isto é só a rede de
+    // segurança, com o erro no campo do desligamento.
+    if (!r) return erroCampo('f-desligamento', 'A data não pode ser anterior à data de admissão.');
+    if (r.anteriorTabelas) return erroCampo('f-desligamento', `A calculadora tem as tabelas de INSS e de IR a partir de janeiro de ${r.primeiroAno}. Para desligamento anterior, o cálculo precisa ser feito com as tabelas da época.`);
     const vp = validarDataPagamento(d.desligamento, d.dataPagamento);
-    const elP = document.getElementById('f-dataPagamento');
-    if (elP) elP.removeAttribute('aria-invalid');
-    if (vp && vp.erro) {
-      if (elP) elP.setAttribute('aria-invalid', 'true');
-      return `<div class="erro" role="alert"><p><strong>Confira o campo antes de calcular:</strong></p><ul><li><a href="#f-dataPagamento">Data de pagamento das verbas</a>: ${esc(vp.erro)}</li></ul></div>`;
-    }
+    if (vp && vp.erro) return erroCampo('f-dataPagamento', vp.erro);
+    if (vp && vp.alerta) msgCampo('f-dataPagamento', vp.alerta);
     const alertas = vp && vp.alerta ? [['Data de pagamento das verbas', vp.alerta]] : [];
     // N-02: períodos e dobra conferidos contra as datas, com a projeção do aviso.
     const v = validarFeriasVencidas({ admissao: d.admissao, desligamento: d.desligamento, fimProjetado: r.fimProjetado, periodos: d._orig.feriasVencidas ?? d.feriasVencidas, emDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'] });
@@ -385,7 +395,8 @@ const CALCS = {
   },
   'aviso-previo'(d) {
     const r = C.avisoPrevio({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo });
-    if (!r) return '<p class="erro">Confira as datas: o desligamento deve ser depois da admissão.</p>';
+    // Rede de segurança: datas vazias, inválidas ou fora de ordem já são erro de campo no ler() (CC-CALC-VALIDA-01).
+    if (!r) return erroCampo('f-desligamento', 'A data não pode ser anterior à data de admissão.');
     const fimBR = r.fimProjetado.split('-').reverse().join('/');
     const acordo = d.tipo === 'acordo';
     return destaque('Aviso prévio', `${n2.format(r.diasValor)} dias`) + tabela([
@@ -543,7 +554,8 @@ const CALCS = {
   },
   'calendario-reforma-tributaria'(d) {
     const r = C.calendarioReforma(d.data);
-    if (!r) return '<p class="erro">Informe uma data válida.</p>';
+    // Rede de segurança: data vazia ou inválida já é erro de campo no ler() (CC-CALC-VALIDA-01).
+    if (!r) return erroCampo('f-data', 'Data incompleta ou inexistente: confira dia, mês e ano.');
     const fmt = (iso) => iso.split('-').reverse().join('/');
     const prox = r.proximo ? `${fmt(r.proximo.data)} (em ${r.proximo.dias} dias)` : 'todos os marcos já passaram';
     return destaque('Próximo marco', prox) + `<p class="nota">Fase na data informada: <strong>${esc(r.fase)}</strong>.</p><div class="tabela-rolar" tabindex="0" role="region" aria-label="Tabela do resultado (role para o lado)"><table class="res"><thead><tr><th scope="col">Data</th><th scope="col">O que acontece</th><th scope="col">Situação</th></tr></thead><tbody>${r.marcos.map((m) => `<tr><th scope="row">${fmt(m.data)}</th><td>${esc(m.t)}</td><td>${m.passou ? 'Já passou' : `Faltam ${m.dias} dias`}</td></tr>`).join('')}</tbody></table></div>`;

@@ -99,6 +99,47 @@ export function validarNumero({ raw = '', badInput = false, min = null, max = nu
 export const attrNum = (v) => (v === null || v === undefined || v === '' || !Number.isFinite(Number(v)) ? null : Number(v));
 
 
+// ---- Datas (CC-CALC-VALIDA-01): o mesmo padrão de erro dos campos numéricos (mensagem no campo, aria-invalid e link na
+// lista de erros). Intervalo aceito igual ao min/max dos inputs date publicados.
+export const DATA_MIN = '1900-01-01';
+export const DATA_MAX = '2100-12-31';
+const dataBR = (s) => s.split('-').reverse().join('/');
+// Chave numérica AAAAMMDD de uma data AAAA-MM-DD (ano com 4 dígitos ou mais, como o Chromium aceita) que existe no
+// calendário; null se o texto não é uma data ou a data não existe (31/04, 29/02 fora de ano bissexto).
+function chaveData(s) {
+  const m = /^(\d{4,})-(\d{2})-(\d{2})$/.exec(String(s ?? ''));
+  if (!m) return null;
+  const [a, me, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const bissexto = (a % 4 === 0 && a % 100 !== 0) || a % 400 === 0;
+  const diasMes = [31, bissexto ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][me - 1];
+  if (!diasMes || d < 1 || d > diasMes) return null;
+  return a * 10000 + me * 100 + d;
+}
+// campo: { raw (value do input date, AAAA-MM-DD ou vazio), badInput (validity.badInput: o navegador deixa o value vazio
+// quando a data foi digitada pela metade ou não existe), obrig, min, max }. Retorna { valor } (a data, ou '' se vazia e
+// opcional) ou { valor: '', erro }.
+export function validarData({ raw = '', badInput = false, obrig = false, min = DATA_MIN, max = DATA_MAX }) {
+  const s = String(raw ?? '').trim();
+  const invalida = { valor: '', erro: 'Data incompleta ou inexistente: confira dia, mês e ano.' };
+  if (badInput) return invalida;
+  if (s === '') return obrig ? { valor: '', erro: 'Preencha a data.' } : { valor: '' };
+  const k = chaveData(s);
+  if (k === null) return invalida;
+  const mn = chaveData(min) === null ? DATA_MIN : min;
+  const mx = chaveData(max) === null ? DATA_MAX : max;
+  if (k < chaveData(mn) || k > chaveData(mx)) return { valor: '', erro: `Informe uma data entre ${dataBR(mn)} e ${dataBR(mx)}.` };
+  return { valor: s };
+}
+// Regra cruzada entre duas datas já validadas (ex.: desligamento x admissão): a data fim não pode ser anterior à
+// data início; o mesmo dia passa. Retorna null ou { erro }, que vai no campo da data fim.
+export function validarOrdemDatas({ inicio, fim, rotuloInicio = 'data inicial' }) {
+  const a = chaveData(inicio);
+  const b = chaveData(fim);
+  if (a === null || b === null || b >= a) return null;
+  const r = String(rotuloInicio).trim();
+  return { erro: `A data não pode ser anterior à ${r.charAt(0).toLowerCase()}${r.slice(1)} (${dataBR(inicio)}).` };
+}
+
 // ---- Rescisão: férias vencidas × datas (N-02), com a data projetada do aviso (R-2/R-3; art. 487 § 1º, OJ 82)
 const iso = (s) => (/^\d{4}-\d{2}-\d{2}$/.test(String(s || '')) ? s : null);
 const addAnosISO = (s, k) => { const d = parseData(s); d.setUTCFullYear(d.getUTCFullYear() + k); return d; };
