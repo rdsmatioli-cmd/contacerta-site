@@ -111,14 +111,21 @@ export function salarioLiquido({ bruto, dependentes = 0, pensao = 0, outrosDesco
 }
 
 // ---------------------------------------------------------------- 13º salário
-export function decimoTerceiro({ salario, meses = 12, mediaVariaveis = 0, dependentes = 0 }) {
+// 1ª parcela (Decreto 10.854/2021, art. 78): metade do salário do mês anterior ao pagamento (caput; aqui, salário + média
+// de variáveis); para quem não tem os 12 meses no ano (admitido no curso do ano ou fora da empresa em parte do ano),
+// metade de 1/12 da remuneração por mês de serviço ou fração superior a 15 dias (§ 4º). Suposição da calculadora: 1ª
+// parcela paga em novembro (prazo até 30/11) e meses informados contados até dezembro, então os meses de serviço até o
+// pagamento são meses − 1 (dezembro ainda não trabalhado). mesesAte1aParcela substitui essa suposição.
+export function decimoTerceiro({ salario, meses = 12, mediaVariaveis = 0, dependentes = 0, mesesAte1aParcela }) {
   const m = Math.min(12, Math.max(0, Math.floor(num(meses))));
-  const bruto = r2(((num(salario) + num(mediaVariaveis)) / 12) * m);
-  const primeira = r2(bruto / 2);
+  const base = num(salario) + num(mediaVariaveis);
+  const bruto = r2((base / 12) * m);
+  const mesesPrimeira = m >= 12 ? 12 : Math.min(m, Math.max(0, Math.floor(num(mesesAte1aParcela, m - 1))));
+  const primeira = r2(m >= 12 ? base / 2 : (base / 12) * mesesPrimeira / 2);
   const { inss } = inssEmpregado(bruto);
   const ir = irrfMensal({ rendimentos: bruto, inss, dependentes });
   const segunda = r2(bruto - primeira - inss - ir.irrf);
-  return { bruto, primeira, segunda, inss, irrf: ir.irrf, ir, liquidoTotal: r2(primeira + segunda), meses: m };
+  return { bruto, primeira, segunda, inss, irrf: ir.irrf, ir, liquidoTotal: r2(primeira + segunda), meses: m, mesesPrimeira };
 }
 
 // ---------------------------------------------------------------- Férias

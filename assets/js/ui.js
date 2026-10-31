@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=d51ac5ce1d';
+import * as C from './calc.js?v=b25991aaf8';
 import { INDICADORES } from './tabelas.js?v=2469a7d685';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=ca94fc5eb6';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=8a438376f1';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -154,12 +154,12 @@ const CALCS = {
     const r = C.decimoTerceiro({ salario: d.salario, meses: d.meses, mediaVariaveis: d.media, dependentes: d.dependentes });
     return destaque('13º líquido total', R(r.liquidoTotal)) + barra([['Líquido', r.liquidoTotal, 'c1'], ['INSS', r.inss, 'c2'], ['IRRF', r.irrf, 'c5']]) + tabela([
       [`13º bruto (${r.meses}/12)`, R(r.bruto)],
-      ['1ª parcela (até 30/11, sem descontos)', R(r.primeira), 'sub'],
+      [r.meses < 12 ? `1ª parcela (até 30/11, sem descontos; ${r.mesesPrimeira}/12 ÷ 2)` : '1ª parcela (até 30/11, sem descontos)', R(r.primeira), 'sub'],
       ['INSS (descontado na 2ª parcela)', `− ${R(r.inss)}`],
       ['IRRF (descontado na 2ª parcela)', `− ${R(r.irrf)}`],
       ['2ª parcela (até 20/12)', R(r.segunda), 'sub'],
       ['Total líquido', R(r.liquidoTotal), 'total'],
-    ]);
+    ]) + (r.meses < 12 ? `<p class="nota">Com menos de 12 meses no ano, a 1ª parcela é metade de 1/12 do salário por mês de serviço até o pagamento (Decreto 10.854/2021, art. 78, § 4º). A calculadora supõe o pagamento em novembro e os ${r.meses} meses informados contados até dezembro: ${r.mesesPrimeira} até novembro. Se a empresa pagar antes, a 1ª parcela é menor e a 2ª, maior; o total não muda.</p>` : '');
   },
   ferias(d) {
     const r = C.ferias({ salario: d.salario, mediaVariaveis: d.media, dias: d.dias, venderDias: d.vender, dependentes: d.dependentes });

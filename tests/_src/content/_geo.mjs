@@ -81,7 +81,7 @@ export const GEO = {
   },
   'decimo-terceiro': {
     topo: bloco(
-      `<p><strong>13º salário = (salário + média de variáveis) ÷ 12 × meses trabalhados no ano.</strong> Conta como mês inteiro aquele em que você trabalhou 15 dias ou mais. A 1ª parcela, paga até 30 de novembro, é metade do bruto sem descontos; a 2ª, até 20 de dezembro, já desconta INSS e IR sobre o valor total.</p>
+      `<p><strong>13º salário = (salário + média de variáveis) ÷ 12 × meses trabalhados no ano.</strong> Conta como mês inteiro aquele em que você trabalhou 15 dias ou mais. A 1ª parcela, paga até 30 de novembro e sem descontos, é metade do salário do mês anterior ou, para quem não trabalhou todos os meses do ano, metade de 1/12 do salário por mês trabalhado até o pagamento; a 2ª, até 20 de dezembro, já desconta INSS e IR sobre o valor total.</p>
 <p>Exemplo: salário de R$ 3.000,00 o ano todo dá 13º bruto de ${R(d13.bruto)}, 1ª parcela de ${R(d13.primeira)} e 2ª parcela de ${R(d13.segunda)} (líquido total de <strong>${R(d13.liquidoTotal)}</strong>).</p>`,
       [
         'Digite o salário bruto mensal e, se houver, a média mensal de horas extras, comissões e adicionais.',
@@ -91,7 +91,7 @@ export const GEO = {
       ],
     ),
     faq: [
-      { q: 'Quanto recebe de 13º quem trabalhou 7 meses?', a: `<p>Com salário de R$ 3.000,00, o 13º proporcional é de 7/12: ${R(d13p.bruto)} brutos. A 1ª parcela é ${R(d13p.primeira)} e a 2ª, após INSS e IR, ${R(d13p.segunda)}.</p>` },
+      { q: 'Quanto recebe de 13º quem trabalhou 7 meses?', a: `<p>Com salário de R$ 3.000,00, o 13º proporcional é de 7/12: ${R(d13p.bruto)} brutos. Se os 7 meses vão de junho a dezembro, a 1ª parcela, paga em novembro, conta os 6 meses até ali: ${R(d13p.primeira)}; a 2ª, após INSS e IR, é de ${R(d13p.segunda)}.</p>` },
     ],
   },
   ferias: {
