@@ -42,6 +42,8 @@ export const URLS_LICITACOES = [
   '/licitacoes/blog/',
   '/licitacoes/blog/como-encontrar-licitacoes.html',
   '/licitacoes/blog/pregoes-material-de-limpeza-pncp.html',
+  '/licitacoes/blog/licitacao-generos-alimenticios-pncp.html',
+  '/licitacoes/blog/pregao-material-de-expediente-pncp.html',
   '/licitacoes/editais/material-de-limpeza.html',
 ];
 export const TODAS_URLS = [...URLS, ...URLS_LICITACOES, ...URLS_NOINDEX];
