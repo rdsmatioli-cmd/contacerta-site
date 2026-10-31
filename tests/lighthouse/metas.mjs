@@ -5,13 +5,14 @@
 // da categoria agentic-browsing com nota 1. Performance só é registrada: a máquina do CI varia demais.
 export const LIGHTHOUSE = '13.5.0';
 
-// 9 URLs: home, 4 calculadoras, 1 tabela, índice do blog e 2 posts.
+// 10 URLs: home, 5 calculadoras (inclui /irpf/), 1 tabela, índice do blog e 2 posts.
 export const URLS = [
   '/',
   '/salario-liquido/',
   '/rescisao/',
   '/juros-compostos/',
   '/simples-hibrido/',
+  '/irpf/',
   '/tabela-inss-2026/',
   '/blog/',
   '/blog/como-calcular-rescisao-2026/',
@@ -22,17 +23,20 @@ export const URLS = [
 // que o noindex derruba de propósito (audit is-crawlable). Passa se todo audit de SEO com peso tirou 1, menos o
 // is-crawlable.
 export const URLS_NOINDEX = [
-  '/empregador-em-dia/',
-  '/empregador-em-dia/avaliacao-rapida-nr1/',
-  '/empregador-em-dia/avaliacao-rapida-nr1/resultado/',
-  '/empregador-em-dia/jornada-42h/',
-  '/empregador-em-dia/orcamento-nr1/',
   '/empregador-em-dia/precos/',
+  '/empregador-em-dia/avaliacao-rapida-nr1/resultado/',
+  '/empregador-em-dia/orcamento-nr1/',
   '/empregador-em-dia/contratar/',
   '/empregador-em-dia/pagamento/',
   '/empregador-em-dia/pagamento/ok/',
   '/empregador-em-dia/pagamento/2/',
   '/empregador-em-dia/painel/',
+];
+// DEC CPO 31/10 (PR #56, go-live 03/11): páginas indexáveis do Empregador em Dia, mesmas metas das URLS.
+export const URLS_EMPREGADOR = [
+  '/empregador-em-dia/',
+  '/empregador-em-dia/avaliacao-rapida-nr1/',
+  '/empregador-em-dia/jornada-42h/',
 ];
 // A-PR35-18: páginas indexáveis do Licitações (/licitacoes/), mesmas metas das URLS.
 export const URLS_LICITACOES = [
@@ -44,7 +48,7 @@ export const URLS_LICITACOES = [
   '/licitacoes/blog/pregoes-material-de-limpeza-pncp.html',
   '/licitacoes/editais/material-de-limpeza.html',
 ];
-export const TODAS_URLS = [...URLS, ...URLS_LICITACOES, ...URLS_NOINDEX];
+export const TODAS_URLS = [...URLS, ...URLS_LICITACOES, ...URLS_EMPREGADOR, ...URLS_NOINDEX];
 export const ehNoindex = (url) => URLS_NOINDEX.includes(url);
 
 // mobile = padrão do Lighthouse (Moto G Power, 4G lento simulado); desktop = --preset=desktop.
