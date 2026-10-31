@@ -67,7 +67,7 @@ function checarLicitacoes(p, html) {
   const h = PAGINAS_COMPRA.includes(p) ? html.replace(`form-action ${FORM_ACTION_COMPRA}"`, "form-action 'none'\"") : html;
   // Beacon do Cloudflare Web Analytics (DEC CEO 31/10/2026): só estes dois acréscimos na CSP; politica.html fica sem
   // beacon até o texto do Advogado no aviso.
-  const h2 = p === 'licitacoes/politica.html' ? h : h.replace("script-src 'self' https://static.cloudflareinsights.com;", "script-src 'self';")
+  const h2 = p === 'licitacoes/politica.html' || p.startsWith('licitacoes/contratos/') ? h : h.replace("script-src 'self' https://static.cloudflareinsights.com;", "script-src 'self';")
     .replace("connect-src 'self' https://cloudflareinsights.com;", "connect-src 'self';");
   assert.match(h2, EXCECOES_REDIR.has(p) ? CSP_REDIR : CSP_LICITACOES);
 }

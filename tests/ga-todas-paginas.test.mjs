@@ -80,7 +80,8 @@ const CSP_LICITACOES = /<meta http-equiv="Content-Security-Policy" content="[^"]
 const CSP_LICITACOES_CF = /<meta http-equiv="Content-Security-Policy" content="[^"]*script-src 'self' https:\/\/static\.cloudflareinsights\.com;[^"]*connect-src 'self' https:\/\/cloudflareinsights\.com;/;
 const BEACON_CF = `<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "9a5bd8768086479c83a179a8a53f6122"}'></script>`;
 const SEM_BEACON = new Set(['licitacoes/privacidade/index.html', 'licitacoes/politica.html']);
-const COM_BEACON = (p) => !SEM_BEACON.has(p);
+// /licitacoes/contratos/ nunca tem beacon (nota do Advogado ced6a5c5, condição 3: landing sem analytics).
+const COM_BEACON = (p) => !SEM_BEACON.has(p) && !p.startsWith('licitacoes/contratos/');
 function checarLicitacoes(p, html) {
   assert.doesNotMatch(html, PROIBIDO);
   assert.doesNotMatch(html, /lcm-consent|data-ga4/);
