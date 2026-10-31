@@ -1,5 +1,5 @@
-// Empregador em Dia E2: flag OFF (padrão) mostra só o aviso; com a flag ligada por rota (homologação simulada, sem
-// mudar o arquivo), o fluxo das 5 faixas, o bloqueio de "R$" em <20 e >200, a conta da jornada (EC 141) e nenhuma
+// Empregador em Dia E2: EMPREGADOR_EM_DIA ON no arquivo (DEC CEO/CPO 31/10); a rota que liga a flag ficou sem efeito,
+// mantida por segurança. Confere o estado inicial no HTML, o fluxo das 5 faixas, o bloqueio de "R$" em <20 e >200, a conta da jornada (EC 141) e nenhuma
 // requisição com dados das respostas.
 import { test, expect, semErros, semRedeExterna, semRolagemHorizontal, assentar } from './fixtures.mjs';
 
@@ -10,13 +10,21 @@ const ligar = (page) => page.route(/\/assets\/js\/empregador\/config\.js/, async
   await route.fulfill({ response: r, body: corpo });
 });
 
+// DEC CEO/CPO 31/10: EMPREGADOR_EM_DIA ON no arquivo. NB-05 (CLS): o app já vem visível no HTML, antes do ui.js, sem
+// troca aviso -> app; o orçamento NR-1 (ED_CHECKOUT OFF) segue só com o aviso.
 for (const url of PAGS) {
-  test(`flag OFF ${url}: só o aviso, sem preço`, async ({ page, rede, erros }) => {
+  const liberada = !url.includes('orcamento-nr1');
+  test(`flag ON no arquivo ${url}: estado final já no HTML (${liberada ? 'app' : 'só o aviso'})`, async ({ page, rede, erros }) => {
+    await page.route(/\/assets\/js\/empregador\/ui\.js/, (route) => route.abort()); // sem o ui.js: só o HTML
+    await page.goto(url);
+    await expect(page.locator(liberada ? '#ed-app' : '#ed-off')).toBeVisible();
+    await expect(page.locator(liberada ? '#ed-off' : '#ed-app')).toBeHidden();
+    await page.unroute(/\/assets\/js\/empregador\/ui\.js/);
     await page.goto(url);
     await assentar(page);
-    await expect(page.locator('#ed-off')).toBeVisible();
-    await expect(page.locator('#ed-app')).toBeHidden();
-    expect(await page.locator('main').innerText()).not.toContain('R$');
+    await expect(page.locator(liberada ? '#ed-app' : '#ed-off')).toBeVisible();
+    await expect(page.locator(liberada ? '#ed-off' : '#ed-app')).toBeHidden();
+    if (!liberada) expect(await page.locator('main').innerText()).not.toContain('R$');
     semRedeExterna(rede);
     semErros(erros, rede);
   });

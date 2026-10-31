@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { FAIXAS } from '../../../assets/js/empregador/config.js';
+import { FAIXAS, FLAGS } from '../../../assets/js/empregador/config.js';
 
 const raiz = fileURLToPath(new URL('../../../', import.meta.url));
 const molde = readFileSync(join(raiz, 'tabelas-oficiais-2026/obrigado/index.html'), 'utf8');
@@ -27,10 +27,15 @@ function pagina({ caminho, titulo, desc, conteudo }) {
     .replaceAll('Download da planilha Tabelas oficiais 2026 do Conta Certa.', desc)
     .replaceAll(`${ORIG}/tabelas-oficiais-2026/obrigado/`, url);
   h = h.replace('<link rel="stylesheet" href="/assets/style.css', `<style>${cssEd}</style>\n<link rel="stylesheet" href="/assets/style.css`);
+  // NB-05 (CLS): o HTML já sai no estado final das flags. Com a página liberada, #ed-app vem visível e #ed-off oculto,
+  // sem troca depois do ui.js (que repete o mesmo estado, sem deslocar nada). Mesma regra do iniciar() do ui.js.
+  const liberada = FLAGS.EMPREGADOR_EM_DIA
+    && !(/id="ed-orc"|data-ed-e3="checkout"/.test(conteudo) && !FLAGS.ED_CHECKOUT)
+    && !(/data-ed-e3="login"/.test(conteudo) && !FLAGS.ED_LOGIN);
   const main = `<main id="conteudo" class="caixa ed">
 <p class="ed-selo">simulação · dados de exemplo</p>
-<section id="ed-off" class="ed-off"><h1>Empregador em Dia</h1><p>Esta página está em preparação e ainda não está disponível.</p><p><a href="/nr1-riscos-psicossociais/">Leia sobre a NR-1 e os riscos psicossociais</a>.</p></section>
-<div id="ed-app" hidden>
+<section id="ed-off" class="ed-off"${liberada ? ' hidden' : ''}><h1>Empregador em Dia</h1><p>Esta página está em preparação e ainda não está disponível.</p><p><a href="/nr1-riscos-psicossociais/">Leia sobre a NR-1 e os riscos psicossociais</a>.</p></section>
+<div id="ed-app"${liberada ? '' : ' hidden'}>
 <nav class="ed-menu" aria-label="Empregador em Dia"><a href="/nr1-riscos-psicossociais/">NR-1</a><a href="/empregador-em-dia/jornada-42h/">Jornada 42h</a><a href="/empregador-em-dia/#preco">Preço</a></nav>
 ${conteudo}
 <nav class="ed-rodape" aria-label="Empregador em Dia: links"><span>Conta Certa · Empregador em Dia</span><a href="/termos/">Termos de uso</a><a href="/privacidade/">Privacidade</a><a href="/contato/">Ajuda</a><a href="/contato/">Contato</a></nav>

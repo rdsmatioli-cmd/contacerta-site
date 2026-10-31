@@ -16,19 +16,29 @@ const PAGINAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-ra
   'empregador-em-dia/pagamento/index.html', 'empregador-em-dia/pagamento/ok/index.html', 'empregador-em-dia/pagamento/2/index.html',
   'empregador-em-dia/painel/index.html'];
 
-test('flags todas desligadas e SST opcional (DEC CPO 30/10, Jurídico 5a441f81)', () => {
-  for (const [k, v] of Object.entries(FLAGS)) assert.equal(v, false, k);
+// DEC CEO/CPO 31/10 (lançamento 03/11): só EMPREGADOR_EM_DIA ligada; todas as outras seguem false.
+test('só EMPREGADOR_EM_DIA ligada; demais flags desligadas e SST opcional (DEC CPO 30/10, Jurídico 5a441f81)', () => {
+  for (const [k, v] of Object.entries(FLAGS)) assert.equal(v, k === 'EMPREGADOR_EM_DIA', k);
   assert.equal(ED_SST_INCLUIDO, false);
 });
 
-test('T01 CA1: páginas noindex, fora do sitemap, aviso visível e app escondido', () => {
+// NB-05 (CLS): o HTML sai no estado final das flags, sem troca aviso -> app depois do ui.js. Com EMPREGADOR_EM_DIA ON,
+// as páginas E2 vêm com o app visível; orçamento NR-1 e E3 (ED_CHECKOUT/ED_LOGIN OFF) seguem só com o aviso.
+const LIBERADAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
+  'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html'];
+test('T01 CA1 + NB-05: páginas noindex, fora do sitemap; estado final no HTML (sem troca de aviso por app)', () => {
   const sitemap = ler('sitemap.xml');
+  assert.ok(!sitemap.includes('empregador-em-dia'), 'sitemap');
   for (const p of PAGINAS) {
     const h = ler(p);
     assert.match(h, /<meta name="robots" content="noindex, nofollow">/, p);
-    assert.ok(!sitemap.includes('empregador-em-dia'), 'sitemap');
-    assert.match(h, /<div id="ed-app" hidden>/, p);
-    assert.match(h, /<section id="ed-off"/, p);
+    if (LIBERADAS.includes(p)) {
+      assert.match(h, /<section id="ed-off" class="ed-off" hidden>/, p);
+      assert.match(h, /<div id="ed-app">/, p);
+    } else {
+      assert.match(h, /<section id="ed-off" class="ed-off">/, p);
+      assert.match(h, /<div id="ed-app" hidden>/, p);
+    }
   }
 });
 

@@ -10,8 +10,8 @@ const raiz = new URL('../', import.meta.url).pathname;
 const ler = (p) => readFileSync(join(raiz, p), 'utf8');
 const E3 = ['precos', 'contratar', 'pagamento', 'pagamento/ok', 'pagamento/2', 'painel'].map((c) => `empregador-em-dia/${c}/index.html`);
 
-test('E3: ED_CHECKOUT e ED_LOGIN OFF, pagamento em mock', () => {
-  assert.equal(FLAGS.EMPREGADOR_EM_DIA, false);
+test('E3: ED_CHECKOUT e ED_LOGIN OFF, pagamento em mock (só EMPREGADOR_EM_DIA ON, DEC CEO/CPO 31/10)', () => {
+  assert.equal(FLAGS.EMPREGADOR_EM_DIA, true);
   assert.equal(FLAGS.ED_CHECKOUT, false);
   assert.equal(FLAGS.ED_LOGIN, false);
   assert.equal(ED_PAGAMENTO_MODO, 'mock');
