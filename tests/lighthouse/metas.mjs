@@ -22,6 +22,7 @@ export const URLS = [
 // que o noindex derruba de propósito (audit is-crawlable). Passa se todo audit de SEO com peso tirou 1, menos o
 // is-crawlable.
 export const URLS_NOINDEX = [
+  '/empregador-em-dia/precos/',
   '/empregador-em-dia/avaliacao-rapida-nr1/resultado/',
   '/empregador-em-dia/orcamento-nr1/',
   '/empregador-em-dia/contratar/',
@@ -35,7 +36,6 @@ export const URLS_EMPREGADOR = [
   '/empregador-em-dia/',
   '/empregador-em-dia/avaliacao-rapida-nr1/',
   '/empregador-em-dia/jornada-42h/',
-  '/empregador-em-dia/precos/',
 ];
 // A-PR35-18: páginas indexáveis do Licitações (/licitacoes/), mesmas metas das URLS.
 export const URLS_LICITACOES = [

@@ -26,9 +26,9 @@ test('só EMPREGADOR_EM_DIA ligada; demais flags desligadas e SST opcional (DEC 
 // as páginas E2 vêm com o app visível; orçamento NR-1 e E3 (ED_CHECKOUT/ED_LOGIN OFF) seguem só com o aviso.
 const LIBERADAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
   'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html'];
-// DEC CPO 31/10 (PR #56): só landing, avaliação rápida, jornada 42h e preços indexáveis e no sitemap.
+// DEC CPO 31/10 (PR #56): só landing, avaliação rápida e jornada 42h (preços noindex até checkout, ADENDO 7ec7825b) indexáveis e no sitemap.
 const INDEXAVEIS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
-  'empregador-em-dia/jornada-42h/index.html', 'empregador-em-dia/precos/index.html'];
+  'empregador-em-dia/jornada-42h/index.html'];
 test('T01 CA1 + NB-05: indexação conforme a DEC; sitemap só com as indexáveis; estado final no HTML (sem troca)', () => {
   const sitemap = ler('sitemap.xml');
   const noSitemap = [...sitemap.matchAll(/<loc>https:\/\/contacertabr\.com\.br\/(empregador-em-dia\/[^<]*)<\/loc>/g)].map((m) => `${m[1]}index.html`);

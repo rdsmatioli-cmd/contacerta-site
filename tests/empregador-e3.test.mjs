@@ -24,8 +24,7 @@ test('E3: telas atrás de flag (data-ed-e3 dentro de #ed-app hidden), noindex', 
     assert.ok(app > 0, p);
     const gate = h.indexOf('data-ed-e3=');
     assert.ok(gate > app, `${p}: gate dentro de #ed-app`);
-    // DEC CPO 31/10 (PR #56): /precos/ indexável (preço visível só com ED_CHECKOUT); as demais E3 seguem noindex.
-    assert.match(h, p.includes('/precos/') ? /<meta name="robots" content="index, follow, max-image-preview:large">/ : /<meta name="robots" content="noindex, nofollow">/, p);
+    assert.match(h, /<meta name="robots" content="noindex, nofollow">/, p);
     assert.match(h, p.includes('painel') ? /data-ed-e3="login"/ : /data-ed-e3="checkout"/, p);
   }
   const ui = ler('assets/js/empregador/ui.js');

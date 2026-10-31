@@ -1,8 +1,8 @@
 // Gera as páginas do Empregador em Dia E2 (T01, T02, T03, T15) e E3 (T05-T08, T10, T12) a partir do molde de
 // tabelas-oficiais-2026/obrigado/index.html (cabeçalho, consentimento, rodapé). Rodar: node tests/_src/empregador/gerar.mjs
 // Textos literais da v3.3 (4c21797f, p. 2-7 e 19) com as decisões do CEO (becbf681, 95a76e17), o parecer do
-// Advogado (c23c3792) e o CFO (0619d010). Com a flag OFF só o aviso aparece. DEC CPO 31/10 (PR #56): landing, avaliação rápida, jornada 42h e preços
-// indexáveis e no sitemap; as demais (resultado, orçamento, contratar, pagamento, painel) seguem noindex.
+// Advogado (c23c3792) e o CFO (0619d010). Com a flag OFF só o aviso aparece. DEC CPO 31/10 (PR #56): landing, avaliação rápida e jornada 42h
+// indexáveis (ADENDO Advogado 7ec7825b: preços só com checkout) e no sitemap; as demais (preços, resultado, orçamento, contratar, pagamento, painel) seguem noindex.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -20,7 +20,7 @@ const vUi = ver('assets/js/empregador/ui.js');
 // ed.css vai inline (QA B-PR42-09: sem CSS extra bloqueando a renderização).
 const cssEd = readFileSync(join(raiz, 'assets/js/empregador/ed.css'), 'utf8').trim();
 
-const INDEXAVEIS = ['empregador-em-dia/', 'empregador-em-dia/avaliacao-rapida-nr1/', 'empregador-em-dia/jornada-42h/', 'empregador-em-dia/precos/'];
+const INDEXAVEIS = ['empregador-em-dia/', 'empregador-em-dia/avaliacao-rapida-nr1/', 'empregador-em-dia/jornada-42h/'];
 function pagina({ caminho, titulo, desc, conteudo }) {
   const url = `${ORIG}/${caminho}`;
   let h = head0
@@ -230,7 +230,7 @@ const selos = '<ul class="ed-lista"><li>Nota fiscal por e-mail</li></ul>';
 pagina({
   caminho: 'empregador-em-dia/precos/',
   titulo: 'Preço da adequação NR-1 por faixa de funcionários | Empregador em Dia',
-  desc: 'Veja o preço fechado da adequação NR-1 pela faixa de funcionários da sua empresa, com pagamento à vista ou metade agora e metade na entrega do relatório.',
+  desc: 'Preço fechado pela faixa de funcionários, à vista ou metade agora e metade na entrega.',
   conteudo: `<h1 data-ed-e3="checkout">Preço fechado pela faixa de funcionários</h1>
 <ul class="ed-cartoes">${card('20-50')}${card('51-100')}${card('101-200')}</ul>
 <p>Menos de 20 funcionários: <a href="/empregador-em-dia/avaliacao-rapida-nr1/">veja a opção gratuita</a>. Mais de 200: <a href="/empregador-em-dia/orcamento-nr1/">Orçamento sob medida</a>.</p>
