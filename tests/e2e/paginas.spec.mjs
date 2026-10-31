@@ -13,7 +13,10 @@ for (const url of ['/', ...BLOG]) {
     const resposta = await page.goto(url);
     expect(resposta.status()).toBe(200);
     await assentar(page);
-    await expect(page.locator('h1').first()).toBeVisible();
+    // Stub M-02 (noindex, conteúdo movido): sem H1 por desenho; exige o link de destino visível.
+    const noindex = await page.locator('meta[name="robots"][content*="noindex"]').count();
+    if (noindex) await expect(page.locator('main a, body a').first()).toBeVisible();
+    else await expect(page.locator('h1').first()).toBeVisible();
     await semRolagemHorizontal(page);
     semRedeExterna(rede);
     semErros(erros, rede);

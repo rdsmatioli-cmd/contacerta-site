@@ -44,7 +44,8 @@ test('índice do blog lido: posts com href, categoria, título e resumo', () => 
 
 // ---------- 1. Speculation Rules
 test('speculationrules: a linha do _seo.mjs, idêntica, logo antes de </head> em toda página fora de /licitacoes/', () => {
-  const fora = paginas.filter((p) => !ehLicitacoes(p));
+  // Stub estático do post movido (Advogado M-02 162a9503): sem speculationrules, coberto em retarget-simples-hibrido.test.mjs.
+  const fora = paginas.filter((p) => !ehLicitacoes(p) && p !== 'blog/simples-hibrido-ou-puro-2027/index.html');
   assert.ok(fora.includes('404.html') && fora.includes('index.html') && fora.length >= 50);
   const falhas = [];
   for (const p of fora) {
@@ -86,7 +87,8 @@ for (const [slug, href] of Object.entries(S.GUIA_DA_CALCULADORA)) {
 
 test('GUIA_DA_CALCULADORA cobre exatamente as páginas com "Guia completo"; sem post, nada', () => {
   const com = paginas.filter((p) => ler(p).includes('aria-labelledby="guia-t"')).map((p) => p.replace(/\/index\.html$/, '')).sort();
-  assert.deepEqual(com, Object.keys(S.GUIA_DA_CALCULADORA).sort());
+  // simples-hibrido: o "Guia completo" aponta para o Creditrilha (retarget, DEC CEO 151b6c2a), não para post do blog.
+  assert.deepEqual(com, [...Object.keys(S.GUIA_DA_CALCULADORA), 'simples-hibrido'].sort());
   assert.equal(S.secaoGuiaCompleto(undefined), '');
   assert.equal(S.guiaDaCalculadora('fgts', posts), undefined);
   assert.equal(S.guiaDaCalculadora('rescisao', posts.filter((p) => p.href !== S.GUIA_DA_CALCULADORA.rescisao)), undefined, 'post fora do portão');
@@ -203,7 +205,7 @@ test('sprite: igual ao sprite() do gerador (ordem do primeiro uso); em SPRITE_FO
 test('sitemap.xml: lastmod a partir de 2026-10-18 nas 8 páginas do PR, que são as que têm conteúdo do PR', () => {
   const lastmod = Object.fromEntries([...ler('sitemap.xml').matchAll(/<loc>https:\/\/contacertabr\.com\.br(\/[^<]*)<\/loc><lastmod>([^<]+)<\/lastmod>/g)].map((m) => [m[1], m[2]]));
   for (const u of S.PAGINAS_PR25) assert.ok(lastmod[u] >= S.LASTMOD_PR25, `${u}: lastmod ${lastmod[u]}`);
-  const comConteudo = ['/', ...Object.keys(S.GUIA_DA_CALCULADORA).map((s) => `/${s}/`), '/rescisao/', '/ferias/', '/seguro-desemprego/'];
+  const comConteudo = ['/', ...Object.keys(S.GUIA_DA_CALCULADORA).map((s) => `/${s}/`), '/simples-hibrido/', '/rescisao/', '/ferias/', '/seguro-desemprego/'];
   assert.deepEqual([...new Set(comConteudo)].sort(), [...S.PAGINAS_PR25].sort());
 });
 

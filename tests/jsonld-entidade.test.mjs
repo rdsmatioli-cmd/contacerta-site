@@ -45,7 +45,7 @@ const define = (o) => typeof o['@id'] === 'string' && Object.keys(o).some((k) =>
 const definicoes = (id) => nos.filter(({ o }) => o['@id'] === id && define(o));
 
 test('todos os blocos ld+json fazem parse (inclusive /licitacoes/ e blog)', () => {
-  assert.ok(blocos.length >= 130, `${blocos.length} blocos`);
+  assert.ok(blocos.length >= 129, `${blocos.length} blocos`);
   assert.ok(blocos.some((b) => b.p.startsWith('licitacoes/')) && blocos.some((b) => b.p.startsWith('blog/')));
 });
 

@@ -52,7 +52,6 @@ export const GUIA_DA_CALCULADORA = Object.freeze({
   'decimo-terceiro': '/blog/decimo-terceiro-2026/',
   'salario-liquido': '/blog/salario-liquido-2026/',
   'nr1-riscos-psicossociais': '/blog/nr1-riscos-psicossociais-2026/',
-  'simples-hibrido': '/blog/simples-hibrido-ou-puro-2027/',
 });
 // post = { href, titulo, resumo, categoria }: titulo é o h1 do post, resumo é o texto do card do índice do blog
 // (no 13º ele difere da meta description) e categoria é a do card do índice. Sem post (calculadora sem guia ou
