@@ -141,6 +141,14 @@ export function validarFeriasVencidas({ admissao, desligamento, fimProjetado = d
   return null;
 }
 
+// Rescisão: quantos selects de dobra das férias vencidas (1º e 2º período) ficam visíveis, pelo mesmo resultado de
+// validarNumero que o cálculo usa (lerNumeroBR, valor limitado ao data-max). null se o campo tem erro: o ui.js não
+// esconde nem zera os selects (CC-CALC-TRABALHISTA-12).
+export function periodosVisiveisDobra(v, limite = 2) {
+  if (!v || v.erro) return null;
+  return Math.min(limite, Math.max(0, Math.floor(Number(v.valor) || 0)));
+}
+
 // Rescisão: data de pagamento das verbas (CLT, art. 477, § 6º).
 export function validarDataPagamento(desligamento, pagamento) {
   if (!iso(pagamento) || !iso(desligamento)) return null;

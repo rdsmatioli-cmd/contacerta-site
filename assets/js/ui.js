@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
 import * as C from './calc.js?v=57d937b1e5';
 import { INDICADORES } from './tabelas.js?v=2469a7d685';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento } from './valida.js?v=9de5f4089b';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, periodosVisiveisDobra } from './valida.js?v=f750d8c7f2';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -26,6 +26,15 @@ function barra(partes) {
   return `<div class="barra" aria-hidden="true">${ok.map(([, v, c]) => `<i class="${c}" style="flex:${pc(v)} 1 0"></i>`).join('')}</div><ul class="legenda">${ok.map(([r, v, c]) => `<li class="${c}">${r} ${pc(v).toLocaleString('pt-BR')}%</li>`).join('')}</ul>`;
 }
 
+// Valida um campo numérico (data-num) pelos atributos dele; o ler() e o ajustaDobro usam a mesma leitura.
+function validarCampo(el) {
+  const ds = el.dataset;
+  // CC-NUM-01: a dica de 3 casas do erro ambíguo só vale em campo não monetário (sem o prefixo R$) e não inteiro.
+  const pre = el.parentElement && el.parentElement.querySelector('.pre');
+  const moeda = !!pre && pre.textContent.trim() === 'R$';
+  return validarNumero({ raw: el.value, min: attrNum(ds.min), max: attrNum(ds.max), teto: attrNum(ds.teto), obrig: 'obrig' in ds, positivo: 'positivo' in ds, inteiro: 'inteiro' in ds, decimal: 'decimal' in ds, dicaCasas: !moeda && !('inteiro' in ds) });
+}
+
 // Lê o formulário validando os campos numéricos (laudo QA CC-01 a CC-05):
 // erros (vazio obrigatório, texto, negativo, abaixo do mínimo) bloqueiam o cálculo;
 // valor acima do máximo é limitado ao máximo, com aviso visível no campo e no resultado.
@@ -45,10 +54,7 @@ function ler(form) {
     if (el.type === 'checkbox') d[el.name] = el.checked;
     else if (el.hasAttribute('data-num')) {
       const ds = el.dataset;
-      // CC-NUM-01: a dica de 3 casas do erro ambíguo só vale em campo não monetário (sem o prefixo R$) e não inteiro.
-      const pre = el.parentElement && el.parentElement.querySelector('.pre');
-      const moeda = !!pre && pre.textContent.trim() === 'R$';
-      const r = validarNumero({ raw: el.value, min: attrNum(ds.min), max: attrNum(ds.max), teto: attrNum(ds.teto), obrig: 'obrig' in ds, positivo: 'positivo' in ds, inteiro: 'inteiro' in ds, decimal: 'decimal' in ds, dicaCasas: !moeda && !('inteiro' in ds) });
+      const r = validarCampo(el);
       if (r.aviso && ds.avisoMax) r.aviso = ds.avisoMax;
       marca(el, r.erro || r.aviso, !!r.erro);
       // data-bloco (porcentagem): o erro bloqueia só a linha do bloco do campo, não o cálculo inteiro.
@@ -565,10 +571,13 @@ function iniciar() {
     form.elements.ano.addEventListener('change', aplicarAno);
     aplicarAno();
   }
+  // CC-CALC-TRABALHISTA-12: a quantidade de selects de dobra vem do mesmo valor que o cálculo lê (validarCampo, com o
+  // limite de data-max); campo com erro não esconde nem zera os selects.
   const vencN = form.elements.feriasVencidas;
   const ajustaDobro = () => {
     if (!vencN) return;
-    const n = Math.min(2, Math.max(0, Math.floor(Number(vencN.value) || 0)));
+    const n = periodosVisiveisDobra(validarCampo(vencN), attrNum(vencN.dataset.max) ?? 2);
+    if (n === null) return;
     ['dobro1', 'dobro2'].forEach((nome, i) => { const el = form.elements[nome]; if (!el) return; const box = el.closest('.campo'); if (box) box.hidden = i >= n; if (i >= n) el.value = 'nao'; });
   };
   const rodar = (enviado = false) => {
