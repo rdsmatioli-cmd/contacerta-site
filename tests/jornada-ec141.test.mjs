@@ -57,6 +57,8 @@ test('páginas: ajuda do divisor, repousos, FAQ da EC 141 (FAQPage = visível), 
   }
   assert.ok(ler('horas-extras/index.html').includes(`R$ 3.300,00 ÷ 210 = ${BRL(C.horasExtras({ salario: 3300, jornadaMensal: 210 }).valorHora)}`.replace(/R\$ /g, 'R$ ')));
   assert.ok(ler('adicional-noturno/index.html').includes(`R$ 2.200,00 ÷ 210 = ${BRL(C.adicionalNoturno({ salario: 2200, jornadaMensal: 210 }).valorHora)}`.replace(/R\$ /g, 'R$ ')));
+  // sábado: até 15/12/2026, dia útil não trabalhado (50%); depois, se for repouso pela escala, regra do repouso (100%)
+  assert.equal(ler('horas-extras/index.html').split('o sábado que for dia de repouso pela escala segue a regra do repouso').length - 1, 2);
   assert.match(ler('horas-extras/index.html'), /<summary>Qual o divisor para quem trabalha 44 horas por semana\?<\/summary><div><p>220\. A conta é 44 horas ÷ 6 dias × 30 dias\. Com a Emenda Constitucional 141\/2026/);
 });
 
