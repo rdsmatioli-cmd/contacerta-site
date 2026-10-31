@@ -418,7 +418,6 @@ const CALCS = {
     if (!r) return '<p class="erro">Informe o faturamento mensal e a alíquota efetiva do DAS.</p>';
     const outro = C.simplesHibridoOuPuro({ ...base, repasseB2B: !repasseB2B });
     const [mant, rep] = repasseB2B ? [outro, r] : [r, outro];
-    const posPrazo = hoje() > '2026-10-30';
     const sinal = (v) => `${v >= 0 ? '+ ' : '− '}${R(Math.abs(v))}`;
     const cen = repasseB2B ? 'com a CBS/IBS repassada ao B2B' : 'cobrando o mesmo valor total';
     const rec = {
@@ -439,7 +438,9 @@ const CALCS = {
 <tr><th scope="row">Diferença para o puro</th><td>${sinal(mant.diferencaLucro)}</td><td>${sinal(rep.diferencaLucro)}</td></tr>
 <tr><th scope="row">Crédito dos clientes B2B</th><td>${R(mant.hibrido.creditoClientes)}</td><td>${R(rep.hibrido.creditoClientes)}</td></tr>
 </tbody></table></div>`;
-    const prazo = posPrazo ? 'Próxima janela de opção: 1º a 31/03/2027, para valer de julho a dezembro de 2027.' : 'Prazo da opção para jan-jun/2027: 30/10/2026.';
+    // Prazo de opção para jan-jun/2027 encerrado em 30/10/2026; cancelamento de 03/11 a 20/12/2026 (Res. CGSN 194/2026).
+    const prazo = (hoje() <= '2026-12-20' ? 'Quem optou para janeiro a junho de 2027 pode cancelar a opção até 20/12/2026, em caráter irretratável (cancelamento aberto de 03/11 a 20/12/2026). ' : '')
+      + 'Próxima janela de opção: março de 2027, para valer de julho a dezembro de 2027 (datas na forma regulamentada pelo CGSN).';
     return `<div class="recomenda rec-${r.recomendacao}"><p class="rec-rot">Indicação da simulação</p><p class="rec-tit">${rec[0]}</p><p>${rec[1]}</p></div>`
       + destaque('Diferença de lucro (fora do DAS − tudo no DAS)', `${sinal(r.diferencaLucro)}/mês`) + comp + lado
       + `<p class="nota">Dados e premissas: faturamento de ${R(d.receita)}; margem de ${n2.format(d.margem)}%; DAS de ${n2.format(d.das)}%, com ${n2.format(d.parcela)}% de CBS/IBS na partilha; compras com crédito de ${R(d.compras)}; ${pctB2B}% das vendas para empresas do regime regular. Preço com CBS e IBS fora do DAS: ${repasseB2B ? 'CBS/IBS repassados ao B2B, valor total mantido para o B2C' : 'mesmo valor total cobrado nas duas opções'}; CBS + IBS de ${pct(r.aliquota)} por fora (valor da operação ${R(r.hibrido.valorOperacao)}); DAS do híbrido calculado sobre ${dasSobreValorSemCbsIbs ? 'o valor sem CBS/IBS' : 'a receita total'} (ponto ainda não definido pela lei), sem a parcela de CBS/IBS; custos iguais (faturamento × (1 − margem)). Simulação para 2027-2028; a CBS de 2027 é estimativa até a fixação oficial. Crédito do cliente condicionado às regras gerais (LC 214/2025, arts. 47 e 48). Custos tratados como valores brutos: as compras com crédito já estão dentro dos custos, com o tributo que gera o crédito incluído. Saldo credor das compras não aproveitado aqui (pode subestimar o resultado fora do DAS). ${prazo}</p>`
