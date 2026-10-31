@@ -67,7 +67,7 @@ test('13º salário', () => {
 test('Férias', () => {
   let f = C.ferias({ salario: 3000 });
   assert.equal(f.terco, 1000); assert.equal(f.inss, 368.6); assert.equal(f.irrf, 0); assert.equal(f.liquido, 3631.4);
-  f = C.ferias({ salario: 3000, venderDias: true });
+  f = C.ferias({ salario: 3000, diasGozo: 20, diasAbono: 10 });
   assert.equal(f.diasGozo, 20); assert.equal(f.diasAbono, 10); assert.equal(f.abono, 1000); assert.equal(f.tercoAbono, 333.33);
   assert.equal(f.inss, 215.69); assert.equal(f.bruto, 4000); assert.equal(f.liquido, 3784.31);
 });

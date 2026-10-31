@@ -53,10 +53,14 @@ test('CC-03/CC-04: negativo, vazio e texto geram erro com mensagem', () => {
 });
 
 test('CC-05: férias abaixo de 5 dias e 13º com 0 meses são erro; acima do máximo é limitado com aviso', () => {
-  const d = campo(ferias, 'dias');
+  const d = campo(ferias, 'diasGozo');
   assert.equal(validarNumero({ raw: '3', min: d.min, max: d.max }).erro, 'O mínimo é 5.');
   const r45 = validarNumero({ raw: '45', min: d.min, max: d.max });
   assert.equal(r45.valor, 30); assert.match(r45.aviso, /máximo é 30/);
+  // dias vendidos (CC-CALC-FERIAS-01): de 0 a 10, acima de 10 limitado com aviso
+  const a = campo(ferias, 'diasAbono');
+  assert.equal(validarNumero({ raw: '12', min: 0, max: a.max }).valor, 10);
+  assert.equal(validarNumero({ raw: '-1', min: 0, max: a.max }).erro, 'O valor não pode ser negativo.');
   const m = campo(decimo, 'meses');
   assert.equal(validarNumero({ raw: '0', min: m.min, max: m.max }).erro, 'O mínimo é 1.');
   assert.equal(validarNumero({ raw: '13', min: m.min, max: m.max }).valor, 12);

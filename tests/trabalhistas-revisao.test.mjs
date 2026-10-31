@@ -159,27 +159,32 @@ test('CC-TRAB-07: FGTS deposita também sobre o 13º e o 1/3 de férias a cada 1
   assert.ok(!html.includes('R$ 2.880,00 em 12 meses'));
 });
 
-test('CC-TRAB-08: o campo de dias de férias é o período calculado, somando os dias vendidos', () => {
+// CC-CALC-FERIAS-01 (auditoria de 30-31/10/2026) substituiu o campo único "somando os dias vendidos" e o checkbox de
+// venda por dois campos: dias de gozo deste período e dias vendidos. O teste do CC-TRAB-08 segue valendo para o
+// período: quem divide as férias informa os dias do período, não o direito inteiro.
+test('CC-TRAB-08 e CC-CALC-FERIAS-01: dias de gozo do período e dias vendidos em campos separados', () => {
   const html = pagina('ferias');
-  const rot = 'Dias deste período de férias, somando os dias vendidos';
-  assert.ok(html.includes(`<label for="f-dias">${rot}</label>`));
-  assert.equal(feriasPag.campos.find((c) => c.n === 'dias').l, rot);
+  assert.ok(html.includes('<label for="f-diasGozo">Dias de gozo neste período</label>'));
+  assert.ok(html.includes('<label for="f-diasAbono">Dias vendidos (abono)</label>'));
+  assert.equal(feriasPag.campos.find((c) => c.n === 'diasGozo').l, 'Dias de gozo neste período');
+  assert.equal(feriasPag.campos.find((c) => c.n === 'diasAbono').l, 'Dias vendidos (abono)');
+  assert.ok(!html.includes('f-vender') && !html.includes('f-dias"') && !html.includes('somando os dias vendidos'));
   // o rótulo não induz quem divide as férias a informar o direito inteiro (30) em vez dos dias do período
   assert.ok(!html.includes('a que tem direito (antes da venda)'));
   assert.ok(!html.includes('Escolha quantos dias de férias vai tirar'));
-  const passo = 'Informe os dias do período que vai calcular, somando os que vai vender, e marque a venda de 1/3 (abono pecuniário), se for vender: para tirar 20 e vender 10, informe 30; para tirar 15 sem vender, informe 15.';
+  const passo = 'Informe os dias de gozo do período que vai calcular e, à parte, os dias vendidos (abono pecuniário): para tirar 20 e vender 10, informe 20 e 10; para tirar 15 sem vender, informe 15 e 0.';
   assert.ok(html.includes(`<li>${passo}</li>`));
   assert.ok(GEO.ferias.topo.includes(`<li>${passo}</li>`));
-  assert.equal(feriasPag.campos.find((c) => c.n === 'dias').ajuda, 'Calcula um período por vez.');
-  // quem informa 30 e marca a venda tira 20 e vende 10: o valor que a página cita
-  const v = C.ferias({ salario: 3000, dias: 30, venderDias: true });
+  assert.equal(feriasPag.campos.find((c) => c.n === 'diasGozo').ajuda, 'Só os dias de descanso, sem os vendidos. Calcula um período por vez.');
+  // 20 de gozo e 10 vendidos: o valor que a página cita (o mesmo do antigo "30 com venda")
+  const v = C.ferias({ salario: 3000, diasGozo: 20, diasAbono: 10 });
   assert.equal(v.diasGozo, 20); assert.equal(v.diasAbono, 10);
   assert.ok(html.includes(R(v.liquido)));
-  // período de 15 dias sem venda (fracionamento): informar 15 dá metade de 30 dias, não o dobro
-  const p15 = C.ferias({ salario: 3000, dias: 15 });
+  // período de 15 dias sem venda (fracionamento): metade de 30 dias, não o dobro
+  const p15 = C.ferias({ salario: 3000, diasGozo: 15 });
   assert.equal(p15.diasGozo, 15); assert.equal(p15.diasAbono, 0);
   assert.equal(p15.bruto, 2000); assert.equal(p15.liquido, 1844.31);
-  assert.equal(C.ferias({ salario: 3000, dias: 30 }).bruto, 4000);
+  assert.equal(C.ferias({ salario: 3000, diasGozo: 30 }).bruto, 4000);
 });
 
 test('CC-TRAB-09: INSS do 13º de um só ano usa a tabela do ano', () => {

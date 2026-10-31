@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=d91f199bf6';
+import * as C from './calc.js?v=74fbbaaa6a';
 import { INDICADORES } from './tabelas.js?v=2469a7d685';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas } from './valida.js?v=2a1eb98415';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas, validarDiasFerias } from './valida.js?v=e440714e7d';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -80,6 +80,16 @@ function ler(form) {
 }
 const listaErros = (erros) => `<div class="erro" role="alert"><p><strong>Confira ${erros.length > 1 ? 'os campos' : 'o campo'} antes de calcular:</strong></p><ul>${erros.map(([r, m, id]) => `<li><a href="#${id}">${esc(r)}</a>: ${esc(m)}</li>`).join('')}</ul></div>`;
 const listaAlertas = (a) => (a.length ? `<div class="aviso-limite" role="status"><p><strong>Atenção:</strong></p><ul>${a.map(([r, m]) => `<li>${esc(r)}: ${esc(m)}</li>`).join('')}</ul></div>` : '');
+// Erro de regra num campo, fora da validação numérica do ler() (CC-CALC-SEGURO-01, CC-CALC-FERIAS-01): marca o campo
+// (aria-invalid e mensagem) e devolve a lista de erros com o link para o campo. O próximo ler() limpa a marca do campo
+// numérico que voltar a valer.
+const erroCampo = (id, texto) => {
+  const el = document.getElementById(id);
+  const msg = document.getElementById(`${id}-msg`);
+  if (el) el.setAttribute('aria-invalid', 'true');
+  if (msg) { msg.textContent = texto; msg.hidden = false; msg.className = 'campo-msg err'; }
+  return listaErros([[(document.querySelector(`label[for="${id}"]`) || {}).textContent || '', texto, id]]);
+};
 const listaAvisos = (avisos) => (avisos.length ? `<div class="aviso-limite" role="status"><p><strong>Valor ajustado ao limite:</strong></p><ul>${avisos.map(([r, m]) => `<li>${esc(r)}: ${esc(m)}</li>`).join('')}</ul></div>` : '');
 
 // Assinatura do resultado (molde "ferramenta gratuita com a marca no resultado") + botão de imprimir/salvar PDF.
@@ -204,7 +214,10 @@ const CALCS = {
     ]);
   },
   ferias(d) {
-    const r = C.ferias({ salario: d.salario, mediaVariaveis: d.media, dias: d.dias, venderDias: d.vender, dependentes: d.dependentes });
+    // CC-CALC-FERIAS-01: dias de gozo e dias vendidos são campos independentes; somados, cabem em 30 dias.
+    const vf = validarDiasFerias({ diasGozo: d.diasGozo, diasAbono: d.diasAbono });
+    if (vf) return erroCampo(`f-${vf.campo}`, vf.erro);
+    const r = C.ferias({ salario: d.salario, mediaVariaveis: d.media, diasGozo: d.diasGozo, diasAbono: d.diasAbono, dependentes: d.dependentes });
     return destaque('Férias líquidas estimadas', R(r.liquido)) + barra([['Líquido', r.liquido, 'c1'], ['INSS', r.inss, 'c2'], ['IRRF', r.irrf, 'c5']]) + tabela([
       [`Férias (${r.diasGozo} dias)`, R(r.valorFerias)],
       ['1/3 constitucional', R(r.terco)],
@@ -271,13 +284,18 @@ const CALCS = {
   },
   'seguro-desemprego'(d) {
     const r = C.seguroDesemprego({ salarios: [d.s1, d.s2, d.s3], solicitacao: d.solicitacao, mesesTrabalhados: d.meses });
-    if (!r.temDireito) return `<p class="erro">Pelas regras informadas, ainda não há direito: na ${d.solicitacao}ª solicitação são exigidos ao menos ${r.carenciaMinima} meses trabalhados.</p>` + tabela([['Média salarial', R(r.media)], ['Valor que seria pago por parcela', R(r.parcela)]]);
+    // CC-CALC-SEGURO-01: sem salário maior que zero não há média, e o resultado não cai no piso (o campo do último mês
+    // já exige valor maior que zero).
+    if (r.semSalario) return erroCampo('f-s1', 'Informe o salário do último mês, maior que zero.');
+    const parcial = r.salariosUsados < 3;
+    const notaMedia = parcial ? `<p class="nota">A média usou ${r.salariosUsados === 1 ? 'só 1 salário' : `${r.salariosUsados} salários`}: os meses com salário 0 ficam fora da conta.</p>` : '';
+    if (!r.temDireito) return `<p class="erro">Pelas regras informadas, ainda não há direito: na ${d.solicitacao}ª solicitação são exigidos ao menos ${r.carenciaMinima} meses trabalhados.</p>` + tabela([['Média salarial', R(r.media)], ['Valor que seria pago por parcela', R(r.parcela)]]) + notaMedia;
     return destaque(`${r.parcelas} parcelas de`, R(r.parcela)) + tabela([
-      ['Média dos últimos 3 salários', R(r.media)],
+      [parcial ? `Média dos salários informados (${r.salariosUsados} de 3)` : 'Média dos últimos 3 salários', R(r.media)],
       ['Valor de cada parcela', R(r.parcela)],
       ['Número de parcelas', String(r.parcelas)],
       ['Total estimado', R(r.total), 'total'],
-    ]);
+    ]) + notaMedia;
   },
   'juros-compostos'(d) {
     const r = C.jurosCompostos({ inicial: d.inicial, aporte: d.aporte, taxa: d.taxa, periodo: d.periodo, meses: d.meses });
@@ -413,18 +431,21 @@ const CALCS = {
   },
   'parcelado-ou-a-vista'(d) {
     const r = C.parceladoOuVista({ vista: d.vista, parcelas: d.parcelas, valorParcela: d.parcela, comEntrada: d.entrada, rendimentoAnual: d.rendimento });
-    const msg = { vista: 'Pagar à vista sai mais barato', parcelado: 'Parcelar e deixar o dinheiro rendendo sai mais barato', empate: 'Tanto faz: os dois caminhos custam o mesmo' }[r.melhor];
+    if (!r) return erroCampo('f-vista', 'Informe o preço à vista e o valor da parcela, maiores que zero.');
+    // CC-CALC-PARCELADO-01: total parcelado abaixo do preço à vista não tem juros (null, e não 0%) nem desconto à vista.
+    const maisBarato = r.parceladoMaisBarato;
+    const msg = maisBarato ? 'Parcelar sai mais barato: o total das parcelas é menor que o preço à vista' : { vista: 'Pagar à vista sai mais barato', parcelado: 'Parcelar e deixar o dinheiro rendendo sai mais barato', empate: 'Tanto faz: os dois caminhos custam o mesmo' }[r.melhor];
     // CC-PARC-01: parcela no ato igual ou maior que o preço à vista não tem taxa de juros (null), e não 0%.
     const semTaxa = r.taxaImplicita === null;
     return destaque('Melhor opção', msg) + tabela([
       ['Total parcelado', R(r.total)],
-      ['Desconto à vista em relação ao total', pct(r.descontoVista, 1)],
-      ['Juros embutidos (ao mês)', semTaxa ? 'não se aplica' : pct(r.taxaImplicita)],
-      ['Juros embutidos (ao ano)', semTaxa ? 'não se aplica' : pct(r.taxaImplicitaAnual)],
+      maisBarato ? ['Comparação com o preço à vista', `Parcelado custa ${pct(r.economiaParcelado, 1)} menos`] : ['Desconto à vista em relação ao total', pct(r.descontoVista, 1)],
+      maisBarato ? ['Juros embutidos', 'não há juros: o parcelado custa menos que à vista'] : ['Juros embutidos (ao mês)', semTaxa ? 'não se aplica' : pct(r.taxaImplicita)],
+      maisBarato ? null : ['Juros embutidos (ao ano)', semTaxa ? 'não se aplica' : pct(r.taxaImplicitaAnual)],
       ['Rendimento do seu dinheiro (ao mês)', pct(r.rendimentoMensal)],
       ['Valor das parcelas trazido a hoje', R(r.vp), 'sub'],
       [r.vantagem >= 0 ? 'Economia ao parcelar' : 'Economia ao pagar à vista', R(Math.abs(r.vantagem)), 'total'],
-    ]) + (semTaxa ? '<p class="nota">Juros embutidos não se aplicam: a parcela paga no ato já é igual ou maior que o preço à vista, sem prazo que explique a diferença. Compare pelo desconto à vista.</p>' : '')
+    ]) + (semTaxa && !maisBarato ? '<p class="nota">Juros embutidos não se aplicam: a parcela paga no ato já é igual ou maior que o preço à vista, sem prazo que explique a diferença. Compare pelo desconto à vista.</p>' : '')
       // Sem taxa, a orientação de comparar os juros embutidos contradiz a nota acima: fica só a ressalva do rendimento.
       + `<p class="nota">O rendimento é bruto, sem imposto de renda.${semTaxa ? '' : ' Se o dinheiro não fosse ficar aplicado, compare só os juros embutidos: qualquer taxa acima de zero significa que à vista é mais barato.'}</p>`;
   },
@@ -651,10 +672,26 @@ function iniciar() {
     p13.dataset.padrao = p13.value.trim();
     p13.dataset.sugerido = sug === null ? '' : 'sim';
   };
+  // CC-CALC-IR-01: na /imposto-de-renda/, o INSS acompanha o rendimento (C.inssEmpregado, tabela de 2026) enquanto o
+  // campo tem o valor que a página pôs (data-padrao) e o usuário não digitou nele, como no CC-PRECO-01. Valor digitado
+  // nunca muda; rendimento com erro deixa o INSS como está.
+  const inssIr = id === 'imposto-de-renda' ? form.elements.inss : null;
+  if (inssIr) {
+    inssIr.dataset.padrao = inssIr.defaultValue.trim();
+    inssIr.addEventListener('input', () => { inssIr.dataset.editado = 'sim'; });
+  }
+  const ajustaInssIr = () => {
+    if (!inssIr || inssIr.dataset.editado === 'sim' || inssIr.value.trim() !== inssIr.dataset.padrao) return;
+    const rend = validarCampo(form.elements.rendimentos);
+    if (rend.erro) return;
+    inssIr.value = C.inssEmpregado(rend.valor).inss.toFixed(2).replace('.', ',');
+    inssIr.dataset.padrao = inssIr.value;
+  };
   const rodar = (enviado = false) => {
     ajustaDobro();
     ajustaAviso();
     ajustaParcela13();
+    ajustaInssIr();
     try {
       const { d, erros, avisos, alertas } = ler(form);
       out.innerHTML = erros.length ? listaErros(erros) : listaAvisos(avisos) + listaAlertas(alertas) + fn(d);

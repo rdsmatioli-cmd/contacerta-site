@@ -1,6 +1,6 @@
 // Validação dos campos numéricos das calculadoras (laudo QA 10/10/2026 e reteste: CC-01 a CC-05, N-01, N-02, N-04, N-11).
 // Funções puras, testáveis no Node; o ui.js aplica o resultado no formulário.
-import { avosFerias, parseData, avisosDoMotivo, addMeses, addDias } from './calc.js?v=d91f199bf6';
+import { avosFerias, parseData, avisosDoMotivo, addMeses, addDias } from './calc.js?v=74fbbaaa6a';
 const fmt = (x) => Number(x).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 const AMBIGUO = 'Formato ambíguo: use 1.000,00 ou 1000';
 
@@ -186,4 +186,13 @@ export function validarDataPagamento(desligamento, pagamento) {
   if (dias < 0) return { erro: 'A data de pagamento não pode ser anterior à data do desligamento.' };
   if (dias > 10) return { alerta: `Pagamento ${dias} dias após o desligamento: o prazo legal é de até 10 dias após o término do contrato (CLT, art. 477, § 6º). O cálculo usa a data informada.` };
   return null;
+}
+
+// Férias: dias de gozo deste período + dias vendidos (abono) cabem em 30 dias (CC-CALC-FERIAS-01). Os dois campos são
+// independentes; a soma acima de 30 é erro no campo dos dias vendidos, sem resultado. Retorna null ou { campo, erro }.
+export function validarDiasFerias({ diasGozo, diasAbono }) {
+  const g = Math.floor(Number(diasGozo) || 0);
+  const a = Math.floor(Number(diasAbono) || 0);
+  if (g + a <= 30) return null;
+  return { campo: 'diasAbono', erro: `Dias de gozo (${g}) e dias vendidos (${a}) somam ${g + a}: as férias de um período aquisitivo têm no máximo 30 dias. Para tirar 20 e vender 10, informe 20 de gozo e 10 vendidos.` };
 }
