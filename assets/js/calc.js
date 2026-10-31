@@ -717,9 +717,16 @@ export function converter(valor, categoria, de, para) {
 // Alíquota de referência da CBS de 2027 calculada pelo TCU em 28/10/2026 (TC 006.529/2026-7): 11,3468%, arredondada
 // para 11,3% (LC 214/2025, art. 349, § 14). Ainda não é a resolução do Senado, que tem até 15/12/2026 para fixá-la
 // (art. 349, § 1º, II, com o prazo prorrogado pelo art. 353, § 2º). Em 2027 e 2028 a CBS é cobrada 0,1 ponto abaixo
-// da referência (art. 347): 11,2%. Quando o Senado fixar a alíquota, troque `situacao` para 'fixada pelo Senado' (e o
-// valor, se mudar) e reveja as páginas da reforma: tests/cbs-2027-tcu.test.mjs falha a partir de 16/12/2026 até isso.
-export const CBS_REFERENCIA_2027 = Object.freeze({ pct: 11.3, situacao: 'calculada pelo TCU', calculadaEm: '2026-10-28', processo: 'TC 006.529/2026-7', prazoSenado: '2026-12-15' });
+// da referência de cada ano (art. 347): 11,2% em 2027. A referência de 2028 tem cálculo próprio (art. 354), feito pelo
+// TCU e fixado pelo Senado em 2027; até lá, as calculadoras repetem os 11,3% de 2028 a 2033 só como premissa.
+// `situacao` (tests/cbs-2027-tcu.test.mjs confere):
+//   'calculada pelo TCU': o Senado ainda não fixou; `conferidaEm` é a data da última conferência da resolução;
+//   'fixada pelo Senado': resolução publicada (troque também o valor, se mudar);
+//   'vigente pelo cálculo do TCU (LC 214/2025, art. 349, § 2º)': sem fixação até 22/12/2026, vale o cálculo do TCU.
+// De 16/12 a 22/12/2026 o teste exige uma conferência depois do prazo do Senado (conferidaEm >= 16/12/2026) enquanto a
+// situação for 'calculada pelo TCU'; depois de 22/12/2026, exige uma das duas situações finais. Reveja as páginas da
+// reforma quando a situação mudar.
+export const CBS_REFERENCIA_2027 = Object.freeze({ pct: 11.3, situacao: 'calculada pelo TCU', calculadaEm: '2026-10-28', processo: 'TC 006.529/2026-7', prazoSenado: '2026-12-15', limiteFixacao: '2026-12-22', conferidaEm: '2026-10-31' });
 // IBS de referência: premissa de 18,70% da Resolução CGIBS 14/2026 (não oficial); só pesa de 2029 em diante.
 export const IBS_REFERENCIA_PREMISSA_PCT = 18.7;
 // Fração de ICMS/ISS que continua valendo em cada ano (ADCT, EC 132/2023): 9/10 em 2029 ... 6/10 em 2032; zero em 2033.
@@ -860,8 +867,8 @@ export function precoReforma({ precoAtual, tributosAtuaisPct, issPct = 0, ano = 
 }
 // CBS e IBS (em %) sugeridos para o ano na calculadora de preço, pela mesma regra da transição (aliquotasAno/TRANSICAO):
 // 2027-2028 = referência da CBS − 0,1 ponto e IBS de 0,1%; 2029-2032 = CBS de referência e IBS × (1 − fração do ISS/ICMS);
-// 2033 = referências cheias. CBS: referência de 2027 calculada pelo TCU (11,3%, CBS_REFERENCIA_2027), mantida de 2029
-// a 2033 como premissa; IBS: premissa de 18,70% da Resolução CGIBS 14/2026. Nenhuma das duas é oficial ainda.
+// 2033 = referências cheias. CBS: referência de 2027 calculada pelo TCU (11,3%, CBS_REFERENCIA_2027), repetida de 2028
+// a 2033 como premissa (cada ano terá referência própria, LC 214/2025, arts. 354 a 359); IBS: premissa de 18,70% da Resolução CGIBS 14/2026. Nenhuma das duas é oficial ainda.
 export function aliquotasPadraoPreco(ano, { cbsRefPct = CBS_REFERENCIA_2027.pct, ibsRefPct = IBS_REFERENCIA_PREMISSA_PCT } = {}) {
   const linha = TRANSICAO.find((l) => l.ano === Number(ano));
   if (!linha) return null;
@@ -883,12 +890,12 @@ export const MARCOS_REFORMA = [
   { data: '2026-01-01', t: 'Início do ano de teste: CBS de 0,9% e IBS de 0,1% destacados nos documentos fiscais, compensáveis com PIS/Cofins ou dispensados para quem cumpre as obrigações acessórias' },
   { data: '2026-10-28', t: 'TCU aprova o cálculo da alíquota de referência da CBS de 2027: 11,3% (TC 006.529/2026-7); a fixação cabe ao Senado' },
   { data: '2026-10-30', t: 'Fim do prazo (aberto em 01/09/2026) para o Simples Nacional optar por apurar IBS/CBS por fora (regime regular) no 1º semestre de 2027; prazo legal do TCU para enviar ao Senado o cálculo da alíquota de referência da CBS' },
-  { data: '2026-11-03', t: 'Começa o prazo para cancelar, em caráter irretratável, a opção do Simples pelo regime regular de IBS/CBS feita para o 1º semestre de 2027 (até 20/12/2026; Resolução CGSN nº 194/2026)' },
+  { data: '2026-11-03', t: 'Começa o prazo para cancelar, em caráter irretratável, a opção do Simples pelo regime regular de IBS/CBS feita para o 1º semestre de 2027 e o pedido de opção pelo Simples Nacional para 2027 (até 20/12/2026; Resolução CGSN nº 194/2026)' },
   { data: '2026-11-16', t: 'Novas regras de validação de IBS/CBS da NF-e em produção (NT 2025.002-RTC, cronograma sujeito a mudança)' },
   { data: '2026-12-15', t: 'Prazo do Senado para fixar a alíquota de referência da CBS de 2027 (o TCU calculou 11,3%)' },
-  { data: '2026-12-20', t: 'Fim do prazo para cancelar a opção do Simples pelo regime regular de IBS/CBS do 1º semestre de 2027' },
+  { data: '2026-12-20', t: 'Fim do prazo para cancelar a opção do Simples pelo regime regular de IBS/CBS do 1º semestre de 2027 e o pedido de opção pelo Simples Nacional para 2027' },
   { data: '2027-01-01', t: 'CBS entra na alíquota de referência (menos 0,1 ponto em 2027-2028); PIS e Cofins extintos; começa o Imposto Seletivo; IBS de 0,1%; IPI zerado, exceto para produtos com industrialização incentivada na Zona Franca de Manaus; apuração assistida da CBS' },
-  { data: '2027-03-01', t: 'Abre a janela de março de 2027 para o Simples optar pelo regime regular de IBS/CBS no 2º semestre de 2027 (LC 123/2006, art. 13, § 10; datas na forma regulamentada pelo CGSN)' },
+  { data: '2027-03-01', t: 'Abre a janela de março de 2027 para o Simples optar pelo regime regular de IBS/CBS no 2º semestre de 2027 (LC 123/2006, art. 13, § 10; datas na forma regulamentada pelo CGSN); empresas em início de atividade seguem regra própria (art. 13, § 11)' },
   { data: '2029-01-01', t: 'ICMS e ISS caem para 90% das alíquotas; IBS sobe na mesma proporção' },
   { data: '2030-01-01', t: 'ICMS e ISS em 80%' },
   { data: '2031-01-01', t: 'ICMS e ISS em 70%' },

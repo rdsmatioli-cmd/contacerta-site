@@ -1,7 +1,9 @@
 // CC-CALC-FINANCEIRO-01 (31/10/2026): alíquota de referência da CBS de 2027 calculada pelo TCU em 28/10/2026
 // (11,3%; TC 006.529/2026-7; LC 214/2025, art. 349, § 14) e cobrada 0,1 ponto abaixo em 2027-2028 (art. 347).
 // Valores padrão, exemplos (recalculados pelo calc.js), FAQ visível x FAQPage e fontes das páginas da reforma.
-// O último teste vence depois do prazo do Senado (15/12/2026): força a conferência da resolução.
+// Os 11,3% são só a referência de 2027: a de 2028 tem cálculo próprio (art. 354), e nenhum texto pode dizer que a CBS
+// será de 11,2% "em 2027 e 2028". A trava do último teste liga depois do prazo do Senado (15/12/2026): força a
+// conferência da resolução e, depois de 22/12/2026 (art. 349, § 2º), uma situação final na constante.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -55,12 +57,16 @@ test('exemplos das páginas batem com o calc.js nos valores padrão de cada pág
   const pf = C.precoReforma({ ...base, issPorDentro: false });
   for (const s of [`a CBS fica em ${BRL(p.cbs)} e o IBS em ${BRL(p.ibs)}`, `sobre o total (${BRL(p.iss)})`, `<strong>${BRL(p.total)}</strong> (${n1(p.variacaoTotal * 100)}% sobre o preço atual)`, `${BRL(p.custoClienteComCredito)} (${n1(p.variacaoComCredito * 100)}%)`, `o total seria ${BRL(pf.total)}.`])
     assert.ok(pr.includes(s), `preço reforma: ${s}`);
+  // custo com crédito = base + ISS (o texto mostra as duas parcelas, que somam o valor exibido)
+  assert.equal(Math.round((p.base + p.iss) * 100) / 100, p.custoClienteComCredito);
+  assert.ok(pr.includes(`a base mais o ISS (${BRL(p.base)} + ${BRL(p.iss)}): ${BRL(p.custoClienteComCredito)}`), 'preço reforma: base + ISS');
 
   const tr = ler('transicao-cbs-ibs/index.html');
   const x = C.transicaoCbsIbs({ precoAtual: 10000, pisCofinsPct: valorDe(tr, 'f-piscofins'), issPct: valorDe(tr, 'f-iss'), cbsRefPct: valorDe(tr, 'f-cbs'), ibsRefPct: valorDe(tr, 'f-ibs') });
   const ano = (a) => x.anos.find((l) => l.ano === a);
   assert.ok(tr.includes(`o cliente pagaria ${BRL(ano(2027).totalCliente)} em 2027 (carga de ${n1(ano(2027).carga * 100)}%) e ${BRL(ano(2033).totalCliente)} em 2033 (carga de ${n1(ano(2033).carga * 100)}%)`), 'exemplo da transição');
-  assert.ok(tr.includes(`chegaria a ${n1(REF.pct + C.IBS_REFERENCIA_PREMISSA_PCT)}%`), 'soma CBS + IBS do texto');
+  assert.ok(tr.includes(`que somam ${n1(REF.pct + C.IBS_REFERENCIA_PREMISSA_PCT)}%, mas essa soma junta duas premissas e não é estimativa oficial da alíquota de 2033`), 'soma CBS + IBS do texto, como premissa');
+  assert.doesNotMatch(tr, /chegaria a 30/, 'soma das premissas apresentada como projeção');
 
   const ct = ler('credito-travado/index.html');
   const c = C.creditoTravado({ comprasMensais: 100000, cbsPct: valorDe(ct, 'f-cbs'), ibsPct: valorDe(ct, 'f-ibs'), pctInadimplente: 10, diasAtraso: 60, custoDinheiroMes: 1.5 });
@@ -85,11 +91,41 @@ test('FAQ visível = FAQPage nas páginas da reforma; texto cita o TCU, os 11,3%
   }
 });
 
-test('prazo do Senado (15/12/2026): depois dele, conferir a resolução e atualizar CBS_REFERENCIA_2027', () => {
+// 11,3% é a referência de 2027; a de 2028 será calculada à parte (LC 214/2025, art. 354).
+const SO_2027 = /11,2\s?%[^.<"]{0,60}2027 e 2028|2027 e 2028[^.<"]{0,80}11,2\s?%|11,2\s?% em 2027-2028/;
+test('nenhum texto diz que a CBS será de 11,2% em 2027 e 2028 (a referência de 2028 tem cálculo próprio)', () => {
+  const falhas = [...PAGINAS.map((p) => `${p}/index.html`), 'llms.txt', 'assets/js/calc.js', 'assets/js/ui.js'].filter((p) => SO_2027.test(ler(p)));
+  assert.deepEqual(falhas, []);
+  for (const p of ['simples-hibrido', 'calendario-reforma-tributaria', 'transicao-cbs-ibs']) assert.match(ler(`${p}/index.html`), /referência de 2028 (?:tem cálculo próprio|será calculada pelo TCU|terá cálculo próprio)[^<"]{0,140}354/, p);
+  assert.ok(SO_2027.test('o que daria CBS de 11,2% em 2027 e 2028'));
+});
+
+// Trava do prazo do Senado. Devolve a mensagem de cobrança ou null.
+const FINAIS = ['fixada pelo Senado', 'vigente pelo cálculo do TCU (LC 214/2025, art. 349, § 2º)'];
+const cobranca = (hoje, ref) => {
+  if (![...FINAIS, 'calculada pelo TCU'].includes(ref.situacao)) return `situação desconhecida: ${ref.situacao}`;
+  if (hoje <= ref.prazoSenado || FINAIS.includes(ref.situacao)) return null;
+  if (hoje <= ref.limiteFixacao) return ref.conferidaEm > ref.prazoSenado ? null
+    : `Hoje é ${hoje}, depois do prazo do Senado (${ref.prazoSenado}). Confira se a resolução do Senado fixou a alíquota de referência da CBS de 2027 `
+      + `e registre a conferência em CBS_REFERENCIA_2027 (conferidaEm, ou a situação 'fixada pelo Senado') em assets/js/calc.js; reveja ${PAGINAS.join(', ')}.`;
+  return `Hoje é ${hoje}, depois de ${ref.limiteFixacao}. Registre em CBS_REFERENCIA_2027 a situação final: '${FINAIS[0]}' (com o valor da resolução) `
+    + `ou '${FINAIS[1]}' (sem fixação até ${ref.limiteFixacao}), e reveja ${PAGINAS.join(', ')}.`;
+};
+
+test('trava do prazo do Senado: regras para cada data e situação', () => {
+  const base = { ...REF, situacao: 'calculada pelo TCU', conferidaEm: '2026-10-31' };
+  assert.equal(REF.limiteFixacao, '2026-12-22');
+  assert.equal(cobranca('2026-12-15', base), null);
+  assert.match(cobranca('2026-12-16', base), /depois do prazo do Senado/);
+  assert.equal(cobranca('2026-12-16', { ...base, conferidaEm: '2026-12-16' }), null);
+  assert.equal(cobranca('2026-12-22', { ...base, conferidaEm: '2026-12-18' }), null);
+  assert.match(cobranca('2026-12-23', { ...base, conferidaEm: '2026-12-22' }), /situação final/);
+  for (const situacao of FINAIS) for (const d of ['2026-12-16', '2026-12-23', '2027-06-01']) assert.equal(cobranca(d, { ...base, situacao }), null, `${situacao} ${d}`);
+  assert.match(cobranca('2026-11-01', { ...base, situacao: 'fixada' }), /desconhecida/);
+});
+
+test('prazo do Senado (15/12/2026) e limite de 22/12/2026: conferir a resolução e atualizar CBS_REFERENCIA_2027', () => {
   const hoje = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
-  if (hoje <= REF.prazoSenado) return;
-  assert.equal(REF.situacao, 'fixada pelo Senado',
-    `Hoje é ${hoje}, depois do prazo do Senado (${REF.prazoSenado}). Confira se a resolução do Senado fixou a alíquota de referência da CBS de 2027 `
-    + '(ou se valeu o cálculo do TCU, sem fixação até 22/12/2026), atualize CBS_REFERENCIA_2027 em assets/js/calc.js e reveja os textos de '
-    + `${PAGINAS.join(', ')}.`);
+  const msg = cobranca(hoje, REF);
+  assert.equal(msg, null, msg ?? '');
 });
