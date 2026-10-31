@@ -1,7 +1,8 @@
 // Gera as páginas do Empregador em Dia E2 (T01, T02, T03, T15) e E3 (T05-T08, T10, T12) a partir do molde de
 // tabelas-oficiais-2026/obrigado/index.html (cabeçalho, consentimento, rodapé). Rodar: node tests/_src/empregador/gerar.mjs
 // Textos literais da v3.3 (4c21797f, p. 2-7 e 19) com as decisões do CEO (becbf681, 95a76e17), o parecer do
-// Advogado (c23c3792) e o CFO (0619d010). Páginas noindex, fora do sitemap; com a flag OFF só o aviso aparece.
+// Advogado (c23c3792) e o CFO (0619d010). Com a flag OFF só o aviso aparece. DEC CPO 31/10 (PR #56): landing, avaliação rápida, jornada 42h e preços
+// indexáveis e no sitemap; as demais (resultado, orçamento, contratar, pagamento, painel) seguem noindex.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +20,7 @@ const vUi = ver('assets/js/empregador/ui.js');
 // ed.css vai inline (QA B-PR42-09: sem CSS extra bloqueando a renderização).
 const cssEd = readFileSync(join(raiz, 'assets/js/empregador/ed.css'), 'utf8').trim();
 
+const INDEXAVEIS = ['empregador-em-dia/', 'empregador-em-dia/avaliacao-rapida-nr1/', 'empregador-em-dia/jornada-42h/', 'empregador-em-dia/precos/'];
 function pagina({ caminho, titulo, desc, conteudo }) {
   const url = `${ORIG}/${caminho}`;
   let h = head0
@@ -26,6 +28,7 @@ function pagina({ caminho, titulo, desc, conteudo }) {
     .replaceAll('Planilha Tabelas oficiais 2026 | Conta Certa', titulo)
     .replaceAll('Download da planilha Tabelas oficiais 2026 do Conta Certa.', desc)
     .replaceAll(`${ORIG}/tabelas-oficiais-2026/obrigado/`, url);
+  if (INDEXAVEIS.includes(caminho)) h = h.replace('<meta name="robots" content="noindex, nofollow">', '<meta name="robots" content="index, follow, max-image-preview:large">');
   h = h.replace('<link rel="stylesheet" href="/assets/style.css', `<style>${cssEd}</style>\n<link rel="stylesheet" href="/assets/style.css`);
   // NB-05 (CLS): o HTML já sai no estado final das flags. Com a página liberada, #ed-app vem visível e #ed-off oculto,
   // sem troca depois do ui.js (que repete o mesmo estado, sem deslocar nada). Mesma regra do iniciar() do ui.js.
@@ -34,7 +37,7 @@ function pagina({ caminho, titulo, desc, conteudo }) {
     && !(/data-ed-e3="login"/.test(conteudo) && !FLAGS.ED_LOGIN);
   const main = `<main id="conteudo" class="caixa ed">
 <p class="ed-selo">simulação · dados de exemplo</p>
-<section id="ed-off" class="ed-off"${liberada ? ' hidden' : ''}><h1>Empregador em Dia</h1><p>Esta página está em preparação e ainda não está disponível.</p><p><a href="/nr1-riscos-psicossociais/">Leia sobre a NR-1 e os riscos psicossociais</a>.</p></section>
+<section id="ed-off" class="ed-off"${liberada ? ' hidden' : ''}><p class="ed-off-t"><strong>Empregador em Dia</strong></p><p>Esta página está em preparação e ainda não está disponível.</p><p><a href="/nr1-riscos-psicossociais/">Leia sobre a NR-1 e os riscos psicossociais</a>.</p></section>
 <div id="ed-app"${liberada ? '' : ' hidden'}>
 <nav class="ed-menu" aria-label="Empregador em Dia"><a href="/nr1-riscos-psicossociais/">NR-1</a><a href="/empregador-em-dia/jornada-42h/">Jornada 42h</a><a href="/empregador-em-dia/#preco">Preço</a></nav>
 ${conteudo}
@@ -60,8 +63,8 @@ const check = (nome, opcoes, ajudaId) => opcoes.map(([v, t]) =>
 
 pagina({
   caminho: 'empregador-em-dia/',
-  titulo: 'Empregador em Dia: NR-1 e riscos psicossociais no PGR | Conta Certa',
-  desc: 'Sua empresa em dia com a NR-1, sem montar planilha: questionário anônimo, inventário e plano de ação para o PGR.',
+  titulo: 'Empregador em Dia: NR-1 e riscos psicossociais no PGR',
+  desc: 'Adequação da sua empresa à NR-1: questionário anônimo aos funcionários, inventário de riscos psicossociais e plano de ação para incluir no PGR.',
   conteudo: `<section class="ed-hero" data-ed-tela="1">
 <p class="cat-pill">NR-1: riscos psicossociais no PGR</p>
 <h1>Sua empresa em dia com a NR-1, sem montar planilha</h1>
@@ -81,9 +84,10 @@ pagina({
 
 pagina({
   caminho: 'empregador-em-dia/avaliacao-rapida-nr1/',
-  titulo: 'Avaliação rápida NR-1 da sua empresa | Empregador em Dia',
-  desc: 'Três perguntas de rotina para saber o que sua empresa precisa para a NR-1.',
-  conteudo: `<form class="ed-form" id="ed-diag" novalidate>
+  titulo: 'Avaliação rápida NR-1: o que sua empresa precisa | Empregador em Dia',
+  desc: 'Responda três perguntas sobre a sua empresa e veja o que falta para incluir os riscos psicossociais no PGR e cumprir a NR-1. Resultado na hora.',
+  conteudo: `<h1>Avaliação rápida NR-1</h1>
+<form class="ed-form" id="ed-diag" novalidate>
 <fieldset data-passo="1"><legend><span class="ed-passo">Passo 1 de 3</span> Quantas pessoas trabalham na empresa?</legend>
 <p>Conte quem tem carteira assinada. O preço sai daqui.</p>
 <p class="ed-rotulo">Funcionários com carteira</p>
@@ -137,7 +141,7 @@ pagina({
 pagina({
   caminho: 'empregador-em-dia/jornada-42h/',
   titulo: 'Simulador da jornada de 42 horas: quanto custa | Empregador em Dia',
-  desc: 'Simulador grátis: quanto custaria reduzir a jornada para 42 horas por semana, com a conta aberta.',
+  desc: 'Simule quanto custaria reduzir a jornada da sua equipe para 42 horas por semana: horas, salário-hora e custo mensal, com a conta aberta passo a passo.',
   conteudo: `<p class="cat-pill">Simulador grátis</p>
 <h1>Quanto custaria reduzir a jornada para 42 horas por semana?</h1>
 <p class="ed-aviso" role="note">A Emenda Constitucional 141/2026 reduz a jornada máxima para 42 horas por semana a partir de 16/12/2026 e para 40 horas a partir de 16/12/2027, sem redução de salário. Esta simulação é uma estimativa e não substitui a análise do seu contrato ou da convenção coletiva.</p>
@@ -226,7 +230,7 @@ const selos = '<ul class="ed-lista"><li>Nota fiscal por e-mail</li></ul>';
 pagina({
   caminho: 'empregador-em-dia/precos/',
   titulo: 'Preço da adequação NR-1 por faixa de funcionários | Empregador em Dia',
-  desc: 'Preço fechado pela faixa de funcionários, à vista ou metade agora e metade na entrega.',
+  desc: 'Veja o preço fechado da adequação NR-1 pela faixa de funcionários da sua empresa, com pagamento à vista ou metade agora e metade na entrega do relatório.',
   conteudo: `<h1 data-ed-e3="checkout">Preço fechado pela faixa de funcionários</h1>
 <ul class="ed-cartoes">${card('20-50')}${card('51-100')}${card('101-200')}</ul>
 <p>Menos de 20 funcionários: <a href="/empregador-em-dia/avaliacao-rapida-nr1/">veja a opção gratuita</a>. Mais de 200: <a href="/empregador-em-dia/orcamento-nr1/">Orçamento sob medida</a>.</p>

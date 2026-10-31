@@ -26,12 +26,16 @@ test('só EMPREGADOR_EM_DIA ligada; demais flags desligadas e SST opcional (DEC 
 // as páginas E2 vêm com o app visível; orçamento NR-1 e E3 (ED_CHECKOUT/ED_LOGIN OFF) seguem só com o aviso.
 const LIBERADAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
   'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html'];
-test('T01 CA1 + NB-05: páginas noindex, fora do sitemap; estado final no HTML (sem troca de aviso por app)', () => {
+// DEC CPO 31/10 (PR #56): só landing, avaliação rápida, jornada 42h e preços indexáveis e no sitemap.
+const INDEXAVEIS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
+  'empregador-em-dia/jornada-42h/index.html', 'empregador-em-dia/precos/index.html'];
+test('T01 CA1 + NB-05: indexação conforme a DEC; sitemap só com as indexáveis; estado final no HTML (sem troca)', () => {
   const sitemap = ler('sitemap.xml');
-  assert.ok(!sitemap.includes('empregador-em-dia'), 'sitemap');
+  const noSitemap = [...sitemap.matchAll(/<loc>https:\/\/contacertabr\.com\.br\/(empregador-em-dia\/[^<]*)<\/loc>/g)].map((m) => `${m[1]}index.html`);
+  assert.deepEqual(noSitemap.sort(), [...INDEXAVEIS].sort(), 'sitemap');
   for (const p of PAGINAS) {
     const h = ler(p);
-    assert.match(h, /<meta name="robots" content="noindex, nofollow">/, p);
+    assert.match(h, INDEXAVEIS.includes(p) ? /<meta name="robots" content="index, follow, max-image-preview:large">/ : /<meta name="robots" content="noindex, nofollow">/, p);
     if (LIBERADAS.includes(p)) {
       assert.match(h, /<section id="ed-off" class="ed-off" hidden>/, p);
       assert.match(h, /<div id="ed-app">/, p);
@@ -238,7 +242,7 @@ test('Avaliação rápida NR-1: slug novo, nenhuma menção a "diagnóstico" nas
   for (const p of PAGINAS) assert.doesNotMatch(ler(p), /diagn[oó]stic/i, p);
   assert.doesNotMatch(readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8'), /\/diagnostico\//);
   assert.ok(!existsSync(new URL('../empregador-em-dia/diagnostico/', import.meta.url)));
-  assert.match(ler(PAGINAS[1]), /<title>Avaliação rápida NR-1 da sua empresa \| Empregador em Dia<\/title>/);
+  assert.match(ler(PAGINAS[1]), /<title>Avaliação rápida NR-1: o que sua empresa precisa \| Empregador em Dia<\/title>/);
   assert.match(ler(PAGINAS[2]), /<title>Resultado da avaliação rápida NR-1 \| Empregador em Dia<\/title>/);
 });
 
