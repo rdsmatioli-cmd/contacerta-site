@@ -77,12 +77,21 @@ for (const p of paginas.filter((x) => !ehLicitacoes(x) && x !== 'blog/simples-hi
 const EXCECOES_REDIR = new Set(['licitacoes/privacidade/index.html']);
 const CSP_REDIR = /<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'">/;
 const CSP_LICITACOES = /<meta http-equiv="Content-Security-Policy" content="[^"]*script-src 'self';/;
+const CSP_LICITACOES_CF = /<meta http-equiv="Content-Security-Policy" content="[^"]*script-src 'self' https:\/\/static\.cloudflareinsights\.com;[^"]*connect-src 'self' https:\/\/cloudflareinsights\.com;/;
+const BEACON_CF = `<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "9a5bd8768086479c83a179a8a53f6122"}'></script>`;
+const SEM_BEACON = new Set(['licitacoes/privacidade/index.html', 'licitacoes/politica.html']);
+// /licitacoes/contratos/ nunca tem beacon (nota do Advogado ced6a5c5, condição 3: landing sem analytics).
+const COM_BEACON = (p) => !SEM_BEACON.has(p) && !p.startsWith('licitacoes/contratos/');
 function checarLicitacoes(p, html) {
   assert.doesNotMatch(html, PROIBIDO);
   assert.doesNotMatch(html, /lcm-consent|data-ga4/);
   assert.equal((html.match(ID_MEDICAO) || []).length, 0);
   for (const s of html.match(/<script\b[^>]*\ssrc="[^"]*"/g) || []) assert.doesNotMatch(s, /\ssrc="(https?:)?\/\//, s);
-  assert.match(html, EXCECOES_REDIR.has(p) ? CSP_REDIR : CSP_LICITACOES);
+  // Único script de terceiros permitido: o beacon do Cloudflare Web Analytics (sem cookies), DEC do CEO 31/10/2026,
+  // exatamente uma vez e só nas páginas com beacon (politica.html entra quando o Advogado arquivar o texto do aviso).
+  const beacons = html.match(/<script\b[^>]*\ssrc='[^']*'[^>]*><\/script>/g) || [];
+  if (COM_BEACON(p)) { assert.equal(beacons.length, 1); assert.equal(beacons[0], BEACON_CF); } else assert.equal(beacons.length, 0);
+  assert.match(html, EXCECOES_REDIR.has(p) ? CSP_REDIR : COM_BEACON(p) ? CSP_LICITACOES_CF : CSP_LICITACOES);
 }
 for (const p of paginas.filter(ehLicitacoes)) {
   test(`${p}: sem GA, sem lcm-consent e sem script de terceiros`, () => checarLicitacoes(p, ler(p)));
