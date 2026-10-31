@@ -5,13 +5,14 @@
 // da categoria agentic-browsing com nota 1. Performance só é registrada: a máquina do CI varia demais.
 export const LIGHTHOUSE = '13.5.0';
 
-// 9 URLs: home, 4 calculadoras, 1 tabela, índice do blog e 2 posts.
+// 10 URLs: home, 5 calculadoras (inclui /irpf/), 1 tabela, índice do blog e 2 posts.
 export const URLS = [
   '/',
   '/salario-liquido/',
   '/rescisao/',
   '/juros-compostos/',
   '/simples-hibrido/',
+  '/irpf/',
   '/tabela-inss-2026/',
   '/blog/',
   '/blog/como-calcular-rescisao-2026/',
