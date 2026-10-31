@@ -691,6 +691,14 @@ export function converter(valor, categoria, de, para) {
 // ---------- Reforma Tributária do Consumo (EC 132/2023 e LC 214/2025)
 // Fatos legais fixos. Alíquotas de referência de CBS/IBS NÃO são oficiais até a resolução do Senado:
 // entram sempre como parâmetro editável (estimativa) informado pelo usuário.
+// Alíquota de referência da CBS de 2027 calculada pelo TCU em 28/10/2026 (TC 006.529/2026-7): 11,3468%, arredondada
+// para 11,3% (LC 214/2025, art. 349, § 14). Ainda não é a resolução do Senado, que tem até 15/12/2026 para fixá-la
+// (art. 349, § 1º, II, com o prazo prorrogado pelo art. 353, § 2º). Em 2027 e 2028 a CBS é cobrada 0,1 ponto abaixo
+// da referência (art. 347): 11,2%. Quando o Senado fixar a alíquota, troque `situacao` para 'fixada pelo Senado' (e o
+// valor, se mudar) e reveja as páginas da reforma: tests/cbs-2027-tcu.test.mjs falha a partir de 16/12/2026 até isso.
+export const CBS_REFERENCIA_2027 = Object.freeze({ pct: 11.3, situacao: 'calculada pelo TCU', calculadaEm: '2026-10-28', processo: 'TC 006.529/2026-7', prazoSenado: '2026-12-15' });
+// IBS de referência: premissa de 18,70% da Resolução CGIBS 14/2026 (não oficial); só pesa de 2029 em diante.
+export const IBS_REFERENCIA_PREMISSA_PCT = 18.7;
 // Fração de ICMS/ISS que continua valendo em cada ano (ADCT, EC 132/2023): 9/10 em 2029 ... 6/10 em 2032; zero em 2033.
 export const TRANSICAO = [
   { ano: 2026, fase: 'Teste', cbsFixa: 0.009, ibsFixa: 0.001, pisCofins: true, fracaoAntigos: 1, testeCompensavel: true },
@@ -829,8 +837,9 @@ export function precoReforma({ precoAtual, tributosAtuaisPct, issPct = 0, ano = 
 }
 // CBS e IBS (em %) sugeridos para o ano na calculadora de preço, pela mesma regra da transição (aliquotasAno/TRANSICAO):
 // 2027-2028 = referência da CBS − 0,1 ponto e IBS de 0,1%; 2029-2032 = CBS de referência e IBS × (1 − fração do ISS/ICMS);
-// 2033 = referências cheias. Referências estimadas, não oficiais (CBS 9,21% e IBS 18,70%, premissas da Resolução CGIBS 14/2026).
-export function aliquotasPadraoPreco(ano, { cbsRefPct = 9.21, ibsRefPct = 18.7 } = {}) {
+// 2033 = referências cheias. CBS: referência de 2027 calculada pelo TCU (11,3%, CBS_REFERENCIA_2027), mantida de 2029
+// a 2033 como premissa; IBS: premissa de 18,70% da Resolução CGIBS 14/2026. Nenhuma das duas é oficial ainda.
+export function aliquotasPadraoPreco(ano, { cbsRefPct = CBS_REFERENCIA_2027.pct, ibsRefPct = IBS_REFERENCIA_PREMISSA_PCT } = {}) {
   const linha = TRANSICAO.find((l) => l.ano === Number(ano));
   if (!linha) return null;
   const a = aliquotasAno(linha, { cbsRefPct, ibsRefPct });
