@@ -7,6 +7,7 @@ import { INSS_POR_ANO, INSS_2024, IRRF_POR_DATA } from '../assets/js/tabelas.js'
 import rescisaoPag from './_src/content/rescisao.mjs';
 import feriasPag from './_src/content/ferias.mjs';
 import { GEO } from './_src/content/_geo.mjs';
+import { abrirCalculadora } from './_formulario-minimo.mjs';
 
 // HTML publicado: "R$" é seguido de espaço não separável; normaliza para comparar com o texto.
 const pagina = (p) => readFileSync(new URL(`../${p}/index.html`, import.meta.url), 'utf8').replace(/ /g, ' ');
@@ -205,66 +206,7 @@ test('CC-TRAB-11: rótulo do vale-transporte deixa claro a base e o limite legal
 });
 
 // ---------------------------------------------------------------- Formulário (ui.js) com um document mínimo
-// Monta o formulário publicado da página (inputs, selects e mensagens dos campos), instala um document mínimo
-// e importa ui.js numa instância nova (query na URL), que roda iniciar() e o primeiro cálculo.
-const atributos = (tag) => Object.fromEntries([...tag.replace(/^<\w+/, '').matchAll(/([\w-]+)(?:="([^"]*)")?/g)].map(([, k, v]) => [k, v ?? '']));
-function elemento(tagName, at, value) {
-  const attrs = new Map(Object.entries(at));
-  const ouvintes = {};
-  const dataset = {};
-  for (const [k, v] of attrs) if (k.startsWith('data-')) dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = v;
-  return {
-    tagName, id: at.id, name: at.name || '', type: tagName === 'SELECT' ? 'select-one' : at.type || 'text',
-    value, defaultValue: value, checked: 'checked' in at, dataset, hidden: 'hidden' in at, textContent: '', className: at.class || '', disabled: 'disabled' in at,
-    hasAttribute: (k) => attrs.has(k), getAttribute: (k) => (attrs.has(k) ? attrs.get(k) : null),
-    setAttribute: (k, v) => attrs.set(k, String(v)), removeAttribute: (k) => attrs.delete(k),
-    addEventListener: (t, f) => (ouvintes[t] ||= []).push(f),
-    disparar(t) { for (const f of ouvintes[t] || []) f({ type: t, target: this, preventDefault() {} }); },
-    closest: () => null, focus() {}, dispatchEvent() { return true; },
-  };
-}
-let instancia = 0;
-async function abrirCalculadora(pag, valores = {}) {
-  const html = readFileSync(new URL(`../${pag}/index.html`, import.meta.url), 'utf8');
-  const ini = html.indexOf('<form class="calc-form"');
-  const formHtml = html.slice(ini, html.indexOf('</form>', ini));
-  const campos = [];
-  const porId = {};
-  for (const [tag] of formHtml.matchAll(/<input\b[^>]*>|<select\b[^>]*>[\s\S]*?<\/select>/g)) {
-    const abre = tag.match(/^<\w+[^>]*>/)[0];
-    const at = atributos(abre);
-    let value = at.value ?? '';
-    if (tag.startsWith('<select')) {
-      const ops = [...tag.matchAll(/<option\b[^>]*>/g)].map(([o]) => atributos(o));
-      value = (ops.find((o) => 'selected' in o) || ops[0]).value;
-    }
-    const el = elemento(tag.startsWith('<select') ? 'SELECT' : 'INPUT', at, value);
-    if (at.name in valores) el.value = valores[at.name];
-    campos.push(el); porId[el.id] = el;
-  }
-  for (const [p] of formHtml.matchAll(/<p class="campo-msg"[^>]*>/g)) { const at = atributos(p); porId[at.id] = elemento('P', at, ''); }
-  const out = elemento('DIV', { id: 'resultado' }, '');
-  out.innerHTML = '';
-  porId.resultado = out;
-  const form = elemento('FORM', { 'data-calc': atributos(formHtml.match(/^<form[^>]*>/)[0])['data-calc'] }, '');
-  form.elements = Object.assign([...campos], Object.fromEntries(campos.map((c) => [c.name, c])));
-  form.querySelector = () => null;
-  form.querySelectorAll = (sel) => { const m = sel.match(/^\[([\w-]+)\]$/); return m ? campos.filter((c) => c.hasAttribute(m[1])) : []; };
-  globalThis.document = {
-    readyState: 'complete',
-    addEventListener() {},
-    querySelector: (sel) => (sel === 'form[data-calc]' ? form : null),
-    getElementById: (id) => porId[id] || null,
-  };
-  try {
-    await import(new URL(`../assets/js/ui.js?cenario=${++instancia}`, import.meta.url));
-  } finally {
-    delete globalThis.document;
-  }
-  // Envio pelo botão Calcular (cálculo imediato, sem o atraso do evento input).
-  const calcular = () => { globalThis.document = { getElementById: (id) => porId[id] || null, querySelector: () => null }; try { form.disparar('submit'); } finally { delete globalThis.document; } return out.innerHTML; };
-  return { form, campo: (n) => form.elements[n], el: (id) => porId[id], out, calcular };
-}
+// tests/_formulario-minimo.mjs: o formulário publicado da página, com o ui.js numa instância nova por cenário.
 
 test('CC-TRAB-04 (formulário): rural com o padrão de 20% mostra o aviso no resultado e no campo', async () => {
   const f = await abrirCalculadora('adicional-noturno', { tipo: 'rural' });

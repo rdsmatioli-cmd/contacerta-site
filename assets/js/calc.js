@@ -420,11 +420,38 @@ export function diasSaldoSalario(admissao, desligamento) {
 }
 
 /**
+ * Avisos prévios possíveis em cada motivo do desligamento (CC-CALC-TRABALHISTA-03), a matriz única usada pelo cálculo,
+ * pela validação (valida.js) e pelo formulário (ui.js). O primeiro de cada lista é o padrão quando o aviso não é
+ * informado. Pedido de demissão: o aviso é devido pelo empregado, cumprido (trabalhado) ou não (art. 487, § 2º:
+ * desconto). Acordo: indenizado (pago pela metade, art. 484-A, I, a) ou trabalhado. Justa causa: lista vazia, o aviso
+ * não se aplica e o valor recebido é ignorado.
+ */
+export const AVISOS_POR_MOTIVO = Object.freeze({
+  semJustaCausa: Object.freeze(['indenizado', 'trabalhado']),
+  pedidoDemissao: Object.freeze(['trabalhado', 'naoCumprido']),
+  acordo: Object.freeze(['indenizado', 'trabalhado']),
+  justaCausa: Object.freeze([]),
+});
+/** Avisos possíveis no motivo (lista vazia na justa causa) ou null se o motivo não existe (nem herdado do Object). */
+export function avisosDoMotivo(tipo) {
+  return Object.prototype.hasOwnProperty.call(AVISOS_POR_MOTIVO, tipo) ? AVISOS_POR_MOTIVO[tipo] : null;
+}
+/** true se o motivo existe e o aviso cabe nele (na justa causa, qualquer aviso: não se aplica). */
+export function avisoCompativel(tipo, aviso) {
+  const lista = avisosDoMotivo(tipo);
+  return !!lista && (!lista.length || lista.includes(aviso));
+}
+
+/**
  * tipo: semJustaCausa | pedidoDemissao | justaCausa | acordo
- * aviso: indenizado | trabalhado | naoCumprido (pedido de demissão sem cumprir: desconto de 30 dias)
+ * aviso: indenizado | trabalhado | naoCumprido (pedido de demissão sem cumprir: desconto de 30 dias), conforme
+ * AVISOS_POR_MOTIVO; omitido, vale o padrão do motivo. Combinação fora da matriz (ou motivo desconhecido): devolve
+ * { avisoInvalido: true } sem calcular.
  * Desligamento antes de PRIMEIRO_ANO_TABELAS: devolve { anteriorTabelas: true, primeiroAno } sem calcular.
  */
-export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso = 'indenizado', feriasVencidas = 0, vencidasEmDobro = [], saldoFgts = 0, dependentes = 0, dataPagamento = '' }) {
+export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso, feriasVencidas = 0, vencidasEmDobro = [], saldoFgts = 0, dependentes = 0, dataPagamento = '' }) {
+  if (aviso == null) aviso = (avisosDoMotivo(tipo) || [])[0];
+  if (!avisoCompativel(tipo, aviso)) return { avisoInvalido: true };
   salario = num(salario);
   const dAdm = parseData(admissao);
   const dDes = parseData(desligamento);
@@ -439,8 +466,9 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
   let diasProjecao = 0;
   let descontoAviso = 0;
   if ((tipo === 'semJustaCausa') && aviso === 'indenizado') { avisoIndenizado = r2(diaria * diasAviso); diasProjecao = diasAviso; }
-  // Acordo (art. 484-A, I, a): valor pela metade exata; projeção pela metade arredondada para baixo.
-  if (tipo === 'acordo') { avisoIndenizado = r2((diaria * diasAviso) / 2); diasProjecao = Math.floor(diasAviso / 2); }
+  // Acordo (art. 484-A, I, a): só o aviso indenizado cai pela metade (valor pela metade exata; projeção pela metade
+  // arredondada para baixo). Com aviso trabalhado não há aviso a pagar nem projeção (CC-CALC-TRABALHISTA-02).
+  if (tipo === 'acordo' && aviso === 'indenizado') { avisoIndenizado = r2((diaria * diasAviso) / 2); diasProjecao = Math.floor(diasAviso / 2); }
   if (tipo === 'pedidoDemissao' && aviso === 'naoCumprido') descontoAviso = r2(salario);
   const fimProjetado = addDias(dDes, diasProjecao);
 
@@ -520,11 +548,16 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
   const saqueFgtsPct = tipo === 'semJustaCausa' ? 1 : tipo === 'acordo' ? 0.8 : 0;
 
   const verbas = r2(saldoSalario + avisoIndenizado + decimo + feriasProp + feriasVenc + tercoFerias);
-  const descontos = r2(inssSaldo + irSaldo + inss13 + ir13 + descontoAviso);
+  // CC-CALC-TRABALHISTA-11: o desconto do aviso não cumprido (30 dias de salário) fica limitado ao que sobra das verbas
+  // depois do INSS e do IRRF; o que passar disso é devolvido em excedenteAviso e o líquido nunca fica negativo.
+  const tributos = r2(inssSaldo + irSaldo + inss13 + ir13);
+  const descontoAvisoAplicado = Math.min(descontoAviso, Math.max(0, r2(verbas - tributos)));
+  const excedenteAviso = r2(descontoAviso - descontoAvisoAplicado);
+  const descontos = r2(tributos + descontoAvisoAplicado);
   return {
     diasNoMes, saldoSalario, diasAviso, diasProjecao, avisoIndenizado, avos13, avos13Anterior, avos13Atual, anoDes, anoFim, decimoAnterior, decimoAtual, decimo,
     avosFerias: avosF, feriasProp, feriasVenc, periodosVenc, periodosEmDobro, periodosProjecao, feriasVencSimples, dobraFeriasVenc, feriasProjecao, tercoFerias,
-    dataPagamento: dataPag, pagamentoInformado, inssSaldo, inssSaldoSubstituida, irSaldo, inss13, inss13Anterior, inss13Atual, tabelasSubstituidas, ir13, ir13Base: ir13R.base, ir13Reducao: ir13R.reducao, irSaldoBase: irSaldoR.base, tabelaIrrf: { vigencia: irTab.tabela.vigencia, rotulo: irTab.tabela.rotulo, ano: irTab.ano, anoPagamento: irTab.anoPagamento, substituida: irTab.substituida }, descontoAviso, verbas, descontos, liquido: r2(verbas - descontos),
+    dataPagamento: dataPag, pagamentoInformado, inssSaldo, inssSaldoSubstituida, irSaldo, inss13, inss13Anterior, inss13Atual, tabelasSubstituidas, ir13, ir13Base: ir13R.base, ir13Reducao: ir13R.reducao, irSaldoBase: irSaldoR.base, tabelaIrrf: { vigencia: irTab.tabela.vigencia, rotulo: irTab.tabela.rotulo, ano: irTab.ano, anoPagamento: irTab.anoPagamento, substituida: irTab.substituida }, descontoAviso, descontoAvisoAplicado, excedenteAviso, verbas, descontos, liquido: Math.max(0, r2(verbas - descontos)),
     depositoFgtsRescisao, baseFgts, multaFgts, saqueFgts: r2(baseFgts * saqueFgtsPct), fimProjetado: fimProjetado.toISOString().slice(0, 10),
   };
 }

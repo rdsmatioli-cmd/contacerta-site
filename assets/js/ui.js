@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=57d937b1e5';
+import * as C from './calc.js?v=44415b9b12';
 import { INDICADORES } from './tabelas.js?v=2469a7d685';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, periodosVisiveisDobra } from './valida.js?v=f750d8c7f2';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra } from './valida.js?v=7611c6ea54';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -104,6 +104,15 @@ const CALCS = {
     ]) + (s.liquido < 0 ? '<p class="erro">Os descontos informados são maiores que o salário bruto. Confira pensão e outros descontos.</p>' : '') + `<p class="nota">IR calculado com ${s.ir.usaSimplificado ? 'desconto simplificado de R$ 607,20' : 'deduções legais'} (a opção mais vantajosa). Imposto pela tabela: ${R(s.ir.impostoTabela)}; redução da Lei 15.270/2025: ${R(s.ir.reducao)}.</p>`;
   },
   rescisao(d) {
+    // CC-CALC-TRABALHISTA-03: aviso fora da matriz do motivo é erro no campo, sem resultado (nunca ignorado em silêncio).
+    const va = validarAviso({ tipo: d.tipo, aviso: d.aviso });
+    if (va) {
+      const el = document.getElementById(`f-${va.campo}`);
+      const msg = document.getElementById(`f-${va.campo}-msg`);
+      if (el) el.setAttribute('aria-invalid', 'true');
+      if (msg) { msg.textContent = va.erro; msg.hidden = false; msg.className = 'campo-msg err'; }
+      return listaErros([[(document.querySelector(`label[for="f-${va.campo}"]`) || {}).textContent || '', va.erro, `f-${va.campo}`]]);
+    }
     const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, vencidasEmDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'], saldoFgts: d.saldoFgts, dependentes: d.dependentes, dataPagamento: d.dataPagamento });
     if (!r) return '<p class="erro">Confira as datas: o desligamento deve ser depois da admissão.</p>';
     const elD = document.getElementById('f-desligamento');
@@ -149,12 +158,12 @@ const CALCS = {
       r.irSaldo ? ['IRRF sobre saldo de salário', `− ${R(r.irSaldo)}`] : null,
       ...(r.avos13Anterior ? [[`INSS sobre 13º de ${r.anoDes}`, `− ${R(r.inss13Anterior)}`], [`INSS sobre 13º de ${r.anoFim}`, `− ${R(r.inss13Atual)}`]] : [['INSS sobre 13º', `− ${R(r.inss13)}`]]),
       r.ir13 ? ['IRRF sobre 13º', `− ${R(r.ir13)}`] : null,
-      r.descontoAviso ? ['Desconto do aviso prévio não cumprido', `− ${R(r.descontoAviso)}`] : null,
+      r.descontoAviso ? [r.excedenteAviso ? 'Desconto do aviso prévio não cumprido (limitado às verbas)' : 'Desconto do aviso prévio não cumprido', `− ${R(r.descontoAvisoAplicado)}`] : null,
       ['Líquido a receber na rescisão', R(r.liquido), 'total'],
       (r.multaFgts || r.saqueFgts) && r.depositoFgtsRescisao ? ['Depósito do FGTS sobre as verbas da rescisão (8%, somado ao saldo informado)', R(r.depositoFgtsRescisao)] : null,
       r.multaFgts ? [`Multa do FGTS (depositada na conta do FGTS)`, R(r.multaFgts)] : null,
       r.saqueFgts ? ['Saque do saldo do FGTS', R(r.saqueFgts)] : null,
-    ]) + (d.tipo === 'justaCausa' ? '' : `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`) + (r.avos13Anterior ? `<p class="nota">Quando o 13º abrange dois anos pela projeção do aviso, o INSS é calculado separadamente por ano, com a tabela de cada ano, e o IR incide sobre o total, num pagamento único. A prática de folha varia nesse ponto.${r.tabelasSubstituidas.map(([a, b]) => ` A tabela do INSS de ${a} ainda não está disponível no site; foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`).join('')}</p>` : '') + `<p class="nota">IRRF pela data de pagamento (${r.dataPagamento.split('-').reverse().join('/')}${r.pagamentoInformado ? '' : ', data do desligamento, pois não foi informada outra'}): tabela de ${r.tabelaIrrf.rotulo}${r.tabelaIrrf.ano >= 2026 ? ', com a redução da Lei 15.270/2025' : ', sem a redução da Lei 15.270/2025 (vigente a partir de 2026)'}.${r.inssSaldoSubstituida ? ` A tabela do INSS de ${r.inssSaldoSubstituida[0]} ainda não está disponível no site; para o saldo de salário foi usada a de ${r.inssSaldoSubstituida[1]}, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}${r.avos13Anterior ? '' : r.tabelasSubstituidas.map(([a, b]) => (r.inssSaldoSubstituida && r.inssSaldoSubstituida[0] === a ? ` A mesma tabela foi usada no INSS do 13º.` : ` A tabela do INSS de ${a} ainda não está disponível no site; para o 13º foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`)).join('')}${r.tabelaIrrf.substituida ? ` Ainda não há tabela do IR de ${r.tabelaIrrf.anoPagamento} no site; foi usada a mais recente, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}</p>` + (d.tipo === 'acordo' ? '<p class="nota">No acordo (CLT, art. 484-A), o aviso indenizado é pago pela metade, e a calculadora projeta também metade do prazo no tempo de serviço, que é o entendimento predominante. A lei não trata expressamente da projeção, e há decisões que projetam o aviso inteiro.</p>' : '');
+    ]) + (r.excedenteAviso ? `<p class="nota">O desconto do aviso não cumprido (${R(r.descontoAviso)}) é maior que as verbas depois do INSS e do IRRF: o líquido fica em ${R(0)} e ${R(r.excedenteAviso)} não foram descontados aqui.</p>` : '') + (d.tipo === 'justaCausa' ? '' : `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`) + (r.avos13Anterior ? `<p class="nota">Quando o 13º abrange dois anos pela projeção do aviso, o INSS é calculado separadamente por ano, com a tabela de cada ano, e o IR incide sobre o total, num pagamento único. A prática de folha varia nesse ponto.${r.tabelasSubstituidas.map(([a, b]) => ` A tabela do INSS de ${a} ainda não está disponível no site; foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`).join('')}</p>` : '') + `<p class="nota">IRRF pela data de pagamento (${r.dataPagamento.split('-').reverse().join('/')}${r.pagamentoInformado ? '' : ', data do desligamento, pois não foi informada outra'}): tabela de ${r.tabelaIrrf.rotulo}${r.tabelaIrrf.ano >= 2026 ? ', com a redução da Lei 15.270/2025' : ', sem a redução da Lei 15.270/2025 (vigente a partir de 2026)'}.${r.inssSaldoSubstituida ? ` A tabela do INSS de ${r.inssSaldoSubstituida[0]} ainda não está disponível no site; para o saldo de salário foi usada a de ${r.inssSaldoSubstituida[1]}, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}${r.avos13Anterior ? '' : r.tabelasSubstituidas.map(([a, b]) => (r.inssSaldoSubstituida && r.inssSaldoSubstituida[0] === a ? ` A mesma tabela foi usada no INSS do 13º.` : ` A tabela do INSS de ${a} ainda não está disponível no site; para o 13º foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`)).join('')}${r.tabelaIrrf.substituida ? ` Ainda não há tabela do IR de ${r.tabelaIrrf.anoPagamento} no site; foi usada a mais recente, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}</p>` + (d.tipo === 'acordo' && r.avisoIndenizado ? '<p class="nota">No acordo (CLT, art. 484-A), o aviso indenizado é pago pela metade, e a calculadora projeta também metade do prazo no tempo de serviço, que é o entendimento predominante. A lei não trata expressamente da projeção, e há decisões que projetam o aviso inteiro.</p>' : '');
   },
   'decimo-terceiro'(d) {
     const r = C.decimoTerceiro({ salario: d.salario, meses: d.meses, mediaVariaveis: d.media, dependentes: d.dependentes });
@@ -580,8 +589,25 @@ function iniciar() {
     if (n === null) return;
     ['dobro1', 'dobro2'].forEach((nome, i) => { const el = form.elements[nome]; if (!el) return; const box = el.closest('.campo'); if (box) box.hidden = i >= n; if (i >= n) el.value = 'nao'; });
   };
+  // CC-CALC-TRABALHISTA-03: as opções de aviso fora do motivo (C.avisosDoMotivo) ficam desabilitadas, sem trocar a
+  // escolha às escondidas: se a escolha atual ficou fora, o cálculo mostra o erro no campo. Na justa causa o campo
+  // inteiro fica desabilitado, com a ajuda "não se aplica".
+  const tipoSel = id === 'rescisao' ? form.elements.tipo : null;
+  const avisoSel = id === 'rescisao' ? form.elements.aviso : null;
+  const ajudaAviso = avisoSel ? document.querySelector('#f-aviso-ajuda small') : null;
+  const ajudaAvisoPadrao = ajudaAviso ? ajudaAviso.textContent : '';
+  const ajustaAviso = () => {
+    if (!tipoSel || !avisoSel) return;
+    const lista = C.avisosDoMotivo(tipoSel.value);
+    const naoSeAplica = !!lista && !lista.length;
+    avisoSel.disabled = naoSeAplica;
+    for (const o of avisoSel.options) o.disabled = !!lista && !naoSeAplica && !lista.includes(o.value);
+    if (ajudaAviso) ajudaAviso.textContent = naoSeAplica ? 'Não se aplica na demissão por justa causa.' : ajudaAvisoPadrao;
+  };
+  if (tipoSel) tipoSel.addEventListener('change', ajustaAviso);
   const rodar = (enviado = false) => {
     ajustaDobro();
+    ajustaAviso();
     try {
       const { d, erros, avisos, alertas } = ler(form);
       out.innerHTML = erros.length ? listaErros(erros) : listaAvisos(avisos) + listaAlertas(alertas) + fn(d);

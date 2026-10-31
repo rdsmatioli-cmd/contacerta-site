@@ -1,6 +1,6 @@
 // Validação dos campos numéricos das calculadoras (laudo QA 10/10/2026 e reteste: CC-01 a CC-05, N-01, N-02, N-04, N-11).
 // Funções puras, testáveis no Node; o ui.js aplica o resultado no formulário.
-import { avosFerias, parseData } from './calc.js?v=57d937b1e5';
+import { avosFerias, parseData, avisosDoMotivo } from './calc.js?v=44415b9b12';
 const fmt = (x) => Number(x).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 const AMBIGUO = 'Formato ambíguo: use 1.000,00 ou 1000';
 
@@ -139,6 +139,22 @@ export function validarFeriasVencidas({ admissao, desligamento, fimProjetado = d
       : `Pelas datas informadas${dataTxt}, só ${pl(v, 'período teve', 'períodos tiveram')} o prazo de concessão encerrado. Marque Sim em no máximo ${v}.` };
   }
   return null;
+}
+
+// Rescisão: aviso prévio x motivo do desligamento pela matriz AVISOS_POR_MOTIVO do calc.js (avisosDoMotivo;
+// CC-CALC-TRABALHISTA-03).
+// Retorna null (ok) ou { campo: 'tipo' | 'aviso', erro }. Aviso omitido vale o padrão do motivo; na justa causa o aviso
+// não se aplica.
+const MOTIVO_TXT = { semJustaCausa: 'Na demissão sem justa causa', pedidoDemissao: 'No pedido de demissão', acordo: 'No acordo' };
+const AVISO_TXT = { indenizado: 'indenizado', trabalhado: 'trabalhado', naoCumprido: 'não cumprido pelo empregado' };
+export function validarAviso({ tipo, aviso }) {
+  const lista = avisosDoMotivo(tipo);
+  if (!lista) return { campo: 'tipo', erro: 'Escolha o motivo do desligamento.' };
+  if (aviso == null || !lista.length || lista.includes(aviso)) return null;
+  const escolha = `escolha ${lista.map((a) => AVISO_TXT[a]).join(' ou ')}.`;
+  if (tipo === 'pedidoDemissao' && aviso === 'indenizado') return { campo: 'aviso', erro: `No pedido de demissão, quem deve o aviso é o empregado: ${escolha}` };
+  const prefixo = aviso === 'naoCumprido' ? 'Não cumprido pelo empregado só vale no pedido de demissão (CLT, art. 487, § 2º). ' : '';
+  return { campo: 'aviso', erro: `${prefixo}${MOTIVO_TXT[tipo]}, ${escolha}` };
 }
 
 // Rescisão: quantos selects de dobra das férias vencidas (1º e 2º período) ficam visíveis, pelo mesmo resultado de
