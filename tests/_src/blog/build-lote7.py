@@ -11,13 +11,13 @@ MES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','set
 y,m,d=DATA.split('-'); DEXT=f'{int(d)} de {MES[int(m)-1]} de {y}'
 POSTS=[
  dict(S='fator-r-simples-nacional',dir='fator-r-simples-nacional',md='755d7e455f93666c00c3f421d1250c7946037ced1497574564a0f51a3813799c',html='aa35c4224ea8c5198546389f4897ad8c6028c3b4887e6fccb0e6b0a719eb36a7',
-  TITLE='Fator R no Simples Nacional: como calcular e Anexo III | Conta Certa',
+  TITLE='Fator R no Simples Nacional: como calcular e Anexo III',
   DESC='Veja como calcular o Fator R do Simples Nacional, o que entra na folha, quando a empresa vai para o Anexo III ou V e o que muda em 2027.',selos=['Revisão jurídica interna']),
  dict(S='nr-1-pequenas-empresas',dir='nr-1-pequenas-empresas',md='2b817a60df459eed93363879c3da9c53b0d898ae3007c554759ddf85cb4b0ded',html='83a0466e10f96edabd39d313e094cda3ccf080ce6d0b233e0bb843f9b3e15772',
-  TITLE='NR-1 para pequenas empresas: MEI, ME e EPP | Conta Certa',
-  DESC='Veja o que a NR-1 exige de MEI, ME e EPP: quem precisa de PGR, a dispensa por grau de risco, a declaração de inexistência de riscos e os riscos psicossociais.',selos=['Revisão jurídica interna']),
+  TITLE='NR-1 para pequenas empresas: o que vale para MEI, ME e EPP',
+  DESC='O que a NR-1 exige de MEI com empregado, ME e EPP: quando o PGR pode ser dispensado, grau de risco 1 e 2, riscos psicossociais e checklist.',selos=['Revisão jurídica interna']),
  dict(S='gro-pgr-nr-1',dir='gro-pgr-nr-1',md='057f7e06a5cc1562303ccc7bebabd7f8566412f67815b1165235cb83ece99b29',html='0caf2a340a35d4be0a4b356bf8af862a9ef8ff04acc5ba60a832bd6145d55afd',
-  TITLE='GRO e PGR na NR-1: o que são e o que o PGR deve ter | Conta Certa',
+  TITLE='GRO e PGR na NR-1: o que são e o que o PGR deve ter',
   DESC='Entenda a diferença entre GRO e PGR na NR-1, quem precisa ter PGR, o que o inventário de riscos e o plano de ação devem conter e quando revisar.',selos=['Revisão jurídica interna']),
 ]
 for P in POSTS:
@@ -50,8 +50,12 @@ for P in POSTS:
   tail=tpl[tpl.index('<script>/* QA P13-04r'):]
   url=f'https://contacertabr.com.br/blog/{S}/'; e=html.escape
   j=lambda o:'<script type="application/ld+json">'+json.dumps(o,ensure_ascii=False,separators=(',',':'))+'</script>'
-  ld=[j({"@context":"https://schema.org","@type":"BlogPosting","headline":html.unescape(h1),"description":DESC,"url":url,"mainEntityOfPage":url,"inLanguage":"pt-BR","datePublished":DATA,"dateModified":DATA,"author":{"@type":"Person","name":"Equipe Conta Certa","jobTitle":"equipe editorial do Conta Certa (LCM Global Services)"},"reviewedBy":{"@type":"Organization","@id":"https://contacertabr.com.br/#organizacao"},"citation":cit,"publisher":{"@id":"https://contacertabr.com.br/#organizacao"},"image":"https://contacertabr.com.br/og/padrao.jpg"}),
+  ld=[j({"@context":"https://schema.org","@type":"BlogPosting","headline":html.unescape(h1),"description":DESC,"url":url,"mainEntityOfPage":url,"inLanguage":"pt-BR","datePublished":DATA,"dateModified":DATA,"author":{"@type":"Organization","name":"Equipe Conta Certa","url":"https://contacertabr.com.br/"},"reviewedBy":{"@type":"Organization","@id":"https://contacertabr.com.br/#organizacao"},"citation":cit,"publisher":{"@id":"https://contacertabr.com.br/#organizacao"},"image":"https://contacertabr.com.br/og/padrao.jpg"}),
       j({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://contacertabr.com.br/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://contacertabr.com.br/blog/"},{"@type":"ListItem","position":3,"name":html.unescape(h1),"item":url}]})]
+  fs=corpo[corpo.index('id="faq-t">'):]; fs=fs[:fs.index('<h2',5)]
+  faqs=[(html.unescape(re.sub(r'<[^>]+>','',q)).strip(),html.unescape(re.sub(r'<[^>]+>','',a)).strip()) for q,a in re.findall(r'<h3[^>]*>(.*?)</h3>(.*?)(?=<h3|$)',fs,re.S)]
+  if len(faqs)!=5: sys.exit(f'ABORTA {S}: FAQ com {len(faqs)} perguntas (esperado 5)')
+  ld.append(j({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":q,"acceptedAnswer":{"@type":"Answer","text":re.sub(r'\s+',' ',a)}} for q,a in faqs]}))
   tt,dd=e(TITLE),e(DESC)
   headm=f'''<title>{tt}</title>
   <meta name="description" content="{dd}">
