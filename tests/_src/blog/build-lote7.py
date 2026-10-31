@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Gera nr-1-pequenas-empresas e gro-pgr-nr-1 (lote 7; fator-r em HOLD: 9ce08fb5 NÃO DE ACORDO L131) a partir do artigo.render.html aprovado.
+"""Gera os 3 posts do lote 7 (fator-r 755d7e45, nr-1 2b817a60, gro-pgr 057f7e06) a partir do artigo.render.html aprovado.
 Uso: python3 tests/_src/blog/build-lote7.py AAAA-MM-DD
-Aborta se o sha256 do artigo.md ou do artigo.render.html divergir dos hashes finais. O texto do artigo não é editado:
-só ids nos títulos, rel/target nos links externos, rolagem nas tabelas e o cabeçalho/rodapé do site.
-Selo "Revisão tributária interna" só no fator-r (pacote-tributario.md; DE ACORDO Tributário no 9ce08fb5)."""
+Aborta se o sha256 do artigo.md ou do artigo.render.html divergir. Texto não editado: só ids, rel/target em links externos,
+rolagem de tabelas e template do site. Selo: só "Revisão jurídica interna" nos três (ADENDO 83ea0b2b)."""
 import sys,re,json,hashlib,html,os,unicodedata
 R=os.path.abspath(os.path.join(os.path.dirname(__file__),'..','..','..'))
 BASE='/workspace/marketing/plano-20-artigos-lcm/primeiro-lote'
@@ -11,7 +10,10 @@ DATA=sys.argv[1]
 MES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
 y,m,d=DATA.split('-'); DEXT=f'{int(d)} de {MES[int(m)-1]} de {y}'
 POSTS=[
- dict(S='nr-1-pequenas-empresas',dir='nr-1-pequenas-empresas',md='097fcd2f6216809ea7c29b7d475faa20011fc8449b2854d9ea521e34bffbea55',html='dbb3de0e41bb9f1f86c8d6bddfeefc74eb650b2b14631fa0110f06d26b243076',
+ dict(S='fator-r-simples-nacional',dir='fator-r-simples-nacional',md='755d7e455f93666c00c3f421d1250c7946037ced1497574564a0f51a3813799c',html='aa35c4224ea8c5198546389f4897ad8c6028c3b4887e6fccb0e6b0a719eb36a7',
+  TITLE='Fator R no Simples Nacional: como calcular e Anexo III | Conta Certa',
+  DESC='Veja como calcular o Fator R do Simples Nacional, o que entra na folha, quando a empresa vai para o Anexo III ou V e o que muda em 2027.',selos=['Revisão jurídica interna']),
+ dict(S='nr-1-pequenas-empresas',dir='nr-1-pequenas-empresas',md='2b817a60df459eed93363879c3da9c53b0d898ae3007c554759ddf85cb4b0ded',html='83a0466e10f96edabd39d313e094cda3ccf080ce6d0b233e0bb843f9b3e15772',
   TITLE='NR-1 para pequenas empresas: MEI, ME e EPP | Conta Certa',
   DESC='Veja o que a NR-1 exige de MEI, ME e EPP: quem precisa de PGR, a dispensa por grau de risco, a declaração de inexistência de riscos e os riscos psicossociais.',selos=['Revisão jurídica interna']),
  dict(S='gro-pgr-nr-1',dir='gro-pgr-nr-1',md='057f7e06a5cc1562303ccc7bebabd7f8566412f67815b1165235cb83ece99b29',html='0caf2a340a35d4be0a4b356bf8af862a9ef8ff04acc5ba60a832bd6145d55afd',

@@ -1,8 +1,8 @@
-// Pós-build do lote 7 (nr-1-pequenas-empresas, gro-pgr-nr-1): sprite só com os símbolos usados e "Guias recentes" da home.
+// Pós-build do lote 7 (fator-r, nr-1, gro-pgr): sprite só com os símbolos usados e "Guias recentes" da home.
 import { readFileSync as r, writeFileSync as w } from 'node:fs';
 import { sprite } from '../content/_visual.mjs';
 import { blocoGuiasRecentes } from '../content/_seo.mjs';
-for (const s of ['nr-1-pequenas-empresas', 'gro-pgr-nr-1']) {
+for (const s of ['fator-r-simples-nacional', 'nr-1-pequenas-empresas', 'gro-pgr-nr-1']) {
   const f = `blog/${s}/index.html`; const h = r(f, 'utf8');
   w(f, h.replace(/<svg class="sprite"[^]*?<\/svg>/, () => sprite(h.slice(h.indexOf('<body>')))));
 }
