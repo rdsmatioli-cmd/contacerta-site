@@ -1,6 +1,6 @@
 // Validação dos campos numéricos das calculadoras (laudo QA 10/10/2026 e reteste: CC-01 a CC-05, N-01, N-02, N-04, N-11).
 // Funções puras, testáveis no Node; o ui.js aplica o resultado no formulário.
-import { avosFerias, parseData, avisosDoMotivo } from './calc.js?v=44415b9b12';
+import { avosFerias, parseData, avisosDoMotivo, addMeses, addDias } from './calc.js?v=d91f199bf6';
 const fmt = (x) => Number(x).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 const AMBIGUO = 'Formato ambíguo: use 1.000,00 ou 1000';
 
@@ -139,6 +139,20 @@ export function validarFeriasVencidas({ admissao, desligamento, fimProjetado = d
       : `Pelas datas informadas${dataTxt}, só ${pl(v, 'período teve', 'períodos tiveram')} o prazo de concessão encerrado. Marque Sim em no máximo ${v}.` };
   }
   return null;
+}
+
+// Rescisão: férias vencidas = 0 com período aquisitivo completo até o desligamento real, sem a projeção do aviso
+// (CC-CALC-TRABALHISTA-08). Só alerta, sem bloquear: as férias desse período podem ter sido tiradas. Retorna null ou
+// { campo: 'feriasVencidas', alerta } com o fim do último período completo.
+export function alertaFeriasVencidas({ admissao, desligamento, periodos = 0 }) {
+  if (!iso(admissao) || !iso(desligamento) || parseData(desligamento) < parseData(admissao)) return null;
+  if (Math.max(0, Math.floor(Number(periodos) || 0)) !== 0) return null;
+  const k = periodosAquisitivosCompletos(admissao, desligamento);
+  if (k < 1) return null;
+  const fim = br(addDias(addMeses(parseData(admissao), 12 * k), -1).toISOString().slice(0, 10));
+  return { campo: 'feriasVencidas', alerta: k === 1
+    ? `Pelas datas informadas, um período aquisitivo de férias se completou até o desligamento (terminou em ${fim}). Se essas férias não foram tiradas, informe 1 período vencido: com 0, o resultado não as inclui.`
+    : `Pelas datas informadas, ${k} períodos aquisitivos de férias se completaram até o desligamento (o último terminou em ${fim}). Se as férias de algum deles não foram tiradas, informe quantos: com 0, o resultado não as inclui.` };
 }
 
 // Rescisão: aviso prévio x motivo do desligamento pela matriz AVISOS_POR_MOTIVO do calc.js (avisosDoMotivo;

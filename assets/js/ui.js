@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=44415b9b12';
+import * as C from './calc.js?v=d91f199bf6';
 import { INDICADORES } from './tabelas.js?v=2469a7d685';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra } from './valida.js?v=7611c6ea54';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas } from './valida.js?v=2a1eb98415';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -87,6 +87,16 @@ const dataBR = () => new Date().toLocaleDateString('pt-BR');
 const marcaResultado = () => `<div class="marca-res"><p>Simulação feita no <strong>Conta Certa</strong> (contacertabr.com.br) em ${dataBR()}. Estimativa com as premissas acima; não é cálculo oficial nem parecer tributário.</p><button type="button" class="imprimir" data-imprimir>Imprimir ou salvar em PDF</button></div>`;
 document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-imprimir]')) window.print(); });
 
+// Saque-aniversário (CC-CALC-TRABALHISTA-04 e CC-CALC-FGTS-01): o mesmo texto publicado em /fgts/ ("Atenção ao
+// saque-aniversário"), na nota da /rescisao/ e da /fgts/ quando a resposta é Sim.
+const NOTA_SAQUE_ANIVERSARIO = 'Quem adere ao saque-aniversário recebe uma parte do saldo todo ano, no mês do aniversário, mas, se for demitido, saca apenas a multa de 40%, e não o saldo. Para voltar ao saque-rescisão é preciso pedir a mudança e aguardar uma carência de 25 meses.';
+const notaSaqueAniversario = (estimado) => `<p class="nota">${estimado ? '' : 'No acordo, a calculadora não estima o saque de quem aderiu ao saque-aniversário. '}${NOTA_SAQUE_ANIVERSARIO}</p>`;
+// Mensagem informativa no campo (sem aria-invalid): o cálculo segue.
+const msgCampo = (id, texto) => {
+  const msg = document.getElementById(`${id}-msg`);
+  if (msg && texto) { msg.textContent = texto; msg.hidden = false; msg.className = 'campo-msg'; }
+};
+
 const hoje = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
 const CALCS = {
@@ -113,7 +123,7 @@ const CALCS = {
       if (msg) { msg.textContent = va.erro; msg.hidden = false; msg.className = 'campo-msg err'; }
       return listaErros([[(document.querySelector(`label[for="f-${va.campo}"]`) || {}).textContent || '', va.erro, `f-${va.campo}`]]);
     }
-    const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, vencidasEmDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'], saldoFgts: d.saldoFgts, dependentes: d.dependentes, dataPagamento: d.dataPagamento });
+    const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, vencidasEmDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'], saldoFgts: d.saldoFgts, dependentes: d.dependentes, dataPagamento: d.dataPagamento, primeiraParcela13: d.primeiraParcela13, saqueAniversario: d.saqueAniversario === 'sim' });
     if (!r) return '<p class="erro">Confira as datas: o desligamento deve ser depois da admissão.</p>';
     const elD = document.getElementById('f-desligamento');
     if (elD) elD.removeAttribute('aria-invalid');
@@ -128,7 +138,7 @@ const CALCS = {
       if (elP) elP.setAttribute('aria-invalid', 'true');
       return `<div class="erro" role="alert"><p><strong>Confira o campo antes de calcular:</strong></p><ul><li><a href="#f-dataPagamento">Data de pagamento das verbas</a>: ${esc(vp.erro)}</li></ul></div>`;
     }
-    const alertaPag = vp && vp.alerta ? listaAlertas([['Data de pagamento das verbas', vp.alerta]]) : '';
+    const alertas = vp && vp.alerta ? [['Data de pagamento das verbas', vp.alerta]] : [];
     // N-02: períodos e dobra conferidos contra as datas, com a projeção do aviso.
     const v = validarFeriasVencidas({ admissao: d.admissao, desligamento: d.desligamento, fimProjetado: r.fimProjetado, periodos: d._orig.feriasVencidas ?? d.feriasVencidas, emDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'] });
     if (v) {
@@ -139,6 +149,20 @@ const CALCS = {
       const rot = (document.querySelector(`label[for="f-${v.campo}"]`) || {}).textContent || '';
       return `<div class="erro" role="alert"><p><strong>Confira o campo antes de calcular:</strong></p><ul><li><a href="#f-${v.campo}">${esc(rot)}</a>: ${esc(v.erro)}</li></ul></div>`;
     }
+    // CC-CALC-TRABALHISTA-08: 0 período vencido com período aquisitivo completo até a data real: alerta, sem bloquear.
+    const af = alertaFeriasVencidas({ admissao: d.admissao, desligamento: d.desligamento, periodos: d._orig.feriasVencidas ?? d.feriasVencidas });
+    if (af) { msgCampo('f-feriasVencidas', af.alerta); alertas.push(['Períodos de férias vencidas não tiradas', af.alerta]); }
+    // CC-CALC-TRABALHISTA-06: 1ª parcela do 13º sugerida (marcada no campo e na linha) e acima do 13º do ano (alerta).
+    const elP13 = document.getElementById('f-primeiraParcela13');
+    const p13Sugerida = !!r.primeiraParcela13 && !!elP13 && elP13.dataset.sugerido === 'sim' && elP13.dataset.editado !== 'sim' && elP13.value.trim() === elP13.dataset.padrao;
+    const msgP13 = [];
+    if (p13Sugerida) msgP13.push('Valor sugerido: metade do salário, para quem estava na empresa desde 1º de janeiro. Altere se recebeu outro valor; com 0, nada é descontado.');
+    if (r.parcela13AcimaDoAno) {
+      const t = `A 1ª parcela informada (${R(r.primeiraParcela13)}) é maior que o 13º proporcional de ${r.anoDes} calculado aqui (${R(r.decimoAnoDesligamento)}). Confira o valor: a calculadora desconta a parcela inteira do líquido.`;
+      msgP13.push(t); alertas.push(['1ª parcela do 13º já recebida', t]);
+    }
+    msgCampo('f-primeiraParcela13', msgP13.join(' '));
+    const alertaPag = listaAlertas(alertas);
     const informados = d._orig.feriasVencidas;
     const usados = d.feriasVencidas;
     const topo = informados > usados
@@ -158,12 +182,15 @@ const CALCS = {
       r.irSaldo ? ['IRRF sobre saldo de salário', `− ${R(r.irSaldo)}`] : null,
       ...(r.avos13Anterior ? [[`INSS sobre 13º de ${r.anoDes}`, `− ${R(r.inss13Anterior)}`], [`INSS sobre 13º de ${r.anoFim}`, `− ${R(r.inss13Atual)}`]] : [['INSS sobre 13º', `− ${R(r.inss13)}`]]),
       r.ir13 ? ['IRRF sobre 13º', `− ${R(r.ir13)}`] : null,
+      r.primeiraParcela13 ? [`1ª parcela do 13º já recebida${r.excedenteParcela13 ? ' (limitada às verbas)' : p13Sugerida ? ' (valor sugerido)' : ''}`, `− ${R(r.parcela13Aplicada)}`] : null,
       r.descontoAviso ? [r.excedenteAviso ? 'Desconto do aviso prévio não cumprido (limitado às verbas)' : 'Desconto do aviso prévio não cumprido', `− ${R(r.descontoAvisoAplicado)}`] : null,
       ['Líquido a receber na rescisão', R(r.liquido), 'total'],
-      (r.multaFgts || r.saqueFgts) && r.depositoFgtsRescisao ? ['Depósito do FGTS sobre as verbas da rescisão (8%, somado ao saldo informado)', R(r.depositoFgtsRescisao)] : null,
+      (r.multaFgts || r.saqueFgts) && r.depositoFgtsRescisao ? [`Depósito do FGTS sobre as verbas da rescisão (8%, somado ao saldo informado${r.primeiraParcela13 ? '; sem a 1ª parcela do 13º, que já teve depósito' : ''})`, R(r.depositoFgtsRescisao)] : null,
       r.multaFgts ? [`Multa do FGTS (depositada na conta do FGTS)`, R(r.multaFgts)] : null,
       r.saqueFgts ? ['Saque do saldo do FGTS', R(r.saqueFgts)] : null,
-    ]) + (r.excedenteAviso ? `<p class="nota">O desconto do aviso não cumprido (${R(r.descontoAviso)}) é maior que as verbas depois do INSS e do IRRF: o líquido fica em ${R(0)} e ${R(r.excedenteAviso)} não foram descontados aqui.</p>` : '') + (d.tipo === 'justaCausa' ? '' : `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`) + (r.avos13Anterior ? `<p class="nota">Quando o 13º abrange dois anos pela projeção do aviso, o INSS é calculado separadamente por ano, com a tabela de cada ano, e o IR incide sobre o total, num pagamento único. A prática de folha varia nesse ponto.${r.tabelasSubstituidas.map(([a, b]) => ` A tabela do INSS de ${a} ainda não está disponível no site; foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`).join('')}</p>` : '') + `<p class="nota">IRRF pela data de pagamento (${r.dataPagamento.split('-').reverse().join('/')}${r.pagamentoInformado ? '' : ', data do desligamento, pois não foi informada outra'}): tabela de ${r.tabelaIrrf.rotulo}${r.tabelaIrrf.ano >= 2026 ? ', com a redução da Lei 15.270/2025' : ', sem a redução da Lei 15.270/2025 (vigente a partir de 2026)'}.${r.inssSaldoSubstituida ? ` A tabela do INSS de ${r.inssSaldoSubstituida[0]} ainda não está disponível no site; para o saldo de salário foi usada a de ${r.inssSaldoSubstituida[1]}, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}${r.avos13Anterior ? '' : r.tabelasSubstituidas.map(([a, b]) => (r.inssSaldoSubstituida && r.inssSaldoSubstituida[0] === a ? ` A mesma tabela foi usada no INSS do 13º.` : ` A tabela do INSS de ${a} ainda não está disponível no site; para o 13º foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`)).join('')}${r.tabelaIrrf.substituida ? ` Ainda não há tabela do IR de ${r.tabelaIrrf.anoPagamento} no site; foi usada a mais recente, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}</p>` + (d.tipo === 'acordo' && r.avisoIndenizado ? '<p class="nota">No acordo (CLT, art. 484-A), o aviso indenizado é pago pela metade, e a calculadora projeta também metade do prazo no tempo de serviço, que é o entendimento predominante. A lei não trata expressamente da projeção, e há decisões que projetam o aviso inteiro.</p>' : '');
+      r.fgtsRetido ? ['Saldo do FGTS', 'fica retido (saque-aniversário)'] : null,
+      r.saqueFgtsEstimado ? null : ['Saque do saldo do FGTS', 'não estimado (saque-aniversário)'],
+    ]) + (r.fgtsRetido || !r.saqueFgtsEstimado ? notaSaqueAniversario(r.saqueFgtsEstimado) : '') + (r.excedenteParcela13 ? `<p class="nota">A 1ª parcela do 13º informada (${R(r.primeiraParcela13)}) é maior que as verbas depois do INSS e do IRRF: o líquido fica em ${R(0)} e ${R(r.excedenteParcela13)} não foram descontados aqui.</p>` : '') + (r.primeiraParcela13 ? '<p class="nota">A 1ª parcela do 13º já recebida sai do líquido. O INSS e o IRRF continuam calculados sobre o 13º inteiro, e o depósito do FGTS da rescisão incide sobre o 13º menos essa parcela.</p>' : '') + (r.excedenteAviso ? `<p class="nota">O desconto do aviso não cumprido (${R(r.descontoAviso)}) é maior que as verbas depois do INSS e do IRRF${r.parcela13Aplicada ? ' e da 1ª parcela do 13º' : ''}: o líquido fica em ${R(0)} e ${R(r.excedenteAviso)} não foram descontados aqui.</p>` : '') + (d.tipo === 'justaCausa' ? '' : `<p class="nota">Aviso prévio de ${r.diasAviso} dias pela Lei 12.506/2011.${r.diasProjecao ? ` A projeção do aviso leva o contrato até ${r.fimProjetado.split('-').reverse().join('/')} para contar 13º e férias.` : ''}</p>`) + (r.avos13Anterior ? `<p class="nota">Quando o 13º abrange dois anos pela projeção do aviso, o INSS é calculado separadamente por ano, com a tabela de cada ano, e o IR incide sobre o total, num pagamento único. A prática de folha varia nesse ponto.${r.tabelasSubstituidas.map(([a, b]) => ` A tabela do INSS de ${a} ainda não está disponível no site; foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`).join('')}</p>` : '') + `<p class="nota">IRRF pela data de pagamento (${r.dataPagamento.split('-').reverse().join('/')}${r.pagamentoInformado ? '' : ', data do desligamento, pois não foi informada outra'}): tabela de ${r.tabelaIrrf.rotulo}${r.tabelaIrrf.ano >= 2026 ? ', com a redução da Lei 15.270/2025' : ', sem a redução da Lei 15.270/2025 (vigente a partir de 2026)'}.${r.inssSaldoSubstituida ? ` A tabela do INSS de ${r.inssSaldoSubstituida[0]} ainda não está disponível no site; para o saldo de salário foi usada a de ${r.inssSaldoSubstituida[1]}, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}${r.avos13Anterior ? '' : r.tabelasSubstituidas.map(([a, b]) => (r.inssSaldoSubstituida && r.inssSaldoSubstituida[0] === a ? ` A mesma tabela foi usada no INSS do 13º.` : ` A tabela do INSS de ${a} ainda não está disponível no site; para o 13º foi usada a de ${b}, e o resultado pode mudar quando a tabela oficial for publicada.`)).join('')}${r.tabelaIrrf.substituida ? ` Ainda não há tabela do IR de ${r.tabelaIrrf.anoPagamento} no site; foi usada a mais recente, e o resultado pode mudar quando a tabela oficial for publicada.` : ''}</p>` + (d.tipo === 'acordo' && r.avisoIndenizado ? '<p class="nota">No acordo (CLT, art. 484-A), o aviso indenizado é pago pela metade, e a calculadora projeta também metade do prazo no tempo de serviço, que é o entendimento predominante. A lei não trata expressamente da projeção, e há decisões que projetam o aviso inteiro.</p>' : '');
   },
   'decimo-terceiro'(d) {
     const r = C.decimoTerceiro({ salario: d.salario, meses: d.meses, mediaVariaveis: d.media, dependentes: d.dependentes });
@@ -190,7 +217,7 @@ const CALCS = {
     ]) + (r.diasAbono ? '<p class="nota">O abono pecuniário e seu 1/3 não sofrem desconto de INSS nem de IR.</p>' : '');
   },
   fgts(d) {
-    const r = C.fgts({ salario: d.salario, meses: d.meses, saldoAtual: d.saldo, aprendiz: d.aprendiz, comRendimento: d.rendimento, tipo: d.tipo });
+    const r = C.fgts({ salario: d.salario, meses: d.meses, saldoAtual: d.saldo, aprendiz: d.aprendiz, comRendimento: d.rendimento, tipo: d.tipo, saqueAniversario: d.saqueAniversario === 'sim' });
     return destaque('Saldo estimado do FGTS', R(r.saldo)) + tabela([
       ['Depósito mensal do empregador', R(r.deposito)],
       r.depositosAnuais ? [`Depósito anual sobre 13º e 1/3 de férias (${r.depositosAnuais} ${r.depositosAnuais === 1 ? 'vez' : 'vezes'})`, R(r.depositoAnual)] : null,
@@ -198,8 +225,9 @@ const CALCS = {
       d.rendimento ? ['Rendimento estimado (3% a.a.)', R(r.rendimento)] : null,
       ['Saldo estimado', R(r.saldo), 'sub'],
       r.multa ? [`Multa rescisória (${pct(r.multaPct, 0)})`, R(r.multa)] : null,
-      ['Valor que pode ser sacado na saída', R(r.saque), 'total'],
-    ]);
+      r.saldoRetido ? ['Saldo do FGTS', 'fica retido (saque-aniversário)'] : null,
+      ['Valor que pode ser sacado na saída', r.saqueEstimado ? R(r.saque) : 'não estimado (saque-aniversário)', 'total'],
+    ]) + (r.saldoRetido || !r.saqueEstimado ? notaSaqueAniversario(r.saqueEstimado) : '');
   },
   inss(d) {
     if (d.categoria === 'empregado') {
@@ -605,9 +633,28 @@ function iniciar() {
     if (ajudaAviso) ajudaAviso.textContent = naoSeAplica ? 'Não se aplica na demissão por justa causa.' : ajudaAvisoPadrao;
   };
   if (tipoSel) tipoSel.addEventListener('change', ajustaAviso);
+  // CC-CALC-TRABALHISTA-06: 1ª parcela do 13º sugerida (C.primeiraParcela13Sugerida: metade do salário com desligamento
+  // em dezembro e admissão até 1º de janeiro), como no CC-PRECO-01: só enquanto o campo tem o valor que a página pôs
+  // (data-padrao) e o usuário não digitou nele. Sem sugestão, volta ao valor inicial do campo. Valor digitado nunca muda.
+  // Sem a função (calc.js antigo vindo do cache), o campo fica como está.
+  const p13 = id === 'rescisao' && typeof C.primeiraParcela13Sugerida === 'function' ? form.elements.primeiraParcela13 : null;
+  if (p13) {
+    // Valor inicial do HTML: um valor diferente já na abertura (restaurado pelo navegador) conta como digitado.
+    p13.dataset.padrao = p13.defaultValue.trim();
+    p13.addEventListener('input', () => { p13.dataset.editado = 'sim'; });
+  }
+  const ajustaParcela13 = () => {
+    if (!p13 || p13.dataset.editado === 'sim' || p13.value.trim() !== p13.dataset.padrao) return;
+    const sal = validarCampo(form.elements.salario);
+    const sug = sal.erro ? null : C.primeiraParcela13Sugerida({ salario: sal.valor, admissao: form.elements.admissao.value, desligamento: form.elements.desligamento.value });
+    p13.value = sug === null ? p13.defaultValue : String(sug).replace('.', ',');
+    p13.dataset.padrao = p13.value.trim();
+    p13.dataset.sugerido = sug === null ? '' : 'sim';
+  };
   const rodar = (enviado = false) => {
     ajustaDobro();
     ajustaAviso();
+    ajustaParcela13();
     try {
       const { d, erros, avisos, alertas } = ler(form);
       out.innerHTML = erros.length ? listaErros(erros) : listaAvisos(avisos) + listaAlertas(alertas) + fn(d);

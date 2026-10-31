@@ -295,10 +295,28 @@ export function seguroDesemprego({ salarios = [], solicitacao = 1, mesesTrabalha
 
 // ---------------------------------------------------------------- FGTS
 /**
+ * Quanto do FGTS pode ser sacado na saída, regra única da /rescisao/ e da /fgts/ (CC-CALC-TRABALHISTA-04 e
+ * CC-CALC-FGTS-01). tipo: semJustaCausa | acordo | qualquer outro (pedido de demissão, justa causa: sem saque).
+ * saldo: saldo da conta na saída (sem a multa); multa: multa rescisória já calculada.
+ * Sem saque-aniversário: sem justa causa saca o saldo e a multa; acordo, 80% do saldo e a multa.
+ * Com saque-aniversário: sem justa causa saca só a multa e o saldo fica retido (Lei 8.036/1990, art. 20-D, § 7º); no
+ * acordo o saque não é estimado (estimado: false, valores null). Nos outros motivos nada muda.
+ * Retorna { estimado, retido, saldo, multa, total } (saldo e multa: partes sacáveis).
+ */
+export function saqueFgtsNaSaida({ tipo, saldo = 0, multa = 0, saqueAniversario = false }) {
+  if (saqueAniversario && tipo === 'acordo') return { estimado: false, retido: false, saldo: null, multa: null, total: null };
+  const m = tipo === 'semJustaCausa' || tipo === 'acordo' ? r2(num(multa)) : 0;
+  if (saqueAniversario && tipo === 'semJustaCausa') return { estimado: true, retido: true, saldo: 0, multa: m, total: m };
+  const s = r2(num(saldo) * (tipo === 'semJustaCausa' ? 1 : tipo === 'acordo' ? 0.8 : 0));
+  return { estimado: true, retido: false, saldo: s, multa: m, total: r2(s + m) };
+}
+
+/**
  * Depósitos mensais sobre o salário e, a cada 12 meses de contrato, depósitos sobre o 13º e o 1/3 de férias gozadas
  * (Lei 8.036/1990, art. 15): aliq × (salário + salário ÷ 3).
+ * saqueAniversario: adesão ao saque-aniversário (saqueFgtsNaSaida); saque null quando não é estimado (acordo).
  */
-export function fgts({ salario, meses, saldoAtual = 0, aprendiz = false, comRendimento = true, tipo = 'semJustaCausa' }) {
+export function fgts({ salario, meses, saldoAtual = 0, aprendiz = false, comRendimento = true, tipo = 'semJustaCausa', saqueAniversario = false }) {
   const aliq = aprendiz ? FGTS.aliquotaAprendiz : FGTS.aliquota;
   const deposito = r2(num(salario) * aliq);
   const depositoAnual = r2(num(salario) * aliq + (num(salario) / 3) * aliq);
@@ -311,8 +329,8 @@ export function fgts({ salario, meses, saldoAtual = 0, aprendiz = false, comRend
   const depositado = r2(deposito * n + depositoAnual * depositosAnuais);
   const multaPct = tipo === 'semJustaCausa' ? FGTS.multaSemJustaCausa : tipo === 'acordo' ? FGTS.multaAcordo : 0;
   const multa = r2(saldo * multaPct);
-  const saquePct = tipo === 'semJustaCausa' ? 1 : tipo === 'acordo' ? 0.8 : 0;
-  return { deposito, depositoAnual, depositosAnuais, depositado, saldo, rendimento: r2(saldo - depositado - num(saldoAtual)), multa, multaPct, saque: r2(saldo * saquePct + multa) };
+  const sq = saqueFgtsNaSaida({ tipo, saldo, multa, saqueAniversario });
+  return { deposito, depositoAnual, depositosAnuais, depositado, saldo, rendimento: r2(saldo - depositado - num(saldoAtual)), multa, multaPct, saque: sq.total, saqueEstimado: sq.estimado, saldoRetido: sq.retido };
 }
 
 // ---------------------------------------------------------------- Datas
@@ -448,8 +466,11 @@ export function avisoCompativel(tipo, aviso) {
  * AVISOS_POR_MOTIVO; omitido, vale o padrão do motivo. Combinação fora da matriz (ou motivo desconhecido): devolve
  * { avisoInvalido: true } sem calcular.
  * Desligamento antes de PRIMEIRO_ANO_TABELAS: devolve { anteriorTabelas: true, primeiroAno } sem calcular.
+ * primeiraParcela13: 1ª parcela do 13º do ano do desligamento já recebida (CC-CALC-TRABALHISTA-06); sai do líquido, o
+ * INSS e o IRRF continuam sobre o 13º inteiro e o depósito do FGTS da rescisão incide sobre o 13º menos a parcela.
+ * saqueAniversario: adesão ao saque-aniversário do FGTS (saqueFgtsNaSaida; CC-CALC-TRABALHISTA-04).
  */
-export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso, feriasVencidas = 0, vencidasEmDobro = [], saldoFgts = 0, dependentes = 0, dataPagamento = '' }) {
+export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso, feriasVencidas = 0, vencidasEmDobro = [], saldoFgts = 0, dependentes = 0, dataPagamento = '', primeiraParcela13 = 0, saqueAniversario = false }) {
   if (aviso == null) aviso = (avisosDoMotivo(tipo) || [])[0];
   if (!avisoCompativel(tipo, aviso)) return { avisoInvalido: true };
   salario = num(salario);
@@ -538,28 +559,54 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
   const ir13R = irrfMensal({ rendimentos: decimo, inss: inss13, dependentes, tabela: irTab.tabela });
   const ir13 = ir13R.irrf;
 
+  // CC-CALC-TRABALHISTA-06: 1ª parcela do 13º já recebida (paga até 30/11, Lei 4.749/1965, art. 2º). O 13º do ano do
+  // desligamento é a parte do anoDes (sem a do ano seguinte, quando a projeção do aviso passa de 31/12); a parcela acima
+  // dele gera alerta no formulário, e o cálculo desconta a parcela inteira.
+  const primeiraParcela = r2(Math.max(0, num(primeiraParcela13)));
+  const decimoAnoDesligamento = anoFim > anoDes ? decimoAnterior : decimo;
+  const parcela13AcimaDoAno = primeiraParcela > decimoAnoDesligamento;
+
   // FGTS (Lei 8.036/1990, arts. 15 e 18): o depósito de 8% sobre saldo de salário, aviso indenizado (Súmula 305 do TST)
   // e 13º da rescisão ainda não aparece no app quando o saldo é consultado; entra na base da multa e do saque.
-  // Férias indenizadas não têm depósito.
-  const depositoFgtsRescisao = r2(FGTS.aliquota * (saldoSalario + avisoIndenizado + decimo));
+  // Férias indenizadas não têm depósito. A 1ª parcela do 13º teve o depósito no mês em que foi paga: sai da base.
+  const depositoFgtsRescisao = r2(FGTS.aliquota * (saldoSalario + avisoIndenizado + Math.max(0, r2(decimo - primeiraParcela))));
   const baseFgts = r2(num(saldoFgts) + depositoFgtsRescisao);
   const multaPct = tipo === 'semJustaCausa' ? 0.4 : tipo === 'acordo' ? 0.2 : 0;
   const multaFgts = r2(baseFgts * multaPct);
-  const saqueFgtsPct = tipo === 'semJustaCausa' ? 1 : tipo === 'acordo' ? 0.8 : 0;
+  const saque = saqueFgtsNaSaida({ tipo, saldo: baseFgts, multa: multaFgts, saqueAniversario });
 
   const verbas = r2(saldoSalario + avisoIndenizado + decimo + feriasProp + feriasVenc + tercoFerias);
   // CC-CALC-TRABALHISTA-11: o desconto do aviso não cumprido (30 dias de salário) fica limitado ao que sobra das verbas
   // depois do INSS e do IRRF; o que passar disso é devolvido em excedenteAviso e o líquido nunca fica negativo.
+  // A 1ª parcela do 13º (adiantamento do próprio 13º) sai antes do aviso, com o mesmo limite (excedenteParcela13).
   const tributos = r2(inssSaldo + irSaldo + inss13 + ir13);
-  const descontoAvisoAplicado = Math.min(descontoAviso, Math.max(0, r2(verbas - tributos)));
+  const parcela13Aplicada = Math.min(primeiraParcela, Math.max(0, r2(verbas - tributos)));
+  const excedenteParcela13 = r2(primeiraParcela - parcela13Aplicada);
+  const descontoAvisoAplicado = Math.min(descontoAviso, Math.max(0, r2(verbas - tributos - parcela13Aplicada)));
   const excedenteAviso = r2(descontoAviso - descontoAvisoAplicado);
-  const descontos = r2(tributos + descontoAvisoAplicado);
+  const descontos = r2(tributos + parcela13Aplicada + descontoAvisoAplicado);
   return {
     diasNoMes, saldoSalario, diasAviso, diasProjecao, avisoIndenizado, avos13, avos13Anterior, avos13Atual, anoDes, anoFim, decimoAnterior, decimoAtual, decimo,
     avosFerias: avosF, feriasProp, feriasVenc, periodosVenc, periodosEmDobro, periodosProjecao, feriasVencSimples, dobraFeriasVenc, feriasProjecao, tercoFerias,
     dataPagamento: dataPag, pagamentoInformado, inssSaldo, inssSaldoSubstituida, irSaldo, inss13, inss13Anterior, inss13Atual, tabelasSubstituidas, ir13, ir13Base: ir13R.base, ir13Reducao: ir13R.reducao, irSaldoBase: irSaldoR.base, tabelaIrrf: { vigencia: irTab.tabela.vigencia, rotulo: irTab.tabela.rotulo, ano: irTab.ano, anoPagamento: irTab.anoPagamento, substituida: irTab.substituida }, descontoAviso, descontoAvisoAplicado, excedenteAviso, verbas, descontos, liquido: Math.max(0, r2(verbas - descontos)),
-    depositoFgtsRescisao, baseFgts, multaFgts, saqueFgts: r2(baseFgts * saqueFgtsPct), fimProjetado: fimProjetado.toISOString().slice(0, 10),
+    primeiraParcela13: primeiraParcela, parcela13Aplicada, excedenteParcela13, decimoAnoDesligamento, parcela13AcimaDoAno,
+    depositoFgtsRescisao, baseFgts, multaFgts, saqueFgts: saque.saldo, saqueFgtsEstimado: saque.estimado, fgtsRetido: saque.retido, fimProjetado: fimProjetado.toISOString().slice(0, 10),
   };
+}
+
+/**
+ * 1ª parcela do 13º sugerida no formulário da /rescisao/ (CC-CALC-TRABALHISTA-06): metade do salário, só com
+ * desligamento em dezembro (a parcela é paga até 30/11, Lei 4.749/1965, art. 2º) e admissão até 1º de janeiro do ano
+ * do desligamento. Fora disso (inclusive admitido no ano), null: sem sugestão.
+ */
+export function primeiraParcela13Sugerida({ salario, admissao, desligamento }) {
+  const ok = (s) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || '')) && !Number.isNaN(parseData(s).getTime());
+  const sal = num(salario);
+  if (!ok(admissao) || !ok(desligamento) || !(sal > 0)) return null;
+  const dDes = parseData(desligamento);
+  const dAdm = parseData(admissao);
+  if (dDes.getUTCMonth() !== 11 || dAdm > dDes || dAdm.getTime() > Date.UTC(dDes.getUTCFullYear(), 0, 1)) return null;
+  return r2(sal / 2);
 }
 const avos13Fn = avos13;
 
