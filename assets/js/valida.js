@@ -1,6 +1,6 @@
 // Validação dos campos numéricos das calculadoras (laudo QA 10/10/2026 e reteste: CC-01 a CC-05, N-01, N-02, N-04, N-11).
 // Funções puras, testáveis no Node; o ui.js aplica o resultado no formulário.
-import { avosFerias, parseData } from './calc.js?v=57d937b1e5';
+import { avosFerias, parseData, avisosDoMotivo, addMeses, addDias } from './calc.js?v=f36af3e12b';
 const fmt = (x) => Number(x).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 const AMBIGUO = 'Formato ambíguo: use 1.000,00 ou 1000';
 
@@ -42,7 +42,9 @@ export function lerNumeroBR(raw, { decimal = false } = {}) {
   } else norm = s;
   const n = Number(norm);
   if (!Number.isFinite(n)) return { erro: 'Digite só números.' };
-  return alerta ? { n: neg ? -n : n, alerta } : { n: neg ? -n : n };
+  // "-0" vira 0 (CC-CALC-VALIDA-02): −0 passava no mínimo 0 (−0 < 0 é falso) e o Intl o mostra como "-R$ 0,00".
+  const v = neg && n !== 0 ? -n : n;
+  return alerta ? { n: v, alerta } : { n: v };
 }
 
 // Inteiro de 0 a 999.999 por extenso, para o alerta de leitura ("1125" → "mil cento e vinte e cinco").
@@ -97,6 +99,47 @@ export function validarNumero({ raw = '', badInput = false, min = null, max = nu
 export const attrNum = (v) => (v === null || v === undefined || v === '' || !Number.isFinite(Number(v)) ? null : Number(v));
 
 
+// ---- Datas (CC-CALC-VALIDA-01): o mesmo padrão de erro dos campos numéricos (mensagem no campo, aria-invalid e link na
+// lista de erros). Intervalo aceito igual ao min/max dos inputs date publicados.
+export const DATA_MIN = '1900-01-01';
+export const DATA_MAX = '2100-12-31';
+const dataBR = (s) => s.split('-').reverse().join('/');
+// Chave numérica AAAAMMDD de uma data AAAA-MM-DD (ano com 4 dígitos ou mais, como o Chromium aceita) que existe no
+// calendário; null se o texto não é uma data ou a data não existe (31/04, 29/02 fora de ano bissexto).
+function chaveData(s) {
+  const m = /^(\d{4,})-(\d{2})-(\d{2})$/.exec(String(s ?? ''));
+  if (!m) return null;
+  const [a, me, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const bissexto = (a % 4 === 0 && a % 100 !== 0) || a % 400 === 0;
+  const diasMes = [31, bissexto ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][me - 1];
+  if (!diasMes || d < 1 || d > diasMes) return null;
+  return a * 10000 + me * 100 + d;
+}
+// campo: { raw (value do input date, AAAA-MM-DD ou vazio), badInput (validity.badInput: o navegador deixa o value vazio
+// quando a data foi digitada pela metade ou não existe), obrig, min, max }. Retorna { valor } (a data, ou '' se vazia e
+// opcional) ou { valor: '', erro }.
+export function validarData({ raw = '', badInput = false, obrig = false, min = DATA_MIN, max = DATA_MAX }) {
+  const s = String(raw ?? '').trim();
+  const invalida = { valor: '', erro: 'Data incompleta ou inexistente: confira dia, mês e ano.' };
+  if (badInput) return invalida;
+  if (s === '') return obrig ? { valor: '', erro: 'Preencha a data.' } : { valor: '' };
+  const k = chaveData(s);
+  if (k === null) return invalida;
+  const mn = chaveData(min) === null ? DATA_MIN : min;
+  const mx = chaveData(max) === null ? DATA_MAX : max;
+  if (k < chaveData(mn) || k > chaveData(mx)) return { valor: '', erro: `Informe uma data entre ${dataBR(mn)} e ${dataBR(mx)}.` };
+  return { valor: s };
+}
+// Regra cruzada entre duas datas já validadas (ex.: desligamento x admissão): a data fim não pode ser anterior à
+// data início; o mesmo dia passa. Retorna null ou { erro }, que vai no campo da data fim.
+export function validarOrdemDatas({ inicio, fim, rotuloInicio = 'data inicial' }) {
+  const a = chaveData(inicio);
+  const b = chaveData(fim);
+  if (a === null || b === null || b >= a) return null;
+  const r = String(rotuloInicio).trim();
+  return { erro: `A data não pode ser anterior à ${r.charAt(0).toLowerCase()}${r.slice(1)} (${dataBR(inicio)}).` };
+}
+
 // ---- Rescisão: férias vencidas × datas (N-02), com a data projetada do aviso (R-2/R-3; art. 487 § 1º, OJ 82)
 const iso = (s) => (/^\d{4}-\d{2}-\d{2}$/.test(String(s || '')) ? s : null);
 const addAnosISO = (s, k) => { const d = parseData(s); d.setUTCFullYear(d.getUTCFullYear() + k); return d; };
@@ -141,6 +184,44 @@ export function validarFeriasVencidas({ admissao, desligamento, fimProjetado = d
   return null;
 }
 
+// Rescisão: férias vencidas = 0 com período aquisitivo completo até o desligamento real, sem a projeção do aviso
+// (CC-CALC-TRABALHISTA-08). Só alerta, sem bloquear: as férias desse período podem ter sido tiradas. Retorna null ou
+// { campo: 'feriasVencidas', alerta } com o fim do último período completo.
+export function alertaFeriasVencidas({ admissao, desligamento, periodos = 0 }) {
+  if (!iso(admissao) || !iso(desligamento) || parseData(desligamento) < parseData(admissao)) return null;
+  if (Math.max(0, Math.floor(Number(periodos) || 0)) !== 0) return null;
+  const k = periodosAquisitivosCompletos(admissao, desligamento);
+  if (k < 1) return null;
+  const fim = br(addDias(addMeses(parseData(admissao), 12 * k), -1).toISOString().slice(0, 10));
+  return { campo: 'feriasVencidas', alerta: k === 1
+    ? `Pelas datas informadas, um período aquisitivo de férias se completou até o desligamento (terminou em ${fim}). Se essas férias não foram tiradas, informe 1 período vencido: com 0, o resultado não as inclui.`
+    : `Pelas datas informadas, ${k} períodos aquisitivos de férias se completaram até o desligamento (o último terminou em ${fim}). Se as férias de algum deles não foram tiradas, informe quantos: com 0, o resultado não as inclui.` };
+}
+
+// Rescisão: aviso prévio x motivo do desligamento pela matriz AVISOS_POR_MOTIVO do calc.js (avisosDoMotivo;
+// CC-CALC-TRABALHISTA-03).
+// Retorna null (ok) ou { campo: 'tipo' | 'aviso', erro }. Aviso omitido vale o padrão do motivo; na justa causa o aviso
+// não se aplica.
+const MOTIVO_TXT = { semJustaCausa: 'Na demissão sem justa causa', pedidoDemissao: 'No pedido de demissão', acordo: 'No acordo' };
+const AVISO_TXT = { indenizado: 'indenizado', trabalhado: 'trabalhado', naoCumprido: 'não cumprido pelo empregado' };
+export function validarAviso({ tipo, aviso }) {
+  const lista = avisosDoMotivo(tipo);
+  if (!lista) return { campo: 'tipo', erro: 'Escolha o motivo do desligamento.' };
+  if (aviso == null || !lista.length || lista.includes(aviso)) return null;
+  const escolha = `escolha ${lista.map((a) => AVISO_TXT[a]).join(' ou ')}.`;
+  if (tipo === 'pedidoDemissao' && aviso === 'indenizado') return { campo: 'aviso', erro: `No pedido de demissão, quem deve o aviso é o empregado: ${escolha}` };
+  const prefixo = aviso === 'naoCumprido' ? 'Não cumprido pelo empregado só vale no pedido de demissão (CLT, art. 487, § 2º). ' : '';
+  return { campo: 'aviso', erro: `${prefixo}${MOTIVO_TXT[tipo]}, ${escolha}` };
+}
+
+// Rescisão: quantos selects de dobra das férias vencidas (1º e 2º período) ficam visíveis, pelo mesmo resultado de
+// validarNumero que o cálculo usa (lerNumeroBR, valor limitado ao data-max). null se o campo tem erro: o ui.js não
+// esconde nem zera os selects (CC-CALC-TRABALHISTA-12).
+export function periodosVisiveisDobra(v, limite = 2) {
+  if (!v || v.erro) return null;
+  return Math.min(limite, Math.max(0, Math.floor(Number(v.valor) || 0)));
+}
+
 // Rescisão: data de pagamento das verbas (CLT, art. 477, § 6º).
 export function validarDataPagamento(desligamento, pagamento) {
   if (!iso(pagamento) || !iso(desligamento)) return null;
@@ -148,4 +229,13 @@ export function validarDataPagamento(desligamento, pagamento) {
   if (dias < 0) return { erro: 'A data de pagamento não pode ser anterior à data do desligamento.' };
   if (dias > 10) return { alerta: `Pagamento ${dias} dias após o desligamento: o prazo legal é de até 10 dias após o término do contrato (CLT, art. 477, § 6º). O cálculo usa a data informada.` };
   return null;
+}
+
+// Férias: dias de gozo deste período + dias vendidos (abono) cabem em 30 dias (CC-CALC-FERIAS-01). Os dois campos são
+// independentes; a soma acima de 30 é erro no campo dos dias vendidos, sem resultado. Retorna null ou { campo, erro }.
+export function validarDiasFerias({ diasGozo, diasAbono }) {
+  const g = Math.floor(Number(diasGozo) || 0);
+  const a = Math.floor(Number(diasAbono) || 0);
+  if (g + a <= 30) return null;
+  return { campo: 'diasAbono', erro: `Dias de gozo (${g}) e dias vendidos (${a}) somam ${g + a}: as férias de um período aquisitivo têm no máximo 30 dias. Para tirar 20 e vender 10, informe 20 de gozo e 10 vendidos.` };
 }

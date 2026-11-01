@@ -32,6 +32,31 @@ Os testes exigem **Node 22** (ver `.nvmrc`). Rode na raiz do repositório:
 node --test 'tests/*.test.mjs'
 ```
 
+`tests/oraculo-2026.test.mjs` (incluído no comando acima) confere o INSS e o IRRF de 2026, com a redução da Lei
+15.270/2025, nas bordas das faixas e no salário líquido, contra valores digitados das fontes oficiais, sem importar
+`assets/js/tabelas.js`. As tabelas do oráculo ficam em `tests/oraculo/oficial-2026.mjs`, em centavos, com a fonte e a
+data da conferência. Tabela nova (outro ano, portaria nova) muda os dois lados: `tabelas.js` e o oráculo, com o texto
+da fonte oficial.
+
+### Testes por propriedade (tests/oraculo)
+
+`tests/oraculo/propriedades.test.mjs` cobre as invariantes das fórmulas com o fast-check (versão exata em
+`tests/oraculo/package-lock.json`; dependência só desses testes, e o glob da raiz não alcança a subpasta): INSS e IRRF
+de 2026 iguais ao oráculo para qualquer valor e IRRF entre 0 e o imposto pela tabela; rendimento até R$ 5.000,00 sem
+IRRF com qualquer dedução; salário líquido, 13º e férias que não diminuem com o bruto (fora o arredondamento a
+centavo de cada desconto, no máximo 2 centavos); `r2`; o número formatado em pt-BR lido de volta pelo `lerNumeroBR`;
+rescisão (matriz motivo x aviso, líquido = verbas − descontos e nunca negativo, aviso pela metade só no acordo
+indenizado, avos de 0 a 12); taxa implícita do parcelado; Price e SAC. A semente é fixa, e a falha mostra o
+contraexemplo já reduzido; `ORACULO_SEMENTE=<número>` troca a semente numa execução local, para explorar outros casos.
+
+```sh
+(cd tests/oraculo && npm ci --ignore-scripts)
+node --test 'tests/oraculo/*.test.mjs'
+```
+
+O job `check` do CI roda os dois comandos depois do `node --test` da raiz. Para atualizar o fast-check: em
+`tests/oraculo`, `npm install -D --save-exact fast-check@<versão>` e commit do `package.json` e do `package-lock.json`.
+
 ## Testes de navegador (e2e)
 
 O job `e2e` do CI roda o Playwright (versão exata em `tests/e2e/package-lock.json`, só Chromium) em 390 px e
@@ -103,6 +128,8 @@ node tests/lighthouse/rodar.mjs --base http://127.0.0.1:8080 --saida /tmp/lighth
 A publicação (`.github/workflows/pages.yml`, só a partir da main) roda a trava da data da política antes do upload:
 data `<=` hoje (America/Sao_Paulo) num push que não altera `privacidade/index.html`; data `=` hoje num push que a
 altera, num `workflow_dispatch` ou num push sem base conhecida. O log do passo mostra a regra aplicada e os SHAs.
+"Altera" é mudança de conteúdo: a troca do `?v=` que o `cache.mjs` faz em todas as páginas quando um CSS ou JS muda
+não conta (`tests/manutencao/politica-alterada.mjs`, o mesmo critério no `ci.yml` e no `pages.yml`).
 
 Se a publicação de um push que alterou a política falhar (trava, upload ou deploy), não espere o próximo push: no
 mesmo dia, rode Actions > Pages > Run workflow na main (`workflow_dispatch`, regra `= hoje`). Em outro dia, ajuste
@@ -112,14 +139,14 @@ evita que um push posterior sem mudança na política publique a versão nova co
 
 ## Dependabot e workflows
 
-`.github/dependabot.yml` abre no dia 1 de cada mês PRs das actions e de `tests/e2e`, só com versão publicada há pelo
-menos 14 dias: minor e patch num PR agrupado por ecossistema, e o major de cada dependência em PR separado (no máximo
-3 PRs abertos por ecossistema); merge manual, com o CI verde. A primeira verificação costuma rodar logo que o arquivo
-chega à main, sem esperar o dia 1; em 19/10/2026, isso quer dizer um PR para `actions/checkout` v7 e outro para
-`actions/setup-node` v7. As versões fixadas nos comandos do `ci.yml` (zizmor, html-validate, Lighthouse) não passam
-pelo Dependabot: atualize à mão, com versão publicada há pelo menos 14 dias. Os alertas e as atualizações de segurança
-do Dependabot são uma opção do repositório, em Settings > Advanced Security. O CI roda em push (menos nas branches
-`dependabot/**`) e em PR, então cada PR do Dependabot roda o CI uma vez.
+`.github/dependabot.yml` abre no dia 1 de cada mês PRs das actions, de `tests/e2e` e de `tests/oraculo`, só com
+versão publicada há pelo menos 14 dias: minor e patch num PR agrupado por ecossistema, e o major de cada dependência
+em PR separado (no máximo 3 PRs abertos por ecossistema); merge manual, com o CI verde. A primeira verificação
+costuma rodar logo que o arquivo chega à main, sem esperar o dia 1; em 19/10/2026, isso quer dizer um PR para
+`actions/checkout` v7 e outro para `actions/setup-node` v7. As versões fixadas nos comandos do `ci.yml` (zizmor,
+html-validate, Lighthouse) não passam pelo Dependabot: atualize à mão, com versão publicada há pelo menos 14 dias. Os
+alertas e as atualizações de segurança do Dependabot são uma opção do repositório, em Settings > Advanced Security. O
+CI roda em push (menos nas branches `dependabot/**`) e em PR, então cada PR do Dependabot roda o CI uma vez.
 
 O job `check` instala o zizmor 1.30.1 num venv, com o sha256 do wheel conferido pelo pip (`--require-hashes`), e passa
 o perfil padrão em `.github/` (offline, sem token). Ele falha com: action por tag ou branch em vez de SHA, checkout

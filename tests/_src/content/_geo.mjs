@@ -26,8 +26,8 @@ const sl5000 = C.salarioLiquido({ bruto: 5000 });
 const slMin = C.salarioLiquido({ bruto: SALARIO_MINIMO.valor });
 const d13 = C.decimoTerceiro({ salario: 3000, meses: 12 });
 const d13p = C.decimoTerceiro({ salario: 3000, meses: 7 });
-const fer = C.ferias({ salario: 3000, dias: 30 });
-const ferV = C.ferias({ salario: 3000, dias: 30, venderDias: true });
+const fer = C.ferias({ salario: 3000, diasGozo: 30 });
+const ferV = C.ferias({ salario: 3000, diasGozo: 20, diasAbono: 10 });
 const fg = C.fgts({ salario: 3000, meses: 12, comRendimento: false });
 const he = C.horasExtras({ salario: 2200, jornadaMensal: 220, horas50: 10 });
 const sd2000 = C.seguroDesemprego({ salarios: [2000, 2000, 2000], solicitacao: 1, mesesTrabalhados: 14 });
@@ -66,7 +66,7 @@ export const GEO = {
   },
   rescisao: {
     topo: bloco(
-      `<p><strong>Na demissão sem justa causa, você recebe saldo de salário, aviso prévio (30 dias mais 3 por ano completo, até 90), 13º proporcional, férias vencidas e proporcionais com 1/3, saque do FGTS e multa de 40% sobre o saldo do fundo.</strong></p>
+      `<p><strong>Na demissão sem justa causa, você recebe saldo de salário, aviso prévio (30 dias mais 3 por ano completo, até 90), 13º proporcional, férias vencidas e proporcionais com 1/3, saque do FGTS e multa de 40% sobre todos os depósitos do contrato, atualizados, sem descontar saques.</strong></p>
 <p>No pedido de demissão não há aviso indenizado, multa nem saque do FGTS. No acordo (art. 484-A da CLT), o aviso indenizado e a multa caem pela metade e o saque do FGTS fica limitado a 80%. Na justa causa, restam apenas saldo de salário e férias vencidas com 1/3. O empregador tem até 10 dias corridos após o fim do contrato para pagar.</p>`,
       [
         'Escolha o motivo do desligamento e o tipo de aviso prévio.',
@@ -81,7 +81,7 @@ export const GEO = {
   },
   'decimo-terceiro': {
     topo: bloco(
-      `<p><strong>13º salário = (salário + média de variáveis) ÷ 12 × meses trabalhados no ano.</strong> Conta como mês inteiro aquele em que você trabalhou 15 dias ou mais. A 1ª parcela, paga até 30 de novembro, é metade do bruto sem descontos; a 2ª, até 20 de dezembro, já desconta INSS e IR sobre o valor total.</p>
+      `<p><strong>13º salário = (salário + média de variáveis) ÷ 12 × meses trabalhados no ano.</strong> Conta como mês inteiro aquele em que você trabalhou 15 dias ou mais. A 1ª parcela, paga até 30 de novembro e sem descontos, é metade do salário do mês anterior ou, para quem não trabalhou todos os meses do ano, metade de 1/12 do salário por mês trabalhado até o pagamento; a 2ª, até 20 de dezembro, já desconta INSS e IR sobre o valor total.</p>
 <p>Exemplo: salário de R$ 3.000,00 o ano todo dá 13º bruto de ${R(d13.bruto)}, 1ª parcela de ${R(d13.primeira)} e 2ª parcela de ${R(d13.segunda)} (líquido total de <strong>${R(d13.liquidoTotal)}</strong>).</p>`,
       [
         'Digite o salário bruto mensal e, se houver, a média mensal de horas extras, comissões e adicionais.',
@@ -91,7 +91,7 @@ export const GEO = {
       ],
     ),
     faq: [
-      { q: 'Quanto recebe de 13º quem trabalhou 7 meses?', a: `<p>Com salário de R$ 3.000,00, o 13º proporcional é de 7/12: ${R(d13p.bruto)} brutos. A 1ª parcela é ${R(d13p.primeira)} e a 2ª, após INSS e IR, ${R(d13p.segunda)}.</p>` },
+      { q: 'Quanto recebe de 13º quem trabalhou 7 meses?', a: `<p>Com salário de R$ 3.000,00, o 13º proporcional é de 7/12: ${R(d13p.bruto)} brutos. Se os 7 meses vão de junho a dezembro, a 1ª parcela, paga em novembro, conta os 6 meses até ali: ${R(d13p.primeira)}; a 2ª, após INSS e IR, é de ${R(d13p.segunda)}.</p>` },
     ],
   },
   ferias: {
@@ -100,7 +100,7 @@ export const GEO = {
 <p>Exemplo: salário de R$ 3.000,00 e 30 dias de férias dão ${R(fer.bruto)} brutos e <strong>${R(fer.liquido)}</strong> líquidos. Vendendo 10 dias, o líquido sobe para ${R(ferV.liquido)}.</p>`,
       [
         'Digite o salário bruto e a média de variáveis (horas extras, comissões) dos últimos 12 meses.',
-        'Informe os dias do período que vai calcular, somando os que vai vender, e marque a venda de 1/3 (abono pecuniário), se for vender: para tirar 20 e vender 10, informe 30; para tirar 15 sem vender, informe 15.',
+        'Informe os dias de gozo do período que vai calcular e, à parte, os dias vendidos (abono pecuniário): para tirar 20 e vender 10, informe 20 e 10; para tirar 15 sem vender, informe 15 e 0.',
         'Informe os dependentes para o IR.',
         'Clique em <strong>Calcular</strong> e confira férias, 1/3, abono e descontos separados.',
       ],
@@ -112,7 +112,7 @@ export const GEO = {
   },
   fgts: {
     topo: bloco(
-      `<p><strong>O empregador deposita todo mês 8% do salário bruto no FGTS (2% para aprendiz), sem descontar nada do trabalhador.</strong> O saldo rende 3% ao ano mais TR e pode receber distribuição de lucros. Na demissão sem justa causa, você saca tudo e recebe multa de 40% sobre o saldo; no acordo, a multa é de 20% e o saque, de 80%.</p>
+      `<p><strong>O empregador deposita todo mês 8% do salário bruto no FGTS (2% para aprendiz), sem descontar nada do trabalhador.</strong> O saldo rende 3% ao ano mais TR e pode receber distribuição de lucros. Na demissão sem justa causa, você saca tudo e recebe multa de 40% sobre todos os depósitos do contrato, atualizados, sem descontar saques; no acordo, a multa é de 20% e o saque, de 80%.</p>
 <p>Exemplo: salário de R$ 3.000,00 gera depósito de ${R(fg.deposito)} por mês. Em 12 meses, com os depósitos sobre o 13º e o 1/3 de férias, o total é de ${R(fg.depositado)}, antes do rendimento.</p>`,
       [
         'Digite o salário bruto mensal e os meses de contrato que quer projetar.',
