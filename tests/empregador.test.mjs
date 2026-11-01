@@ -122,7 +122,7 @@ test('T15 CA2: inteiro >= 1; meios de faixa do CFO/CEO, nenhum abaixo do mínimo
   assert.ok(h.includes('A Emenda Constitucional 141/2026 reduz a jornada máxima para 42 horas por semana a partir de 16/12/2026 e para 40 horas a partir de 16/12/2027, sem redução de salário.'));
   assert.ok(h.includes('salário ÷ <span data-ed="div42">210</span> horas'));
   // M-02 (parecer jurídico 05, alternativa; decisão do CPO): divisor 210 mantido, com aviso visível
-  assert.ok(h.includes('<p class="ed-aviso" data-ed="aviso-m02">Sem norma coletiva que distribua 42 horas, a jornada efetiva com 2 repousos e 8 horas por dia é de 40 horas; nesse caso use 200.</p>'));
+  assert.ok(h.includes('<p class="ed-aviso" role="note" data-ed="aviso-m02">Esta simulação usa o divisor 210, que só vale se houver acordo ou convenção coletiva que distribua 42 horas por semana. Sem essa norma, a jornada efetiva com 2 repousos e 8 horas por dia é de 40 horas e o divisor é 200: o valor da hora fica maior que o mostrado aqui. O resultado é uma estimativa e não garante o valor devido.</p>'));
   assert.deepEqual(JORNADA.etapas.map((e) => e.divisor), [210, 200]);
   assert.ok(h.includes('Sou empregador doméstico'));
   assert.equal(NOTA_DOMESTICO, 'Para empregado doméstico, a lei específica (LC 150/2015) ainda fala em 44 horas, mas a Emenda Constitucional 141/2026 também vale para ele.');
@@ -217,12 +217,17 @@ test('PR #36 revisões: textos literais travados nas páginas', () => {
     'O valor não inclui os reflexos das horas extras habituais no descanso semanal remunerado, nas férias com 1/3, no 13º e no FGTS, nem os encargos sobre a folha (INSS patronal, RAT e terceiros). Por isso é um valor mínimo: o custo real tende a ser maior.',
     'Para MEI, microempresas e empresas de pequeno porte, uma lei complementar ainda poderá criar regras de transição, ligadas à manutenção de empregos. Até lá, valem as datas acima.',
   ]) assert.ok(jor.includes(t), t);
-  assert.doesNotMatch(jor, /TST/);
   // NR-1 (CPO 28/10): os 2 literais do NR-1 junto com o texto do Advogado; B-03 também na linha do 200 (NR-1 e2d17d3)
   assert.ok(jor.includes('Valores sem encargos e reflexos (FGTS, INSS, DSR, férias e 13º).'), 'NR-1: sem encargos e reflexos');
+  // B4 (parecer jurídico 06 sobre 5e3beac6): Súmula 431, 210 só com norma coletiva; portão: nada de "art. 64"
   for (const d of ['210', '200']) {
-    assert.ok(jor.includes(`${d}</span> horas, cálculo pelo método da CLT (art. 64))<br><small>Divisor pelo método do art. 64 da CLT. A convenção coletiva da categoria pode adotar outro.</small></th>`), `CLT art. 64 + B-03 na linha do ${d}`);
+    assert.ok(jor.includes(`${d}</span> horas, proporção da Súmula 431 do TST (horas semanais × 5))<br><small>A lei ainda não definiu o divisor. Na etapa de 42 horas, 210 pressupõe norma coletiva de 42 horas; sem ela, use 200.</small></th>`), `Súmula 431 na linha do ${d}`);
   }
+  assert.ok(!jor.includes('art. 64'));
+  assert.ok(jor.includes('só vale se houver acordo ou convenção coletiva'));
+  assert.ok(jor.includes('não garante o valor devido'));
+  assert.ok(jor.includes('200') && jor.includes('convenção coletiva que distribua 42 horas'));
+  assert.ok(jor.indexOf('data-ed="aviso-m02"') < jor.indexOf('<section class="ed-conta"'), 'aviso antes do resultado');
   for (const t of [
     '<h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>',
     'MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.',
