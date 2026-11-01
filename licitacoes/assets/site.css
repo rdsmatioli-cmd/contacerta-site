@@ -72,6 +72,7 @@ svg{flex:none}
 .status .fio-v{width:1px;height:14px;background:var(--vidro-fio)}
 .status .fonte{font-weight:500;color:var(--na-faixa-3)}
 .hero h1{margin:0 0 14px;color:#fff;font-size:2rem;line-height:1.06;letter-spacing:-.04em}
+.hero .pt{margin-left:-.07em}
 .lede{max-width:54ch;margin:0;font-size:.96875rem;line-height:1.52;color:var(--na-faixa-2)}
 .facts{display:none}
 .facts div{display:flex;flex-direction:column;gap:3px;padding-left:14px;box-shadow:inset 2px 0 0 var(--vidro-fio)}
