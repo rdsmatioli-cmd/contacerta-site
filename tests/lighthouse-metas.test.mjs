@@ -95,7 +95,7 @@ test('CI: job lighthouse roda o 13.5.0 por npx (sem @lhci/cli), com actions fixa
 
 test('A-PR35-18: Lighthouse cobre as páginas indexáveis do /licitacoes/ (existem e estão no sitemap)', () => {
   const sitemap = ler('sitemap.xml');
-  assert.equal(URLS_LICITACOES.length, 8);
+  assert.equal(URLS_LICITACOES.length, 7); // hotfix 1042: /licitacoes/cobranca/ noindex, fora do sitemap
   for (const u of URLS_LICITACOES) {
     assert.ok(TODAS_URLS.includes(u), u);
     const arq = u.endsWith('/') ? `${u.slice(1)}index.html` : u.slice(1);
