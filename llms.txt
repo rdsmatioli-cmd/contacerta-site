@@ -42,6 +42,7 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 ## Impostos e MEI
 
 - [Calculadora de imposto de renda 2026 (IRRF mensal)](https://contacertabr.com.br/imposto-de-renda/): Calcule o IR retido na fonte em 2026 com a nova isenção até R$ 5.000 e a redução até R$ 7.350 (Lei 15.270/2025), dependentes e desconto simplificado.
+- [Simulador IRPF 2027: estimativa da restituição](https://contacertabr.com.br/irpf/): Simulação gratuita da declaração IRPF 2027 (ano-base 2026): compare os modelos completo e simplificado, com a redução da Lei 15.270/2025, e estime a restituição.
 - [Calculadora DAS MEI 2026](https://contacertabr.com.br/das-mei/): Veja o valor do DAS MEI 2026 (R$ 82,05, R$ 86,05 ou R$ 87,05), o total anual e se o seu faturamento cabe no limite de R$ 81 mil do MEI.
 - [Calculadora de INSS 2026](https://contacertabr.com.br/inss/): Calcule a contribuição ao INSS 2026 com a tabela progressiva oficial (7,5% a 14%, teto R$ 8.475,55) ou como autônomo, facultativo e MEI (20%, 11% ou 5%).
 - [Calculadora de custo de funcionário para a empresa](https://contacertabr.com.br/custo-funcionario/): Calcule quanto um funcionário CLT custa por mês e por ano: 13º, férias, FGTS, INSS patronal e benefícios, no Simples Nacional, Lucro Presumido ou MEI.

@@ -55,7 +55,7 @@ export const ICONE_CALC = {
   'salario-liquido': 'carteira', rescisao: 'saida', 'decimo-terceiro': 'presente', ferias: 'sol', fgts: 'cofre',
   'horas-extras': 'relogio', 'adicional-noturno': 'lua', 'seguro-desemprego': 'guarda', 'aviso-previo': 'calendario',
   'juros-compostos': 'alta', financiamento: 'casa', investimentos: 'barras', 'parcelado-ou-a-vista': 'cartao',
-  'das-mei': 'loja', inss: 'escudo', 'imposto-de-renda': 'recibo', 'custo-funcionario': 'pessoas', markup: 'etiqueta',
+  'das-mei': 'loja', inss: 'escudo', 'imposto-de-renda': 'recibo', irpf: 'recibo', 'custo-funcionario': 'pessoas', markup: 'etiqueta',
   porcentagem: 'porcento', 'regra-de-tres': 'balanca', 'conversor-de-medidas': 'regua', imc: 'coracao', idade: 'bolo',
   'transicao-cbs-ibs': 'escada', 'simples-hibrido': 'divisao', 'preco-reforma-tributaria': 'etiquetapct', 'credito-travado': 'cadeado',
   'calendario-reforma-tributaria': 'calprazo', 'nr1-riscos-psicossociais': 'mente', 'lista-de-espera': 'email',
