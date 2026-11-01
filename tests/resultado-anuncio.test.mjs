@@ -66,3 +66,22 @@ test('ui.js: lista de erros com role="alert" só no Calcular; na carga e ao digi
   assert.equal(f.el('f-bruto').getAttribute('aria-invalid'), 'true');
   assert.match(f.calcular(), /^<div class="erro" role="alert">[^]*: Digite só números\.<\/li>/);
 });
+
+// CC-SITE-12 (revisão): o Calcular apertado dentro dos 250 ms do atraso da digitação cancela o recálculo que ainda
+// esperava. Sem isso, ele saía depois do envio e trocava a lista com role="alert" pela da digitação, sem o alerta.
+test('ui.js: Calcular antes dos 250 ms da digitação mantém a lista do envio, com role="alert"', async () => {
+  const f = await abrirCalculadora('salario-liquido', { bruto: '5000' });
+  const doc = () => { globalThis.document = { getElementById: (id) => f.el(id) || null, querySelector: (sel) => (sel === 'form[data-calc]' ? f.form : null) }; };
+  f.campo('bruto').value = 'abc';
+  doc();
+  try { f.form.disparar('input'); } finally { delete globalThis.document; }
+  const enviado = f.calcular();
+  assert.match(enviado, /^<div class="erro" role="alert">[^]*: Digite só números\.<\/li>/);
+  doc();
+  try {
+    await new Promise((ok) => setTimeout(ok, 300));
+  } finally {
+    delete globalThis.document;
+  }
+  assert.equal(f.out.innerHTML, enviado, 'o recálculo da digitação não sai depois do Calcular');
+});

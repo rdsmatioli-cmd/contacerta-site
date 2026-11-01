@@ -105,6 +105,31 @@ test('aviso de cookies: botões com 15 px, peso 600, sem a margem nem a largura 
   expect(aceitar.altura).toBeGreaterThanOrEqual(44);
 });
 
+// Revisão do CC-SITE-11: button:hover e button:active do style.css (0,1,1) ganhavam do .lcmc-btn (0,1,0). No Recusar,
+// o fundo ia de rgb(20,33,61) para rgb(15,58,43) no hover (tema claro) e de rgb(238,242,247) para o lima rgb(168,221,58)
+// (escuro). Com o mouse em cima e apertado, os dois botões ficam com o fundo do componente e sem deslocamento.
+for (const tema of ['light', 'dark']) {
+  test(`aviso de cookies (tema ${tema === 'light' ? 'claro' : 'escuro'}): hover e clique não trocam o fundo nem movem os botões`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: tema });
+    await page.goto('/salario-liquido/');
+    await expect(banner(page)).toBeVisible();
+    const fundo = (b) => b.evaluate((el) => [getComputedStyle(el).backgroundColor, getComputedStyle(el).transform]);
+    const aceitar = banner(page).locator('[data-lcmc="aceitar"]');
+    const parado = await fundo(aceitar);
+    expect(parado[0]).toBe(tema === 'light' ? 'rgb(20, 33, 61)' : 'rgb(238, 242, 247)');
+    for (const sel of ['[data-lcmc="aceitar"]', '[data-lcmc="recusar"]']) {
+      const b = banner(page).locator(sel);
+      await b.hover();
+      expect(await fundo(b), `${sel} com o mouse em cima`).toEqual(parado);
+      await page.mouse.down();
+      expect(await fundo(b), `${sel} apertado`).toEqual(parado);
+      await page.mouse.move(0, 0);
+      await page.mouse.up();
+      await expect(banner(page), 'o clique soltado fora do botão não escolhe').toBeVisible();
+    }
+  });
+}
+
 // CC-SITE-09 (WCAG 2.2, 2.4.11): com o aviso aberto, nenhum dos 40 primeiros focáveis da página fica atrás dele. O
 // aviso fixo ocupa metade da tela em 390 px; o site acrescenta embaixo do body o espaço que ele ocupa e, quando o foco
 // vai para um elemento que ficaria sob o aviso, rola a página até o elemento ficar acima dele. Confere também que o
