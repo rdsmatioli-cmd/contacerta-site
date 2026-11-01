@@ -97,6 +97,13 @@ Playwright: em `tests/e2e`, `npm install -D --save-exact @playwright/test@<vers�
 nova tentativa 60 s depois do fim da primeira passada. Em link de afiliado, o parâmetro do afiliado (`tag=` da
 Amazon, `indicacao=`) sai da URL conferida, para a checagem não contar como clique.
 
+Entram `href`, `src`, `poster`, `cite` e as URLs do JSON-LD. Destino de envio de formulário (`action`, `formaction`)
+não é link e fica de fora: um GET nele pode gravar resposta ou abrir sessão de pagamento. Hosts de outros produtos da
+empresa (`NAO_BUSCAR` no script: `creditrilha.com.br` e `licitacoes-checkout.*.workers.dev`) não recebem nenhuma
+requisição, nem quando outro link redireciona para eles: cada acesso ao Creditrilha grava no banco dele, e o checkout
+do Licitações abriria sessão de pagamento. Eles saem no resumo como "não conferido (próprio)", sem falhar o job; link
+para outro produto novo da empresa entra nessa lista antes de ir ao ar.
+
 O job falha só com QUEBRADO: 404, 410 e os demais 4xx fora da lista de robô (400, 402, 422...); 5xx nas duas
 tentativas; erro de DNS, de rede (conexão recusada ou fechada) ou de certificado (expirado, autoassinado, de outro
 nome); tempo esgotado duas vezes; mais de 15 redirecionamentos, 3xx sem destino ou redirecionamento que termina em
