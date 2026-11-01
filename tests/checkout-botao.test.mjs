@@ -36,7 +36,7 @@ for (const p of PAGINAS_COMPRA) {
     assert.doesNotMatch(h, /<script[^>]+src="https?:/);
   });
 }
-test('botões: um por produto, mensal e anual, com o preço no rótulo', () => {
+test('botões: um por produto, mensal e anual, com o preço no rótulo', { skip: PAGINAS_COMPRA.length === 0 && 'hotfix 1042: compra desativada' }, () => {
   const h = ler(PAGINAS_COMPRA[0]);
   assert.match(h, /produto=radar"><button type="submit" class="btn">Assinar o Radar mensal \(R\$ 197 por mês\)<\/button>/);
   assert.match(h, /produto=radar-anual"><button type="submit" class="btn">Assinar o Radar anual \(R\$ 1\.970 por ano\)<\/button>/);

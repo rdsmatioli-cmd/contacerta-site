@@ -111,14 +111,21 @@ export function salarioLiquido({ bruto, dependentes = 0, pensao = 0, outrosDesco
 }
 
 // ---------------------------------------------------------------- 13º salário
-export function decimoTerceiro({ salario, meses = 12, mediaVariaveis = 0, dependentes = 0 }) {
+// 1ª parcela (Decreto 10.854/2021, art. 78): metade do salário do mês anterior ao pagamento (caput; aqui, salário + média
+// de variáveis); para quem não tem os 12 meses no ano (admitido no curso do ano ou fora da empresa em parte do ano),
+// metade de 1/12 da remuneração por mês de serviço ou fração superior a 15 dias (§ 4º). Suposição da calculadora: 1ª
+// parcela paga em novembro (prazo até 30/11) e meses informados contados até dezembro, então os meses de serviço até o
+// pagamento são meses − 1 (dezembro ainda não trabalhado). mesesAte1aParcela substitui essa suposição.
+export function decimoTerceiro({ salario, meses = 12, mediaVariaveis = 0, dependentes = 0, mesesAte1aParcela }) {
   const m = Math.min(12, Math.max(0, Math.floor(num(meses))));
-  const bruto = r2(((num(salario) + num(mediaVariaveis)) / 12) * m);
-  const primeira = r2(bruto / 2);
+  const base = num(salario) + num(mediaVariaveis);
+  const bruto = r2((base / 12) * m);
+  const mesesPrimeira = m >= 12 ? 12 : Math.min(m, Math.max(0, Math.floor(num(mesesAte1aParcela, m - 1))));
+  const primeira = r2(m >= 12 ? base / 2 : (base / 12) * mesesPrimeira / 2);
   const { inss } = inssEmpregado(bruto);
   const ir = irrfMensal({ rendimentos: bruto, inss, dependentes });
   const segunda = r2(bruto - primeira - inss - ir.irrf);
-  return { bruto, primeira, segunda, inss, irrf: ir.irrf, ir, liquidoTotal: r2(primeira + segunda), meses: m };
+  return { bruto, primeira, segunda, inss, irrf: ir.irrf, ir, liquidoTotal: r2(primeira + segunda), meses: m, mesesPrimeira };
 }
 
 // ---------------------------------------------------------------- Férias
@@ -141,6 +148,33 @@ export function ferias({ salario, mediaVariaveis = 0, diasGozo = 30, diasAbono =
   return { diasGozo, diasAbono, valorFerias, terco, abono, tercoAbono, bruto, inss, irrf: ir.irrf, ir, liquido: r2(bruto - inss - ir.irrf) };
 }
 
+// ---------------------------------------------------------------- Jornada (EC 141/2026)
+// Duração normal máxima de 44 h até 15/12/2026, 42 h a partir de 16/12/2026 e 40 h a partir de 16/12/2027 (EC 141/2026,
+// art. 6º, DOU de 16/10/2026: 2 meses e 1 ano depois). Divisor padrão (parecer jurídico 05, ee9db3ba): 220 até 15/12/2026 e
+// 200 a partir de 16/12/2026 (2 repousos e 8 h por dia = 40 h efetivas; Súmula 431 do TST); 210 só quando acordo ou
+// convenção coletiva distribui 42 horas semanais (divisorNormaColetiva). A lei não definiu o divisor (M-02). Dois repousos semanais remunerados a partir de
+// 16/12/2026 (art. 1º, inciso XV, e art. 10, I). Dias padrão das calculadoras num mês de 30 dias com 1 feriado: 25 úteis e
+// 5 de repouso e feriados com 1 repouso por semana; 21 e 9 com 2 repousos por semana.
+// Mesmas datas de assets/js/empregador/config.js (JORNADA). O simulador do Empregador em Dia ainda usa 210 em 16/12/2026
+// (= divisorNormaColetiva); a troca para 200 é decisão separada do Empregador. tests/jornada-ec141.test.mjs confere.
+export const JORNADA_CLT = Object.freeze([
+  Object.freeze({ desde: '', horas: 44, divisor: 220, repousosSemanais: 1, diasUteis: 25, diasRepouso: 5 }),
+  Object.freeze({ desde: '2026-12-16', horas: 42, divisor: 200, divisorNormaColetiva: 210, repousosSemanais: 2, diasUteis: 21, diasRepouso: 9 }),
+  Object.freeze({ desde: '2027-12-16', horas: 40, divisor: 200, repousosSemanais: 2, diasUteis: 21, diasRepouso: 9 }),
+]);
+// Jornada padrão na data (AAAA-MM-DD): a última etapa com desde <= data. normaColetiva42: há acordo ou convenção
+// coletiva que distribui 42 horas semanais -> divisor 210 na etapa que o prevê.
+export function jornadaPadrao(dataISO, normaColetiva42 = false) {
+  const d = String(dataISO ?? '').slice(0, 10);
+  const j = JORNADA_CLT.reduce((atual, e) => (e.desde <= d ? e : atual), JORNADA_CLT[0]);
+  return normaColetiva42 && j.divisorNormaColetiva ? { ...j, divisor: j.divisorNormaColetiva } : j;
+}
+// Data de referência do mês das horas (AAAA-MM): dia 16, para que dezembro de 2026 já siga a regra de 16/12/2026.
+export function referenciaCompetencia(mes) {
+  return /^\d{4}-\d{2}$/.test(String(mes ?? '')) ? `${mes}-16` : '';
+}
+
+// ---------------------------------------------------------------- Horas extras
 export function horasExtras({ salario, jornadaMensal = 220, horas50 = 0, horas100 = 0, diasUteis = 0, domingosFeriados = 0, outroPercentual = 0, horasOutro = 0 }) {
   const valorHora = num(salario) / Math.max(1, num(jornadaMensal, 220));
   const he50 = r2(valorHora * 1.5 * num(horas50));
@@ -481,7 +515,7 @@ export function avisoCompativel(tipo, aviso) {
  * INSS e o IRRF continuam sobre o 13º inteiro e o depósito do FGTS da rescisão incide sobre o 13º menos a parcela.
  * saqueAniversario: adesão ao saque-aniversário do FGTS (saqueFgtsNaSaida; CC-CALC-TRABALHISTA-04).
  */
-export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso, feriasVencidas = 0, vencidasEmDobro = [], saldoFgts = 0, dependentes = 0, dataPagamento = '', primeiraParcela13 = 0, saqueAniversario = false }) {
+export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCausa', aviso, feriasVencidas = 0, vencidasEmDobro = [], saldoFgts = 0, saquesFgts = 0, dependentes = 0, dataPagamento = '', primeiraParcela13 = 0, saqueAniversario = false }) {
   if (aviso == null) aviso = (avisosDoMotivo(tipo) || [])[0];
   if (!avisoCompativel(tipo, aviso)) return { avisoInvalido: true };
   salario = num(salario);
@@ -580,11 +614,14 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
   // FGTS (Lei 8.036/1990, arts. 15 e 18): o depósito de 8% sobre saldo de salário, aviso indenizado (Súmula 305 do TST)
   // e 13º da rescisão ainda não aparece no app quando o saldo é consultado; entra na base da multa e do saque.
   // Férias indenizadas não têm depósito. A 1ª parcela do 13º teve o depósito no mês em que foi paga: sai da base.
+  // A multa incide sobre todos os depósitos do contrato, sem descontar saques (art. 18, § 1º): os saques informados entram
+  // na base da multa, mas não no valor a sacar.
   const depositoFgtsRescisao = r2(FGTS.aliquota * (saldoSalario + avisoIndenizado + Math.max(0, r2(decimo - primeiraParcela))));
-  const baseFgts = r2(num(saldoFgts) + depositoFgtsRescisao);
+  const saldoFgtsFinal = r2(num(saldoFgts) + depositoFgtsRescisao);
+  const baseFgts = r2(saldoFgtsFinal + Math.max(0, num(saquesFgts)));
   const multaPct = tipo === 'semJustaCausa' ? 0.4 : tipo === 'acordo' ? 0.2 : 0;
   const multaFgts = r2(baseFgts * multaPct);
-  const saque = saqueFgtsNaSaida({ tipo, saldo: baseFgts, multa: multaFgts, saqueAniversario });
+  const saque = saqueFgtsNaSaida({ tipo, saldo: saldoFgtsFinal, multa: multaFgts, saqueAniversario });
 
   const verbas = r2(saldoSalario + avisoIndenizado + decimo + feriasProp + feriasVenc + tercoFerias);
   // CC-CALC-TRABALHISTA-11: o desconto do aviso não cumprido (30 dias de salário) fica limitado ao que sobra das verbas
@@ -601,7 +638,7 @@ export function rescisao({ salario, admissao, desligamento, tipo = 'semJustaCaus
     avosFerias: avosF, feriasProp, feriasVenc, periodosVenc, periodosEmDobro, periodosProjecao, feriasVencSimples, dobraFeriasVenc, feriasProjecao, tercoFerias,
     dataPagamento: dataPag, pagamentoInformado, inssSaldo, inssSaldoSubstituida, irSaldo, inss13, inss13Anterior, inss13Atual, tabelasSubstituidas, ir13, ir13Base: ir13R.base, ir13Reducao: ir13R.reducao, irSaldoBase: irSaldoR.base, tabelaIrrf: { vigencia: irTab.tabela.vigencia, rotulo: irTab.tabela.rotulo, ano: irTab.ano, anoPagamento: irTab.anoPagamento, substituida: irTab.substituida }, descontoAviso, descontoAvisoAplicado, excedenteAviso, verbas, descontos, liquido: Math.max(0, r2(verbas - descontos)),
     primeiraParcela13: primeiraParcela, parcela13Aplicada, excedenteParcela13, decimoAnoDesligamento, parcela13AcimaDoAno,
-    depositoFgtsRescisao, baseFgts, multaFgts, saqueFgts: saque.saldo, saqueFgtsEstimado: saque.estimado, fgtsRetido: saque.retido, fimProjetado: fimProjetado.toISOString().slice(0, 10),
+    depositoFgtsRescisao, saldoFgtsFinal, baseFgts, multaFgts, saqueFgts: saque.saldo, saqueFgtsEstimado: saque.estimado, fgtsRetido: saque.retido, fimProjetado: fimProjetado.toISOString().slice(0, 10),
   };
 }
 
@@ -782,6 +819,21 @@ export function converter(valor, categoria, de, para) {
 // ---------- Reforma Tributária do Consumo (EC 132/2023 e LC 214/2025)
 // Fatos legais fixos. Alíquotas de referência de CBS/IBS NÃO são oficiais até a resolução do Senado:
 // entram sempre como parâmetro editável (estimativa) informado pelo usuário.
+// Alíquota de referência da CBS de 2027 calculada pelo TCU em 28/10/2026 (TC 006.529/2026-7): 11,3468%, arredondada
+// para 11,3% (LC 214/2025, art. 349, § 14). Ainda não é a resolução do Senado, que tem até 15/12/2026 para fixá-la
+// (art. 349, § 1º, II, com o prazo prorrogado pelo art. 353, § 2º). Em 2027 e 2028 a CBS é cobrada 0,1 ponto abaixo
+// da referência de cada ano (art. 347): 11,2% em 2027. A referência de 2028 tem cálculo próprio (art. 354), feito pelo
+// TCU e fixado pelo Senado em 2027; até lá, as calculadoras repetem os 11,3% de 2028 a 2033 só como premissa.
+// `situacao` (tests/cbs-2027-tcu.test.mjs confere):
+//   'calculada pelo TCU': o Senado ainda não fixou; `conferidaEm` é a data da última conferência da resolução;
+//   'fixada pelo Senado': resolução publicada (troque também o valor, se mudar);
+//   'vigente pelo cálculo do TCU (LC 214/2025, art. 349, § 2º)': sem fixação até 22/12/2026, vale o cálculo do TCU.
+// De 16/12 a 22/12/2026 o teste exige uma conferência depois do prazo do Senado (conferidaEm >= 16/12/2026) enquanto a
+// situação for 'calculada pelo TCU'; depois de 22/12/2026, exige uma das duas situações finais. Reveja as páginas da
+// reforma quando a situação mudar.
+export const CBS_REFERENCIA_2027 = Object.freeze({ pct: 11.3, situacao: 'calculada pelo TCU', calculadaEm: '2026-10-28', processo: 'TC 006.529/2026-7', prazoSenado: '2026-12-15', limiteFixacao: '2026-12-22', conferidaEm: '2026-10-31' });
+// IBS de referência: premissa de 18,70% da Resolução CGIBS 14/2026 (não oficial); só pesa de 2029 em diante.
+export const IBS_REFERENCIA_PREMISSA_PCT = 18.7;
 // Fração de ICMS/ISS que continua valendo em cada ano (ADCT, EC 132/2023): 9/10 em 2029 ... 6/10 em 2032; zero em 2033.
 export const TRANSICAO = [
   { ano: 2026, fase: 'Teste', cbsFixa: 0.009, ibsFixa: 0.001, pisCofins: true, fracaoAntigos: 1, testeCompensavel: true },
@@ -920,8 +972,9 @@ export function precoReforma({ precoAtual, tributosAtuaisPct, issPct = 0, ano = 
 }
 // CBS e IBS (em %) sugeridos para o ano na calculadora de preço, pela mesma regra da transição (aliquotasAno/TRANSICAO):
 // 2027-2028 = referência da CBS − 0,1 ponto e IBS de 0,1%; 2029-2032 = CBS de referência e IBS × (1 − fração do ISS/ICMS);
-// 2033 = referências cheias. Referências estimadas, não oficiais (CBS 9,21% e IBS 18,70%, premissas da Resolução CGIBS 14/2026).
-export function aliquotasPadraoPreco(ano, { cbsRefPct = 9.21, ibsRefPct = 18.7 } = {}) {
+// 2033 = referências cheias. CBS: referência de 2027 calculada pelo TCU (11,3%, CBS_REFERENCIA_2027), repetida de 2028
+// a 2033 como premissa (cada ano terá referência própria, LC 214/2025, arts. 354 a 359); IBS: premissa de 18,70% da Resolução CGIBS 14/2026. Nenhuma das duas é oficial ainda.
+export function aliquotasPadraoPreco(ano, { cbsRefPct = CBS_REFERENCIA_2027.pct, ibsRefPct = IBS_REFERENCIA_PREMISSA_PCT } = {}) {
   const linha = TRANSICAO.find((l) => l.ano === Number(ano));
   if (!linha) return null;
   const a = aliquotasAno(linha, { cbsRefPct, ibsRefPct });
@@ -940,11 +993,14 @@ export function creditoTravado({ comprasMensais, cbsPct, ibsPct, pctInadimplente
 // Calendário oficial: marcos e situação em relação a uma data (AAAA-MM-DD).
 export const MARCOS_REFORMA = [
   { data: '2026-01-01', t: 'Início do ano de teste: CBS de 0,9% e IBS de 0,1% destacados nos documentos fiscais, compensáveis com PIS/Cofins ou dispensados para quem cumpre as obrigações acessórias' },
-  { data: '2026-10-30', t: 'Fim do prazo para o Simples Nacional optar por apurar IBS/CBS por fora (regime regular) no 1º semestre de 2027; prazo do TCU para enviar ao Senado o cálculo da alíquota de referência da CBS' },
+  { data: '2026-10-28', t: 'TCU calcula a alíquota de referência da CBS de 2027 em 11,3% (TC 006.529/2026-7). Não é a alíquota oficial: a fixação cabe ao Senado.' },
+  { data: '2026-10-30', t: 'Fim do prazo (aberto em 01/09/2026) para o Simples Nacional optar por apurar IBS/CBS por fora (regime regular) no 1º semestre de 2027; prazo legal do TCU para enviar ao Senado o cálculo da alíquota de referência da CBS' },
+  { data: '2026-11-03', t: 'Começa o prazo para cancelar, em caráter irretratável, a opção do Simples pelo regime regular de IBS/CBS feita para o 1º semestre de 2027 e o pedido de opção pelo Simples Nacional para 2027 (até 20/12/2026; Resolução CGSN nº 186/2026, art. 1º, § 1º, I (Simples) e art. 2º, parágrafo único (IBS/CBS), na redação da Resolução CGSN nº 194/2026)' },
   { data: '2026-11-16', t: 'Novas regras de validação de IBS/CBS da NF-e em produção (NT 2025.002-RTC, cronograma sujeito a mudança)' },
-  { data: '2026-12-15', t: 'Prazo do Senado para fixar a alíquota de referência da CBS de 2027' },
+  { data: '2026-12-15', t: 'Prazo do Senado para fixar a alíquota de referência da CBS de 2027 (o TCU calculou 11,3%)' },
+  { data: '2026-12-20', t: 'Fim do prazo para cancelar a opção do Simples pelo regime regular de IBS/CBS do 1º semestre de 2027 e o pedido de opção pelo Simples Nacional para 2027' },
   { data: '2027-01-01', t: 'CBS entra na alíquota de referência (menos 0,1 ponto em 2027-2028); PIS e Cofins extintos; começa o Imposto Seletivo; IBS de 0,1%; IPI zerado, exceto para produtos com industrialização incentivada na Zona Franca de Manaus; apuração assistida da CBS' },
-  { data: '2027-03-01', t: 'Abre a janela (1º a 31/03/2027) para o Simples optar pelo regime regular de IBS/CBS no 2º semestre de 2027' },
+  { data: '2027-03-01', t: 'Abre a janela de março de 2027 para o Simples optar pelo regime regular de IBS/CBS no 2º semestre de 2027 (LC 123/2006, art. 13, § 10; datas na forma regulamentada pelo CGSN); empresas em início de atividade seguem regra própria (art. 13, § 11)' },
   { data: '2029-01-01', t: 'ICMS e ISS caem para 90% das alíquotas; IBS sobe na mesma proporção' },
   { data: '2030-01-01', t: 'ICMS e ISS em 80%' },
   { data: '2031-01-01', t: 'ICMS e ISS em 70%' },

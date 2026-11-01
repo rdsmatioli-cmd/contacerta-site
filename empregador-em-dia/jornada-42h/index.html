@@ -79,18 +79,19 @@
 <p class="ajuda" id="aj-sal"><small>Valor da carteira, sem descontos. Exemplo: a maioria ganha R$ 2.400.</small></p></fieldset>
 <p><label class="ed-op"><input type="checkbox" id="f-dom" name="domestico"> Sou empregador doméstico</label></p>
 <p class="ed-aviso" data-ed="nota-dom" hidden></p>
+<p class="ed-aviso" role="note" data-ed="aviso-m02">Esta simulação usa o divisor 210, que só vale se houver acordo ou convenção coletiva que distribua 42 horas por semana. Sem essa norma, a jornada efetiva com 2 repousos e 8 horas por dia é de 40 horas e o divisor é 200: o valor da hora fica maior que o mostrado aqui. O resultado é uma estimativa e não garante o valor devido.</p>
 <button type="submit" disabled class="btn">Calcular</button>
 </form>
 <section class="ed-conta" aria-live="polite"><h2>Como chegamos no valor</h2>
 <table class="ed-tab"><caption>Etapa de 42 horas, a partir de 16/12/2026</caption><tbody>
 <tr><th scope="row">Salário médio (meio da faixa)</th><td data-ed="salario"></td></tr>
-<tr><th scope="row">Valor da hora (salário ÷ <span data-ed="div42">210</span> horas, cálculo pelo método da CLT (art. 64))<br><small>Divisor pelo método do art. 64 da CLT. A convenção coletiva da categoria pode adotar outro.</small></th><td data-ed="hora42"></td></tr>
+<tr><th scope="row">Valor da hora (salário ÷ <span data-ed="div42">210</span> horas, proporção da Súmula 431 do TST (horas semanais × 5))<br><small>A lei ainda não definiu o divisor. Na etapa de 42 horas, 210 pressupõe norma coletiva de 42 horas; sem ela, use 200.</small></th><td data-ed="hora42"></td></tr>
 <tr><th scope="row">Horas a cobrir por mês (2h × 52 semanas ÷ 12)</th><td data-ed="horas42"></td></tr>
 <tr><th scope="row">Custo por funcionário, como hora extra (+50%)</th><td data-ed="func42"></td></tr>
 <tr><th scope="row">Total para <span data-ed="n"></span> funcionários</th><td data-ed="total42"></td></tr>
 </tbody></table>
 <table class="ed-tab"><caption>Etapa de 40 horas, a partir de 16/12/2027</caption><tbody>
-<tr><th scope="row">Valor da hora (salário ÷ <span data-ed="div40">200</span> horas, cálculo pelo método da CLT (art. 64))<br><small>Divisor pelo método do art. 64 da CLT. A convenção coletiva da categoria pode adotar outro.</small></th><td data-ed="hora40"></td></tr>
+<tr><th scope="row">Valor da hora (salário ÷ <span data-ed="div40">200</span> horas, proporção da Súmula 431 do TST (horas semanais × 5))<br><small>A lei ainda não definiu o divisor. Na etapa de 42 horas, 210 pressupõe norma coletiva de 42 horas; sem ela, use 200.</small></th><td data-ed="hora40"></td></tr>
 <tr><th scope="row">Horas a cobrir por mês (4h × 52 semanas ÷ 12)</th><td data-ed="horas40"></td></tr>
 <tr><th scope="row">Custo por funcionário, como hora extra (+50%)</th><td data-ed="func40"></td></tr>
 <tr><th scope="row">Total para <span data-ed="n2"></span> funcionários</th><td data-ed="total40"></td></tr>

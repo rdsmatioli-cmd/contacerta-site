@@ -17,7 +17,8 @@ const paginas = (dir = RAIZ) => readdirSync(dir, { withFileTypes: true }).flatMa
 });
 
 test('todo #resultado tem aria-live="off" e, logo depois, o #resultado-anuncio (role="status", só para leitor de tela)', () => {
-  const comResultado = paginas().map((p) => [p.slice(RAIZ.length), readFileSync(p, 'utf8')]).filter(([, h]) => h.includes('id="resultado"'));
+  const comResultado = paginas().map((p) => [p.slice(RAIZ.length), readFileSync(p, 'utf8')]).filter(([p, h]) => h.includes('id="resultado"') && !p.startsWith('irpf/'));
+  // /irpf/ tem motor próprio (data-motor="proprio", PR #55) e fica fora deste lote (IRPF separado).
   // piso de sanidade: 27 calculadoras ligadas + idade e IMC desligadas
   assert.ok(comResultado.length >= 29, `${comResultado.length} páginas com #resultado`);
   for (const [p, html] of comResultado) {

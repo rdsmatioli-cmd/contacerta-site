@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=74fbbaaa6a';
+import * as C from './calc.js?v=f36af3e12b';
 import { INDICADORES } from './tabelas.js?v=2469a7d685';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas, validarDiasFerias, validarData, validarOrdemDatas } from './valida.js?v=5dc88aefda';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas, validarDiasFerias, validarData, validarOrdemDatas } from './valida.js?v=48fffebbde';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -163,7 +163,7 @@ const CALCS = {
       if (msg) { msg.textContent = va.erro; msg.hidden = false; msg.className = 'campo-msg err'; }
       return listaErros([[(document.querySelector(`label[for="f-${va.campo}"]`) || {}).textContent || '', va.erro, `f-${va.campo}`]]);
     }
-    const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, vencidasEmDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'], saldoFgts: d.saldoFgts, dependentes: d.dependentes, dataPagamento: d.dataPagamento, primeiraParcela13: d.primeiraParcela13, saqueAniversario: d.saqueAniversario === 'sim' });
+    const r = C.rescisao({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo, aviso: d.aviso, feriasVencidas: d.feriasVencidas, vencidasEmDobro: [d.dobro1 === 'sim', d.dobro2 === 'sim'], saldoFgts: d.saldoFgts, saquesFgts: d.saquesFgts, dependentes: d.dependentes, dataPagamento: d.dataPagamento, primeiraParcela13: d.primeiraParcela13, saqueAniversario: d.saqueAniversario === 'sim' });
     // Datas vazias, inválidas ou fora de ordem já são erro de campo no ler() (CC-CALC-VALIDA-01); isto é só a rede de
     // segurança, com o erro no campo do desligamento.
     if (!r) return erroCampo('f-desligamento', 'A data não pode ser anterior à data de admissão.');
@@ -219,6 +219,7 @@ const CALCS = {
       r.descontoAviso ? [r.excedenteAviso ? 'Desconto do aviso prévio não cumprido (limitado às verbas)' : 'Desconto do aviso prévio não cumprido', `− ${R(r.descontoAvisoAplicado)}`] : null,
       ['Líquido a receber na rescisão', R(r.liquido), 'total'],
       (r.multaFgts || r.saqueFgts) && r.depositoFgtsRescisao ? [`Depósito do FGTS sobre as verbas da rescisão (8%, somado ao saldo informado${r.primeiraParcela13 ? '; sem a 1ª parcela do 13º, que já teve depósito' : ''})`, R(r.depositoFgtsRescisao)] : null,
+      r.multaFgts && r.baseFgts > r.saldoFgtsFinal ? ['Base da multa: depósitos do contrato, sem descontar os saques', R(r.baseFgts)] : null,
       r.multaFgts ? [`Multa do FGTS (depositada na conta do FGTS)`, R(r.multaFgts)] : null,
       r.saqueFgts ? ['Saque do saldo do FGTS', R(r.saqueFgts)] : null,
       r.fgtsRetido ? ['Saldo do FGTS', 'fica retido (saque-aniversário)'] : null,
@@ -229,12 +230,12 @@ const CALCS = {
     const r = C.decimoTerceiro({ salario: d.salario, meses: d.meses, mediaVariaveis: d.media, dependentes: d.dependentes });
     return destaque('13º líquido total', R(r.liquidoTotal)) + barra([['Líquido', r.liquidoTotal, 'c1'], ['INSS', r.inss, 'c2'], ['IRRF', r.irrf, 'c5']]) + tabela([
       [`13º bruto (${r.meses}/12)`, R(r.bruto)],
-      ['1ª parcela (até 30/11, sem descontos)', R(r.primeira), 'sub'],
+      [r.meses < 12 ? `1ª parcela (até 30/11, sem descontos; ${r.mesesPrimeira}/12 ÷ 2)` : '1ª parcela (até 30/11, sem descontos)', R(r.primeira), 'sub'],
       ['INSS (descontado na 2ª parcela)', `− ${R(r.inss)}`],
       ['IRRF (descontado na 2ª parcela)', `− ${R(r.irrf)}`],
       ['2ª parcela (até 20/12)', R(r.segunda), 'sub'],
       ['Total líquido', R(r.liquidoTotal), 'total'],
-    ]);
+    ]) + (r.meses < 12 ? '<p class="nota">Com menos de 12 meses no ano, a 1ª parcela é metade de 1/12 do salário por mês de serviço com mais de 15 dias, contado até o pagamento (Decreto 10.854/2021, art. 78, § 4º). A calculadora supõe o pagamento na 2ª quinzena de novembro, até 30/11, e por isso conta novembro. Se a empresa pagar antes, novembro pode não contar.</p>' : '');
   },
   ferias(d) {
     // CC-CALC-FERIAS-01: dias de gozo e dias vendidos são campos independentes; somados, cabem em 30 dias.
@@ -303,7 +304,7 @@ const CALCS = {
       ['Subtotal de horas extras', R(r.totalHE), 'sub'],
       ['Reflexo no DSR', R(r.dsr)],
       ['Total bruto', R(r.total), 'total'],
-    ]);
+    ]) + `<p class="nota">Divisor usado: ${n2.format(d.jornada)} horas. Padrão pelo mês das horas (EC 141/2026): 220 até 15/12/2026; 200 a partir de 16/12/2026, ou 210 se houver norma coletiva de 42 horas; o contrato ou a convenção coletiva podem prever outro. Dias úteis e de repouso padrão pelo mês das horas: 25 e 5 até 15/12/2026 (1 repouso por semana); 21 e 9 a partir de 16/12/2026 (2 repousos por semana).</p>`;
   },
   'seguro-desemprego'(d) {
     const r = C.seguroDesemprego({ salarios: [d.s1, d.s2, d.s3], solicitacao: d.solicitacao, mesesTrabalhados: d.meses });
@@ -404,7 +405,7 @@ const CALCS = {
       [`Adicional noturno (${pct(r.pct, 0)})`, R(r.adicional), 'sub'],
       ['Reflexo no DSR', R(r.dsr)],
       ['Total bruto a mais no mês', R(r.total), 'total'],
-    ]);
+    ]) + `<p class="nota">Divisor usado: ${n2.format(d.jornada)} horas. Padrão pelo mês das horas (EC 141/2026): 220 até 15/12/2026; 200 a partir de 16/12/2026, ou 210 se houver norma coletiva de 42 horas; o contrato ou a convenção coletiva podem prever outro. Dias úteis e de repouso padrão pelo mês das horas: 25 e 5 até 15/12/2026 (1 repouso por semana); 21 e 9 a partir de 16/12/2026 (2 repousos por semana).</p>`;
   },
   'aviso-previo'(d) {
     const r = C.avisoPrevio({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo });
@@ -506,7 +507,6 @@ const CALCS = {
     if (!r) return '<p class="erro">Informe o faturamento mensal e a alíquota efetiva do DAS.</p>';
     const outro = C.simplesHibridoOuPuro({ ...base, repasseB2B: !repasseB2B });
     const [mant, rep] = repasseB2B ? [outro, r] : [r, outro];
-    const posPrazo = hoje() > '2026-10-30';
     const sinal = (v) => `${v >= 0 ? '+ ' : '− '}${R(Math.abs(v))}`;
     const cen = repasseB2B ? 'com a CBS/IBS repassada ao B2B' : 'cobrando o mesmo valor total';
     const rec = {
@@ -527,7 +527,9 @@ const CALCS = {
 <tr><th scope="row">Diferença para o puro</th><td>${sinal(mant.diferencaLucro)}</td><td>${sinal(rep.diferencaLucro)}</td></tr>
 <tr><th scope="row">Crédito dos clientes B2B</th><td>${R(mant.hibrido.creditoClientes)}</td><td>${R(rep.hibrido.creditoClientes)}</td></tr>
 </tbody></table></div>`;
-    const prazo = posPrazo ? 'Próxima janela de opção: 1º a 31/03/2027, para valer de julho a dezembro de 2027.' : 'Prazo da opção para jan-jun/2027: 30/10/2026.';
+    // Prazo de opção para jan-jun/2027 encerrado em 30/10/2026; cancelamento de 03/11 a 20/12/2026 (Res. CGSN 194/2026).
+    const prazo = (hoje() <= '2026-12-20' ? 'Quem optou para janeiro a junho de 2027 pode cancelar a opção até 20/12/2026, em caráter irretratável (cancelamento aberto de 03/11 a 20/12/2026). ' : '')
+      + 'Próxima janela de opção: março de 2027, para valer de julho a dezembro de 2027 (datas na forma regulamentada pelo CGSN). Empresas em início de atividade seguem regra própria (LC 123/2006, art. 13, § 11).';
     return `<div class="recomenda rec-${r.recomendacao}"><p class="rec-rot">Indicação da simulação</p><p class="rec-tit">${rec[0]}</p><p>${rec[1]}</p></div>`
       + destaque('Diferença de lucro (fora do DAS − tudo no DAS)', `${sinal(r.diferencaLucro)}/mês`) + comp + lado
       + `<p class="nota">Dados e premissas: faturamento de ${R(d.receita)}; margem de ${n2.format(d.margem)}%; DAS de ${n2.format(d.das)}%, com ${n2.format(d.parcela)}% de CBS/IBS na partilha; compras com crédito de ${R(d.compras)}; ${pctB2B}% das vendas para empresas do regime regular. Preço com CBS e IBS fora do DAS: ${repasseB2B ? 'CBS/IBS repassados ao B2B, valor total mantido para o B2C' : 'mesmo valor total cobrado nas duas opções'}; CBS + IBS de ${pct(r.aliquota)} por fora (valor da operação ${R(r.hibrido.valorOperacao)}); DAS do híbrido calculado sobre ${dasSobreValorSemCbsIbs ? 'o valor sem CBS/IBS' : 'a receita total'} (ponto ainda não definido pela lei), sem a parcela de CBS/IBS; custos iguais (faturamento × (1 − margem)). Simulação para 2027-2028; a CBS de 2027 é estimativa até a fixação oficial. Crédito do cliente condicionado às regras gerais (LC 214/2025, arts. 47 e 48). Custos tratados como valores brutos: as compras com crédito já estão dentro dos custos, com o tributo que gera o crédito incluído. Saldo credor das compras não aproveitado aqui (pode subestimar o resultado fora do DAS). ${prazo}</p>`
@@ -630,6 +632,30 @@ function iniciar() {
       if (v === '' || v === pisoTxt(tipoAnterior)) el.value = pisoTxt(form.elements.tipo.value);
       tipoAnterior = form.elements.tipo.value;
     });
+  }
+  // EC 141/2026 (parecer jurídico 05): divisor, dias úteis e dias de repouso padrão pelo mês das horas (competência), não
+  // pela data de hoje: 220, 25 e 5 até 15/12/2026; 200, 21 e 9 a partir de 16/12/2026 (210 com norma coletiva de 42 h).
+  // Só troca campos que ainda têm o último padrão preenchido (não editados). Sem jornadaPadrao (calc.js antigo vindo do
+  // cache), ficam os valores do HTML.
+  if ((id === 'horas-extras' || id === 'adicional-noturno') && form.elements.jornada && typeof C.jornadaPadrao === 'function') {
+    const comp = form.elements.competencia;
+    const norma = form.elements.normaColetiva42;
+    if (comp && !comp.value) comp.value = hoje().slice(0, 7);
+    const campos = ['jornada', 'diasUteis', 'domingos'].map((n) => form.elements[n]).filter(Boolean);
+    for (const c of campos) c.dataset.padrao = c.defaultValue;
+    const aplicarPadrao = () => {
+      const ref = (typeof C.referenciaCompetencia === 'function' && comp && C.referenciaCompetencia(comp.value)) || hoje();
+      const jp = C.jornadaPadrao(ref, !!(norma && norma.checked));
+      const v = { jornada: jp.divisor, diasUteis: jp.diasUteis, domingos: jp.diasRepouso };
+      for (const c of campos) {
+        if (v[c.name] == null || c.value.trim() !== c.dataset.padrao) continue; // editado pelo usuário: mantém
+        c.value = String(v[c.name]);
+        c.dataset.padrao = c.value;
+      }
+    };
+    aplicarPadrao();
+    if (comp) comp.addEventListener('change', aplicarPadrao);
+    if (norma) norma.addEventListener('change', aplicarPadrao);
   }
   if (id === 'conversor-de-medidas') {
     popularUnidades(form);
