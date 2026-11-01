@@ -19,6 +19,9 @@ test('/irpf/: resultado primeiro, captura depois e desligada, sem erro', async (
   const resultado = page.locator('#resultado');
   await expect(resultado).toContainText('R$');
   await expect(resultado).toContainText(/estimad/i);
+  // CC-CALC-A11Y-01: o #resultado não é região viva; o leitor de tela recebe só a frase curta do valor principal.
+  await expect(resultado).toHaveAttribute('aria-live', 'off');
+  await expect(page.locator('#resultado-anuncio')).toHaveText(/^(Restituição estimada|Saldo a pagar estimado): R\$\s[\d.]+,\d{2}$/);
   expect(await page.evaluate(() => window.__semRecarga), 'o envio não recarregou a página').toBe(true);
   await expect(page.locator('#irpf-captura'), 'IRPF_CAPTURA=false').toBeHidden();
   await expect(page.locator('#irpf-captura button[type="submit"]')).toBeDisabled();

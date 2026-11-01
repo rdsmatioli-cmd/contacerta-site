@@ -25,6 +25,10 @@ const MSG = {
 
 const form = document.getElementById('irpf-form');
 const saida = document.getElementById('resultado');
+// CC-CALC-A11Y-01 (como no ui.js): o #resultado tem aria-live="off"; o leitor de tela recebe só a frase curta do valor
+// principal no #resultado-anuncio (role="status"), a cada Simular com dados válidos. Com erro, a região fica vazia: o
+// foco vai para o primeiro campo inválido, que lê a mensagem dele.
+const anuncio = document.getElementById('resultado-anuncio');
 const captura = document.getElementById('irpf-captura');
 
 function dados() {
@@ -72,8 +76,14 @@ form.addEventListener('submit', (ev) => {
   const d = dados();
   const erros = validar(d);
   mostrarErros(erros);
-  if (erros.length) { form.elements[erros[0]].focus(); return; }
-  render(simularIrpf(d));
+  if (erros.length) {
+    if (anuncio) anuncio.textContent = '';
+    form.elements[erros[0]].focus();
+    return;
+  }
+  const r = simularIrpf(d);
+  render(r);
+  if (anuncio) anuncio.textContent = r.aPagar > 0 ? `Saldo a pagar estimado: ${brl(r.aPagar)}` : `Restituição estimada: ${brl(r.restituicao)}`;
   saida.focus();
 });
 const botao = form.querySelector('button[type=submit]');
