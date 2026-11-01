@@ -1,4 +1,4 @@
-/* Licitações · tokens v6 (redesign 3, 01/11/2026): família Conta Certa v2. Mesma fonte (Plus Jakarta Sans, já em cache
+/* Licitações · tokens v7 (redesign 3, rodada 2, 01/11/2026): família Conta Certa v2. Mesma fonte (Plus Jakarta Sans, já em cache
    no domínio, com métricas de fallback), mesmos neutros verde-acinzentados, faixa escura de marca e lima só na marca.
    Claro e escuro automáticos (prefers-color-scheme). Contrastes medidos no DESIGN_PLAN.md do redesign 3. */
 @font-face{font-family:"Plus Jakarta Sans";font-style:normal;font-weight:400 800;font-display:swap;src:url("/fonts/plus-jakarta-sans-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -16,13 +16,15 @@
   --tinta:#0A1411;--tinta-2:#25312C;--suave:#54625B;
   /* ação e links */
   --verde:#137447;--verde-forte:#0C5C39;--verde-500:#1C9561;--verde-claro:#E2F3E9;--verde-50:#F1F8F3;
-  /* prazo: segmentos da régua (aceso x apagado >= 3:1) e pílulas da contagem */
-  --seg:#E3E9E5;--seg-n:#1C9561;--seg-a:#C4650A;--seg-r:#D92D20;
+  /* prazo: trilho da régua (apagado), segmentos acesos (>= 3:1 contra o apagado), hachura de encerrado e pílulas */
+  --seg:#DCE3DE;--seg-n:#168454;--seg-a:#C4650A;--seg-r:#D92D20;--risco:#B9C6BE;
   --ok-bg:#E2F3E9;--ok:#0C5C39;--sin-a-bg:#FFF1DE;--sin-a:#9A4A06;--sin-r-bg:#FEECEA;--sin-r:#B42318;
   /* cabeçalho das tabelas dos documentos */
   --tab-cab:#062519;
+  /* ação secundária (Ver no PNCP): contorno 3,3:1 sobre branco */
+  --fio-acao:#5A9A7A;
   /* avisos */
-  --aviso:#FFF6E3;--aviso-fio:#F0D7A2;--aviso-tinta:#5E3A00;
+  --aviso:#FFF6E3;--aviso-fio:#F0D7A2;--aviso-regua:#E2A93B;--aviso-tinta:#5E3A00;
   /* marca (radar): ladrilho lima, traço da faixa */
   --mk-t:#C9F36A;--mk-g:#03140D;
   /* forma */
@@ -33,15 +35,15 @@
   color-scheme:light}
 @media (prefers-color-scheme:dark){:root{
   --faixa:#03110B;--faixa-2:#0A1E16;--faixa-3:#0F2A1F;
-  --fundo:#050E0A;--card:#0B1712;--card-2:#0E1C16;--card-3:#12231C;
-  --fio:#1C2E26;--fio-2:#16271F;--fio-forte:#2B4337;
+  --fundo:#07120D;--card:#0F1D17;--card-2:#12221B;--card-3:#172A21;
+  --fio:#20342A;--fio-2:#1A2C23;--fio-forte:#2E4739;
   --tinta:#E8F0EC;--tinta-2:#C9D6CF;--suave:#9DB1A7;
   --verde:#7BE2AF;--verde-forte:#A9EECB;--verde-500:#4FD99B;--verde-claro:#10291F;--verde-50:#0C1F17;
-  --seg:#22362D;--seg-n:#4FD99B;--seg-a:#F0A43A;--seg-r:#FF8A7A;
+  --seg:#26392F;--seg-n:#4FD99B;--seg-a:#F0A43A;--seg-r:#FF8A7A;--risco:#3B5546;--fio-acao:#3E7E60;
   --ok-bg:#10291F;--ok:#A9EECB;--sin-a-bg:#2E2010;--sin-a:#F6C177;--sin-r-bg:#33160F;--sin-r:#FFA79B;
   --tab-cab:#133325;
-  --aviso:#241B0C;--aviso-fio:#4E3D17;--aviso-tinta:#F4DEA8;
-  --sombra:0 0 0 1px var(--fio);
-  --sombra-media:0 0 0 1px var(--fio),0 12px 28px -16px rgba(0,0,0,.7);
+  --aviso:#241B0C;--aviso-fio:#4E3D17;--aviso-regua:#9A7426;--aviso-tinta:#F4DEA8;
+  --sombra:0 0 0 1px rgba(255,255,255,.09);
+  --sombra-media:0 0 0 1px rgba(255,255,255,.1),0 12px 28px -16px rgba(0,0,0,.7);
   --sombra-alta:0 0 0 1px rgba(255,255,255,.08),0 36px 72px -36px rgba(0,0,0,.9);
   color-scheme:dark}}

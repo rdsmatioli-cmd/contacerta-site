@@ -23,7 +23,8 @@ export function minificar(css) {
     .replace(/;}/g, '}').trim();
 }
 // Por página, só as regras cujos seletores podem casar: toda classe/id do seletor aparece no HTML da página ou nas
-// classes que licitacoes/assets/app.js aplica. Seletores sem classe/id (html, body, h1, :root...) e @font-face ficam.
+// classes que licitacoes/assets/app.js aplica. Seletores sem classe/id (html, body, h1, :root...) e @font-face ficam;
+// @media e @container são podados por dentro (some o bloco que fica vazio).
 const CLASSES_JS = ['pill', 'cd', 'n', 'r', 'a', 'ruler', 'on'];
 function tokensDaPagina(html) {
   const s = new Set(CLASSES_JS.map((c) => '.' + c));
@@ -45,7 +46,7 @@ function regras(css) { // [prelúdio, corpo] de primeiro nível
 export function podar(css, html) {
   const tk = tokensDaPagina(html);
   const p = (c) => regras(c).map(([pre, corpo]) => {
-    if (pre.startsWith('@media')) { const r = p(corpo); return r ? `${pre}{${r}}` : ''; }
+    if (pre.startsWith('@media') || pre.startsWith('@container')) { const r = p(corpo); return r ? `${pre}{${r}}` : ''; }
     if (pre.startsWith('@')) return `${pre}{${corpo}}`;
     const sels = pre.split(',').filter((s) => seletorCasa(s.replace(/::?[\w-]+(\([^)]*\))?/g, ''), tk));
     return sels.length ? `${sels.join(',')}{${corpo}}` : '';
