@@ -543,3 +543,10 @@ main p a,main li a,main dd a{overflow-wrap:anywhere}
 
 /* Guia completo nas calculadoras: um card só (post do blog), na largura do texto. */
 .relacionadas.guia-completo .cards{grid-template-columns:1fr;max-width:780px}
+
+/* CC-SITE-05: legenda das tabelas do resultado do /irpf/ alinhada à esquerda (numa tabela que rola, centrada ela ficava
+   fora da tela). A tabela .comp do Simples híbrido tem legenda própria e fica como está. */
+.resultado table:not(.comp)>caption{text-align:left;font-size:.86rem;font-weight:700;color:var(--suave);padding:0 0 8px}
+.resultado .rolagem+table.res{margin-top:14px}
+/* Até 480 px a tabela .res vira bloco (Round 2, acima): a legenda acompanha, na largura toda, alinhada às linhas. */
+@media (max-width:480px){div:not(.tabela-rolar)>table.res>caption{display:block;padding:10px 12px 2px}}
