@@ -16,8 +16,8 @@
 //   QUEBRADO.
 // - Links de afiliado: o parâmetro do afiliado (tag= da Amazon, indicacao=) sai da URL conferida, para a checagem não
 //   contar como clique de robô; a página existe ou não sem ele, e o resumo mostra a URL publicada. Afiliado no caminho
-//   (go.hotmart.com/<código>, bling.com.br/planos-e-precos/<código>) não tem como sair: é conferido como está, com 1
-//   GET por semana (2 se não der OK).
+//   (bling.com.br/planos-e-precos/<código>) não tem como sair: é conferido como está, com 1 GET por semana (2 se não
+//   der OK).
 // - Classes: OK (2xx); BLOQUEIO_DE_ROBO (401, 403, 405, 406, 418, 429, 451, 999 ou desafio do Cloudflare: aviso, não
 //   falha); NAO_CONFERIDO (cadeia TLS incompleta, que o navegador completa e o Node não: aviso); QUEBRADO (404, 410
 //   e demais 4xx, 5xx nas duas tentativas, erro de DNS ou de rede, tempo esgotado duas vezes; também quando um
