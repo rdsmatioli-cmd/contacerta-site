@@ -137,8 +137,13 @@ test('salário líquido: digitar atualiza o resultado sem anúncio; Calcular e a
   await expect(anuncio).toHaveAttribute('role', 'status');
   await expect(anuncio).toHaveClass('vh');
   await expect(anuncio).toHaveText(''); // a carga não anuncia
+  // CC-SITE-12: campo apagado, a lista de erros aparece sem role="alert" (nada de alerta com o campo em edição); o campo
+  // fica marcado (aria-invalid e mensagem)
   await page.fill('#f-bruto', '');
-  await expect(resultado.locator('.erro[role="alert"]')).toHaveCount(1);
+  await expect(resultado.locator('.erro')).toContainText('Salário bruto mensal: Preencha este campo.');
+  await expect(resultado.locator('[role="alert"]')).toHaveCount(0);
+  await expect(page.locator('#f-bruto')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#f-bruto-msg')).toHaveText('Preencha este campo.');
   await observar(page);
   // digitação lenta (cada tecla depois do atraso de 250 ms): o resultado muda a cada pausa, a região de anúncio não
   await page.locator('#f-bruto').pressSequentially('4500', { delay: 350 });
@@ -174,22 +179,33 @@ test('salário líquido: digitar atualiza o resultado sem anúncio; Calcular e a
   semErros(erros, rede);
 });
 
-test('lista de erros: continua role="alert" e não é reescrita enquanto o erro é o mesmo', async ({ page, rede, erros }) => {
+// CC-SITE-12: com o campo em edição, a lista de erros sai sem role="alert" (o campo continua com aria-invalid e a
+// mensagem); o alerta, que interrompe o leitor de tela, fica para o Calcular. Ao digitar, a lista não é reescrita
+// enquanto o erro é o mesmo.
+test('lista de erros: sem role="alert" ao digitar, mesmo nó enquanto o erro é o mesmo e role="alert" só no Calcular', async ({ page, rede, erros }) => {
   const { resultado, calcular } = await abrir(page, '/salario-liquido/');
   await observar(page);
   await page.fill('#f-bruto', 'a');
-  const alerta = resultado.locator('.erro[role="alert"]');
-  await expect(alerta).toContainText('Digite só números.');
-  await alerta.evaluate((el) => { el.dataset.marca = '1'; });
-  // mais letras, o mesmo erro: o mesmo nó (nada reanunciado)
+  const lista = resultado.locator('.erro');
+  await expect(lista).toContainText('Salário bruto mensal: Digite só números.');
+  await expect(resultado.locator('[role="alert"]')).toHaveCount(0);
+  await expect(page.locator('#f-bruto')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#f-bruto-msg')).toHaveText('Digite só números.');
+  await lista.evaluate((el) => { el.dataset.marca = '1'; });
+  // mais letras, o mesmo erro: o mesmo nó, ainda sem alerta
   await page.locator('#f-bruto').pressSequentially('bc', { delay: 350 });
   await page.waitForTimeout(400);
-  await expect(resultado.locator('.erro[role="alert"][data-marca="1"]')).toHaveCount(1);
-  // envio com erro: a lista de erros se anuncia sozinha; a região de anúncio fica vazia
+  await expect(resultado.locator('.erro[data-marca="1"]')).toHaveCount(1);
+  await expect(resultado.locator('[role="alert"]')).toHaveCount(0);
+  // envio com erro: a lista ganha role="alert" e se anuncia sozinha; a região de anúncio fica vazia
   await calcular();
-  await expect(alerta).toHaveCount(1);
+  await expect(resultado.locator('.erro[role="alert"]')).toContainText('Salário bruto mensal: Digite só números.');
   await expect(page.locator('#resultado-anuncio')).toHaveText('');
   expect(await anuncios(page)).toEqual([]);
+  // de volta ao campo, mais uma tecla com o mesmo erro: a lista continua, sem alerta
+  await page.locator('#f-bruto').pressSequentially('d', { delay: 350 });
+  await expect(resultado.locator('[role="alert"]')).toHaveCount(0);
+  await expect(lista).toContainText('Salário bruto mensal: Digite só números.');
   // corrigido e enviado: a frase volta
   await page.fill('#f-bruto', '3500');
   await calcular();
@@ -203,11 +219,13 @@ test('troca do motivo na rescisão anuncia o novo líquido; sem destaque, a fras
   await observar(page);
   await page.selectOption('#f-tipo', 'acordo');
   await expect.poll(() => anuncios(page)).toEqual(['Valor líquido estimado da rescisão: R$ 10.751,27']);
-  // erro de campo pela troca (aviso fora do motivo): só a lista de erros, sem frase
+  // erro de campo pela troca (aviso fora do motivo): a lista de erros sem role="alert" (CC-SITE-12: o alerta fica para o
+  // Calcular) e a frase do erro na região de anúncio (role="status", educada)
   await page.selectOption('#f-tipo', 'pedidoDemissao');
-  await expect(resultado.locator('.erro[role="alert"] a[href="#f-aviso"]')).toBeVisible();
-  await expect(page.locator('#resultado-anuncio')).toHaveText('');
-  expect(await anuncios(page)).toHaveLength(1);
+  await expect(resultado.locator('.erro a[href="#f-aviso"]')).toBeVisible();
+  await expect(resultado.locator('[role="alert"]')).toHaveCount(0);
+  await expect.poll(() => anuncios(page)).toHaveLength(2);
+  expect((await anuncios(page))[1]).toMatch(/^Confira o campo antes de calcular: Aviso prévio: \S/);
   semRedeExterna(rede);
   semErros(erros, rede);
 });
