@@ -121,6 +121,14 @@ bloqueia o IP do GitHub), registre numa issue em vez de remover o link; se estiv
 o link nessas páginas. O GitHub desliga o agendamento depois de 60 dias sem atividade no repositório: reative em
 Actions se isso acontecer.
 
+## Imagens de compartilhamento (og:image)
+
+As artes de `og/` têm 1200x630 e o mesmo layout (marca, selo, título, subtítulo, chips e o ícone da página).
+`node tools/og.mjs <nome>` gera `og/<nome>.jpg` a partir da tabela `ARTES` do script, com o Playwright de `tests/e2e`
+(`npm ci --ignore-scripts` lá) e a fonte de `/fonts`, sem rede; `CHROME_PATH` aponta outro Chromium. Os textos da arte
+saem do que a página já diz. Página sem arte própria usa `og/padrao.jpg`: `tests/og-imagens.test.mjs` falha com arte
+copiada de outra página (bytes iguais com outro nome) e com medida diferente da declarada em `og:image:width/height`.
+
 ## Lighthouse
 
 O job `lighthouse` do CI roda o Lighthouse 13.5.0 (`npx --yes lighthouse@13.5.0`) em 9 URLs, nos perfis mobile e
