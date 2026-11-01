@@ -4,7 +4,7 @@
 // tentativa fica registrada. Antes de qualquer clique no banner e depois de Recusar, zero tentativa ao Google;
 // depois de Aceitar, a tentativa de carregar o gtag.js aparece, o que prova que o bloqueio depende do consentimento.
 import { test, expect, ehGoogle, semErros, semRedeExterna, semRolagemHorizontal, assentar, prepararEnvio, semRecarga } from './fixtures.mjs';
-import { ARQUIVOS, BLOG, CALCULADORAS, DESLIGADAS, LICITACOES, POSTS, urlDe } from './site.mjs';
+import { ARQUIVOS, BLOG, CALCULADORAS, DESLIGADAS, LICITACOES, PROPRIOS, POSTS, urlDe } from './site.mjs';
 
 const banner = (page) => page.locator('section#lcm-consent');
 
@@ -89,7 +89,7 @@ for (const p of PAGINAS) {
 
 // Varredura: toda página com o banner (fora das já cobertas em calculadoras.spec e paginas.spec) abre com o banner
 // visível e sem nenhuma tentativa externa, sem erro e sem rolagem horizontal.
-const cobertas = new Set(['/', ...BLOG, ...CALCULADORAS.map((c) => c.url), ...DESLIGADAS.map((c) => c.url), ...LICITACOES]);
+const cobertas = new Set(['/', ...BLOG, ...CALCULADORAS.map((c) => c.url), ...DESLIGADAS.map((c) => c.url), ...PROPRIOS.map((c) => c.url), ...LICITACOES]);
 const demais = ARQUIVOS.map(urlDe).filter((u) => !cobertas.has(u));
 for (const url of demais) {
   test(`página ${url}: banner visível, zero Google e nenhum host externo antes do aceite`, async ({ page, rede, erros }) => {

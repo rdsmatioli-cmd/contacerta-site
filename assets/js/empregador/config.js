@@ -1,7 +1,7 @@
 // Empregador em Dia: configuração única (backlog v2 81dfa1e0; OK do CEO a1dc9f21; DEC 95a76e17; CFO 0619d010).
 // Flags: tudo desligado. Ligar só em homologação, com OK do CEO.
 export const FLAGS = Object.freeze({
-  EMPREGADOR_EM_DIA: false, // páginas: com false, só o aviso "em preparação"
+  EMPREGADOR_EM_DIA: true, // páginas: com false, só o aviso "em preparação" (DEC CEO/CPO 31/10: ON para o lançamento de 03/11)
   ED_CHECKOUT: false, // checkout/contratar (E3)
   ED_ME_AVISE: false, // captura "Me avise" (<20)
   ED_GUIA: false, // guia gratuito (E4, D-06)
