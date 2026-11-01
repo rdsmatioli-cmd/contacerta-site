@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=6fc4ea62e0';
+import * as C from './calc.js?v=f36af3e12b';
 import { INDICADORES } from './tabelas.js?v=2469a7d685';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas, validarDiasFerias, validarData, validarOrdemDatas } from './valida.js?v=7b41b53d67';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas, validarDiasFerias, validarData, validarOrdemDatas } from './valida.js?v=48fffebbde';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -304,7 +304,7 @@ const CALCS = {
       ['Subtotal de horas extras', R(r.totalHE), 'sub'],
       ['Reflexo no DSR', R(r.dsr)],
       ['Total bruto', R(r.total), 'total'],
-    ]) + `<p class="nota">Divisor usado: ${n2.format(d.jornada)} horas. Padrão pela EC 141/2026: 220 (44 horas semanais) até 15/12/2026, 210 (42 horas) a partir de 16/12/2026 e 200 (40 horas) a partir de 16/12/2027; o contrato ou a convenção coletiva podem prever outro. Dias úteis e de repouso padrão pela data: 25 e 5 até 15/12/2026 (1 repouso por semana); 21 e 9 a partir de 16/12/2026 (2 repousos por semana).</p>`;
+    ]) + `<p class="nota">Divisor usado: ${n2.format(d.jornada)} horas. Padrão pelo mês das horas (EC 141/2026): 220 até 15/12/2026; 200 a partir de 16/12/2026, ou 210 se houver norma coletiva de 42 horas; o contrato ou a convenção coletiva podem prever outro. Dias úteis e de repouso padrão pelo mês das horas: 25 e 5 até 15/12/2026 (1 repouso por semana); 21 e 9 a partir de 16/12/2026 (2 repousos por semana).</p>`;
   },
   'seguro-desemprego'(d) {
     const r = C.seguroDesemprego({ salarios: [d.s1, d.s2, d.s3], solicitacao: d.solicitacao, mesesTrabalhados: d.meses });
@@ -405,7 +405,7 @@ const CALCS = {
       [`Adicional noturno (${pct(r.pct, 0)})`, R(r.adicional), 'sub'],
       ['Reflexo no DSR', R(r.dsr)],
       ['Total bruto a mais no mês', R(r.total), 'total'],
-    ]) + `<p class="nota">Divisor usado: ${n2.format(d.jornada)} horas. Padrão pela EC 141/2026: 220 (44 horas semanais) até 15/12/2026, 210 (42 horas) a partir de 16/12/2026 e 200 (40 horas) a partir de 16/12/2027; o contrato ou a convenção coletiva podem prever outro. Dias úteis e de repouso padrão pela data: 25 e 5 até 15/12/2026 (1 repouso por semana); 21 e 9 a partir de 16/12/2026 (2 repousos por semana).</p>`;
+    ]) + `<p class="nota">Divisor usado: ${n2.format(d.jornada)} horas. Padrão pelo mês das horas (EC 141/2026): 220 até 15/12/2026; 200 a partir de 16/12/2026, ou 210 se houver norma coletiva de 42 horas; o contrato ou a convenção coletiva podem prever outro. Dias úteis e de repouso padrão pelo mês das horas: 25 e 5 até 15/12/2026 (1 repouso por semana); 21 e 9 a partir de 16/12/2026 (2 repousos por semana).</p>`;
   },
   'aviso-previo'(d) {
     const r = C.avisoPrevio({ salario: d.salario, admissao: d.admissao, desligamento: d.desligamento, tipo: d.tipo });
@@ -633,17 +633,29 @@ function iniciar() {
       tipoAnterior = form.elements.tipo.value;
     });
   }
-  // EC 141/2026: divisor, dias úteis e dias de repouso padrão pela data de hoje (220, 25 e 5; 210, 21 e 9 a partir de
-  // 16/12/2026; 200, 21 e 9 a partir de 16/12/2027), só nos campos que ainda têm o valor do HTML. Sem jornadaPadrao
-  // (calc.js antigo vindo do cache), ficam os valores do HTML.
+  // EC 141/2026 (parecer jurídico 05): divisor, dias úteis e dias de repouso padrão pelo mês das horas (competência), não
+  // pela data de hoje: 220, 25 e 5 até 15/12/2026; 200, 21 e 9 a partir de 16/12/2026 (210 com norma coletiva de 42 h).
+  // Só troca campos que ainda têm o último padrão preenchido (não editados). Sem jornadaPadrao (calc.js antigo vindo do
+  // cache), ficam os valores do HTML.
   if ((id === 'horas-extras' || id === 'adicional-noturno') && form.elements.jornada && typeof C.jornadaPadrao === 'function') {
-    const el = form.elements.jornada;
-    const jp = C.jornadaPadrao(hoje());
-    if (el.value.trim() === el.defaultValue) el.value = String(jp.divisor);
-    for (const [nome, v] of [['diasUteis', jp.diasUteis], ['domingos', jp.diasRepouso]]) {
-      const campo = form.elements[nome];
-      if (campo && v != null && campo.value.trim() === campo.defaultValue) campo.value = String(v);
-    }
+    const comp = form.elements.competencia;
+    const norma = form.elements.normaColetiva42;
+    if (comp && !comp.value) comp.value = hoje().slice(0, 7);
+    const campos = ['jornada', 'diasUteis', 'domingos'].map((n) => form.elements[n]).filter(Boolean);
+    for (const c of campos) c.dataset.padrao = c.defaultValue;
+    const aplicarPadrao = () => {
+      const ref = (typeof C.referenciaCompetencia === 'function' && comp && C.referenciaCompetencia(comp.value)) || hoje();
+      const jp = C.jornadaPadrao(ref, !!(norma && norma.checked));
+      const v = { jornada: jp.divisor, diasUteis: jp.diasUteis, domingos: jp.diasRepouso };
+      for (const c of campos) {
+        if (v[c.name] == null || c.value.trim() !== c.dataset.padrao) continue; // editado pelo usuário: mantém
+        c.value = String(v[c.name]);
+        c.dataset.padrao = c.value;
+      }
+    };
+    aplicarPadrao();
+    if (comp) comp.addEventListener('change', aplicarPadrao);
+    if (norma) norma.addEventListener('change', aplicarPadrao);
   }
   if (id === 'conversor-de-medidas') {
     popularUnidades(form);

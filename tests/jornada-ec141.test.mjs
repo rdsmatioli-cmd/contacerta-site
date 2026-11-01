@@ -13,35 +13,42 @@ const ler = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
 const BRL = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const EC_URL = 'https://www.in.gov.br/web/dou/-/emenda-constitucional-n-141-738818165';
 
-test('jornadaPadrao: 220 até 15/12/2026, 210 de 16/12/2026, 200 de 16/12/2027', () => {
+test('jornadaPadrao: 220 até 15/12/2026, 200 de 16/12/2026 (210 com norma coletiva de 42 h), 200 de 16/12/2027 (parecer 05)', () => {
   const div = (d) => C.jornadaPadrao(d).divisor;
   assert.equal(div('2026-10-31'), 220);
   assert.equal(div('2026-12-15'), 220);
-  assert.equal(div('2026-12-16'), 210);
-  assert.equal(div('2027-12-15'), 210);
+  assert.equal(div('2026-12-16'), 200);
+  assert.equal(div('2027-12-15'), 200);
+  assert.equal(C.jornadaPadrao('2026-12-16', true).divisor, 210);
+  assert.equal(C.jornadaPadrao('2026-12-15', true).divisor, 220);
+  assert.equal(C.jornadaPadrao('2027-12-16', true).divisor, 200);
+  assert.equal(C.referenciaCompetencia('2026-12'), '2026-12-16');
+  assert.equal(C.referenciaCompetencia('2026-11'), '2026-11-16');
+  assert.equal(C.referenciaCompetencia(''), '');
   assert.equal(div('2027-12-16'), 200);
   assert.equal(div('2030-01-01'), 200);
   assert.equal(div(''), 220);
   assert.equal(C.jornadaPadrao('2026-12-16').repousosSemanais, 2);
-  for (const j of C.JORNADA_CLT) assert.equal(j.divisor, j.horas * 5, `${j.horas} h`);
+  assert.deepEqual(C.JORNADA_CLT.map((j) => j.divisor), [220, 200, 200]);
+  assert.equal(C.JORNADA_CLT[1].divisorNormaColetiva, 210);
   // dias padrão num mês de 30 dias com 1 feriado: 1 repouso por semana -> 25 + 5; 2 repousos -> 21 + 9
   assert.deepEqual(C.JORNADA_CLT.map((j) => [j.repousosSemanais, j.diasUteis, j.diasRepouso]), [[1, 25, 5], [2, 21, 9], [2, 21, 9]]);
   for (const j of C.JORNADA_CLT) assert.equal(j.diasUteis + j.diasRepouso, 30);
 });
 
-test('mesmas datas e divisores do Empregador em Dia (config.js, JORNADA)', () => {
+test('mesmas datas do Empregador em Dia (config.js, JORNADA); divisor de 16/12/2026 do Empregador = norma coletiva (210), decisão separada', () => {
   assert.equal(JORNADA.atual, C.JORNADA_CLT[0].horas);
-  assert.deepEqual(JORNADA.etapas.map((e) => [e.desde, e.horas, e.divisor]), C.JORNADA_CLT.slice(1).map((j) => [j.desde, j.horas, j.divisor]));
+  assert.deepEqual(JORNADA.etapas.map((e) => [e.desde, e.horas, e.divisor]), C.JORNADA_CLT.slice(1).map((j) => [j.desde, j.horas, j.divisorNormaColetiva ?? j.divisor]));
 });
 
-test('ui.js preenche o divisor pela data só se o campo não foi editado, e explica no resultado', () => {
+test('ui.js preenche o padrão pelo mês das horas (competência), não pela data de hoje, só em campos não editados', () => {
   const ui = ler('assets/js/ui.js');
   assert.match(ui, /if \(\(id === 'horas-extras' \|\| id === 'adicional-noturno'\) && form\.elements\.jornada && typeof C\.jornadaPadrao === 'function'\) \{/);
-  assert.match(ui, /const jp = C\.jornadaPadrao\(hoje\(\)\);\n\s*if \(el\.value\.trim\(\) === el\.defaultValue\) el\.value = String\(jp\.divisor\);/);
-  // dias úteis e de repouso: mesma regra do campo não editado
-  assert.match(ui, /for \(const \[nome, v\] of \[\['diasUteis', jp\.diasUteis\], \['domingos', jp\.diasRepouso\]\]\) \{\n\s*const campo = form\.elements\[nome\];\n\s*if \(campo && v != null && campo\.value\.trim\(\) === campo\.defaultValue\) campo\.value = String\(v\);/);
-  assert.equal((ui.match(/Dias úteis e de repouso padrão pela data: 25 e 5 até 15\/12\/2026 \(1 repouso por semana\); 21 e 9 a partir de 16\/12\/2026 \(2 repousos por semana\)/g) || []).length, 2);
-  assert.equal((ui.match(/Padrão pela EC 141\/2026: 220 \(44 horas semanais\) até 15\/12\/2026, 210 \(42 horas\) a partir de 16\/12\/2026 e 200 \(40 horas\) a partir de 16\/12\/2027/g) || []).length, 2);
+  assert.match(ui, /const jp = C\.jornadaPadrao\(ref, !!\(norma && norma\.checked\)\);/);
+  assert.match(ui, /C\.referenciaCompetencia\(comp\.value\)/);
+  assert.match(ui, /if \(v\[c\.name\] == null \|\| c\.value\.trim\(\) !== c\.dataset\.padrao\) continue;/);
+  assert.doesNotMatch(ui, /C\.jornadaPadrao\(hoje\(\)\)/);
+  assert.equal((ui.match(/Padrão pelo mês das horas \(EC 141\/2026\): 220 até 15\/12\/2026; 200 a partir de 16\/12\/2026, ou 210 se houver norma coletiva de 42 horas/g) || []).length, 2);
 });
 
 test('páginas: ajuda do divisor, repousos, FAQ da EC 141 (FAQPage = visível), exemplos e fonte', () => {
@@ -49,15 +56,19 @@ test('páginas: ajuda do divisor, repousos, FAQ da EC 141 (FAQPage = visível), 
   for (const p of ['horas-extras', 'adicional-noturno']) {
     const h = ler(`${p}/index.html`);
     assert.match(h, /id="f-jornada" name="jornada"[^>]*value="220"/, p); // HTML: valor do dia; o JS troca pela data
-    assert.match(h, /220 para 44 h por semana até 15\/12\/2026, 210 para 42 h a partir de 16\/12\/2026 e 200 para 40 h a partir de 16\/12\/2027/, p);
+    assert.match(h, /220 para 44 h por semana até 15\/12\/2026; 200 a partir de 16\/12\/2026, ou 210 se houver norma coletiva de 42 horas/, p);
+    assert.ok(h.includes('a calculadora preenche o padrão pelo mês das horas: 220 até 15/12/2026; 200 a partir de 16/12/2026, ou 210 se houver norma coletiva de 42 horas'), p);
+    assert.ok(h.includes('Há acordo ou convenção coletiva que distribui 42 horas semanais (divisor 210)'), p);
+    assert.match(h, /<input type="month" id="f-competencia" name="competencia"/, p);
+    assert.doesNotMatch(h, /data de hoje/, p);
     assert.match(h, /<label for="f-domingos">Dias de repouso e feriados no mês<\/label>/, p);
     assert.match(h, /aria-describedby="f-domingos-ajuda f-domingos-msg"><\/div><div id="f-domingos-ajuda" class="ajuda"><small>[^<]*2 dias de repouso semanal remunerado/, p);
     assert.doesNotMatch(h, /Domingos e feriados no mês/, p);
     // HTML com os dias da regra atual (o JS troca pela data); ajudas citam os dois padrões
     assert.match(h, /id="f-diasUteis" name="diasUteis"[^>]*value="25"/, p);
     assert.match(h, /id="f-domingos" name="domingos"[^>]*value="5"/, p);
-    assert.match(h, /Padrão pela data de hoje: 25 até 15\/12\/2026; 21 a partir de 16\/12\/2026/, p);
-    assert.match(h, /Padrão pela data de hoje: 5 até 15\/12\/2026; 9 a partir de 16\/12\/2026/, p);
+    assert.match(h, /Padrão pelo mês das horas: 25 até 15\/12\/2026; 21 a partir de 16\/12\/2026/, p);
+    assert.match(h, /Padrão pelo mês das horas: 5 até 15\/12\/2026; 9 a partir de 16\/12\/2026/, p);
     const ld = JSON.parse(h.match(/<script type="application\/ld\+json">(\{"@context":"https:\/\/schema\.org","@type":"FAQPage".*?)<\/script>/)[1]).mainEntity;
     const vis = [...h.matchAll(/<details><summary>(.*?)<\/summary><div>(.*?)<\/div><\/details>/g)];
     assert.equal(ld.length, vis.length, p);

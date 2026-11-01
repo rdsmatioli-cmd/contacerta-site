@@ -150,21 +150,28 @@ export function ferias({ salario, mediaVariaveis = 0, diasGozo = 30, diasAbono =
 
 // ---------------------------------------------------------------- Jornada (EC 141/2026)
 // Duração normal máxima de 44 h até 15/12/2026, 42 h a partir de 16/12/2026 e 40 h a partir de 16/12/2027 (EC 141/2026,
-// art. 6º, DOU de 16/10/2026: 2 meses e 1 ano depois). Divisor padrão = horas semanais × 5 (220, 210 e 200), a proporção
-// da Súmula 431 do TST (40 h -> 200); a lei não definiu o divisor do regime de 2 repousos, e 210/200 seguem pendentes da
-// validação trabalhista (M-02), como em assets/js/empregador/config.js. Dois repousos semanais remunerados a partir de
+// art. 6º, DOU de 16/10/2026: 2 meses e 1 ano depois). Divisor padrão (parecer jurídico 05, ee9db3ba): 220 até 15/12/2026 e
+// 200 a partir de 16/12/2026 (2 repousos e 8 h por dia = 40 h efetivas; Súmula 431 do TST); 210 só quando acordo ou
+// convenção coletiva distribui 42 horas semanais (divisorNormaColetiva). A lei não definiu o divisor (M-02). Dois repousos semanais remunerados a partir de
 // 16/12/2026 (art. 1º, inciso XV, e art. 10, I). Dias padrão das calculadoras num mês de 30 dias com 1 feriado: 25 úteis e
 // 5 de repouso e feriados com 1 repouso por semana; 21 e 9 com 2 repousos por semana.
-// Mesmas datas e divisores de assets/js/empregador/config.js (JORNADA); tests/jornada-ec141.test.mjs confere.
+// Mesmas datas de assets/js/empregador/config.js (JORNADA). O simulador do Empregador em Dia ainda usa 210 em 16/12/2026
+// (= divisorNormaColetiva); a troca para 200 é decisão separada do Empregador. tests/jornada-ec141.test.mjs confere.
 export const JORNADA_CLT = Object.freeze([
   Object.freeze({ desde: '', horas: 44, divisor: 220, repousosSemanais: 1, diasUteis: 25, diasRepouso: 5 }),
-  Object.freeze({ desde: '2026-12-16', horas: 42, divisor: 210, repousosSemanais: 2, diasUteis: 21, diasRepouso: 9 }),
+  Object.freeze({ desde: '2026-12-16', horas: 42, divisor: 200, divisorNormaColetiva: 210, repousosSemanais: 2, diasUteis: 21, diasRepouso: 9 }),
   Object.freeze({ desde: '2027-12-16', horas: 40, divisor: 200, repousosSemanais: 2, diasUteis: 21, diasRepouso: 9 }),
 ]);
-// Jornada padrão na data (AAAA-MM-DD): a última etapa com desde <= data.
-export function jornadaPadrao(dataISO) {
+// Jornada padrão na data (AAAA-MM-DD): a última etapa com desde <= data. normaColetiva42: há acordo ou convenção
+// coletiva que distribui 42 horas semanais -> divisor 210 na etapa que o prevê.
+export function jornadaPadrao(dataISO, normaColetiva42 = false) {
   const d = String(dataISO ?? '').slice(0, 10);
-  return JORNADA_CLT.reduce((atual, j) => (j.desde <= d ? j : atual), JORNADA_CLT[0]);
+  const j = JORNADA_CLT.reduce((atual, e) => (e.desde <= d ? e : atual), JORNADA_CLT[0]);
+  return normaColetiva42 && j.divisorNormaColetiva ? { ...j, divisor: j.divisorNormaColetiva } : j;
+}
+// Data de referência do mês das horas (AAAA-MM): dia 16, para que dezembro de 2026 já siga a regra de 16/12/2026.
+export function referenciaCompetencia(mes) {
+  return /^\d{4}-\d{2}$/.test(String(mes ?? '')) ? `${mes}-16` : '';
 }
 
 // ---------------------------------------------------------------- Horas extras
@@ -988,7 +995,7 @@ export const MARCOS_REFORMA = [
   { data: '2026-01-01', t: 'Início do ano de teste: CBS de 0,9% e IBS de 0,1% destacados nos documentos fiscais, compensáveis com PIS/Cofins ou dispensados para quem cumpre as obrigações acessórias' },
   { data: '2026-10-28', t: 'TCU calcula a alíquota de referência da CBS de 2027 em 11,3% (TC 006.529/2026-7). Não é a alíquota oficial: a fixação cabe ao Senado.' },
   { data: '2026-10-30', t: 'Fim do prazo (aberto em 01/09/2026) para o Simples Nacional optar por apurar IBS/CBS por fora (regime regular) no 1º semestre de 2027; prazo legal do TCU para enviar ao Senado o cálculo da alíquota de referência da CBS' },
-  { data: '2026-11-03', t: 'Começa o prazo para cancelar, em caráter irretratável, a opção do Simples pelo regime regular de IBS/CBS feita para o 1º semestre de 2027 e o pedido de opção pelo Simples Nacional para 2027 (até 20/12/2026; Resolução CGSN nº 194/2026)' },
+  { data: '2026-11-03', t: 'Começa o prazo para cancelar, em caráter irretratável, a opção do Simples pelo regime regular de IBS/CBS feita para o 1º semestre de 2027 e o pedido de opção pelo Simples Nacional para 2027 (até 20/12/2026; Resolução CGSN nº 186/2026, art. 1º, § 1º, I (Simples) e art. 2º, parágrafo único (IBS/CBS), na redação da Resolução CGSN nº 194/2026)' },
   { data: '2026-11-16', t: 'Novas regras de validação de IBS/CBS da NF-e em produção (NT 2025.002-RTC, cronograma sujeito a mudança)' },
   { data: '2026-12-15', t: 'Prazo do Senado para fixar a alíquota de referência da CBS de 2027 (o TCU calculou 11,3%)' },
   { data: '2026-12-20', t: 'Fim do prazo para cancelar a opção do Simples pelo regime regular de IBS/CBS do 1º semestre de 2027 e o pedido de opção pelo Simples Nacional para 2027' },

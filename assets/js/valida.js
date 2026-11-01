@@ -1,6 +1,6 @@
 // Validação dos campos numéricos das calculadoras (laudo QA 10/10/2026 e reteste: CC-01 a CC-05, N-01, N-02, N-04, N-11).
 // Funções puras, testáveis no Node; o ui.js aplica o resultado no formulário.
-import { avosFerias, parseData, avisosDoMotivo, addMeses, addDias } from './calc.js?v=6fc4ea62e0';
+import { avosFerias, parseData, avisosDoMotivo, addMeses, addDias } from './calc.js?v=f36af3e12b';
 const fmt = (x) => Number(x).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 const AMBIGUO = 'Formato ambíguo: use 1.000,00 ou 1000';
 
