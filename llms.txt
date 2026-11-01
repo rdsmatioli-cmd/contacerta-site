@@ -18,6 +18,7 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 - [Tabela do imposto de renda 2026](https://contacertabr.com.br/tabela-ir-2026/): Tabela do imposto de renda 2026: faixas do IRRF, dedução por dependente, desconto simplificado e isenção efetiva até R$ 5.000,00 pela Lei 15.270/2025.
 - [Salário mínimo 2026](https://contacertabr.com.br/salario-minimo-2026/): O salário mínimo de 2026 é R$ 1.621,00, vigente desde 01/01/2026 (Decreto nº 12.797, de 23/12/2025). Veja o efeito no INSS, no seguro-desemprego e no DAS do MEI.
 - [Tabela do seguro-desemprego 2026](https://contacertabr.com.br/tabela-seguro-desemprego-2026/): Tabela do seguro-desemprego 2026, vigente desde 11/01/2026: 80% da média até R$ 2.222,17, faixa intermediária e teto de R$ 2.518,65.
+- [Planilha grátis: Tabelas oficiais 2026](https://contacertabr.com.br/tabelas-oficiais-2026/): Baixe grátis a planilha com as tabelas oficiais 2026 de INSS, IR, salário mínimo e seguro-desemprego, com as fontes oficiais.
 
 ## Trabalho e salário
 
@@ -78,6 +79,8 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 ## Blog
 
 - [Blog do Conta Certa](https://contacertabr.com.br/blog/): guias com resposta direta e links para as calculadoras.
+- [Blog: Trabalho e salário](https://contacertabr.com.br/blog/categoria/trabalho-e-salario/): guias de trabalho e salário, com resposta direta e links para as calculadoras.
+- [Blog: Impostos e MEI](https://contacertabr.com.br/blog/categoria/impostos-e-mei/): guias de impostos e MEI, com resposta direta e links para as calculadoras.
 - [Juros compostos: fórmula e 3 exemplos práticos](https://contacertabr.com.br/blog/juros-compostos-exemplo/): Veja a fórmula dos juros compostos e 3 exemplos resolvidos: aplicação, dívida no cartão e aportes mensais. Inclui conversão de taxas e regra do 72.
 - [Como calcular markup: fórmula, exemplo e diferença para margem](https://contacertabr.com.br/blog/como-calcular-markup/): Aprenda a calcular markup divisor e multiplicador com exemplo em reais, tabela de conversão para margem e os erros que fazem você vender no prejuízo.
 - [Pró-labore em 2026: o que é, quanto retirar e como fica no Simples](https://contacertabr.com.br/blog/pro-labore/): Pró-labore em 2026 com INSS de 11%, desconto máximo de R$ 932,31, IR com a redução da Lei 15.270, Fator R e exemplos com números. Fontes oficiais.

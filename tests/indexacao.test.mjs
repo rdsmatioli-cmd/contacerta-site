@@ -4,6 +4,9 @@
 // CC-SITE-14: o /irpf/ estava no sitemap desde 31/10 sem nenhum link interno. Agora toda URL do sitemap fora de
 // /licitacoes/ precisa ser alcançável a partir da home seguindo <a href> internos (o caminho que o robô faz), salvo
 // as exceções comentadas em SEM_LINK_INTERNO.
+// CC-SITE-15: o teste antigo só conferia que as URLs citadas no llms.txt e no feed existem; por isso o llms.txt
+// ficou sem /irpf/, /tabelas-oficiais-2026/ e as categorias do blog. Agora toda URL do sitemap fora de /licitacoes/
+// está no llms.txt ou em FORA_DO_LLMS (com o motivo), e todo post indexável de blog/<slug>/ está no feed.xml.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, statSync } from 'node:fs';
@@ -136,4 +139,81 @@ test('/irpf/: linha no llms.txt em "Impostos e MEI", com a meta description da p
   const bloco = ler('llms.txt').split(/^## /m).find((b) => b.startsWith('Impostos e MEI\n'));
   assert.ok(bloco);
   assert.ok(bloco.includes(`- [Simulador IRPF 2027: estimativa da restituição](${ORIGEM}/irpf/): ${desc}\n`));
+});
+
+// URLs do sitemap (fora de /licitacoes/) que ficam fora do llms.txt, cada uma com o motivo. Exceção que entra no
+// llms.txt ou sai do sitemap derruba o teste, para a lista não envelhecer.
+const FORA_DO_LLMS = new Map([
+  // Empregador em Dia: produto à parte, ainda sem link do resto do site (ver SEM_LINK_INTERNO). Entra no llms.txt
+  // junto com a decisão de ligá-lo ao site.
+  [`${ORIGEM}/empregador-em-dia/`, 'Empregador em Dia, até a decisão'],
+  [`${ORIGEM}/empregador-em-dia/avaliacao-rapida-nr1/`, 'Empregador em Dia, até a decisão'],
+  [`${ORIGEM}/empregador-em-dia/jornada-42h/`, 'Empregador em Dia, até a decisão'],
+  // Lista de espera desligada desde 16/10: links-sem-destino.test.mjs (CC-SITE-03) exige que o llms.txt não a cite.
+  [`${ORIGEM}/lista-de-espera/`, 'lista de espera desligada (CC-SITE-03)'],
+]);
+// Categoria do blog sem nenhum post (<ul class="posts"></ul>) fica fora do llms.txt: indicar a um modelo de linguagem
+// uma página vazia não ajuda. Ao ganhar o primeiro post, a categoria passa a ser exigida no llms.txt.
+const semPosts = (html) => /<ul class="posts">\s*<\/ul>/.test(html);
+const categoriaVazia = (u) => {
+  const arq = arquivoDe(new URL(u).pathname);
+  return /^blog\/categoria\/[^/]+\/index\.html$/.test(arq || '') && semPosts(ler(arq));
+};
+const urlsDoTexto = (txt) => new Set([...txt.matchAll(/https?:\/\/(?:www\.)?contacertabr\.com\.br[^\s)<>"']*/g)].map((m) => {
+  const u = new URL(m[0].replace(/[.,;:]+$/, ''));
+  return `${ORIGEM}${u.pathname}`;
+}));
+const llms = ler('llms.txt');
+const noLlms = urlsDoTexto(llms);
+
+test('llms.txt: toda URL do sitemap fora de /licitacoes/ está nele ou em FORA_DO_LLMS', () => {
+  const faltam = foraDeLicitacoes.filter((u) => !noLlms.has(u) && !FORA_DO_LLMS.has(u) && !categoriaVazia(u));
+  assert.deepEqual(faltam, []);
+});
+
+test('llms.txt: as exceções estão no sitemap e continuam fora dele (senão saem da lista)', () => {
+  for (const u of FORA_DO_LLMS.keys()) {
+    assert.ok(sitemap.includes(u), `${u}: fora do sitemap, tire de FORA_DO_LLMS`);
+    assert.ok(!noLlms.has(u), `${u}: já está no llms.txt, tire de FORA_DO_LLMS`);
+  }
+});
+
+test('llms.txt: a leitura das URLs normaliza a home sem barra e corta pontuação do fim; categoria vazia detectada', () => {
+  assert.deepEqual([...urlsDoTexto('Conta Certa (https://contacertabr.com.br) e https://www.contacertabr.com.br/irpf/#x.')],
+    [`${ORIGEM}/`, `${ORIGEM}/irpf/`]);
+  assert.ok(noLlms.has(`${ORIGEM}/`));
+  assert.ok(semPosts('<ul class="posts"></ul>') && semPosts('<ul class="posts">\n</ul>'));
+  assert.ok(!semPosts('<ul class="posts"><li><a class="post-card" href="/blog/x/">x</a></li></ul>'));
+  assert.ok(!categoriaVazia(`${ORIGEM}/blog/categoria/trabalho-e-salario/`));
+  assert.ok(!categoriaVazia(`${ORIGEM}/irpf/`));
+});
+
+test('llms.txt: planilha das tabelas oficiais em "Tabelas oficiais" e categorias do blog com post em "Blog"', () => {
+  const blocos = Object.fromEntries(llms.split(/^## /m).slice(1).map((b) => [b.slice(0, b.indexOf('\n')), b]));
+  const desc = ler('tabelas-oficiais-2026/index.html').match(/<meta name="description" content="([^"]+)">/)[1];
+  assert.ok(blocos['Tabelas oficiais'].includes(`- [Planilha grátis: Tabelas oficiais 2026](${ORIGEM}/tabelas-oficiais-2026/): ${desc}\n`));
+  const categorias = sitemap.filter((u) => /\/blog\/categoria\/[^/]+\/$/.test(u));
+  assert.equal(categorias.length, 3);
+  for (const u of categorias.filter((x) => !categoriaVazia(x))) {
+    const h1 = ler(arquivoDe(new URL(u).pathname)).match(/<h1>([^<]+)<\/h1>/)[1];
+    assert.match(blocos.Blog, new RegExp(`^- \\[${h1.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\]\\(${u.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}\\): .+$`, 'm'), u);
+  }
+});
+
+// Posts do blog: pasta direta de blog/ (fora de categoria/) com index.html.
+const posts = paginas.filter((p) => /^blog\/(?!categoria\/)[^/]+\/index\.html$/.test(p));
+const feed = ler('blog/feed.xml');
+const itensFeed = [...feed.matchAll(/<item>[^]*?<\/item>/g)].map((m) => ({
+  link: (m[0].match(/<link>([^<]+)<\/link>/) || [])[1],
+  guid: (m[0].match(/<guid isPermaLink="true">([^<]+)<\/guid>/) || [])[1],
+}));
+
+test('feed.xml: todo post indexável de blog/<slug>/ está no feed, e o feed só tem posts indexáveis', () => {
+  assert.ok(posts.length >= 7 && itensFeed.length >= 7);
+  const indexaveis = posts.filter((p) => !robots(ler(p)).includes('noindex')).map((p) => `${ORIGEM}${caminhoDe(p)}`);
+  const noFeed = itensFeed.map((i) => i.link);
+  assert.deepEqual(indexaveis.filter((u) => !noFeed.includes(u)), [], 'post indexável fora do feed');
+  assert.deepEqual(noFeed.filter((u) => !indexaveis.includes(u)), [], 'item do feed que não é post indexável');
+  assert.equal(new Set(noFeed).size, noFeed.length, 'item repetido no feed');
+  for (const i of itensFeed) assert.equal(i.guid, i.link);
 });
