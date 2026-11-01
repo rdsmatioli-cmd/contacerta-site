@@ -218,8 +218,15 @@ for (const url of demais) {
 }
 
 // /licitacoes/ é outra marca e promete "sem ferramentas de análise": nem banner, nem lcm-consent, nem rede externa.
-// A rolagem horizontal não é conferida aqui: o layout de /licitacoes/ é outro e fica fora do escopo destes testes.
-test('descoberta: /licitacoes/ tem páginas', () => { expect(LICITACOES).toContain('/licitacoes/'); });
+// Rolagem horizontal (CC-SITE-13, WCAG 1.4.10): conferida em todas as páginas de /licitacoes/, menos a política e o
+// redirecionamento de privacidade/, que cai nela. A política rola na horizontal em 390 px, mas qualquer mudança em
+// politica.html muda o selo do aviso exibido em todas as páginas (licitacoes-selo.test.mjs): fica para quem cuida do
+// texto selado.
+const LICITACOES_SEM_ROLAGEM_CONFERIDA = new Set(['/licitacoes/politica.html', '/licitacoes/privacidade/']);
+test('descoberta: /licitacoes/ tem páginas', () => {
+  expect(LICITACOES).toContain('/licitacoes/');
+  for (const u of LICITACOES_SEM_ROLAGEM_CONFERIDA) expect(LICITACOES).toContain(u);
+});
 for (const url of LICITACOES) {
   test(`licitações ${url}: sem banner, sem lcm-consent, sem rede externa e sem erro`, async ({ page, rede, erros }) => {
     await page.goto(url);
@@ -227,7 +234,22 @@ for (const url of LICITACOES) {
     await expect(page.locator('#lcm-consent'), 'sem banner de cookies').toHaveCount(0);
     expect(await page.evaluate(() => [typeof window.lcmConsent, typeof window.gtag, typeof window.dataLayer]), 'sem lcmConsent, gtag e dataLayer')
       .toEqual(['undefined', 'undefined', 'undefined']);
+    if (!LICITACOES_SEM_ROLAGEM_CONFERIDA.has(url)) await semRolagemHorizontal(page);
     semRedeExterna(rede);
     semErros(erros, rede);
   });
 }
+
+// CC-SITE-13: a tabela de 6 colunas do exemplo de triagem rola dentro da própria região (focável pelo teclado, com nome),
+// sem levar a página para os lados.
+test('licitações: a tabela do exemplo de triagem rola dentro da região, não a página', async ({ page }) => {
+  await page.goto('/licitacoes/blog/como-encontrar-licitacoes.html');
+  const regiao = page.locator('div.tbl-rolagem[role="region"][tabindex="0"]');
+  await expect(regiao).toHaveCount(1);
+  await expect(regiao).toHaveAttribute('aria-label', 'Exemplo de triagem (role para o lado)');
+  await expect(regiao.locator('table th').first()).toHaveText('Edital (hipotético)');
+  await semRolagemHorizontal(page);
+  const { largura, visivel, overflow } = await regiao.evaluate((el) => ({ largura: el.scrollWidth, visivel: el.clientWidth, overflow: getComputedStyle(el).overflowX }));
+  expect(overflow).toBe('auto');
+  if ((page.viewportSize() || {}).width < 600) expect(largura, 'em 390 px a tabela é mais larga que a região e rola nela').toBeGreaterThan(visivel);
+});
