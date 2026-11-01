@@ -151,6 +151,7 @@ pagina({
 <p class="ajuda" id="aj-sal"><small>Valor da carteira, sem descontos. Exemplo: a maioria ganha R$ 2.400.</small></p></fieldset>
 <p><label class="ed-op"><input type="checkbox" id="f-dom" name="domestico"> Sou empregador doméstico</label></p>
 <p class="ed-aviso" data-ed="nota-dom" hidden></p>
+<p class="ed-aviso" data-ed="aviso-m02">Sem norma coletiva que distribua 42 horas, a jornada efetiva com 2 repousos e 8 horas por dia é de 40 horas; nesse caso use 200.</p>
 <button type="submit" disabled class="btn">Calcular</button>
 </form>
 <section class="ed-conta" aria-live="polite"><h2>Como chegamos no valor</h2>

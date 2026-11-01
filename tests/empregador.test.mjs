@@ -121,6 +121,8 @@ test('T15 CA2: inteiro >= 1; meios de faixa do CFO/CEO, nenhum abaixo do mínimo
   const h = ler(PAGINAS[3]);
   assert.ok(h.includes('A Emenda Constitucional 141/2026 reduz a jornada máxima para 42 horas por semana a partir de 16/12/2026 e para 40 horas a partir de 16/12/2027, sem redução de salário.'));
   assert.ok(h.includes('salário ÷ <span data-ed="div42">210</span> horas'));
+  // M-02 (parecer jurídico 05, alternativa; decisão do CPO): divisor 210 mantido, com aviso visível
+  assert.ok(h.includes('<p class="ed-aviso" data-ed="aviso-m02">Sem norma coletiva que distribua 42 horas, a jornada efetiva com 2 repousos e 8 horas por dia é de 40 horas; nesse caso use 200.</p>'));
   assert.deepEqual(JORNADA.etapas.map((e) => e.divisor), [210, 200]);
   assert.ok(h.includes('Sou empregador doméstico'));
   assert.equal(NOTA_DOMESTICO, 'Para empregado doméstico, a lei específica (LC 150/2015) ainda fala em 44 horas, mas a Emenda Constitucional 141/2026 também vale para ele.');
