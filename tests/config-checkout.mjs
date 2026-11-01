@@ -3,7 +3,9 @@
 // Ao trocar, substituir o valor aqui e nas páginas de PAGINAS_COMPRA; o teste checkout-botao.test.mjs exige que batam.
 // Se voltar a ser [ORIGEM_CHECKOUT], a trava de publicação (politica-data.test.mjs) falha por placeholder.
 export const ORIGEM_CHECKOUT = 'https://licitacoes-checkout.rds-matioli.workers.dev';
-export const PAGINAS_COMPRA = ['licitacoes/cobranca/index.html'];
+// Hotfix 1042 (CEO GO opção B, 31/10/2026): Worker inexistente; botões de compra removidos de /licitacoes/cobranca/.
+// Restaurar ['licitacoes/cobranca/index.html'] quando o Worker for publicado (opção A, novo GO).
+export const PAGINAS_COMPRA = [];
 // Fonte CSP de form-action nas páginas de compra. Enquanto a origem for o placeholder, fica 'none' (um token
 // "[ORIGEM_CHECKOUT]" na CSP gera erro de console no navegador); o placeholder no action do form mantém a trava.
 export const ORIGEM_PENDENTE = ORIGEM_CHECKOUT === '[ORIGEM_CHECKOUT]';

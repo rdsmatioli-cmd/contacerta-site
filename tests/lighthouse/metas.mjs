@@ -42,7 +42,6 @@ export const URLS_EMPREGADOR = [
 export const URLS_LICITACOES = [
   '/licitacoes/',
   '/licitacoes/politica.html',
-  '/licitacoes/cobranca/',
   '/licitacoes/blog/',
   '/licitacoes/blog/como-encontrar-licitacoes.html',
   '/licitacoes/blog/pregoes-material-de-limpeza-pncp.html',
