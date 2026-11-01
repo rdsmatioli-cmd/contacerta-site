@@ -19,8 +19,17 @@
 .ed-tab caption{text-align:left;font-weight:600}
 .ed-tab th,.ed-tab td{padding:.5rem;border-bottom:1px solid #8885;text-align:left}
 .ed-tab td{text-align:right;white-space:nowrap}
-.ed input[type=email],.ed-form input:not([type=radio]):not([type=checkbox]){width:100%;max-width:24rem;padding:.6rem;min-height:44px}
+.ed input[type=email],.ed-form input:not([type=radio]):not([type=checkbox]){width:100%;max-width:24rem;padding:.6rem;min-height:44px;font-family:inherit;font-size:1rem}
 /* P-08 S-02/S-03: aviso de privacidade inteiro no fluxo, antes de "Começar", com o corpo do texto principal (mín. 14 px) */
 .ed-q{display:flex;flex-direction:column;gap:.75rem;overflow:visible}
 .ed-q-priv{font-size:max(1rem,14px);line-height:1.5;max-height:none;overflow:visible;overflow-wrap:anywhere}
 .ed-fornecedor{font-size:.85rem;margin:.25rem 0 0}
+/* CC-SITE-06: a.btn com a cara do botão principal do site (button do style.css: tinta no claro, lima no escuro, 54 px);
+   .btn.sec (Voltar, Copiar) em contorno, sem a seta. O ed.css vem antes do style.css: as regras aqui têm mais especificidade. */
+.ed a.btn{display:inline-flex;align-items:center;justify-content:center;max-width:100%;min-height:54px;padding:12px 28px;border-radius:14px;background:var(--tinta);color:#fff;font-weight:800;font-size:1.05rem;letter-spacing:-.01em;line-height:1.3;text-align:center;text-decoration:none}
+.ed a.btn:hover{background:var(--tinta-2)}
+.ed a.btn:focus-visible{outline:3px solid var(--verde);outline-offset:3px}
+.ed .btn.sec{background:transparent;color:inherit;border:2px solid var(--borda-forte)}
+.ed .btn.sec::after{content:none}
+.ed .btn.sec:hover{background:transparent;border-color:var(--verde)}
+@media (prefers-color-scheme:dark){.ed a.btn{background:var(--lima);color:var(--tinta)}.ed a.btn:hover{background:var(--lima-2)}}
