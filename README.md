@@ -142,6 +142,36 @@ node tests/lighthouse/rodar.mjs --base http://127.0.0.1:8080 --saida /tmp/lighth
 
 `CHROME_PATH` escolhe o Chrome. `--perfis mobile` roda só um perfil; `--so-verificar` só confere os JSON já gerados.
 
+## IndexNow (Bing)
+
+O IndexNow avisa o Bing (e Yandex, Seznam, Naver e Yep, que compartilham os envios) das URLs novas ou alteradas; o
+Google não usa o protocolo. Na auditoria de 01/11/2026, nada no código impedia o Bing de indexar o site (robots.txt
+com `Allow: /` e o sitemap, nenhuma página indexável com noindex, canonical e og:url iguais à URL, www e http com 301
+para `https://contacertabr.com.br/`), mas não havia chave nem rotina de envio.
+
+A chave é o arquivo `<32 hex>.txt` da raiz, com a própria chave como conteúdo, sem quebra de linha. Ela é pública por
+desenho: o buscador baixa `https://contacertabr.com.br/<chave>.txt` para conferir que o envio veio do dono do site.
+Não apague nem renomeie o arquivo à toa: sem ele no ar, o envio volta 403. Para trocar a chave, substitua o arquivo
+pelo da chave nova (o `tests/indexnow.test.mjs` exige um só na raiz) e só envie de novo depois do deploy.
+
+O envio é manual e do operador (Rodrigo), nunca do CI. Depois que o deploy da main (Actions > Pages) publicou as
+páginas alteradas, na raiz do repositório atualizado:
+
+```sh
+node tests/manutencao/indexnow.mjs --desde 2026-11-01            # só imprime o payload (padrão, sem rede)
+node tests/manutencao/indexnow.mjs --desde 2026-11-01 --enviar   # confere a chave no ar e faz o POST
+```
+
+O payload (`host`, `key`, `keyLocation`, `urlList`) leva só URLs do `sitemap.xml`, as de `lastmod` maior ou igual a
+`--desde` (sem `--desde`, todas: use no primeiro envio). Com `--enviar`, o script primeiro baixa a chave publicada e
+só faz o POST em `https://api.indexnow.org/indexnow` se ela bater com a do repositório. Respostas: 200 ou 202
+(aceito; 202 = a chave ainda vai ser conferida), 400 (formato), 403 (chave não encontrada no ar), 422 (URL de outro
+host), 429 (muitas requisições: espere). Atrás de proxy, `NODE_USE_ENV_PROXY=1`. Envie só URLs que mudaram de fato:
+reenviar o site inteiro toda vez não acelera nada.
+
+Fica fora do repositório, no painel do Bing Webmaster Tools: cadastrar e verificar o site (dá para importar do
+Google Search Console) e enviar o sitemap. O `_headers` não vale no GitHub Pages: nenhum `X-Robots-Tag` sai dele.
+
 ## Runbook: publicação da política de privacidade
 
 A publicação (`.github/workflows/pages.yml`, só a partir da main) roda a trava da data da política antes do upload:
