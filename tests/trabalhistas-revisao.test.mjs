@@ -7,6 +7,7 @@ import { INSS_POR_ANO, INSS_2024, IRRF_POR_DATA } from '../assets/js/tabelas.js'
 import rescisaoPag from './_src/content/rescisao.mjs';
 import feriasPag from './_src/content/ferias.mjs';
 import { GEO } from './_src/content/_geo.mjs';
+import { abrirCalculadora } from './_formulario-minimo.mjs';
 
 // HTML publicado: "R$" é seguido de espaço não separável; normaliza para comparar com o texto.
 const pagina = (p) => readFileSync(new URL(`../${p}/index.html`, import.meta.url), 'utf8').replace(/ /g, ' ');
@@ -158,27 +159,32 @@ test('CC-TRAB-07: FGTS deposita também sobre o 13º e o 1/3 de férias a cada 1
   assert.ok(!html.includes('R$ 2.880,00 em 12 meses'));
 });
 
-test('CC-TRAB-08: o campo de dias de férias é o período calculado, somando os dias vendidos', () => {
+// CC-CALC-FERIAS-01 (auditoria de 30-31/10/2026) substituiu o campo único "somando os dias vendidos" e o checkbox de
+// venda por dois campos: dias de gozo deste período e dias vendidos. O teste do CC-TRAB-08 segue valendo para o
+// período: quem divide as férias informa os dias do período, não o direito inteiro.
+test('CC-TRAB-08 e CC-CALC-FERIAS-01: dias de gozo do período e dias vendidos em campos separados', () => {
   const html = pagina('ferias');
-  const rot = 'Dias deste período de férias, somando os dias vendidos';
-  assert.ok(html.includes(`<label for="f-dias">${rot}</label>`));
-  assert.equal(feriasPag.campos.find((c) => c.n === 'dias').l, rot);
+  assert.ok(html.includes('<label for="f-diasGozo">Dias de gozo neste período</label>'));
+  assert.ok(html.includes('<label for="f-diasAbono">Dias vendidos (abono)</label>'));
+  assert.equal(feriasPag.campos.find((c) => c.n === 'diasGozo').l, 'Dias de gozo neste período');
+  assert.equal(feriasPag.campos.find((c) => c.n === 'diasAbono').l, 'Dias vendidos (abono)');
+  assert.ok(!html.includes('f-vender') && !html.includes('f-dias"') && !html.includes('somando os dias vendidos'));
   // o rótulo não induz quem divide as férias a informar o direito inteiro (30) em vez dos dias do período
   assert.ok(!html.includes('a que tem direito (antes da venda)'));
   assert.ok(!html.includes('Escolha quantos dias de férias vai tirar'));
-  const passo = 'Informe os dias do período que vai calcular, somando os que vai vender, e marque a venda de 1/3 (abono pecuniário), se for vender: para tirar 20 e vender 10, informe 30; para tirar 15 sem vender, informe 15.';
+  const passo = 'Informe os dias de gozo do período que vai calcular e, à parte, os dias vendidos (abono pecuniário): para tirar 20 e vender 10, informe 20 e 10; para tirar 15 sem vender, informe 15 e 0.';
   assert.ok(html.includes(`<li>${passo}</li>`));
   assert.ok(GEO.ferias.topo.includes(`<li>${passo}</li>`));
-  assert.equal(feriasPag.campos.find((c) => c.n === 'dias').ajuda, 'Calcula um período por vez.');
-  // quem informa 30 e marca a venda tira 20 e vende 10: o valor que a página cita
-  const v = C.ferias({ salario: 3000, dias: 30, venderDias: true });
+  assert.equal(feriasPag.campos.find((c) => c.n === 'diasGozo').ajuda, 'Só os dias de descanso, sem os vendidos. Calcula um período por vez.');
+  // 20 de gozo e 10 vendidos: o valor que a página cita (o mesmo do antigo "30 com venda")
+  const v = C.ferias({ salario: 3000, diasGozo: 20, diasAbono: 10 });
   assert.equal(v.diasGozo, 20); assert.equal(v.diasAbono, 10);
   assert.ok(html.includes(R(v.liquido)));
-  // período de 15 dias sem venda (fracionamento): informar 15 dá metade de 30 dias, não o dobro
-  const p15 = C.ferias({ salario: 3000, dias: 15 });
+  // período de 15 dias sem venda (fracionamento): metade de 30 dias, não o dobro
+  const p15 = C.ferias({ salario: 3000, diasGozo: 15 });
   assert.equal(p15.diasGozo, 15); assert.equal(p15.diasAbono, 0);
   assert.equal(p15.bruto, 2000); assert.equal(p15.liquido, 1844.31);
-  assert.equal(C.ferias({ salario: 3000, dias: 30 }).bruto, 4000);
+  assert.equal(C.ferias({ salario: 3000, diasGozo: 30 }).bruto, 4000);
 });
 
 test('CC-TRAB-09: INSS do 13º de um só ano usa a tabela do ano', () => {
@@ -205,66 +211,7 @@ test('CC-TRAB-11: rótulo do vale-transporte deixa claro a base e o limite legal
 });
 
 // ---------------------------------------------------------------- Formulário (ui.js) com um document mínimo
-// Monta o formulário publicado da página (inputs, selects e mensagens dos campos), instala um document mínimo
-// e importa ui.js numa instância nova (query na URL), que roda iniciar() e o primeiro cálculo.
-const atributos = (tag) => Object.fromEntries([...tag.replace(/^<\w+/, '').matchAll(/([\w-]+)(?:="([^"]*)")?/g)].map(([, k, v]) => [k, v ?? '']));
-function elemento(tagName, at, value) {
-  const attrs = new Map(Object.entries(at));
-  const ouvintes = {};
-  const dataset = {};
-  for (const [k, v] of attrs) if (k.startsWith('data-')) dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = v;
-  return {
-    tagName, id: at.id, name: at.name || '', type: tagName === 'SELECT' ? 'select-one' : at.type || 'text',
-    value, defaultValue: value, checked: 'checked' in at, dataset, hidden: 'hidden' in at, textContent: '', className: at.class || '', disabled: 'disabled' in at,
-    hasAttribute: (k) => attrs.has(k), getAttribute: (k) => (attrs.has(k) ? attrs.get(k) : null),
-    setAttribute: (k, v) => attrs.set(k, String(v)), removeAttribute: (k) => attrs.delete(k),
-    addEventListener: (t, f) => (ouvintes[t] ||= []).push(f),
-    disparar(t) { for (const f of ouvintes[t] || []) f({ type: t, target: this, preventDefault() {} }); },
-    closest: () => null, focus() {}, dispatchEvent() { return true; },
-  };
-}
-let instancia = 0;
-async function abrirCalculadora(pag, valores = {}) {
-  const html = readFileSync(new URL(`../${pag}/index.html`, import.meta.url), 'utf8');
-  const ini = html.indexOf('<form class="calc-form"');
-  const formHtml = html.slice(ini, html.indexOf('</form>', ini));
-  const campos = [];
-  const porId = {};
-  for (const [tag] of formHtml.matchAll(/<input\b[^>]*>|<select\b[^>]*>[\s\S]*?<\/select>/g)) {
-    const abre = tag.match(/^<\w+[^>]*>/)[0];
-    const at = atributos(abre);
-    let value = at.value ?? '';
-    if (tag.startsWith('<select')) {
-      const ops = [...tag.matchAll(/<option\b[^>]*>/g)].map(([o]) => atributos(o));
-      value = (ops.find((o) => 'selected' in o) || ops[0]).value;
-    }
-    const el = elemento(tag.startsWith('<select') ? 'SELECT' : 'INPUT', at, value);
-    if (at.name in valores) el.value = valores[at.name];
-    campos.push(el); porId[el.id] = el;
-  }
-  for (const [p] of formHtml.matchAll(/<p class="campo-msg"[^>]*>/g)) { const at = atributos(p); porId[at.id] = elemento('P', at, ''); }
-  const out = elemento('DIV', { id: 'resultado' }, '');
-  out.innerHTML = '';
-  porId.resultado = out;
-  const form = elemento('FORM', { 'data-calc': atributos(formHtml.match(/^<form[^>]*>/)[0])['data-calc'] }, '');
-  form.elements = Object.assign([...campos], Object.fromEntries(campos.map((c) => [c.name, c])));
-  form.querySelector = () => null;
-  form.querySelectorAll = (sel) => { const m = sel.match(/^\[([\w-]+)\]$/); return m ? campos.filter((c) => c.hasAttribute(m[1])) : []; };
-  globalThis.document = {
-    readyState: 'complete',
-    addEventListener() {},
-    querySelector: (sel) => (sel === 'form[data-calc]' ? form : null),
-    getElementById: (id) => porId[id] || null,
-  };
-  try {
-    await import(new URL(`../assets/js/ui.js?cenario=${++instancia}`, import.meta.url));
-  } finally {
-    delete globalThis.document;
-  }
-  // Envio pelo botão Calcular (cálculo imediato, sem o atraso do evento input).
-  const calcular = () => { globalThis.document = { getElementById: (id) => porId[id] || null, querySelector: () => null }; try { form.disparar('submit'); } finally { delete globalThis.document; } return out.innerHTML; };
-  return { form, campo: (n) => form.elements[n], el: (id) => porId[id], out, calcular };
-}
+// tests/_formulario-minimo.mjs: o formulário publicado da página, com o ui.js numa instância nova por cenário.
 
 test('CC-TRAB-04 (formulário): rural com o padrão de 20% mostra o aviso no resultado e no campo', async () => {
   const f = await abrirCalculadora('adicional-noturno', { tipo: 'rural' });

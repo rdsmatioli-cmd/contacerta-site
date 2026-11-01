@@ -26,8 +26,8 @@ const sl5000 = C.salarioLiquido({ bruto: 5000 });
 const slMin = C.salarioLiquido({ bruto: SALARIO_MINIMO.valor });
 const d13 = C.decimoTerceiro({ salario: 3000, meses: 12 });
 const d13p = C.decimoTerceiro({ salario: 3000, meses: 7 });
-const fer = C.ferias({ salario: 3000, dias: 30 });
-const ferV = C.ferias({ salario: 3000, dias: 30, venderDias: true });
+const fer = C.ferias({ salario: 3000, diasGozo: 30 });
+const ferV = C.ferias({ salario: 3000, diasGozo: 20, diasAbono: 10 });
 const fg = C.fgts({ salario: 3000, meses: 12, comRendimento: false });
 const he = C.horasExtras({ salario: 2200, jornadaMensal: 220, horas50: 10 });
 const sd2000 = C.seguroDesemprego({ salarios: [2000, 2000, 2000], solicitacao: 1, mesesTrabalhados: 14 });
@@ -100,7 +100,7 @@ export const GEO = {
 <p>Exemplo: salário de R$ 3.000,00 e 30 dias de férias dão ${R(fer.bruto)} brutos e <strong>${R(fer.liquido)}</strong> líquidos. Vendendo 10 dias, o líquido sobe para ${R(ferV.liquido)}.</p>`,
       [
         'Digite o salário bruto e a média de variáveis (horas extras, comissões) dos últimos 12 meses.',
-        'Informe os dias do período que vai calcular, somando os que vai vender, e marque a venda de 1/3 (abono pecuniário), se for vender: para tirar 20 e vender 10, informe 30; para tirar 15 sem vender, informe 15.',
+        'Informe os dias de gozo do período que vai calcular e, à parte, os dias vendidos (abono pecuniário): para tirar 20 e vender 10, informe 20 e 10; para tirar 15 sem vender, informe 15 e 0.',
         'Informe os dependentes para o IR.',
         'Clique em <strong>Calcular</strong> e confira férias, 1/3, abono e descontos separados.',
       ],

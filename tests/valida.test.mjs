@@ -1,7 +1,7 @@
 // Validação de entradas (laudo QA 10/10/2026: CC-01 a CC-05). Rode: npm test
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validarNumero } from './_src/js/valida.js';
+import { validarNumero, lerNumeroBR } from './_src/js/valida.js';
 import * as C from './_src/js/calc.js';
 import rescisao from './_src/content/rescisao.mjs';
 import dasMei from './_src/content/das-mei.mjs';
@@ -53,10 +53,14 @@ test('CC-03/CC-04: negativo, vazio e texto geram erro com mensagem', () => {
 });
 
 test('CC-05: férias abaixo de 5 dias e 13º com 0 meses são erro; acima do máximo é limitado com aviso', () => {
-  const d = campo(ferias, 'dias');
+  const d = campo(ferias, 'diasGozo');
   assert.equal(validarNumero({ raw: '3', min: d.min, max: d.max }).erro, 'O mínimo é 5.');
   const r45 = validarNumero({ raw: '45', min: d.min, max: d.max });
   assert.equal(r45.valor, 30); assert.match(r45.aviso, /máximo é 30/);
+  // dias vendidos (CC-CALC-FERIAS-01): de 0 a 10, acima de 10 limitado com aviso
+  const a = campo(ferias, 'diasAbono');
+  assert.equal(validarNumero({ raw: '12', min: 0, max: a.max }).valor, 10);
+  assert.equal(validarNumero({ raw: '-1', min: 0, max: a.max }).erro, 'O valor não pode ser negativo.');
   const m = campo(decimo, 'meses');
   assert.equal(validarNumero({ raw: '0', min: m.min, max: m.max }).erro, 'O mínimo é 1.');
   assert.equal(validarNumero({ raw: '13', min: m.min, max: m.max }).valor, 12);
@@ -86,4 +90,21 @@ test('Rescisão: férias vencidas fora do prazo de concessão são pagas em dobr
   const f = rescisao.campos.find((c) => c.n === 'feriasVencidas');
   assert.match(f.avisoMax, /CLT não limita a 2/);
   assert.equal(rescisao.campos.find((c) => c.n === 'dobro1').v, 'nao');
+});
+
+test('CC-CALC-VALIDA-02: "-0" vira 0: passa no mínimo 0 sem sinal e não aparece como "-R$ 0,00"', () => {
+  const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  for (const raw of ['-0', '-0,00', '-0.0', '-000', '- 0', '+0']) {
+    const r = validarNumero({ raw, min: 0 });
+    assert.equal(r.erro, undefined, raw);
+    assert.ok(Object.is(r.valor, 0), `${raw}: ${Object.is(r.valor, -0) ? '-0' : r.valor}`);
+    assert.equal(brl.format(r.valor), brl.format(0), raw);
+    assert.ok(Object.is(lerNumeroBR(raw).n, 0), raw);
+  }
+  // sem mínimo, o zero também sai sem sinal; negativos de verdade continuam negativos
+  assert.ok(Object.is(validarNumero({ raw: '-0' }).valor, 0));
+  assert.equal(validarNumero({ raw: '-0,01', min: 0 }).erro, 'O valor não pode ser negativo.');
+  assert.deepEqual(validarNumero({ raw: '-2' }), { valor: -2 });
+  // campo decimal com alerta de milhar: o sinal continua no valor e no alerta
+  assert.equal(lerNumeroBR('-1.125', { decimal: true }).n, -1125);
 });
