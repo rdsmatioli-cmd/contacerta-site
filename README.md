@@ -66,7 +66,11 @@ erro; nada do Google antes de clicar no banner de cookies nem depois de Recusar,
 aparece depois de Aceitar. Calculadora desligada fica sem `data-calc` e com o botão `disabled`. O mesmo job passa o
 axe-core (`@axe-core/playwright`, versão exata no lockfile) em todas as páginas, nas duas larguras e nos temas claro e
 escuro (`prefers-color-scheme`), com as regras WCAG 2.0, 2.1 e 2.2 A e AA: falha só com violação serious ou critical;
-moderate e minor saem no log. O Playwright serve o site com `python3 -m http.server` em 127.0.0.1:8191 (`E2E_PORTA`
+moderate e minor saem no log. Em 390 px, o `toque.spec.mjs` pega o que o axe e o Lighthouse deixam passar, em todas
+as páginas: campo (input, select, textarea, fora checkbox, radio e o honeypot `.le-hp`) com menos de 44 px de altura
+ou fonte abaixo de 16 px (o iOS dá zoom no foco), `a.btn` ou botão com menos de 44 px e, nas calculadoras e no
+`/irpf/` depois do envio, célula de tabela além da borda de um ancestral com overflow hidden/clip que não rola (use
+o `.rolagem` do `ui.js`). O Playwright serve o site com `python3 -m http.server` em 127.0.0.1:8191 (`E2E_PORTA`
 troca a porta), aborta e registra toda requisição HTTP ou WebSocket a outro host e registra as dicas de conexão para
 fora (`preconnect`, `dns-prefetch`...); o Chromium sobe sem proxy, nem o do ambiente, e sem DNS. Local:
 
@@ -78,7 +82,7 @@ npx playwright test                                        # -g "markup" roda s�
 ```
 
 Quando falha, a mensagem diz o quê: resultado sem número, envio que recarrega a página, erro de console, elementos
-que passam da borda, URL de outro host pedida, URL do Google pedida antes do aceite, violação de acessibilidade
+que passam da borda, campo, botão ou célula fora do padrão de toque (página, seletor e medida), URL de outro host pedida, URL do Google pedida antes do aceite, violação de acessibilidade
 (página, tema, regra do axe e seletor do elemento). No CI, capturas e traces ficam no artefato `e2e-falhas`
 (`npx playwright show-trace` abre o `.zip`). Corrija a página, não o teste. Nenhuma página pode pedir nada de outro
 host antes do aceite (imagem, vídeo, fonte, script de terceiro, `preconnect`): isso derruba o e2e de propósito, e
@@ -116,6 +120,14 @@ navegador: se abrir normalmente, rode o workflow de novo antes de mexer; se a fa
 bloqueia o IP do GitHub), registre numa issue em vez de remover o link; se estiver quebrado de fato, troque ou remova
 o link nessas páginas. O GitHub desliga o agendamento depois de 60 dias sem atividade no repositório: reative em
 Actions se isso acontecer.
+
+## Imagens de compartilhamento (og:image)
+
+As artes de `og/` têm 1200x630 e o mesmo layout (marca, selo, título, subtítulo, chips e o ícone da página).
+`node tools/og.mjs <nome>` gera `og/<nome>.jpg` a partir da tabela `ARTES` do script, com o Playwright de `tests/e2e`
+(`npm ci --ignore-scripts` lá) e a fonte de `/fonts`, sem rede; `CHROME_PATH` aponta outro Chromium. Os textos da arte
+saem do que a página já diz. Página sem arte própria usa `og/padrao.jpg`: `tests/og-imagens.test.mjs` falha com arte
+copiada de outra página (bytes iguais com outro nome) e com medida diferente da declarada em `og:image:width/height`.
 
 ## Lighthouse
 

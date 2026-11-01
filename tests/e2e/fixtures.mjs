@@ -144,3 +144,30 @@ export async function assentar(page) {
   await page.waitForLoadState('load');
   await page.waitForLoadState('networkidle');
 }
+
+// Células de tabela cortadas (CC-SITE-05 e -08): de cada td/th visível, sobe até o primeiro ancestral que rola
+// (overflow auto/scroll); a célula precisa caber em todo ancestral com overflow hidden/clip do caminho. O
+// semRolagemHorizontal não vê o que esse corte esconde. Devolve uma linha por célula, com a tabela, o ancestral que corta
+// e quantos pixels passam da borda.
+export const celulasCortadas = (page) => page.evaluate(medirTabelas);
+function medirTabelas() {
+  const nome = (el) => `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ''}${el.classList.length ? `.${[...el.classList].join('.')}` : ''}`;
+  const fora = [];
+  for (const cel of document.querySelectorAll('td, th')) {
+    const b = cel.getBoundingClientRect();
+    if (b.width <= 1 || b.height <= 1 || !cel.checkVisibility({ checkVisibilityCSS: true })) continue;
+    for (let a = cel.parentElement; a && a !== document.documentElement; a = a.parentElement) {
+      const ox = getComputedStyle(a).overflowX;
+      if (ox === 'auto' || ox === 'scroll') break;
+      if (ox !== 'hidden' && ox !== 'clip') continue;
+      const c = a.getBoundingClientRect();
+      const sobra = Math.max(b.right - c.right, c.left - b.left);
+      if (sobra <= 1) continue;
+      const tabela = cel.closest('table');
+      const legenda = tabela && tabela.caption ? ` da tabela "${tabela.caption.textContent.trim().slice(0, 50)}"` : '';
+      fora.push(`célula ${nome(cel)} "${cel.textContent.replace(/\s+/g, ' ').trim().slice(0, 30)}"${legenda}: ${Math.round(sobra)}px além da borda de ${nome(a)} (overflow-x ${ox}, sem rolagem)`);
+      break;
+    }
+  }
+  return fora;
+}
