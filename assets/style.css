@@ -544,6 +544,9 @@ main p a,main li a,main dd a{overflow-wrap:anywhere}
    atalho), e o button{} acima vazava nos botões do aviso: 16,8 px, peso 800, margin-top de 22 px, largura 100%. Aqui
    ficam a fonte que o componente pretendia e o resto do button{} zerado; a mesma regra vale para Aceitar e Recusar (G-06). */
 .lcmc-btn{font-family:inherit;font-size:15px;font-weight:600;line-height:1.2;margin:0;letter-spacing:normal;width:auto}
+/* CC-SITE-09: com o aviso de cookies aberto (classe posta pelo assets/js/medicao.js), o sumário dos posts deixa de ser
+   sticky. Preso na tela, ele não sai de trás do aviso quando a página rola, e os últimos itens ficavam cobertos pelo Tab. */
+@media (min-width:1024px){html.cc-aviso-aberto .post-grade .sumario{position:static}}
 
 /* Guia completo nas calculadoras: um card só (post do blog), na largura do texto. */
 .relacionadas.guia-completo .cards{grid-template-columns:1fr;max-width:780px}

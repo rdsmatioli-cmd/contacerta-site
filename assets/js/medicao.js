@@ -15,11 +15,18 @@
 
 // Foco com o aviso de cookies aberto (CC-SITE-09 e CC-SITE-10), do lado do site: o componente assets/lcm-consent.js fica
 // sem alteração (ac527630, tests/nr1-m01.test.mjs). Este arquivo já é a ponte do site com ele e vem logo depois dele.
+// Este bloco depende de detalhes internos do componente v1.0.0: id lcm-consent, atributo hidden, botão
+// data-lcm-consent-abrir e foco em Aceitar ao abrir. Uma versão nova do componente que trate o foco sozinha (o hash do
+// teste muda) precisa tirar este bloco junto.
 // - WCAG 2.4.11: o aviso é fixo embaixo e ocupa até metade da tela. Aberto, o body ganha embaixo o espaço que ele ocupa
 //   mais 16 px, e o elemento que recebe o foco fora dele e ficaria atrás dele sobe até 16 px acima (rolagem 'instant': o
-//   html tem scroll-behavior:smooth). Uma rolagem suave do navegador ainda em curso (Tab rápido) pode mover a página de
-//   novo: até 1 s depois do foco, quando a rolagem para, a conferência se repete. Com o botão do mouse apertado não rola:
-//   a página andaria entre o mousedown e o mouseup, e o clique se perderia. Fechado, o espaço sai.
+//   html tem scroll-behavior:smooth). A rolagem suave do navegador que leva o foco à tela pode vir depois e mover a
+//   página de novo: quando a rolagem para, até 1 s depois do foco, a conferência se repete uma vez só. A parte da
+//   rolagem que não move o elemento (contêiner sticky ou fixed) é desfeita na hora e não se repete. Nada rola com o botão
+//   do mouse apertado (a página andaria entre o mousedown e o mouseup, e o clique se perderia) nem depois que a própria
+//   pessoa rola (roda do mouse, toque, PageUp/PageDown, setas, espaço, Home/End): a posição passa a ser a dela. O html
+//   ganha a classe cc-aviso-aberto, que tira o sticky do sumário dos posts (style.css): preso na tela, ele não sairia de
+//   trás do aviso. Fechado, o espaço e a classe saem.
 // - WCAG 2.4.3: ao fechar (Aceitar, Recusar ou Esc), se o foco estava no aviso ou caiu no body, ele volta para quem abriu
 //   o aviso ("Preferências de cookies", no rodapé) ou, se a escolha veio do teclado, para o último elemento focado fora
 //   dele (no toque, devolver o foco a um campo reabriria o teclado virtual).
@@ -28,45 +35,57 @@
   var aviso = null, aberto = false, abridor = null, ultimoFora = null, apertado = false, teclado = false;
   var vigiado = null, prazo = 0, espera = 0;
   var cap = { capture: true, passive: true };
-  w.addEventListener('pointerdown', function () { apertado = true; teclado = false; }, cap);
+  var ROLAGEM = /^(PageUp|PageDown|Home|End|ArrowUp|ArrowDown|ArrowLeft|ArrowRight| |Spacebar)$/;
+  function parar() { vigiado = null; clearTimeout(espera); }
+  w.addEventListener('pointerdown', function () { apertado = true; teclado = false; parar(); }, cap);
   w.addEventListener('pointerup', function () { apertado = false; }, cap);
   w.addEventListener('pointercancel', function () { apertado = false; }, cap);
-  w.addEventListener('keydown', function () { apertado = false; teclado = true; }, cap);
+  w.addEventListener('wheel', parar, cap);
+  w.addEventListener('touchstart', parar, cap);
+  w.addEventListener('keydown', function (e) { apertado = false; teclado = true; if (ROLAGEM.test(e.key)) parar(); }, cap);
   function visivel() { return !!aviso && !aviso.hidden && aviso.isConnected; }
   function espaco() {
     if (visivel()) d.body.style.paddingBottom = Math.ceil(d.documentElement.clientHeight - aviso.getBoundingClientRect().top + FOLGA) + 'px';
   }
   // Sobe o elemento até 16 px acima do aviso, sem levar o topo dele para baixo do cabeçalho fixo (scroll-padding-top): o
-  // que é mais alto que o espaço livre fica com o topo logo abaixo do cabeçalho.
+  // que é mais alto que o espaço livre fica com o topo logo abaixo do cabeçalho. A parte da rolagem que não moveu o
+  // elemento (contêiner sticky ou fixed, que fica no mesmo lugar da tela) volta na hora, e a função devolve false: rolar
+  // de novo não o tiraria dali.
   function desencobrir(el) {
     var a = aviso.getBoundingClientRect(), r = el.getBoundingClientRect();
-    if (r.bottom <= a.top || r.right <= a.left || r.left >= a.right || (!r.width && !r.height)) return;
+    if (r.bottom <= a.top || r.right <= a.left || r.left >= a.right || (!r.width && !r.height)) return true;
     var sobe = r.bottom - a.top + FOLGA;
     var limite = r.top - (parseFloat(getComputedStyle(d.documentElement).scrollPaddingTop) || 0);
     if (sobe > limite) sobe = Math.max(limite, 0);
-    if (sobe > 0) w.scrollBy({ top: sobe, left: 0, behavior: 'instant' });
+    if (sobe <= 0) return true;
+    var y = w.scrollY;
+    w.scrollBy({ top: sobe, left: 0, behavior: 'instant' });
+    var sobra = (w.scrollY - y) - (r.top - el.getBoundingClientRect().top);
+    if (sobra < 1) return true;
+    w.scrollBy({ top: -sobra, left: 0, behavior: 'instant' });
+    return false;
   }
   function aoFocar(e) {
     var el = e.target;
     if (!visivel() || !el || !el.getBoundingClientRect || el === d.body || aviso.contains(el)) return;
     ultimoFora = el;
-    vigiado = null;
-    if (apertado) return;
+    parar();
+    if (apertado || !desencobrir(el)) return;
     vigiado = el; prazo = Date.now() + JANELA;
-    desencobrir(el);
   }
   function aoRolar() {
     if (!vigiado) return;
     clearTimeout(espera);
     espera = setTimeout(function () {
       var el = vigiado;
-      if (!el || Date.now() > prazo + 200) { vigiado = null; return; }
-      if (visivel() && d.activeElement === el && !apertado) desencobrir(el);
+      vigiado = null;
+      if (el && Date.now() <= prazo + 200 && visivel() && d.activeElement === el && !apertado) desencobrir(el);
     }, 80);
   }
   function mudou() {
     if (visivel() === aberto) return;
     aberto = visivel();
+    d.documentElement.classList.toggle('cc-aviso-aberto', aberto);
     if (aberto) {
       espaco();
       d.addEventListener('focusin', aoFocar);
@@ -78,7 +97,7 @@
     d.removeEventListener('focusin', aoFocar);
     w.removeEventListener('scroll', aoRolar, { passive: true });
     w.removeEventListener('resize', espaco);
-    clearTimeout(espera); vigiado = null;
+    parar();
     var foco = d.activeElement, alvo = abridor || (teclado ? ultimoFora : null);
     abridor = null; ultimoFora = null;
     if (alvo && alvo.isConnected && (!foco || foco === d.body || aviso.contains(foco))) alvo.focus();

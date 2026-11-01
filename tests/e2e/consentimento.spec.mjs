@@ -127,6 +127,31 @@ const sobAviso = (page) => page.evaluate(() => {
   const nome = `${a.tagName.toLowerCase()}${a.id ? `#${a.id}` : ''} "${(a.textContent || a.value || '').replace(/\s+/g, ' ').trim().slice(0, 30)}"`;
   return `${nome}: ${pct}% sob o aviso`;
 });
+// Rolagem por Tab (revisão do CC-SITE-09): o sumário fixo dos posts (sticky a partir de 1024 px) não sai do lugar quando
+// a página rola, e cada conferência rolava de novo, até 2600 px por Tab. Guarda a posição do elemento e da página no
+// momento do foco (focusin na captura da window, antes do medicao.js e da rolagem do navegador) e, quando a página para,
+// confere: (1) a página só rola o quanto o elemento focado anda na tela; (2) se ele cabe entre o cabeçalho e o aviso, a
+// rolagem para baixo não passa da que leva o topo dele até o cabeçalho (scroll-padding-top), o teto por Tab.
+const vigiarFoco = (page) => page.evaluate(() => {
+  addEventListener('focusin', (e) => {
+    const el = e.target;
+    window.__e2eFoco = el && el.getBoundingClientRect ? { el, topo: el.getBoundingClientRect().top, y: scrollY } : null;
+  }, true);
+});
+const rolagemDoTab = (page) => page.evaluate(() => {
+  const f = window.__e2eFoco, a = document.activeElement, av = document.getElementById('lcm-consent');
+  if (!f || f.el !== a || a === document.body || !av || av.hidden) return null;
+  const r = a.getBoundingClientRect();
+  if (!r.width || !r.height) return null;
+  const andou = Math.round(scrollY - f.y), moveu = Math.round(f.topo - r.top);
+  const cabecalho = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+  const livre = av.getBoundingClientRect().top - 16 - cabecalho;
+  const nome = `${a.tagName.toLowerCase()}${a.id ? `#${a.id}` : ''} "${(a.textContent || a.value || '').replace(/\s+/g, ' ').trim().slice(0, 30)}"`;
+  if (Math.abs(andou) > 2 && Math.abs(andou - moveu) > 2) return `${nome}: a página rolou ${andou} px e o elemento andou ${moveu} px na tela`;
+  const teto = Math.max(0, Math.round(f.topo - cabecalho));
+  if (r.height <= livre && andou > teto + 2) return `${nome}: a página rolou ${andou} px, mais que os ${teto} px que levam o topo dele ao cabeçalho`;
+  return null;
+});
 // Com Tab rápido, a rolagem suave do navegador (html com scroll-behavior:smooth) pode estar em curso: mede a posição em
 // que a página para (3 quadros e nenhum evento de rolagem há 150 ms; no máximo 3 s), que é o que a pessoa vê.
 const rolagemParada = (page) => page.evaluate(() => new Promise((ok) => {
@@ -139,24 +164,73 @@ const rolagemParada = (page) => page.evaluate(() => new Promise((ok) => {
   };
   requestAnimationFrame(passo);
 }));
+async function tabsComAviso(page, url, n = 40) {
+  await page.goto(url);
+  await expect(banner(page)).toBeVisible();
+  await assentar(page);
+  const espaco = await page.evaluate(() => [parseFloat(getComputedStyle(document.body).paddingBottom), document.getElementById('lcm-consent').getBoundingClientRect().height]);
+  expect(espaco[0], 'o body ganha embaixo pelo menos a altura do aviso').toBeGreaterThanOrEqual(espaco[1]);
+  await vigiarFoco(page);
+  const cobertos = [], rolagens = [];
+  for (let i = 1; i <= n; i++) {
+    await page.keyboard.press('Tab');
+    await rolagemParada(page);
+    const c = await sobAviso(page);
+    if (c) cobertos.push(`Tab ${i}, ${c}`);
+    const r = await rolagemDoTab(page);
+    if (r) rolagens.push(`Tab ${i}, ${r}`);
+  }
+  expect(cobertos, 'focáveis atrás do aviso de cookies').toEqual([]);
+  expect(rolagens, 'rolagem da página além da que o foco pede').toEqual([]);
+  await banner(page).locator('[data-lcmc="recusar"]').click();
+  await expect(banner(page)).toBeHidden();
+  expect(await page.evaluate(() => document.body.style.paddingBottom), 'o espaço sai quando o aviso fecha').toBe('');
+  expect(await page.evaluate(() => document.documentElement.classList.contains('cc-aviso-aberto')), 'a classe sai quando o aviso fecha').toBe(false);
+}
 for (const url of ['/', '/salario-liquido/', '/rescisao/', '/simples-hibrido/', '/blog/pro-labore/']) {
   test(`${url}: com o aviso aberto, o foco do teclado nunca fica atrás dele (40 Tabs)`, async ({ page }) => {
-    await page.goto(url);
+    test.setTimeout(60_000);
+    await tabsComAviso(page, url);
+  });
+}
+// Telas de notebook (área útil de 1366x768 e 1536x864 com a barra do navegador), em que o sumário fixo dos posts é mais
+// alto que o espaço livre acima do aviso: com ele sticky, 'Perguntas frequentes', 'Fontes oficiais' e 'Calculadoras
+// relacionadas' ficavam 100% cobertos e a página saltava milhares de pixels. Com o aviso aberto, o sumário não é sticky.
+for (const url of ['/blog/pro-labore/', '/blog/decimo-terceiro-2026/']) {
+  for (const [largura, altura] of [[1366, 657], [1536, 730]]) {
+    test(`${url} em ${largura}x${altura}: com o aviso aberto, o sumário não fica atrás dele e a página não salta (40 Tabs)`, async ({ page }, info) => {
+      test.skip(info.project.name !== '1280px', 'tela de notebook: só no projeto de desktop');
+      test.setTimeout(60_000);
+      await page.setViewportSize({ width: largura, height: altura });
+      await tabsComAviso(page, url);
+    });
+  }
+}
+// Rolagem da própria pessoa logo depois do Tab (dentro de 1 s): a conferência do medicao.js não a desfaz. Antes, Tab,
+// 200 ms e PageUp levavam a página de 2278 para 1652 e ela voltava sozinha para 2278; com a seta para cima, o mesmo.
+for (const [tecla, minimo] of [['PageUp', 200], ['ArrowUp', 20]]) {
+  test(`/blog/pro-labore/: com o aviso aberto, ${tecla} logo depois do Tab não é desfeito`, async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto('/blog/pro-labore/');
     await expect(banner(page)).toBeVisible();
     await assentar(page);
-    const espaco = await page.evaluate(() => [parseFloat(getComputedStyle(document.body).paddingBottom), document.getElementById('lcm-consent').getBoundingClientRect().height]);
-    expect(espaco[0], 'o body ganha embaixo pelo menos a altura do aviso').toBeGreaterThanOrEqual(espaco[1]);
-    const cobertos = [];
-    for (let i = 0; i < 40; i++) {
+    const y = () => page.evaluate(() => scrollY);
+    // Tab até um foco que role a página para baixo, já longe do topo (para o PageUp ter para onde voltar).
+    let antes = 0, depois = 0;
+    for (let i = 0; i < 80; i++) {
+      antes = await y();
       await page.keyboard.press('Tab');
+      await page.waitForTimeout(200);
+      depois = await y();
+      if (depois > antes && depois > 1000) break;
       await rolagemParada(page);
-      const r = await sobAviso(page);
-      if (r) cobertos.push(r);
     }
-    expect(cobertos, 'focáveis atrás do aviso de cookies').toEqual([]);
-    await banner(page).locator('[data-lcmc="recusar"]').click();
-    await expect(banner(page)).toBeHidden();
-    expect(await page.evaluate(() => document.body.style.paddingBottom), 'o espaço sai quando o aviso fecha').toBe('');
+    expect(depois, 'um Tab que rolou a página, longe do topo').toBeGreaterThan(Math.max(antes, 1000));
+    await page.keyboard.press(tecla);
+    await rolagemParada(page);
+    await page.waitForTimeout(1500);
+    await rolagemParada(page);
+    expect(await y(), `a rolagem do ${tecla} fica`).toBeLessThan(depois - minimo);
   });
 }
 
