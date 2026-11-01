@@ -1,28 +1,29 @@
-/* Licitações · tokens v4 */
-@font-face{font-family:"Inter";src:url("fonts/Inter-var.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:block}
-@font-face{font-family:"Geist Mono";src:url("fonts/GeistMono-var.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:block}
+/* Licitações · tokens v5 (família visual do Conta Certa, 31/10/2026): mesma fonte (Plus Jakarta Sans, já em cache no domínio),
+   neutros verde-acinzentados e verde floresta no lugar do azul-marinho. Só tokens: a estrutura do site.css não muda. */
+@font-face{font-family:"Plus Jakarta Sans";font-style:normal;font-weight:400 800;font-display:swap;src:url("/fonts/plus-jakarta-sans-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Jakarta Fallback";src:local("Arial"),local("ArialMT"),local("Arimo"),local("Liberation Sans"),local("Roboto"),local("Helvetica");size-adjust:104.4%;ascent-override:99.4%;descent-override:21.3%;line-gap-override:0%}
 :root{
-/* Grafite: neutros frios */
---n0:#ffffff;--n25:#fbfbfc;--n50:#f6f7f9;--n100:#eff1f4;--n150:#e6e8ec;--n200:#dadde3;--n300:#c2c7d0;--n400:#9aa1ad;--n500:#6b7280;--n600:#525866;--n700:#3a404b;--n800:#252a32;--n900:#14171d;--n950:#0b0d11;
-/* Azul-marinho institucional: marca e ação */
---b50:#eef3f9;--b100:#dce6f2;--b200:#b8cbe4;--b300:#8ba8d0;--b400:#5b83b8;--b500:#3766a3;--b600:#1e4f8f;--b700:#183f73;--b800:#13325c;--b900:#0e2645;
+/* Neutros: verde-acinzentados */
+--n0:#ffffff;--n25:#f7f9f6;--n50:#f3f5f1;--n100:#eef2ed;--n150:#e1e7e2;--n200:#d3dcd6;--n300:#c6d1ca;--n400:#8c9c95;--n500:#54625b;--n600:#3e4b45;--n700:#25312c;--n800:#16201c;--n900:#0a1411;--n950:#03140d;
+/* Marca: floresta e verde */
+--b50:#f1f8f3;--b100:#e2f3e9;--b200:#bfe5cf;--b300:#7ccba2;--b400:#3fae7b;--b500:#1c9561;--b600:#137447;--b700:#0c5c39;--b800:#0a3424;--b900:#062519;
 /* Sinais */
 --g50:#ecfdf3;--g100:#d1fadf;--g500:#12b76a;--g600:#079455;--g700:#067647;
 --a50:#fff8eb;--a100:#feefc6;--a500:#f79009;--a600:#dc6803;--a700:#b54708;
 --r50:#fef3f2;--r100:#fee4e2;--r500:#f04438;--r600:#d92d20;--r700:#b42318;
 /* Dados: categóricas */
---d1:#1e4f8f;--d2:#0e9384;--d3:#7a5af8;--d4:#98a2b3;
+--d1:#137447;--d2:#0e9384;--d3:#7a5af8;--d4:#98a2b3;
 /* Semânticos */
---canvas:var(--n25);--surface:var(--n0);--subtle:var(--n50);--line:var(--n150);--line-2:var(--n200);
+--canvas:var(--n50);--surface:var(--n0);--subtle:var(--n25);--line:var(--n150);--line-2:var(--n200);
 --ink:var(--n900);--ink-2:var(--n600);--ink-3:var(--n500);--ink-4:var(--n400);
 --pri:var(--b600);--pri-h:var(--b700);--pri-t:var(--b50);
---ring:0 0 0 3px rgba(30,79,143,.22);
+--ring:0 0 0 3px rgba(28,149,97,.24);
 /* Raios, espaço, sombra, movimento */
---r-xs:4px;--r-sm:6px;--r-md:8px;--r-lg:12px;--r-pill:999px;
+--r-xs:6px;--r-sm:10px;--r-md:14px;--r-lg:20px;--r-pill:999px;
 --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s8:32px;--s10:40px;
---e1:0 1px 2px rgba(16,24,40,.04),0 1px 1px rgba(16,24,40,.02);
---e2:0 1px 2px rgba(16,24,40,.05),0 4px 12px -2px rgba(16,24,40,.06);
---e3:0 2px 4px rgba(16,24,40,.04),0 16px 32px -8px rgba(16,24,40,.16);
+--e1:0 1px 2px rgba(3,20,13,.04),0 1px 1px rgba(3,20,13,.02);
+--e2:0 1px 2px rgba(3,20,13,.05),0 6px 16px -4px rgba(3,20,13,.08);
+--e3:0 2px 4px rgba(3,20,13,.04),0 24px 48px -16px rgba(3,20,13,.24);
 --ease:cubic-bezier(.2,.8,.2,1);--t1:120ms;--t2:200ms;
---sans:"Inter",ui-sans-serif,system-ui,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;
+--sans:"Plus Jakarta Sans","Jakarta Fallback",ui-sans-serif,system-ui,sans-serif;--mono:"Plus Jakarta Sans","Jakarta Fallback",ui-sans-serif,system-ui,sans-serif;
 }

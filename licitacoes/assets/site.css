@@ -28,7 +28,7 @@ img,svg{display:block}
 
 /* ---------- herói ---------- */
 .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:
- radial-gradient(900px 480px at 82% 10%,rgba(30,79,143,.07),transparent 60%),var(--surface)}
+ radial-gradient(900px 480px at 82% 10%,rgba(19,116,71,.07),transparent 60%),var(--surface)}
 .hero .rings{position:absolute;right:-180px;top:-210px;width:860px;height:860px;pointer-events:none;opacity:.9}
 .hero .grid{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 460px;gap:64px;align-items:start;padding-top:40px;padding-bottom:56px}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px 0 10px;border-radius:var(--r-pill);background:var(--surface);border:1px solid var(--line);box-shadow:var(--e1);font-size:12.5px;font-weight:500;color:var(--ink-2)}
@@ -49,7 +49,7 @@ h1 .hl{color:var(--pri)}
 .facts span{display:block;font-size:12.5px;line-height:17px;color:var(--ink-3);margin-top:2px}
 
 /* ---------- formulário ---------- */
-.formcard{scroll-margin-top:80px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--e3),0 0 0 6px rgba(30,79,143,.035);overflow:hidden}
+.formcard{scroll-margin-top:80px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--e3),0 0 0 6px rgba(19,116,71,.035);overflow:hidden}
 .fhead{padding:18px 24px 14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--n25),var(--surface))}
 .fhead .t{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .fhead h2{font-size:18px;line-height:24px;font-weight:650;letter-spacing:-.02em;margin:0;color:var(--n950)}
@@ -263,3 +263,10 @@ footer .ver{margin-top:12px;font:450 11px/16px var(--mono);color:var(--ink-2);te
 @media (max-width:720px){.top nav a.cta .lg{display:none}.top nav a.cta .sh{display:inline}.logo b{font-size:14.5px}}
 .doc p.kicker{font-size:11.5px;line-height:16px;color:var(--pri)}
 .proof .ph span{white-space:nowrap;flex:none;margin-left:12px}
+/* Revisão independente (31/10/2026): texto nunca abaixo de 13 px, números tabulares onde era monoespaçada, logo e anéis no verde da família. */
+.mono,.kicker,.step .n,.ufs span,.cver,footer .ver,.draft{font-variant-numeric:tabular-nums}
+.kicker,.doc p.kicker{font:800 13px/16px var(--sans);letter-spacing:.08em}
+.eyebrow,.pill,.draft,.eyebrow .mono,.obj .mono,.doc h2 .mono,.ufs span,.cver,footer .ver{font-size:13px}
+.draft{height:24px}
+.rings g{stroke:var(--b600)}.rings stop{stop-color:var(--b600)}
+.logo svg rect{fill:var(--n950)}.logo svg [fill="#5b83b8"]{fill:var(--b500)}.logo svg [stroke="#8ba8d0"]{stroke:var(--b300)}
