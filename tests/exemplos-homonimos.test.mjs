@@ -40,11 +40,13 @@ test('rescisão da Carla: post e /rescisao/ com depósito da rescisão e multa d
   assert.ok(!post.includes('R$ 4.800,00') && !pag.includes('R$ 4.800,00'), 'multa sem o depósito da rescisão');
 });
 
-test('13º: nota da 1ª parcela supõe pagamento na 2ª quinzena de novembro e distingue as frações de 15 dias', () => {
+test('13º: nota da 1ª parcela supõe pagamento na 2ª quinzena de novembro e conta só o mês com mais de 15 dias (parecer 500fc746)', () => {
   const ui = readFileSync(new URL('../assets/js/ui.js', import.meta.url), 'utf8');
-  assert.match(ui, /supõe o pagamento na segunda quinzena de novembro \(até 30\/11\), quando novembro já tem mais de 15 dias de serviço/);
-  assert.match(ui, /Na 1ª parcela, conta como mês a fração de mais de 15 dias \(art\. 78, § 4º\); no 13º, a de 15 dias ou mais \(art\. 76, § 2º\)/);
+  assert.match(ui, /por mês de serviço com mais de 15 dias, contado até o pagamento \(Decreto 10\.854\/2021, art\. 78, § 4º\)/);
+  assert.match(ui, /A calculadora supõe o pagamento na 2ª quinzena de novembro, até 30\/11, e por isso conta novembro\. Se a empresa pagar antes, novembro pode não contar\./);
   assert.doesNotMatch(ui, /supõe o pagamento em novembro/);
+  const h = ler('decimo-terceiro/index.html');
+  assert.match(h, /Por isso um mês com exatamente 15 dias entra no 13º, mas não na 1ª parcela\./);
 });
 
 // Multa do FGTS: 40% de todos os depósitos do contrato, atualizados, sem descontar saques (Lei 8.036/1990, art. 18, § 1º).

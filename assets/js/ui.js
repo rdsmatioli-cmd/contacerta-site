@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=9f45ee25a6';
+import * as C from './calc.js?v=6fc4ea62e0';
 import { INDICADORES } from './tabelas.js?v=2469a7d685';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas, validarDiasFerias, validarData, validarOrdemDatas } from './valida.js?v=282baa1f87';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas, validarDiasFerias, validarData, validarOrdemDatas } from './valida.js?v=7b41b53d67';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -235,7 +235,7 @@ const CALCS = {
       ['IRRF (descontado na 2ª parcela)', `− ${R(r.irrf)}`],
       ['2ª parcela (até 20/12)', R(r.segunda), 'sub'],
       ['Total líquido', R(r.liquidoTotal), 'total'],
-    ]) + (r.meses < 12 ? `<p class="nota">Com menos de 12 meses no ano, a 1ª parcela é metade de 1/12 do salário por mês de serviço até o pagamento (Decreto 10.854/2021, art. 78, § 4º). A calculadora supõe o pagamento na segunda quinzena de novembro (até 30/11), quando novembro já tem mais de 15 dias de serviço, e os ${r.meses} meses informados contados até dezembro: ${r.mesesPrimeira} até novembro. Na 1ª parcela, conta como mês a fração de mais de 15 dias (art. 78, § 4º); no 13º, a de 15 dias ou mais (art. 76, § 2º). Se a empresa pagar antes, a 1ª parcela é menor e a 2ª, maior; o total não muda.</p>` : '');
+    ]) + (r.meses < 12 ? '<p class="nota">Com menos de 12 meses no ano, a 1ª parcela é metade de 1/12 do salário por mês de serviço com mais de 15 dias, contado até o pagamento (Decreto 10.854/2021, art. 78, § 4º). A calculadora supõe o pagamento na 2ª quinzena de novembro, até 30/11, e por isso conta novembro. Se a empresa pagar antes, novembro pode não contar.</p>' : '');
   },
   ferias(d) {
     // CC-CALC-FERIAS-01: dias de gozo e dias vendidos são campos independentes; somados, cabem em 30 dias.

@@ -986,7 +986,7 @@ export function creditoTravado({ comprasMensais, cbsPct, ibsPct, pctInadimplente
 // Calendário oficial: marcos e situação em relação a uma data (AAAA-MM-DD).
 export const MARCOS_REFORMA = [
   { data: '2026-01-01', t: 'Início do ano de teste: CBS de 0,9% e IBS de 0,1% destacados nos documentos fiscais, compensáveis com PIS/Cofins ou dispensados para quem cumpre as obrigações acessórias' },
-  { data: '2026-10-28', t: 'TCU aprova o cálculo da alíquota de referência da CBS de 2027: 11,3% (TC 006.529/2026-7); a fixação cabe ao Senado' },
+  { data: '2026-10-28', t: 'TCU calcula a alíquota de referência da CBS de 2027 em 11,3% (TC 006.529/2026-7). Não é a alíquota oficial: a fixação cabe ao Senado.' },
   { data: '2026-10-30', t: 'Fim do prazo (aberto em 01/09/2026) para o Simples Nacional optar por apurar IBS/CBS por fora (regime regular) no 1º semestre de 2027; prazo legal do TCU para enviar ao Senado o cálculo da alíquota de referência da CBS' },
   { data: '2026-11-03', t: 'Começa o prazo para cancelar, em caráter irretratável, a opção do Simples pelo regime regular de IBS/CBS feita para o 1º semestre de 2027 e o pedido de opção pelo Simples Nacional para 2027 (até 20/12/2026; Resolução CGSN nº 194/2026)' },
   { data: '2026-11-16', t: 'Novas regras de validação de IBS/CBS da NF-e em produção (NT 2025.002-RTC, cronograma sujeito a mudança)' },
