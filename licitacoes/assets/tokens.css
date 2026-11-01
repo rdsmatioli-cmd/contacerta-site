@@ -1,29 +1,47 @@
-/* Licitações · tokens v5 (família visual do Conta Certa, 31/10/2026): mesma fonte (Plus Jakarta Sans, já em cache no domínio),
-   neutros verde-acinzentados e verde floresta no lugar do azul-marinho. Só tokens: a estrutura do site.css não muda. */
+/* Licitações · tokens v6 (redesign 3, 01/11/2026): família Conta Certa v2. Mesma fonte (Plus Jakarta Sans, já em cache
+   no domínio, com métricas de fallback), mesmos neutros verde-acinzentados, faixa escura de marca e lima só na marca.
+   Claro e escuro automáticos (prefers-color-scheme). Contrastes medidos no DESIGN_PLAN.md do redesign 3. */
 @font-face{font-family:"Plus Jakarta Sans";font-style:normal;font-weight:400 800;font-display:swap;src:url("/fonts/plus-jakarta-sans-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:"Jakarta Fallback";src:local("Arial"),local("ArialMT"),local("Arimo"),local("Liberation Sans"),local("Roboto"),local("Helvetica");size-adjust:104.4%;ascent-override:99.4%;descent-override:21.3%;line-gap-override:0%}
 :root{
-/* Neutros: verde-acinzentados */
---n0:#ffffff;--n25:#f7f9f6;--n50:#f3f5f1;--n100:#eef2ed;--n150:#e1e7e2;--n200:#d3dcd6;--n300:#c6d1ca;--n400:#8c9c95;--n500:#54625b;--n600:#3e4b45;--n700:#25312c;--n800:#16201c;--n900:#0a1411;--n950:#03140d;
-/* Marca: floresta e verde */
---b50:#f1f8f3;--b100:#e2f3e9;--b200:#bfe5cf;--b300:#7ccba2;--b400:#3fae7b;--b500:#1c9561;--b600:#137447;--b700:#0c5c39;--b800:#0a3424;--b900:#062519;
-/* Sinais */
---g50:#ecfdf3;--g100:#d1fadf;--g500:#12b76a;--g600:#079455;--g700:#067647;
---a50:#fff8eb;--a100:#feefc6;--a500:#f79009;--a600:#dc6803;--a700:#b54708;
---r50:#fef3f2;--r100:#fee4e2;--r500:#f04438;--r600:#d92d20;--r700:#b42318;
-/* Dados: categóricas */
---d1:#137447;--d2:#0e9384;--d3:#7a5af8;--d4:#98a2b3;
-/* Semânticos */
---canvas:var(--n50);--surface:var(--n0);--subtle:var(--n25);--line:var(--n150);--line-2:var(--n200);
---ink:var(--n900);--ink-2:var(--n600);--ink-3:var(--n500);--ink-4:var(--n400);
---pri:var(--b600);--pri-h:var(--b700);--pri-t:var(--b50);
---ring:0 0 0 3px rgba(28,149,97,.24);
-/* Raios, espaço, sombra, movimento */
---r-xs:6px;--r-sm:10px;--r-md:14px;--r-lg:20px;--r-pill:999px;
---s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s8:32px;--s10:40px;
---e1:0 1px 2px rgba(3,20,13,.04),0 1px 1px rgba(3,20,13,.02);
---e2:0 1px 2px rgba(3,20,13,.05),0 6px 16px -4px rgba(3,20,13,.08);
---e3:0 2px 4px rgba(3,20,13,.04),0 24px 48px -16px rgba(3,20,13,.24);
---ease:cubic-bezier(.2,.8,.2,1);--t1:120ms;--t2:200ms;
---sans:"Plus Jakarta Sans","Jakarta Fallback",ui-sans-serif,system-ui,sans-serif;--mono:"Plus Jakarta Sans","Jakarta Fallback",ui-sans-serif,system-ui,sans-serif;
-}
+  --fonte:"Plus Jakarta Sans","Jakarta Fallback",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  /* faixa de marca (cabeçalho, topo das páginas, fecho e rodapé) */
+  --faixa:#03140D;--faixa-2:#062519;--faixa-3:#0A3424;
+  --na-faixa:#FFFFFF;--na-faixa-2:rgba(255,255,255,.78);--na-faixa-3:rgba(255,255,255,.66);
+  --fio-faixa:rgba(255,255,255,.1);--vidro:rgba(255,255,255,.06);--vidro-fio:rgba(255,255,255,.12);
+  --lima:#C9F36A;--lima-2:#B9EC52;
+  /* neutros */
+  --fundo:#F3F5F1;--card:#FFFFFF;--card-2:#F7F9F6;--card-3:#EEF2ED;
+  --fio:#E1E7E2;--fio-2:#EBF0EB;--fio-forte:#C6D1CA;
+  --tinta:#0A1411;--tinta-2:#25312C;--suave:#54625B;
+  /* ação e links */
+  --verde:#137447;--verde-forte:#0C5C39;--verde-500:#1C9561;--verde-claro:#E2F3E9;--verde-50:#F1F8F3;
+  /* prazo: segmentos da régua (aceso x apagado >= 3:1) e pílulas da contagem */
+  --seg:#E3E9E5;--seg-n:#1C9561;--seg-a:#C4650A;--seg-r:#D92D20;
+  --ok-bg:#E2F3E9;--ok:#0C5C39;--sin-a-bg:#FFF1DE;--sin-a:#9A4A06;--sin-r-bg:#FEECEA;--sin-r:#B42318;
+  /* cabeçalho das tabelas dos documentos */
+  --tab-cab:#062519;
+  /* avisos */
+  --aviso:#FFF6E3;--aviso-fio:#F0D7A2;--aviso-tinta:#5E3A00;
+  /* marca (radar): ladrilho lima, traço da faixa */
+  --mk-t:#C9F36A;--mk-g:#03140D;
+  /* forma */
+  --r-1:6px;--r-2:12px;--r-3:20px;--r-4:28px;
+  --sombra:0 1px 2px rgba(3,20,13,.04),0 0 0 1px var(--fio-2);
+  --sombra-media:0 1px 2px rgba(3,20,13,.04),0 12px 28px -16px rgba(3,20,13,.22),0 0 0 1px var(--fio-2);
+  --sombra-alta:0 2px 4px rgba(3,20,13,.05),0 36px 72px -36px rgba(3,20,13,.55),0 0 0 1px rgba(3,20,13,.06);
+  color-scheme:light}
+@media (prefers-color-scheme:dark){:root{
+  --faixa:#03110B;--faixa-2:#0A1E16;--faixa-3:#0F2A1F;
+  --fundo:#050E0A;--card:#0B1712;--card-2:#0E1C16;--card-3:#12231C;
+  --fio:#1C2E26;--fio-2:#16271F;--fio-forte:#2B4337;
+  --tinta:#E8F0EC;--tinta-2:#C9D6CF;--suave:#9DB1A7;
+  --verde:#7BE2AF;--verde-forte:#A9EECB;--verde-500:#4FD99B;--verde-claro:#10291F;--verde-50:#0C1F17;
+  --seg:#22362D;--seg-n:#4FD99B;--seg-a:#F0A43A;--seg-r:#FF8A7A;
+  --ok-bg:#10291F;--ok:#A9EECB;--sin-a-bg:#2E2010;--sin-a:#F6C177;--sin-r-bg:#33160F;--sin-r:#FFA79B;
+  --tab-cab:#133325;
+  --aviso:#241B0C;--aviso-fio:#4E3D17;--aviso-tinta:#F4DEA8;
+  --sombra:0 0 0 1px var(--fio);
+  --sombra-media:0 0 0 1px var(--fio),0 12px 28px -16px rgba(0,0,0,.7);
+  --sombra-alta:0 0 0 1px rgba(255,255,255,.08),0 36px 72px -36px rgba(0,0,0,.9);
+  color-scheme:dark}}
