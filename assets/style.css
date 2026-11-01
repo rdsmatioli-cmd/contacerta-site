@@ -540,6 +540,10 @@ main p a,main li a,main dd a{overflow-wrap:anywhere}
 @media (min-width:600px){[data-calc="nr1-riscos-psicossociais"] .grade-campos>.campo{justify-content:flex-end}}
 /* Ressalva do QA (PR #5): sem a seta herdada de button::after nos botões do aviso de cookies; lcm-consent.css/js ficam intactos (ac527630). */
 .lcmc-btn::after{content:none}
+/* CC-SITE-11: o `font:600 15px/1.2 inherit` do lcm-consent.css é descartado (inherit não combina com outros valores no
+   atalho), e o button{} acima vazava nos botões do aviso: 16,8 px, peso 800, margin-top de 22 px, largura 100%. Aqui
+   ficam a fonte que o componente pretendia e o resto do button{} zerado; a mesma regra vale para Aceitar e Recusar (G-06). */
+.lcmc-btn{font-family:inherit;font-size:15px;font-weight:600;line-height:1.2;margin:0;letter-spacing:normal;width:auto}
 
 /* Guia completo nas calculadoras: um card só (post do blog), na largura do texto. */
 .relacionadas.guia-completo .cards{grid-template-columns:1fr;max-width:780px}
