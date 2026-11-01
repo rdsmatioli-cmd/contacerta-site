@@ -13,7 +13,7 @@
   --fonte:"Plus Jakarta Sans","Jakarta Fallback",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   /* neutros */
   --fundo:#F3F5F1;--card:#FFFFFF;--card-2:#F7F9F6;--card-3:#EEF2ED;
-  --borda:#E1E7E2;--borda-2:#EBF0EB;--borda-forte:#C6D1CA;
+  --borda:#E1E7E2;--borda-2:#EBF0EB;--borda-forte:#C6D1CA;--borda-campo:#7E8E87;
   --texto:#0A1411;--texto-2:#25312C;--suave:#54625B;
   --link:#137447;--link-forte:#0C5C39;
   /* marca: floresta e lima */
@@ -39,7 +39,7 @@
   color-scheme:light}
 @media (prefers-color-scheme:dark){:root{
   --fundo:#050E0A;--card:#0B1712;--card-2:#0E1C16;--card-3:#12231C;
-  --borda:#1C2E26;--borda-2:#16271F;--borda-forte:#2B4337;
+  --borda:#1C2E26;--borda-2:#16271F;--borda-forte:#2B4337;--borda-campo:#587366;
   --texto:#E8F0EC;--texto-2:#C9D6CF;--suave:#9DB1A7;
   --link:#7BE2AF;--link-forte:#A9EECB;
   --verde:#7BE2AF;--verde-esc:#A9EECB;--verde-500:#4FD99B;--verde-claro:#10291F;--verde-50:#0C1F17;
@@ -216,7 +216,7 @@ main>.cabeca{padding-top:36px}
 .campo{display:flex;flex-direction:column;gap:7px;min-width:0}
 .campo label{font:700 .875rem/1.35 var(--fonte);color:var(--texto-2)}
 .campo small{display:block;color:var(--suave);font-size:.8125rem;line-height:1.45}
-.entrada{display:flex;align-items:center;min-width:0;border:1.5px solid var(--borda-forte);border-radius:14px;background:var(--card);transition:border-color .15s,box-shadow .15s}
+.entrada{display:flex;align-items:center;min-width:0;border:1.5px solid var(--borda-campo);border-radius:14px;background:var(--card);transition:border-color .15s,box-shadow .15s}
 .entrada:hover{border-color:var(--suave)}
 .entrada:focus-within{border-color:var(--verde-500);box-shadow:0 0 0 4px color-mix(in srgb,var(--verde-500) 20%,transparent)}
 .pre,.suf{color:var(--suave);font-size:.9375rem;font-weight:700;white-space:nowrap}
@@ -225,7 +225,7 @@ main>.cabeca{padding-top:36px}
 input,select,textarea{font:inherit;color:inherit;max-width:100%}
 input[type=number],input[data-num],input[type=date],input[type=email],input[type=tel],input[type=text]:not(.busca input),select{width:100%;min-width:0;min-height:52px;padding:10px 15px;border:0;background:transparent;font:600 1.0625rem/1.2 var(--fonte);font-variant-numeric:tabular-nums;color:var(--texto)}
 .pre+input{padding-left:8px}
-input[type=date],select,.campo>input[type=text],.campo>input[type=email],.campo>input[type=tel]{border:1.5px solid var(--borda-forte);border-radius:14px;background-color:var(--card);transition:border-color .15s,box-shadow .15s}
+input[type=date],select,.campo>input[type=text],.campo>input[type=email],.campo>input[type=tel]{border:1.5px solid var(--borda-campo);border-radius:14px;background-color:var(--card);transition:border-color .15s,box-shadow .15s}
 select{-webkit-appearance:none;appearance:none;padding-right:44px;font-size:1rem;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2354625b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:20px;cursor:pointer}
 input[type=date]:hover,select:hover{border-color:var(--suave)}
 select:disabled{opacity:.6;cursor:not-allowed}
@@ -660,7 +660,8 @@ details>div>p:first-child{margin-top:0}
 .le-botao:hover{background:var(--f800);color:#fff}
 .le-form{position:relative;display:grid;gap:12px;max-width:520px}
 .le-form label{font-weight:700;font-size:.9375rem}
-.le-form input,.le-form select,.le-form textarea{width:100%;min-height:48px;padding:10px 14px;border:1.5px solid var(--borda-forte);border-radius:12px;background:var(--card);color:var(--texto)}
+.le-form input,.le-form select,.le-form textarea{width:100%;min-height:48px;padding:10px 14px;border:1.5px solid var(--borda-campo);border-radius:12px;background-color:var(--card);color:var(--texto)}
+.le-form select{padding-right:44px}
 .le-form .le-ok{display:flex;align-items:flex-start;gap:10px;font-weight:400;font-size:.9375rem;line-height:1.45}
 .le-form .le-ok input{flex:none;width:22px;min-height:22px;height:22px;margin:1px 0 0;accent-color:var(--verde-500)}
 .le-form input:focus-visible,.le-form select:focus-visible{outline:3px solid var(--verde-500);outline-offset:2px}
@@ -695,7 +696,7 @@ details>div>p:first-child{margin-top:0}
 .ed-cartoes li:has(a) strong{color:#fff}
 .ed-cartoes li:has(a) span{color:rgba(255,255,255,.76)}
 .ed-ops{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
-.ed-op{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 16px;border:0;border-radius:14px;background:var(--card);box-shadow:inset 0 0 0 1.5px var(--borda-forte);font-weight:600;cursor:pointer}
+.ed-op{display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 16px;line-height:1.35;border:0;border-radius:14px;background:var(--card);box-shadow:inset 0 0 0 1.5px var(--borda-campo);font-weight:600;cursor:pointer}
 .ed-op:has(input:checked){box-shadow:inset 0 0 0 2px var(--verde-500);background:var(--verde-50)}
 .ed-op input{accent-color:var(--verde-500);width:18px;height:18px}
 .ed-form{max-width:760px;margin-top:8px;padding:24px 22px;border-radius:24px;background:var(--card);box-shadow:var(--sombra-media)}
@@ -718,7 +719,7 @@ details>div>p:first-child{margin-top:0}
 .ed-tab th,.ed-tab td{padding:12px 16px;border-bottom:1px solid var(--borda-2);text-align:left}
 .ed-tab td{text-align:right;white-space:nowrap;font-weight:700;font-variant-numeric:tabular-nums}
 .ed-tab tr:last-child th,.ed-tab tr:last-child td{border-bottom:0}
-.ed input[type=email],.ed-form input:not([type=radio]):not([type=checkbox]){width:100%;max-width:28rem;min-height:52px;padding:0 15px;border:1.5px solid var(--borda-forte);border-radius:14px;background:var(--card)}
+.ed input[type=email],.ed-form input:not([type=radio]):not([type=checkbox]){width:100%;max-width:28rem;min-height:52px;padding:0 15px;border:1.5px solid var(--borda-campo);border-radius:14px;background:var(--card)}
 .ed-rodape{display:flex;flex-wrap:wrap;align-items:center;gap:4px 18px;margin:40px 0 0;padding-top:18px;border-top:1px solid var(--borda);font-size:.9375rem;color:var(--suave)}
 .ed-rodape a{display:inline-flex;align-items:center;min-height:44px;color:var(--texto-2)}
 .ed-off{margin:24px 0;padding:22px;border-radius:22px;background:var(--card);box-shadow:var(--sombra)}
@@ -777,3 +778,29 @@ html .lcmc-btn::after{content:none}
 
 /* Guia completo nas calculadoras: um card só (post do blog), na largura do texto. */
 .relacionadas.guia-completo .cards{grid-template-columns:1fr;max-width:780px}
+
+/* Revisão independente (31/10/2026): foco visível, campos, Empregador em Dia, home e tabelas no celular. */
+.ed-op:has(input:focus-visible),.ed-form input:not([type=radio]):not([type=checkbox]):focus-visible,.le-form textarea:focus-visible{outline:3px solid var(--verde-500);outline-offset:2px}
+.calc-form .grade-campos{grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr))}
+/* Desktop: o formulário fica com mais largura que o resultado e o select usa 15 px (só com mouse; no toque, 16 px evita o zoom do iOS),
+   para nenhuma opção aprovada ser cortada no meio da palavra. A INSS tem dois campos: uma coluna. */
+@media (min-width:1024px){.calc{grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr)}[data-calc="inss"] .grade-campos{grid-template-columns:minmax(0,1fr)}}
+@media (min-width:1024px) and (pointer:fine){.calc-form select{font-size:.9375rem}}
+.emp-lista .tile{display:grid;place-items:center;margin-top:0}
+#ed-painel h1{text-wrap:pretty}
+#ed-painel>h1+p>.btn{display:flex;width:max-content;margin-top:12px}
+.ed-form .ajuda{margin:8px 0 0;font-size:.8125rem;line-height:1.45;color:var(--suave)}
+.ed-form .ajuda small{font-size:inherit}
+.ed-form legend.ed-rotulo{margin:16px 0 7px;padding:0;font:700 .9375rem/1.35 var(--fonte);letter-spacing:0;color:var(--texto-2)}
+code{padding:.12em .4em;border-radius:6px;background:var(--card-3);font:500 .9em/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;overflow-wrap:anywhere}
+.ed p>code{display:block;margin:10px 0;padding:12px 14px;border-radius:12px;font:600 1rem/1.4 var(--fonte);background:var(--card-2);box-shadow:inset 0 0 0 1px var(--borda)}
+@media (max-width:599px){.ed-acoes:has(>:nth-child(3))>.btn{flex:1 1 100%}}
+@media (max-width:480px){div:not(.tabela-rolar)>table.res tr{flex-wrap:nowrap}div:not(.tabela-rolar)>table.res th{flex:1 1 0}}
+.rodape .mini a{display:inline;min-height:0}
+.rodape nav a{padding:6px 0;line-height:1.3}
+@media (max-width:599px){.empresas .acoes .btn{padding:0 18px;gap:8px;font-size:.9375rem}}
+@media (min-width:768px){.atalhos span{flex-basis:100%}}
+.sumario a{min-height:0;padding:6px 0}
+.hero-recibo .k{font-size:.8125rem}
+/* Blog (#60 da main): URL longa em texto puro (Fontes) não alarga a página em 320 a 412 px. */
+main article p,main article li{overflow-wrap:anywhere}

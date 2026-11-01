@@ -25,5 +25,5 @@
 --e2:0 1px 2px rgba(3,20,13,.05),0 6px 16px -4px rgba(3,20,13,.08);
 --e3:0 2px 4px rgba(3,20,13,.04),0 24px 48px -16px rgba(3,20,13,.24);
 --ease:cubic-bezier(.2,.8,.2,1);--t1:120ms;--t2:200ms;
---sans:"Plus Jakarta Sans","Jakarta Fallback",ui-sans-serif,system-ui,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+--sans:"Plus Jakarta Sans","Jakarta Fallback",ui-sans-serif,system-ui,sans-serif;--mono:"Plus Jakarta Sans","Jakarta Fallback",ui-sans-serif,system-ui,sans-serif;
 }
