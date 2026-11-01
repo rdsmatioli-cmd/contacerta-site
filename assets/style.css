@@ -266,14 +266,10 @@ details>div{color:var(--suave)}
 .cards li>a:not(.card){display:flex;flex-direction:column;gap:2px;height:100%;padding:16px 18px;border:1px solid var(--borda);border-radius:var(--raio);background:var(--card);text-decoration:none;color:var(--texto);box-shadow:var(--sombra)}
 .cards li>a:not(.card)>span{color:var(--suave);font-size:.88rem;line-height:1.45}
 .cards li>a:not(.card):hover{border-color:var(--borda-forte)}
-/* Reforma Tributária: tabelas largas e bloco de lista de espera */
+/* Reforma Tributária: tabelas largas; formulários .le-form */
 .tabela-rolar{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tabela-rolar table.res th,.tabela-rolar table.res td{white-space:nowrap;font-size:.88rem}
 .tabela-rolar table.res td:nth-child(2){white-space:normal;min-width:180px}
-.lista-espera{margin:24px 0;padding:18px 20px;border:2px solid var(--verde);border-radius:var(--raio);background:var(--card)}
-.lista-espera h2{margin:0 0 6px;font-size:1.15rem}
-.lista-espera p{margin:0 0 10px}
-.le-botao{display:inline-block;min-height:44px;padding:10px 20px;border-radius:10px;background:var(--verde);color:#fff;font-weight:700;text-decoration:none}
 .le-form{display:grid;gap:12px;max-width:520px}
 .le-form label{font-weight:600}
 .le-form input,.le-form select,.le-form textarea{width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--borda);border-radius:8px;font:inherit;background:var(--card);color:var(--texto)}
@@ -282,7 +278,7 @@ details>div{color:var(--suave)}
 .le-form .le-ok input{width:22px;min-height:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--verde)}
 .le-form{position:relative}
 .le-form input:focus-visible,.le-form select:focus-visible{outline:3px solid var(--verde);outline-offset:2px}
-@media (prefers-color-scheme:dark){.le-botao,.le-form button{color:var(--tinta)}}
+@media (prefers-color-scheme:dark){.le-form button{color:var(--tinta)}}
 
 /* Recomendação e assinatura do resultado (simuladores da Reforma, 10/10/2026) */
 .recomenda{border-radius:12px;padding:14px 16px;margin:0 0 12px;border:1.5px solid var(--borda);background:var(--card)}
@@ -296,7 +292,7 @@ details>div{color:var(--suave)}
 .marca-logo{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--verde);color:#fff;font-size:.75rem;font-weight:800}
 .imprimir{min-height:44px;padding:8px 14px;border:1.5px solid var(--verde);border-radius:10px;background:transparent;color:var(--verde);font:inherit;font-weight:700;cursor:pointer}
 @media print{
-  body>header,body>footer,.topo,.rodape,nav,.calc-form,.cc-banner,.cc-rever,.texto,.faq,.fontes,.relacionadas,.lista-espera,aside,.imprimir,.lead,.meta,#cc-consent,[class*="consent"]{display:none!important}
+  body>header,body>footer,.topo,.rodape,nav,.calc-form,.cc-banner,.cc-rever,.texto,.faq,.fontes,.relacionadas,aside,.imprimir,.lead,.meta,#cc-consent,[class*="consent"]{display:none!important}
   body{background:#fff;color:#000}
   .calc,.calc-saida{box-shadow:none;border:0;padding:0;grid-template-columns:1fr!important}
   .marca-res{color:#000;border-top:1px solid #000}

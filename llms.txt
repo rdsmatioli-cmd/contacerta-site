@@ -69,7 +69,6 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 ## Sobre o site
 
 - [Sobre e metodologia](https://contacertabr.com.br/sobre/): quem mantém o site, como as fontes são verificadas e como as tabelas são atualizadas.
-- [Lista de espera](https://contacertabr.com.br/lista-de-espera/): aviso de lançamento das ferramentas de automação da Reforma Tributária e da NR-1.
 - [Contato](https://contacertabr.com.br/contato/): correções de tabelas e sugestões.
 - [Política de privacidade](https://contacertabr.com.br/privacidade/)
 - [Termos de uso](https://contacertabr.com.br/termos/)
