@@ -46,7 +46,7 @@ svg{flex:none}
 /* ============ Cabeçalho (faixa) ============ */
 .top{position:sticky;top:0;z-index:40;background:var(--faixa);color:#fff;border-bottom:1px solid var(--fio-faixa)}
 .top .wrap{display:flex;align-items:center;gap:12px;min-height:64px}
-.top .logo{display:inline-flex;align-items:center;gap:11px;min-height:44px;margin-right:auto;color:#fff;text-decoration:none;border-radius:12px}
+.top .logo{display:inline-flex;align-items:center;gap:11px;min-width:44px;min-height:44px;margin-right:auto;color:#fff;text-decoration:none;border-radius:12px}
 .top .logo:hover{color:#fff}
 .wm{display:flex;flex-direction:column;gap:4px}
 .wm b{font:800 1.125rem/1 var(--fonte);letter-spacing:-.035em;color:#fff}
@@ -75,9 +75,10 @@ svg{flex:none}
 /* editais: o resumo do filtro ocupa a metade direita da faixa */
 @media (min-width:1024px){.faixa-grade{display:grid;grid-template-columns:minmax(0,760px) auto;justify-content:space-between;align-items:end;column-gap:48px}.faixa-grade .filtro{margin:0 0 3px}}
 /* no escuro a faixa ganha um fio na borda de baixo (sem ele, faixa e página se fundem) */
-@media (prefers-color-scheme:dark){.faixa{box-shadow:inset 0 -1px 0 rgba(255,255,255,.09)}}
+@media (prefers-color-scheme:dark){.faixa{box-shadow:inset 0 -1px 0 rgba(255,255,255,.09)}.hero::after{content:"";position:absolute;left:-100vmax;right:-100vmax;bottom:0;height:1px;background:rgba(255,255,255,.09)}.fim{box-shadow:inset 0 1px 0 rgba(255,255,255,.09)}}
 
 /* ============ Herói da landing (faixa) + grade com o painel ============ */
+.abre{overflow-x:clip}
 .grade{display:grid;grid-template-columns:minmax(0,1fr)}
 .hero{position:relative;background:var(--faixa);box-shadow:0 0 0 100vmax var(--faixa);clip-path:inset(0 -100vmax -1px);color:var(--na-faixa-2);padding:20px 0 56px}
 .status{display:inline-flex;align-items:center;gap:10px;min-height:32px;margin:0 0 16px;padding:0 13px 0 11px;border-radius:999px;background:var(--vidro);box-shadow:inset 0 0 0 1px var(--vidro-fio);font:600 .8125rem/1 var(--fonte);color:#fff;white-space:nowrap}
@@ -93,7 +94,7 @@ svg{flex:none}
 .facts b{font:700 .9375rem/1.3 var(--fonte);color:#fff}
 .facts span{font-size:.875rem;line-height:1.4;color:var(--na-faixa-3)}
 .lista{margin-bottom:72px}
-.painel{position:relative;z-index:1;margin-top:-40px;border-radius:22px;background:var(--card);box-shadow:var(--sombra-alta);scroll-margin-top:84px;container-type:inline-size}
+.painel{position:relative;z-index:1;margin-top:-40px;border-radius:22px;background:var(--card);box-shadow:var(--sombra-alta);container-type:inline-size}
 @media (min-width:640px){
   .hero{padding:44px 0 112px}
   .hero h1{font-size:3rem;line-height:1.04}
@@ -107,10 +108,11 @@ svg{flex:none}
   .hero h1{font-size:2.75rem;line-height:1.04;letter-spacing:-.045em;margin-bottom:18px}
   .grade>.painel{grid-column:2;grid-row:1/span 2;align-self:start;margin-top:52px}
   .publico{grid-column:1;grid-row:2}}
+@media (min-width:1200px){.grade{grid-template-columns:440px minmax(0,1fr);column-gap:56px}}
 @media (min-width:1280px){
-  .grade{grid-template-columns:440px minmax(0,1fr);column-gap:64px}
+  .grade{grid-template-columns:460px minmax(0,1fr);column-gap:64px}
   .hero{padding:64px 0 96px}
-  .hero h1{font-size:3rem;margin-bottom:20px}
+  .hero h1{font-size:2.875rem;margin-bottom:20px}
   .grade>.painel{margin-top:64px}}
 
 /* ============ Painel do radar (a amostra) ============ */
@@ -121,6 +123,7 @@ svg{flex:none}
 .tag{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:var(--r-1);background:var(--card-3);color:var(--suave);font:600 .8125rem/1 var(--fonte)}
 .pbar-r{gap:7px;font:500 .8125rem/1.3 var(--fonte);color:var(--suave);font-variant-numeric:tabular-nums}
 @media (max-width:419px){.pbar-r .ic{display:none}}
+@media (max-width:639px){.pbar{flex-wrap:nowrap;gap:8px;padding:8px 12px}.pbar-l{flex:none}.pbar-r{min-width:0}.pbar-l .tag{padding:0 7px}}
 .phead{padding:18px 16px;border-bottom:1px solid var(--fio)}
 .phead h2{margin:0 0 6px;font-size:1.0625rem;line-height:1.3;letter-spacing:-.02em}
 .phead .sub{max-width:60ch;margin:0 0 12px;font-size:.875rem;line-height:1.5;color:var(--suave)}
@@ -141,13 +144,24 @@ svg{flex:none}
   #exemplo{display:flex;flex-direction:column}
   #exemplo .phead{display:contents}
   #exemplo h2{order:1;margin:0;padding:16px 16px 0}
-  #exemplo .nota-prazo{order:2;margin:8px 16px 0}
+  #exemplo .nota-prazo{order:2;display:block;margin:8px 16px 0}
+  #exemplo .nota-prazo .ic{margin:-2px 6px 0 0}
   #exemplo .filtro{order:3;align-self:flex-start;gap:4px 8px;margin:12px 16px 16px;padding:5px 12px 5px 9px}
   #exemplo .ufs{gap:2px 7px}
   #exemplo .kw{padding:0 7px}
   #exemplo .ed{order:4;border-top:1px solid var(--fio)}
   #exemplo .sub{order:5;max-width:none;margin:0;padding:16px;border-top:1px solid var(--fio)}
   #exemplo .pfoot{order:6}}
+/* telefones de 360-379 px: margens internas do painel de 12 px, título do painel numa linha, filtro sem cápsula */
+@media (max-width:379px){
+  .hero{padding-top:16px}
+  .status{margin-bottom:12px}
+  #exemplo h2{padding:14px 12px 0;font-size:1rem}
+  #exemplo .nota-prazo{margin:8px 12px 0}
+  #exemplo .filtro{margin:10px 12px 14px;padding:0;background:none;box-shadow:none}
+  #exemplo .sub{padding:16px 12px}
+  .ed tr{padding:16px 12px 20px}
+  .pfoot{padding:16px 12px 18px}}
 
 /* ============ Ficha de edital (linha da tabela .ed) ============ */
 /* Painel estreito: ficha empilhada como comprovante (título, valor e prazo, órgão, ação). Painel de 600 px+: duas zonas
@@ -184,8 +198,8 @@ svg{flex:none}
 .ed .ruler{grid-area:rul;align-self:center}
 .ed .cd{grid-area:cd;align-self:center;justify-self:end}
 /* régua de 30 dias (10 segmentos de 3 dias, acesos pelo app.js): trilho cheio de 6 px, aceso >= 3:1 contra o apagado */
-.ruler{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px;height:6px}
-.ruler i{display:block;height:6px;border-radius:2px;background:var(--seg)}
+.ruler{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px;height:8px}
+.ruler i{display:block;height:8px;border-radius:2px;background:var(--seg)}
 .ruler.n i.on{background:var(--seg-n)}
 .ruler.a i.on{background:var(--seg-a)}
 .ruler.r i.on{background:var(--seg-r)}
@@ -207,25 +221,26 @@ svg{flex:none}
 .lnk:active{transform:translateY(1px)}
 .lnk .ic{stroke-width:2.1}
 @container (min-width:600px){
-  .ed tr{grid-template-columns:minmax(0,1fr) 272px;grid-template-rows:auto 1fr auto auto;grid-template-areas:"obj val" "obj due" "org due" "act due";padding:0}
+  .ed tr{grid-template-columns:minmax(0,1fr) 288px;grid-template-rows:auto 1fr auto auto;grid-template-areas:"obj val" "obj due" "org due" "act due";padding:0}
   .ed .obj{padding:24px 28px 0 24px}
   .ed .org{margin-top:10px;padding:0 28px 0 24px}
   .ed .act{align-self:end;margin-top:18px;padding:0 28px 24px 24px}
   .ed .val,.ed .due{margin:0;padding-left:24px;padding-right:24px;box-shadow:inset 1px 0 0 var(--fio-2)}
   .ed .val{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:4px;padding-top:24px;border-top:0}
-  .ed .due{grid-template-areas:"lab lab" "d d" "rul cd";gap:6px 10px;align-content:start;padding-top:20px;padding-bottom:24px}
-  .ed .d{text-align:left}
-  .ed .ruler{margin-top:6px}
-  .ed .cd{margin-top:6px}
+  .ed .due{display:flex;flex-wrap:wrap;align-items:center;align-content:flex-start;gap:6px 10px;padding-top:20px;padding-bottom:24px}
+  .ed .due::before{flex:0 0 100%}
+  .ed .d{order:1;text-align:left}
+  .ed .cd{order:2;margin-left:auto}
+  .ed .ruler{order:3;flex:0 0 100%;margin-top:8px}
   .ed .v{font-size:1.5rem}
   .ed .d{font-size:1.25rem}
-  .tit{font-size:1.03125rem}}
+  .ed .tit{font-size:1.03125rem}}
 /* página de editais, painel de 900 px+: tabela com cabeçalho visível (fixo sob o cabeçalho do site), linhas alinhadas
    pela linha de base, sem rótulo repetido; valores numa coluna = algarismos tabulares. 900-1059: o órgão vai numa linha
    sob o objeto (4 colunas). 1060+: 5 colunas, como a tabela de antes. */
 @container (min-width:900px){
   .lista .ed thead{position:sticky;top:72px;z-index:2;display:block;width:auto;height:auto;overflow:visible;clip:auto;white-space:normal;background:var(--card-2)}
-  .lista .ed thead tr,.lista .ed tbody tr{grid-template-columns:minmax(0,1fr) 176px 220px 152px;padding:0}
+  .lista .ed thead tr,.lista .ed tbody tr{grid-template-columns:minmax(0,1fr) 176px 256px 152px;padding:0}
   .lista .ed thead tr{grid-template-areas:none}
   .lista .ed th{padding:11px 20px;font:600 .8125rem/1.3 var(--fonte);color:var(--suave);text-align:left}
   .lista .ed th:first-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -242,12 +257,12 @@ svg{flex:none}
   .lista .ed .val{display:block;margin:0;padding:20px 20px 20px 8px;border:0;box-shadow:none;text-align:right}
   .lista .ed .val::before,.lista .ed .due::before{display:none}
   .lista .ed .v{font-size:1.25rem;font-variant-numeric:lining-nums tabular-nums}
-  .lista .ed .due{grid-template-areas:"d d" "rul cd";gap:10px;margin:0;padding:20px;box-shadow:none}
+  .lista .ed .due{gap:10px 8px;margin:0;padding:20px 18px;box-shadow:none}
   .lista .ed .d{font-size:1.125rem}
-  .lista .ed .ruler,.lista .ed .cd{margin-top:2px}
+  .lista .ed .ruler{margin-top:4px}
   .lista .ed .act{align-self:baseline;margin:0;padding:20px 24px 20px 0;text-align:right}}
 @container (min-width:1060px){
-  .lista .ed thead tr,.lista .ed tbody tr{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) 176px 220px 152px}
+  .lista .ed thead tr,.lista .ed tbody tr{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) 176px 256px 152px}
   .lista .ed th:first-child{position:static;width:auto;height:auto;overflow:visible;clip:auto;white-space:normal;padding-left:24px}
   .lista .ed th:nth-child(2){padding-left:20px}
   .lista .ed tbody tr{grid-template-rows:auto;grid-template-areas:"org obj val due act"}
@@ -330,7 +345,7 @@ svg{flex:none}
 .doc .resumo{position:relative;margin:-52px 0 40px;padding:20px;border-radius:var(--r-3);background:var(--card);box-shadow:var(--sombra-media);font-size:1rem;line-height:1.65;color:var(--tinta)}
 .resumo p:last-child{margin-bottom:0}
 .corpo>p,.corpo>ul,.corpo>ol{max-width:66ch;font-size:1rem;line-height:1.7;color:var(--tinta-2)}
-.corpo h2{margin:2.3em 0 .6em;font-size:1.375rem;line-height:1.22;letter-spacing:-.025em;scroll-margin-top:96px}
+.corpo h2{margin:2.3em 0 .6em;font-size:1.375rem;line-height:1.22;letter-spacing:-.025em}
 .corpo h3{margin:1.9em 0 .5em;font-size:1.125rem;line-height:1.35;letter-spacing:-.015em}
 .corpo ul,.corpo ol{padding-left:1.35em}
 .corpo li{margin:.45em 0}
@@ -369,7 +384,7 @@ svg{flex:none}
   .corpo .pilha td{display:grid;grid-template-columns:minmax(6.5em,38%) minmax(0,1fr);gap:12px;padding:9px 16px;border-radius:0!important;background:none!important}
   .pilha td::before{content:attr(data-l);content:attr(data-l)/"";font-size:.8125rem;font-weight:600;line-height:1.55;color:var(--suave)}
   .pilha td:first-child{font-weight:700;color:var(--tinta)}
-  .pilha td>a{align-self:start;margin:-11px 0;padding:11px 0}
+  .pilha .cel>a{display:inline-block;margin:-11px 0;padding:11px 0}
   .corpo .pilha tbody tr>td{border-bottom:1px solid var(--fio-2)}
   .corpo .pilha tbody tr>td:last-child{border-bottom:0}}
 @media (max-width:479px){.corpo .pilha td{grid-template-columns:minmax(0,1fr);gap:1px}}
@@ -402,32 +417,32 @@ svg{flex:none}
 .cta-ex .ic{color:var(--verde)}
 /* guias: os editais reais citados no texto viram fichas (mesma ficha da landing; prazo ao vivo pelo app.js) */
 .corpo>.fichas{max-width:none;margin:20px 0 28px;padding:0;list-style:none;container-type:inline-size}
-.fichas .ficha{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"org" "tit" "dados" "act";margin:0 0 12px;padding:18px 18px 20px;border-radius:18px;background:var(--card);box-shadow:var(--sombra-media);font-size:.9375rem;line-height:1.55;color:var(--tinta-2)}
-.fichas .org{grid-area:org;font:700 1rem/1.4 var(--fonte);letter-spacing:-.01em}
-.fichas .tit{grid-area:tit;margin-top:4px;font:400 .9375rem/1.55 var(--fonte);letter-spacing:0;color:var(--tinta-2)}
+.fichas .ficha{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"ident" "dados" "act";margin:0 0 12px;padding:18px 18px 20px;border-radius:18px;background:var(--card);box-shadow:var(--sombra-media);font-size:.9375rem;line-height:1.55;color:var(--tinta-2)}
+.fichas .ident{grid-area:ident;font:400 .9375rem/1.6 var(--fonte);color:var(--tinta-2)}
+.fichas .ident strong{font-weight:700;color:var(--tinta)}
 .fichas .dados{grid-area:dados;display:block;margin-top:14px;padding-top:12px;border-top:1px dashed var(--fio-forte)}
 .fichas .val{display:flex;flex-direction:column;gap:3px}
 .fichas .lab{font:600 .8125rem/1.35 var(--fonte);color:var(--suave)}
-.fichas .due{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"lab lab" "d d" "obs obs" "rul cd";align-items:baseline;gap:3px 14px;margin-top:12px}
-.fichas .due .lab{grid-area:lab}
-.fichas .d{grid-area:d;font-size:1.0625rem}
-.fichas .obs{grid-area:obs;font-size:.8125rem;line-height:1.4;color:var(--suave)}
-.fichas .ruler{grid-area:rul;align-self:center;margin-top:8px}
-.fichas .cd{grid-area:cd;align-self:center;justify-self:end;margin-top:8px}
+/* prazo: rótulo; data e contagem na mesma linha (a contagem desce se não couber); observação; régua na largura toda */
+.fichas .due{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px;margin-top:12px}
+.fichas .due .lab{order:1;flex:0 0 100%}
+.fichas .d{order:2;font-size:1.0625rem}
+.fichas .cd{order:3;min-width:0;margin-left:auto}
+.fichas .obs{order:4;flex:0 0 100%;font-size:.8125rem;line-height:1.4;color:var(--suave)}
+.fichas .ruler{order:5;flex:0 0 100%;margin-top:8px}
 .fichas .act{grid-area:act;margin-top:16px}
 @container (min-width:600px){
-  .fichas .ficha{grid-template-columns:minmax(0,1fr) 272px;grid-template-rows:auto auto 1fr;grid-template-areas:"org dados" "tit dados" "act dados";padding:0}
-  .fichas .org{padding:22px 28px 0 24px}
-  .fichas .tit{padding:0 28px 0 24px}
+  .fichas .ficha{grid-template-columns:minmax(0,1fr) 304px;grid-template-rows:auto 1fr;grid-template-areas:"ident dados" "act dados";padding:0}
+  .fichas .ident{padding:22px 28px 0 24px}
   .fichas .act{align-self:end;margin:18px 0 0;padding:0 28px 22px 24px}
   .fichas .dados{margin:0;padding:22px 24px;border:0;box-shadow:inset 1px 0 0 var(--fio-2)}
   .fichas .v{font-size:1.375rem}
-  .fichas .due{gap:4px 10px;margin-top:16px}
+  .fichas .due{margin-top:16px}
   .fichas .d{font-size:1.125rem}}
 /* documentos legais */
-.faixa .versao-l{margin:16px 0 0;font:600 .875rem/1.5 var(--fonte);color:var(--na-faixa-2);font-variant-numeric:tabular-nums}
-/* celular: quebra antes do identificador e corpo de 13 px, para o "·" não ficar sozinho no fim da linha */
-@media (max-width:479px){.faixa .versao-l{font-size:.8125rem}.faixa .versao-l .nw::before{content:"\A";content:"\A"/"";white-space:pre}}
+/* versão dos termos: os três trechos ("Versão:", o identificador e "· Data: ...") quebram inteiros, então o "·" nunca
+   fica no fim da linha nem "Data:" se separa da data; o texto não muda */
+.faixa .versao-l{display:flex;flex-wrap:wrap;column-gap:.3em;margin:16px 0 0;font:600 .875rem/1.5 var(--fonte);color:var(--na-faixa-2);font-variant-numeric:tabular-nums}
 .legal .faixa .meta{gap:8px}
 .faixa .meta .pill{min-height:28px;padding:0 11px;font-weight:600;background:var(--vidro);box-shadow:inset 0 0 0 1px var(--vidro-fio);color:var(--na-faixa-2)}
 .faixa .meta .pill.b{color:#fff}

@@ -35,7 +35,7 @@
   color-scheme:light}
 @media (prefers-color-scheme:dark){:root{
   --faixa:#03110B;--faixa-2:#0A1E16;--faixa-3:#0F2A1F;
-  --fundo:#07120D;--card:#0F1D17;--card-2:#12221B;--card-3:#172A21;
+  --fundo:#0A1712;--card:#0F1D17;--card-2:#12221B;--card-3:#172A21;
   --fio:#20342A;--fio-2:#1A2C23;--fio-forte:#2E4739;
   --tinta:#E8F0EC;--tinta-2:#C9D6CF;--suave:#9DB1A7;
   --verde:#7BE2AF;--verde-forte:#A9EECB;--verde-500:#4FD99B;--verde-claro:#10291F;--verde-50:#0C1F17;
