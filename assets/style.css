@@ -122,7 +122,7 @@ strong{font-weight:700}
 .entrada:focus-within{border-color:var(--verde);box-shadow:0 0 0 4px color-mix(in srgb,var(--verde) 22%,transparent)}
 .pre,.suf{color:var(--suave);font-size:.9rem;font-weight:700;white-space:nowrap}
 .pre{padding-left:14px}.suf{padding-right:14px}
-input[type=number],input[data-num],input[type=date],select{font:inherit;font-size:1.05rem;font-weight:600;font-variant-numeric:tabular-nums;color:inherit;min-height:52px;padding:10px 14px;border:0;background:transparent;width:100%;min-width:0}
+input[type=number],input[data-num],.entrada input,input[type=date],select{font:inherit;font-size:1.05rem;font-weight:600;font-variant-numeric:tabular-nums;color:inherit;min-height:52px;padding:10px 14px;border:0;background:transparent;width:100%;min-width:0}
 .pre+input{padding-left:8px}
 input[type=date],select{border:1.5px solid var(--borda-forte);border-radius:var(--raio-p);background-color:var(--card);transition:border-color .15s,box-shadow .15s}
 select{-webkit-appearance:none;appearance:none;padding-right:40px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237a8b84' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:20px;font-size:1rem}
@@ -266,14 +266,10 @@ details>div{color:var(--suave)}
 .cards li>a:not(.card){display:flex;flex-direction:column;gap:2px;height:100%;padding:16px 18px;border:1px solid var(--borda);border-radius:var(--raio);background:var(--card);text-decoration:none;color:var(--texto);box-shadow:var(--sombra)}
 .cards li>a:not(.card)>span{color:var(--suave);font-size:.88rem;line-height:1.45}
 .cards li>a:not(.card):hover{border-color:var(--borda-forte)}
-/* Reforma Tributária: tabelas largas e bloco de lista de espera */
+/* Reforma Tributária: tabelas largas; formulários .le-form */
 .tabela-rolar{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tabela-rolar table.res th,.tabela-rolar table.res td{white-space:nowrap;font-size:.88rem}
 .tabela-rolar table.res td:nth-child(2){white-space:normal;min-width:180px}
-.lista-espera{margin:24px 0;padding:18px 20px;border:2px solid var(--verde);border-radius:var(--raio);background:var(--card)}
-.lista-espera h2{margin:0 0 6px;font-size:1.15rem}
-.lista-espera p{margin:0 0 10px}
-.le-botao{display:inline-block;min-height:44px;padding:10px 20px;border-radius:10px;background:var(--verde);color:#fff;font-weight:700;text-decoration:none}
 .le-form{display:grid;gap:12px;max-width:520px}
 .le-form label{font-weight:600}
 .le-form input,.le-form select,.le-form textarea{width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--borda);border-radius:8px;font:inherit;background:var(--card);color:var(--texto)}
@@ -282,7 +278,7 @@ details>div{color:var(--suave)}
 .le-form .le-ok input{width:22px;min-height:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--verde)}
 .le-form{position:relative}
 .le-form input:focus-visible,.le-form select:focus-visible{outline:3px solid var(--verde);outline-offset:2px}
-@media (prefers-color-scheme:dark){.le-botao,.le-form button{color:var(--tinta)}}
+@media (prefers-color-scheme:dark){.le-form button{color:var(--tinta)}}
 
 /* Recomendação e assinatura do resultado (simuladores da Reforma, 10/10/2026) */
 .recomenda{border-radius:12px;padding:14px 16px;margin:0 0 12px;border:1.5px solid var(--borda);background:var(--card)}
@@ -296,7 +292,7 @@ details>div{color:var(--suave)}
 .marca-logo{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--verde);color:#fff;font-size:.75rem;font-weight:800}
 .imprimir{min-height:44px;padding:8px 14px;border:1.5px solid var(--verde);border-radius:10px;background:transparent;color:var(--verde);font:inherit;font-weight:700;cursor:pointer}
 @media print{
-  body>header,body>footer,.topo,.rodape,nav,.calc-form,.cc-banner,.cc-rever,.texto,.faq,.fontes,.relacionadas,.lista-espera,aside,.imprimir,.lead,.meta,#cc-consent,[class*="consent"]{display:none!important}
+  body>header,body>footer,.topo,.rodape,nav,.calc-form,.cc-banner,.cc-rever,.texto,.faq,.fontes,.relacionadas,aside,.imprimir,.lead,.meta,#cc-consent,[class*="consent"]{display:none!important}
   body{background:#fff;color:#000}
   .calc,.calc-saida{box-shadow:none;border:0;padding:0;grid-template-columns:1fr!important}
   .marca-res{color:#000;border-top:1px solid #000}
@@ -544,6 +540,24 @@ main p a,main li a,main dd a{overflow-wrap:anywhere}
 @media (min-width:600px){[data-calc="nr1-riscos-psicossociais"] .grade-campos>.campo{justify-content:flex-end}}
 /* Ressalva do QA (PR #5): sem a seta herdada de button::after nos botões do aviso de cookies; lcm-consent.css/js ficam intactos (ac527630). */
 .lcmc-btn::after{content:none}
+/* CC-SITE-11: o `font:600 15px/1.2 inherit` do lcm-consent.css é descartado (inherit não combina com outros valores no
+   atalho), e o button{} acima vazava nos botões do aviso: 16,8 px, peso 800, margin-top de 22 px, largura 100%. Aqui
+   ficam a fonte que o componente pretendia e o resto do button{} zerado; a mesma regra vale para Aceitar e Recusar (G-06). */
+.lcmc-btn{font-family:inherit;font-size:15px;font-weight:600;line-height:1.2;margin:0;letter-spacing:normal;width:auto}
+/* button:hover e button:active (especificidade 0,1,1) ganhavam do .lcmc-btn (0,1,0): no hover o fundo ia para o verde do
+   site (o lima no tema escuro) e no clique o botão descia 1 px. O componente não tem hover: fica o fundo dele. */
+.lcmc .lcmc-btn:hover{background:var(--lcmc-btn-bg,#14213d)}
+.lcmc-btn:active{transform:none}
+/* CC-SITE-09: com o aviso de cookies aberto (classe posta pelo assets/js/medicao.js), o sumário dos posts deixa de ser
+   sticky. Preso na tela, ele não sai de trás do aviso quando a página rola, e os últimos itens ficavam cobertos pelo Tab. */
+@media (min-width:1024px){html.cc-aviso-aberto .post-grade .sumario{position:static}}
 
 /* Guia completo nas calculadoras: um card só (post do blog), na largura do texto. */
 .relacionadas.guia-completo .cards{grid-template-columns:1fr;max-width:780px}
+
+/* CC-SITE-05: legenda das tabelas do resultado do /irpf/ alinhada à esquerda (numa tabela que rola, centrada ela ficava
+   fora da tela). A tabela .comp do Simples híbrido tem legenda própria e fica como está. */
+.resultado table:not(.comp)>caption{text-align:left;font-size:.86rem;font-weight:700;color:var(--suave);padding:0 0 8px}
+.resultado .rolagem+table.res{margin-top:14px}
+/* Até 480 px a tabela .res vira bloco (Round 2, acima): a legenda acompanha, na largura toda, alinhada às linhas. */
+@media (max-width:480px){div:not(.tabela-rolar)>table.res>caption{display:block;padding:10px 12px 2px}}

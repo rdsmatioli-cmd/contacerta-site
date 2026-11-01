@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { abrirCalculadora } from './_formulario-minimo.mjs';
 
 const RAIZ = fileURLToPath(new URL('../', import.meta.url));
 const paginas = (dir = RAIZ) => readdirSync(dir, { withFileTypes: true }).flatMap((d) => {
@@ -40,4 +41,47 @@ test('ui.js: anuncia no #resultado-anuncio e mantém o role="alert" da lista de 
   assert.match(js, /const listaErros = \(erros\) => `<div class="erro" role="alert">/);
   // o ui.js não devolve o aria-live ao #resultado
   assert.doesNotMatch(js, /setAttribute\('aria-live'/);
+});
+
+// CC-SITE-12: o role="alert" (anúncio assertivo, que interrompe o leitor de tela) só vai na lista de erros do Calcular.
+// Na carga e ao digitar (evento input, atraso de 250 ms), a mesma lista sai sem ele; o campo continua com aria-invalid e
+// a mensagem. O comportamento no navegador está em tests/e2e/datas-e-anuncio.spec.mjs.
+test('ui.js: lista de erros com role="alert" só no Calcular; na carga e ao digitar, sem alerta e com o campo marcado', async () => {
+  const f = await abrirCalculadora('salario-liquido', { bruto: '' });
+  assert.match(f.out.innerHTML, /^<div class="erro"><p><strong>Confira o campo antes de calcular:<\/strong><\/p><ul><li><a href="#f-bruto">Salário bruto mensal<\/a>: Preencha este campo\.<\/li><\/ul><\/div>$/);
+  assert.equal(f.el('f-bruto').getAttribute('aria-invalid'), 'true');
+  assert.equal(f.el('f-bruto-msg').textContent, 'Preencha este campo.');
+  assert.match(f.calcular(), /^<div class="erro" role="alert"><p><strong>Confira o campo antes de calcular:/);
+  // digitação com outro erro: a lista muda, sem role="alert"
+  f.campo('bruto').value = 'abc';
+  globalThis.document = { getElementById: (id) => f.el(id) || null, querySelector: (sel) => (sel === 'form[data-calc]' ? f.form : null) };
+  try {
+    f.form.disparar('input');
+    await new Promise((ok) => setTimeout(ok, 300));
+  } finally {
+    delete globalThis.document;
+  }
+  assert.match(f.out.innerHTML, /^<div class="erro"><p>[^]*: Digite só números\.<\/li>/);
+  assert.doesNotMatch(f.out.innerHTML, /role="alert"/);
+  assert.equal(f.el('f-bruto').getAttribute('aria-invalid'), 'true');
+  assert.match(f.calcular(), /^<div class="erro" role="alert">[^]*: Digite só números\.<\/li>/);
+});
+
+// CC-SITE-12 (revisão): o Calcular apertado dentro dos 250 ms do atraso da digitação cancela o recálculo que ainda
+// esperava. Sem isso, ele saía depois do envio e trocava a lista com role="alert" pela da digitação, sem o alerta.
+test('ui.js: Calcular antes dos 250 ms da digitação mantém a lista do envio, com role="alert"', async () => {
+  const f = await abrirCalculadora('salario-liquido', { bruto: '5000' });
+  const doc = () => { globalThis.document = { getElementById: (id) => f.el(id) || null, querySelector: (sel) => (sel === 'form[data-calc]' ? f.form : null) }; };
+  f.campo('bruto').value = 'abc';
+  doc();
+  try { f.form.disparar('input'); } finally { delete globalThis.document; }
+  const enviado = f.calcular();
+  assert.match(enviado, /^<div class="erro" role="alert">[^]*: Digite só números\.<\/li>/);
+  doc();
+  try {
+    await new Promise((ok) => setTimeout(ok, 300));
+  } finally {
+    delete globalThis.document;
+  }
+  assert.equal(f.out.innerHTML, enviado, 'o recálculo da digitação não sai depois do Calcular');
 });

@@ -174,7 +174,7 @@ const guiaIr = {
     { nome: 'Receita Federal — exemplos de aplicação da Lei 15.270/2025', url: 'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/exemplos-de-aplicacao-da-lei-15-270-2025' },
     { nome: 'Lei nº 15.270, de 26/11/2025', url: 'https://in.gov.br/web/dou/-/lei-n-15.270-de-26-de-novembro-de-2025-671614220' },
   ],
-  relacionadas: ['imposto-de-renda', 'salario-liquido', 'tabela-inss-2026', 'inss', 'decimo-terceiro'],
+  relacionadas: ['imposto-de-renda', 'irpf', 'salario-liquido', 'tabela-inss-2026', 'inss', 'decimo-terceiro'],
   resposta: `<p><strong>Em 2026, rendimentos tributáveis mensais de até ${R(red.isencaoAte)} ficam sem IRRF.</strong> A tabela progressiva em si continua isentando só a base até ${R(IRRF.faixas[0].ate)}. A isenção até ${R(red.isencaoAte)} é a redução da Lei 15.270/2025, aplicada depois da tabela: até ${R(red.limiteIsencao)} de imposto, o bastante para zerar a retenção nesse patamar.</p>
 <p>De ${R(cent(red.isencaoAte))} a ${R(red.faixaAte)}, a redução é ${R(red.a)} − ${String(red.b).replace('.', ',')} × rendimento. Acima de ${R(red.faixaAte)}, não há redução. A vigência é ${IRRF.vigencia}.</p>`,
   artigo: `<h2>Tabela progressiva do IRRF em 2026</h2>

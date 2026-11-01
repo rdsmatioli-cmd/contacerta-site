@@ -25,6 +25,10 @@ const MSG = {
 
 const form = document.getElementById('irpf-form');
 const saida = document.getElementById('resultado');
+// CC-CALC-A11Y-01 (como no ui.js): o #resultado tem aria-live="off"; o leitor de tela recebe só a frase curta do valor
+// principal no #resultado-anuncio (role="status"), a cada Simular com dados válidos. Com erro, a região fica vazia: o
+// foco vai para o primeiro campo inválido, que lê a mensagem dele.
+const anuncio = document.getElementById('resultado-anuncio');
 const captura = document.getElementById('irpf-captura');
 
 function dados() {
@@ -51,19 +55,20 @@ function linha(rot, val) { return `<tr><th scope="row">${rot}</th><td>${val}</td
 
 function render(r) {
   const ind = r.indicado === 'completo' ? 'completo (deduções legais)' : 'simplificado (desconto de 20%)';
+  // CC-SITE-05: valor principal no .destaque e tabelas nos padrões do ui.js (.rolagem com .grade, .res, .nota).
   const destaque = r.aPagar > 0
-    ? `<p class="res-rot">Saldo a pagar estimado</p><p class="res-valor">${brl(r.aPagar)}</p>`
-    : `<p class="res-rot">Restituição estimada</p><p class="res-valor">${brl(r.restituicao)}</p>`;
+    ? `<p class="destaque"><span>Saldo a pagar estimado</span> <strong>${brl(r.aPagar)}</strong></p>`
+    : `<p class="destaque"><span>Restituição estimada</span> <strong>${brl(r.restituicao)}</strong></p>`;
   const col = (m, saldo) => `<td>${brl(m.deducao)}</td><td>${brl(m.base)}</td><td>${brl(m.tabela)}</td><td>${brl(m.reducao)}</td><td>${brl(m.devido)}</td><td>${saldo >= 0 ? `restituição de ${brl(saldo)}` : `saldo a pagar de ${brl(-saldo)}`}</td>`;
   saida.innerHTML = `${destaque}
 <p>Pela simulação, o modelo que parece mais vantajoso é o <strong>${ind}</strong>. Valores de 2026 (declaração 2027).</p>
-<div class="tabela-rolagem"><table><caption>Comparação estimada dos dois modelos</caption>
+<div class="rolagem" tabindex="0" role="region" aria-label="Comparação dos dois modelos (role para o lado)"><table class="grade"><caption>Comparação estimada dos dois modelos</caption>
 <thead><tr><th scope="col">Modelo</th><th scope="col">Deduções ou desconto</th><th scope="col">Base de cálculo</th><th scope="col">Imposto pela tabela</th><th scope="col">Redução (Lei 15.270/2025)</th><th scope="col">Imposto devido estimado</th><th scope="col">Com o IR retido</th></tr></thead>
 <tbody><tr><th scope="row">Completo</th>${col(r.completo, r.saldoCompleto)}</tr><tr><th scope="row">Simplificado</th>${col(r.simplificado, r.saldoSimplificado)}</tr></tbody></table></div>
-<table class="res-det"><caption>Deduções consideradas no modelo completo</caption><tbody>
+<table class="res"><caption>Deduções consideradas no modelo completo</caption><tbody>
 ${linha('INSS informado', brl(r.deducoes.inss))}${linha('Dependentes', brl(r.deducoes.dependentes))}${linha('Saúde', brl(r.deducoes.saude))}${linha('Instrução (até R$ 3.561,50 por pessoa)', brl(r.deducoes.instrucao))}${linha('Alíquota da faixa no modelo indicado', pct(r[r.indicado].aliquota))}
 </tbody></table>
-<p class="aviso-curto">Confira no programa da Receita Federal antes de enviar a sua declaração.</p>`;
+<p class="nota">Confira no programa da Receita Federal antes de enviar a sua declaração.</p>`;
   if (FLAGS.IRPF_CAPTURA && captura) captura.hidden = false;
 }
 
@@ -72,8 +77,14 @@ form.addEventListener('submit', (ev) => {
   const d = dados();
   const erros = validar(d);
   mostrarErros(erros);
-  if (erros.length) { form.elements[erros[0]].focus(); return; }
-  render(simularIrpf(d));
+  if (erros.length) {
+    if (anuncio) anuncio.textContent = '';
+    form.elements[erros[0]].focus();
+    return;
+  }
+  const r = simularIrpf(d);
+  render(r);
+  if (anuncio) anuncio.textContent = r.aPagar > 0 ? `Saldo a pagar estimado: ${brl(r.aPagar)}` : `Restituição estimada: ${brl(r.restituicao)}`;
   saida.focus();
 });
 const botao = form.querySelector('button[type=submit]');

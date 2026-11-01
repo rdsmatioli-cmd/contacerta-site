@@ -81,9 +81,11 @@ test('formulário da /rescisao/: admissão vazia e desligamento antes da admiss�
   assert.equal(f.el('f-admissao').getAttribute('aria-invalid'), 'true');
   assert.equal(f.el('f-admissao-msg').textContent, 'Preencha a data.');
   assert.equal(f.el('f-admissao-msg').hidden, false);
-  assert.match(html, /role="alert"/);
+  // CC-SITE-12: na carga (e ao digitar) a lista sai sem role="alert"; o alerta vem no Calcular
+  assert.doesNotMatch(html, /role="alert"/);
   assert.match(html, /<a href="#f-admissao">[^<]*<\/a>: Preencha a data\./);
   assert.doesNotMatch(html, /destaque|desligamento deve ser depois/);
+  assert.match(f.calcular(), /<div class="erro" role="alert">[^]*<a href="#f-admissao">/);
   // desligamento antes da admissão: o erro fica no desligamento, a admissão sai do erro
   f.campo('admissao').value = '2026-10-01';
   html = f.calcular();

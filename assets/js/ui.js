@@ -125,8 +125,9 @@ const msgCampo = (id, texto) => {
 };
 
 // CC-CALC-A11Y-01: frase curta do resultado para o leitor de tela (#resultado-anuncio, role="status"): rótulo e valor do
-// destaque. Com a lista de erros (role="alert", que se anuncia sozinha), nada; sem destaque, a mensagem de erro do
-// resultado ou "Resultado atualizado.".
+// destaque. Com a lista de erros com role="alert" (só no envio, CC-SITE-12), que se anuncia sozinha, nada; sem destaque,
+// a mensagem de erro do resultado (a lista de erros como frase: "Confira o campo antes de calcular: Rótulo: mensagem.")
+// ou "Resultado atualizado.".
 const textoLimpo = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
 function fraseResultado(out) {
   if (!out || typeof out.querySelector !== 'function' || out.querySelector('[role="alert"]')) return '';
@@ -134,8 +135,15 @@ function fraseResultado(out) {
   const rot = textoLimpo(dq && dq.querySelector(':scope > span')).replace(/:$/, '');
   const val = textoLimpo(dq && dq.querySelector(':scope > strong'));
   if (rot && val) return `${rot}: ${val}`;
-  return textoLimpo(out.querySelector('.erro')) || 'Resultado atualizado.';
+  const erro = out.querySelector('.erro');
+  const itens = erro ? [...erro.querySelectorAll('li')].map(textoLimpo).filter(Boolean) : [];
+  if (itens.length) return [textoLimpo(erro.querySelector('p')), itens.join(' ')].filter(Boolean).join(' ');
+  return textoLimpo(erro) || 'Resultado atualizado.';
 }
+// CC-SITE-12: o role="alert" das listas de erros (listaErros, erroCampo, bloco da porcentagem) interrompe o leitor de
+// tela; ele fica só no envio (Calcular). Na carga, ao digitar e na troca de opção, a lista sai sem ele: o campo continua
+// com aria-invalid e a mensagem, e na troca de opção a frase do erro vai para o #resultado-anuncio (role="status").
+const semAlerta = (html) => html.replace(/<div class="erro" role="alert">/g, '<div class="erro">');
 
 const hoje = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
@@ -741,12 +749,15 @@ function iniciar() {
   // CC-CALC-A11Y-01: o #resultado tem aria-live="off" e é reescrito a cada pausa da digitação sem anúncio; o leitor de
   // tela recebe a frase curta (fraseResultado) no #resultado-anuncio só no envio (Calcular) e na troca de uma opção
   // (select, caixa de seleção), nunca ao digitar nem ao carregar, e só quando o texto muda. Saída igual à anterior não
-  // é reescrita (fora do envio): a lista de erros (role="alert") não volta a ser anunciada a cada tecla com o mesmo erro.
+  // é reescrita (fora do envio). A lista de erros só leva role="alert" no envio (CC-SITE-12, semAlerta).
   const anuncio = document.getElementById('resultado-anuncio');
   let ultimoHtml = null;
   // motivo: 'carga' | 'digitacao' | 'escolha' | 'envio'
   const rodar = (motivo = 'digitacao') => {
     const enviado = motivo === 'envio';
+    // O envio e a troca de opção calculam com os valores atuais: o recálculo da digitação que ainda esperava o atraso
+    // de 250 ms sairia depois e trocaria a lista de erros do envio (com role="alert") pela da digitação.
+    if (motivo !== 'digitacao') clearTimeout(t);
     ajustaDobro();
     ajustaAviso();
     ajustaParcela13();
@@ -761,6 +772,7 @@ function iniciar() {
       html = '<p class="erro">Não foi possível calcular. Confira os valores informados.</p>';
       console.error(e);
     }
+    if (!enviado) html = semAlerta(html);
     if (enviado || html !== ultimoHtml) { out.innerHTML = html; ultimoHtml = html; }
     if (anuncio && (enviado || motivo === 'escolha')) {
       const frase = fraseResultado(out);

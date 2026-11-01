@@ -18,6 +18,7 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 - [Tabela do imposto de renda 2026](https://contacertabr.com.br/tabela-ir-2026/): Tabela do imposto de renda 2026: faixas do IRRF, dedução por dependente, desconto simplificado e isenção efetiva até R$ 5.000,00 pela Lei 15.270/2025.
 - [Salário mínimo 2026](https://contacertabr.com.br/salario-minimo-2026/): O salário mínimo de 2026 é R$ 1.621,00, vigente desde 01/01/2026 (Decreto nº 12.797, de 23/12/2025). Veja o efeito no INSS, no seguro-desemprego e no DAS do MEI.
 - [Tabela do seguro-desemprego 2026](https://contacertabr.com.br/tabela-seguro-desemprego-2026/): Tabela do seguro-desemprego 2026, vigente desde 11/01/2026: 80% da média até R$ 2.222,17, faixa intermediária e teto de R$ 2.518,65.
+- [Planilha grátis: Tabelas oficiais 2026](https://contacertabr.com.br/tabelas-oficiais-2026/): Baixe grátis a planilha com as tabelas oficiais 2026 de INSS, IR, salário mínimo e seguro-desemprego, com as fontes oficiais.
 
 ## Trabalho e salário
 
@@ -42,6 +43,7 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 ## Impostos e MEI
 
 - [Calculadora de imposto de renda 2026 (IRRF mensal)](https://contacertabr.com.br/imposto-de-renda/): Calcule o IR retido na fonte em 2026 com a nova isenção até R$ 5.000 e a redução até R$ 7.350 (Lei 15.270/2025), dependentes e desconto simplificado.
+- [Simulador IRPF 2027: estimativa da restituição](https://contacertabr.com.br/irpf/): Simulação gratuita da declaração IRPF 2027 (ano-base 2026): compare os modelos completo e simplificado, com a redução da Lei 15.270/2025, e estime a restituição.
 - [Calculadora DAS MEI 2026](https://contacertabr.com.br/das-mei/): Veja o valor do DAS MEI 2026 (R$ 82,05, R$ 86,05 ou R$ 87,05), o total anual e se o seu faturamento cabe no limite de R$ 81 mil do MEI.
 - [Calculadora de INSS 2026](https://contacertabr.com.br/inss/): Calcule a contribuição ao INSS 2026 com a tabela progressiva oficial (7,5% a 14%, teto R$ 8.475,55) ou como autônomo, facultativo e MEI (20%, 11% ou 5%).
 - [Calculadora de custo de funcionário para a empresa](https://contacertabr.com.br/custo-funcionario/): Calcule quanto um funcionário CLT custa por mês e por ano: 13º, férias, FGTS, INSS patronal e benefícios, no Simples Nacional, Lucro Presumido ou MEI.
@@ -69,7 +71,6 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 ## Sobre o site
 
 - [Sobre e metodologia](https://contacertabr.com.br/sobre/): quem mantém o site, como as fontes são verificadas e como as tabelas são atualizadas.
-- [Lista de espera](https://contacertabr.com.br/lista-de-espera/): aviso de lançamento das ferramentas de automação da Reforma Tributária e da NR-1.
 - [Contato](https://contacertabr.com.br/contato/): correções de tabelas e sugestões.
 - [Política de privacidade](https://contacertabr.com.br/privacidade/)
 - [Termos de uso](https://contacertabr.com.br/termos/)
@@ -78,6 +79,8 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 ## Blog
 
 - [Blog do Conta Certa](https://contacertabr.com.br/blog/): guias com resposta direta e links para as calculadoras.
+- [Blog: Trabalho e salário](https://contacertabr.com.br/blog/categoria/trabalho-e-salario/): guias de trabalho e salário, com resposta direta e links para as calculadoras.
+- [Blog: Impostos e MEI](https://contacertabr.com.br/blog/categoria/impostos-e-mei/): guias de impostos e MEI, com resposta direta e links para as calculadoras.
 - [Juros compostos: fórmula e 3 exemplos práticos](https://contacertabr.com.br/blog/juros-compostos-exemplo/): Veja a fórmula dos juros compostos e 3 exemplos resolvidos: aplicação, dívida no cartão e aportes mensais. Inclui conversão de taxas e regra do 72.
 - [Como calcular markup: fórmula, exemplo e diferença para margem](https://contacertabr.com.br/blog/como-calcular-markup/): Aprenda a calcular markup divisor e multiplicador com exemplo em reais, tabela de conversão para margem e os erros que fazem você vender no prejuízo.
 - [Pró-labore em 2026: o que é, quanto retirar e como fica no Simples](https://contacertabr.com.br/blog/pro-labore/): Pró-labore em 2026 com INSS de 11%, desconto máximo de R$ 932,31, IR com a redução da Lei 15.270, Fator R e exemplos com números. Fontes oficiais.
