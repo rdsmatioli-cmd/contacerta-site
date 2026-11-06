@@ -11,13 +11,13 @@ import { PUBLICACAO_LICITACOES } from './publicacao-licitacoes.mjs';
 // DEC CPO (a) (A-PR35-14, 26/10/2026): as 3 datas (política, pílula e item 12 do aviso) e a dos Termos ficam como
 // [DATA DE PUBLICAÇÃO] até o commit do deploy; vermelho só por esse placeholder é aceito antes do deploy, sem bump diário.
 // DEC CPO (Bugbot PR #48, 30/10/2026): "data = hoje" vale só para a política de privacidade e só quando o arquivo
-// legal muda (REQUIRE_POLICY_DATE_TODAY=1: ci.yml em PR que altera privacidade/index.html; pages.yml em push que a altera).
+// legal muda (REQUIRE_POLICY_DATE_TODAY=1: ci.yml em PR que altera privacidade/index.html; pages.yml quando o conteúdo muda desde a base).
 // Termos e aviso do Licitações comparam com a constante PUBLICACAO_LICITACOES, nunca com o dia do build ou do deploy.
 const PH = '[DATA DE PUBLICAÇÃO]';
 const DATA_OU_PH = '(\\d{2}\\/\\d{2}\\/\\d{4}|\\[DATA DE PUBLICAÇÃO\\])';
 const obrigatoria = () => process.env.REQUIRE_POLICY_DATE_TODAY === '1';
-// Decisão do CPO (28/10): na publicação (pages.yml) basta a data não estar no futuro (<= hoje), salvo quando o push
-// altera privacidade/index.html, que volta a exigir = hoje (REQUIRE_POLICY_DATE_TODAY=1).
+// Decisão do CPO (28/10): na publicação (pages.yml) basta a data não estar no futuro (<= hoje), salvo quando o
+// conteúdo de privacidade/index.html mudou desde a base, que volta a exigir = hoje (REQUIRE_POLICY_DATE_TODAY=1).
 const naoFutura = () => !obrigatoria() && process.env.REQUIRE_POLICY_DATE_NOT_FUTURE === '1';
 const ordem = (d) => d.split('/').reverse().join('');
 // B-PR34-06 (Advogado 123a5499): só datas que existem no calendário (31/02, 00/10, 29/02 fora de ano bissexto falham).
@@ -54,7 +54,7 @@ test('privacidade: "Última atualização" válida; = hoje só quando privacidad
 });
 
 test('privacidade: "Última atualização" não está no futuro (publicação sem mudança na política)', {
-  skip: naoFutura() ? false : 'só com REQUIRE_POLICY_DATE_NOT_FUTURE=1 (pages.yml, push que não altera privacidade/index.html)',
+  skip: naoFutura() ? false : 'só com REQUIRE_POLICY_DATE_NOT_FUTURE=1 (pages.yml, política sem mudança de conteúdo desde a base)',
 }, () => {
   const html = readFileSync(new URL('../privacidade/index.html', import.meta.url), 'utf8');
   const datas = [...html.matchAll(new RegExp(`Última atualização: ${DATA_OU_PH}\\.`, 'g'))].map((m) => m[1]);

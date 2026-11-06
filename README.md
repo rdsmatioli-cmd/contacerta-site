@@ -174,14 +174,18 @@ Google Search Console) e enviar o sitemap. O `_headers` não vale no GitHub Page
 
 ## Runbook: publicação da política de privacidade
 
-A publicação (`.github/workflows/pages.yml`, só a partir da main) roda a trava da data da política antes do upload:
-data `<=` hoje (America/Sao_Paulo) num push que não altera `privacidade/index.html`; data `=` hoje num push que a
-altera, num `workflow_dispatch` ou num push sem base conhecida. O log do passo mostra a regra aplicada e os SHAs.
+A publicação (`.github/workflows/pages.yml`, só a partir da main) roda a trava da data da política antes do upload.
+A "Última atualização" fica `<=` hoje (America/Sao_Paulo) quando o conteúdo de `privacidade/index.html` não mudou
+desde a base, e `=` hoje quando mudou. No push, a base é `github.event.before` se esse commit der para ler. No
+`workflow_dispatch`, e no push em que essa base não existe ou não dá para ler, a base é o SHA do último deployment
+com status `success` do ambiente `github-pages` (`tests/manutencao/regra-data-politica.mjs`). Se essa base também
+não der para resolver ou ler, vale o ramo estrito (`=` hoje). O log do passo mostra a regra, a origem da base e os SHAs.
 "Altera" é mudança de conteúdo: a troca do `?v=` que o `cache.mjs` faz em todas as páginas quando um CSS ou JS muda
 não conta (`tests/manutencao/politica-alterada.mjs`, o mesmo critério no `ci.yml` e no `pages.yml`).
 
 Se a publicação de um push que alterou a política falhar (trava, upload ou deploy), não espere o próximo push: no
-mesmo dia, rode Actions > Pages > Run workflow na main (`workflow_dispatch`, regra `= hoje`). Em outro dia, ajuste
+mesmo dia, rode Actions > Pages > Run workflow na main (`workflow_dispatch`). A base é o último deploy com sucesso,
+então a política ainda conta como alterada e a regra segue `= hoje`. Em outro dia, ajuste
 antes a "Última atualização" para a data da republicação, num PR que altera a política (o CI cobra `= hoje`). Isso
 evita que um push posterior sem mudança na política publique a versão nova com data anterior à publicação real
 (B-PR34-05, Advogado 123a5499).
