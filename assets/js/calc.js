@@ -1020,7 +1020,7 @@ export function calendarioReforma(dataISO) {
   return { marcos, proximo, fase };
 }
 
-// NR-1 (riscos psicossociais): autodiagnóstico orientativo de exposição a fatores de risco psicossociais.
+// NR-1 (riscos psicossociais): avaliação rápida NR-1, orientativa, de exposição a fatores de risco psicossociais.
 // Cada fator recebe 0 (nunca ou quase nunca) a 3 (quase sempre). Nada é enviado nem gravado: roda só no navegador.
 export const NR1_ESCALA = [['', 'Selecione'], ['0', 'Nunca ou quase nunca'], ['1', 'Às vezes'], ['2', 'Com frequência'], ['3', 'Quase sempre']];
 export const NR1_FATORES = [
