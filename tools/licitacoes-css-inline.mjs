@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const raiz = fileURLToPath(new URL('../', import.meta.url));
 export const PAGINAS = [
-  'licitacoes/index.html', 'licitacoes/politica.html', 'licitacoes/cobranca/index.html', 'licitacoes/assinar/index.html', 'licitacoes/assinar/obrigado/index.html',
+  'licitacoes/index.html', 'licitacoes/politica.html', 'licitacoes/cobranca/index.html', 'licitacoes/assinar/index.html', 'licitacoes/obrigado/index.html',
   'licitacoes/blog/index.html',
   'licitacoes/blog/como-encontrar-licitacoes.html', 'licitacoes/blog/pregoes-material-de-limpeza-pncp.html',
   'licitacoes/blog/pregao-material-de-expediente-pncp/index.html',

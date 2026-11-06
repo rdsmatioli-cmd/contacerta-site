@@ -33,7 +33,7 @@ export const URLS_NOINDEX = [
   '/empregador-em-dia/painel/',
   // Ordem CEO P0 06/11: DEC 20h24: compra do Licitações por Stripe Payment Links, noindex.
   '/licitacoes/assinar/',
-  '/licitacoes/assinar/obrigado/',
+  '/licitacoes/obrigado/',
 ];
 // DEC CPO 31/10 (PR #56, go-live 03/11): páginas indexáveis do Empregador em Dia, mesmas metas das URLS.
 export const URLS_EMPREGADOR = [
