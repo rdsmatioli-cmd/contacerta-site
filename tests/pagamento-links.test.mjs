@@ -27,10 +27,14 @@ test('obrigado/: noindex, sem link de pagamento, com atendimento', () => {
   assert.match(h, /<meta name="robots" content="noindex,follow">/);
   assert.deepEqual(hrefsStripe(h), []);
   assert.ok(h.includes('mailto:contato@contacertabr.com.br'));
+  assert.doesNotMatch(h, /[Pp]agamento (recebido|confirmado)/, 'vedado pelo parecer ADV 4e6fa371');
 });
 test('home do /licitacoes/ tem CTA para assinar/', () => assert.ok(ler('licitacoes/index.html').includes('href="assinar/"')));
-test('Termos (cobranca/) intactos: sem form nem link de pagamento', () => {
+test('Termos 1.5 (cobranca/): sem form nem link de pagamento, sem "indisponível", aceite versão 1.5', () => {
   const h = ler('licitacoes/cobranca/index.html');
+  assert.match(h, /TERMOS-VENDA-LICITACOES-1\.5/);
+  assert.doesNotMatch(h, /temporariamente indisponível|Assinaturas em breve|versão 1\.3\)/);
+  assert.ok(h.includes('(link, versão 1.5)'));
   assert.doesNotMatch(h, /<form\b/);
   assert.deepEqual(hrefsStripe(h), []);
 });
