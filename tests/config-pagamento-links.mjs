@@ -4,14 +4,14 @@
 // o build do Pages (pages.yml) roda tools/licitacoes-links-pagamento.mjs no _site e troca cada produto com URL por
 // <a class="btn" href="URL">ROTULO</a>. Preços: DEC-CFO 23/10 (config-checkout.mjs, DEC_CFO_PRECOS).
 // ===== URLs Payment Links: preencher quando a conta live for liberada =====
-// Hoje: SANDBOX (test_) da spec /workspace/cfo/stripe/payment-links-sandbox-2026-11-06.md (sha256 2d71be5b), só para o QA
-// ligar os botões no preview. Com DEPLOY=1 (ou no build do Pages) qualquer '/test_' falha (tests/pagamento-links.test.mjs).
+// Hoje vazio (DEC CEO 06/11 20h51): S-PL0 publica com tudo "em breve". S-PL1 preenche só estas URLs LIVE. Links de
+// sandbox nunca entram no repositório (preview do QA injeta fora dele); '/test_' falha com DEPLOY=1 e no build do Pages.
 // Vazio = "em breve". montagemEntrega (saldo) nunca vai na página: o atendimento envia o link junto com a entrega.
 export const LINKS_PAGAMENTO = {
-  radarMensal: 'https://buy.stripe.com/test_aFa8wH9jwchv3nq53c7Re02', // R$ 197 por mês
-  radarAnual: 'https://buy.stripe.com/test_4gM3cn8fs1CR3nq3Z87Re03', // R$ 1.970 por ano
-  montagemSinal: 'https://buy.stripe.com/test_bJe6oz9jw4P30be67g7Re04', // R$ 495 no aceite (50% de R$ 990)
-  montagemEntrega: 'https://buy.stripe.com/test_dRmfZ90N06Xb0be8fo7Re05', // R$ 495 na entrega (saldo), só pelo atendimento
+  radarMensal: '', // R$ 197 por mês
+  radarAnual: '', // R$ 1.970 por ano
+  montagemSinal: '', // R$ 495 no aceite (50% de R$ 990)
+  montagemEntrega: '', // R$ 495 na entrega (saldo), só pelo atendimento
 };
 // ===== fim do slot =====
 export const ROTULOS = {

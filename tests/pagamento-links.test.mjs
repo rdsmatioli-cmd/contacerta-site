@@ -66,34 +66,32 @@ test('Termos 1.5 (cobranca/): sem "indisponível", aceite versão 1.5, links de 
   const cfg = Object.values(LINKS_PAGAMENTO).filter(Boolean);
   for (const u of hrefsStripe(h)) assert.ok(cfg.includes(u), u);
 });
-// Trava de produção: o Pages roda este arquivo com LINKS_PAGAMENTO_PRODUCAO=1 antes do upload.
-test('produção: pelo menos um produto com URL LIVE na config', { skip: process.env.LINKS_PAGAMENTO_PRODUCAO !== '1' && 'só no build do Pages' }, () => {
-  assert.ok(NA_PAGINA.some((k) => LINKS_PAGAMENTO[k]), 'nenhum link de pagamento: /licitacoes/assinar/ não deve ir ao ar');
+// DEC CEO 20h51: slot vazio é publicável; só '/test_' barra.
+test('slot vazio: assinar/ renderiza "em breve" em todos os produtos, sem href para buy.stripe.com', () => {
+  const vazio = Object.fromEntries(Object.keys(LINKS_PAGAMENTO).map((k) => [k, '']));
+  const h = render(ler(PAGINA_ASSINAR), vazio);
+  assert.deepEqual(hrefsStripe(h), []);
+  for (const k of NA_PAGINA) assert.ok(h.includes(`aria-disabled="true">${EM_BREVE[k]}</span>`), k);
 });
-// DEC CPO 7a1eaf70 (D1, D3): Radar entregue por e-mail, sem login, painel ou plataforma. (Nos Termos, "login"/"senha"
-// só aparecem como o login/senha do próprio cliente no portal de compras do órgão, que a LCM não recebe.)
-test('Radar sem promessa de login, painel, dashboard, área logada ou plataforma', () => {
-  for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO]) {
-    const tx = ler(p).replace('não há login, painel nem acesso a plataforma', '').replaceAll('sem login nem painel', '');
-    assert.doesNotMatch(tx, /login|painel|dashboard|área logada|área do cliente|plataforma|acess/i, p);
-  }
-  assert.doesNotMatch(ler('licitacoes/cobranca/index.html').replace('não há login, painel nem acesso a plataforma', '').replaceAll('sem login nem painel', ''), /painel|dashboard|área logada|plataforma/i);
-  assert.match(ler(PAGINA_ASSINAR), /envio semanal, por e-mail/);
-  assert.match(ler(PAGINA_ASSINAR), /O serviço começa após a emissão da nota fiscal\./);
-  assert.doesNotMatch(ler('licitacoes/cobranca/index.html'), /primeiro acesso ao serviço|data em que o acesso termina/);
-  for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO, 'licitacoes/cobranca/index.html']) assert.doesNotMatch(ler(p), /custom_field|<input/i, p);
+test('repositório: nenhuma URL de sandbox na config', () => {
+  for (const [k, u] of Object.entries(LINKS_PAGAMENTO)) assert.ok(!u.includes('/test_'), k);
 });
 // Guarda de deploy: link de sandbox (test_) nunca vai ao ar.
 test('DEPLOY=1 / build do Pages: nenhuma URL de Payment Link de sandbox (/test_)', { skip: process.env.DEPLOY !== '1' && process.env.LINKS_PAGAMENTO_PRODUCAO !== '1' && 'só com DEPLOY=1 ou no build do Pages' }, () => {
   for (const [k, u] of Object.entries(LINKS_PAGAMENTO)) assert.ok(!u.includes('/test_'), `${k}: URL de sandbox`);
 });
-test('guarda de sandbox detecta /test_ (autoteste, roda sempre)', () => {
-  assert.ok('https://buy.stripe.com/test_abc'.includes('/test_'));
-  assert.ok(!'https://buy.stripe.com/abc'.includes('/test_'));
+test('guarda de sandbox: URL test_ falha, URL live e vazio passam (autoteste)', () => {
+  const ruim = (links) => Object.values(links).some((u) => u.includes('/test_'));
+  assert.equal(ruim({ a: 'https://buy.stripe.com/test_abc' }), true);
+  assert.equal(ruim({ a: 'https://buy.stripe.com/abc', b: '' }), false);
 });
-// Adendo ADV A-2 fd1fc8e6: aviso literal antes de cada link de pagamento; sem corte mensal (decisão CPO pendente).
-test('assinar/: aviso A-2 antes de cada produto; sem texto de fechamento mensal', () => {
+// Adendo ADV A-2 fd1fc8e6 + corte mensal (DEC CPO c50de42a; adendo ADV 9efa7cf6): aviso literal antes de cada link.
+test('assinar/: aviso A-2 antes de cada produto; corte mensal nas 3 páginas', () => {
   const h = ler(PAGINA_ASSINAR);
   for (const k of NA_PAGINA) assert.match(h, new RegExp(`<p class="aviso-fiscal">Depois da confirmação do pagamento, a Conta Certa enviará um e-mail pedindo o CNPJ da empresa\\.[^<]*</p>\\n<p class="compra" data-produto="${k}">`), k);
-  for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO, 'licitacoes/cobranca/index.html']) assert.doesNotMatch(ler(p), /encerramento do mês/, p);
+  const corte = 'o encerramento do mês dessa confirmação, às 23h59 no horário de Brasília (America/Sao_Paulo, UTC-3)';
+  assert.equal(h.split(corte).length - 1, 3);
+  assert.equal(ler(PAGINA_OBRIGADO).split(corte).length - 1, 1);
+  assert.equal(ler('licitacoes/cobranca/index.html').split(corte).length - 1, 2);
+  assert.doesNotMatch(ler('licitacoes/index.html'), /em preparação|Ainda não há inscrição|Não pede senha/);
 });

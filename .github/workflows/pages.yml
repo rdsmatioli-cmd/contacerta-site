@@ -42,8 +42,8 @@ jobs:
             echo "saída inesperada da trava; publicação barrada."
             exit 1
           fi
-      # DEC CEO 06/11 20h24: /licitacoes/assinar/ não publica sem nenhum link de pagamento LIVE.
-      - name: Trava dos links de pagamento do Licitações (ao menos um LIVE)
+      # DEC CEO 06/11 20h24: /licitacoes/assinar/ não publica link de pagamento de sandbox (/test_); slot vazio publica "em breve".
+      - name: Trava dos links de pagamento do Licitações (sem /test_)
         run: LINKS_PAGAMENTO_PRODUCAO=1 node --test tests/pagamento-links.test.mjs
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       # Só o conteúdo do site: os mesmos arquivos que o Pages legado serve hoje, sem tests, node_modules, .github,
