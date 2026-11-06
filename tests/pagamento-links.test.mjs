@@ -83,3 +83,9 @@ test('Radar sem promessa de login, painel, dashboard, área logada ou plataforma
   assert.doesNotMatch(ler('licitacoes/cobranca/index.html'), /primeiro acesso ao serviço|data em que o acesso termina/);
   for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO, 'licitacoes/cobranca/index.html']) assert.doesNotMatch(ler(p), /custom_field|<input/i, p);
 });
+// DEC CPO 451996a2 (A-2): CPF/CNPJ pedido por e-mail depois do pagamento; bloco reservado vazio até o texto do ADV.
+test('assinar/: bloco #aviso-cnpj-email vazio e oculto; nenhuma menção a tax_id ou campo de CPF/CNPJ', () => {
+  const h = ler(PAGINA_ASSINAR);
+  assert.equal((h.match(/<div id="aviso-cnpj-email" hidden><\/div>/g) || []).length, 1);
+  for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO]) assert.doesNotMatch(ler(p), /tax_id|campo de identificação fiscal|informe (o )?(seu )?(CPF|CNPJ)/i, p);
+});
