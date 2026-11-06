@@ -20,7 +20,7 @@ export default {
 <p>A gratificação natalina, criada pela Lei 4.090/1962, equivale a um salário extra por ano para quem trabalha com carteira assinada, aposentados e pensionistas do INSS. Quem não trabalhou o ano todo recebe proporcionalmente: 1/12 do salário para cada mês com pelo menos 15 dias trabalhados.</p>
 <p>O pagamento é dividido em duas parcelas (Lei 4.749/1965):</p>
 <ul>
-<li><strong>1ª parcela:</strong> paga entre 1º de fevereiro e 30 de novembro, ou junto com as férias se o empregado pedir em janeiro. Corresponde à metade do salário do mês anterior e <strong>não tem descontos</strong>.</li>
+<li><strong>1ª parcela:</strong> paga entre 1º de fevereiro e 30 de novembro, ou junto com as férias se o empregado pedir em janeiro. Corresponde à metade do salário do mês anterior e <strong>não tem descontos</strong>. Para quem foi admitido no ano ou não ficou à disposição da empresa em todos os meses, é metade de 1/12 da remuneração por mês de serviço até o pagamento, contando a fração superior a 15 dias como mês (Decreto 10.854/2021, art. 78, § 4º).</li>
 <li><strong>2ª parcela:</strong> paga até 20 de dezembro. É o valor total do 13º menos a 1ª parcela, menos o INSS e o imposto de renda calculados sobre o valor cheio.</li>
 </ul>
 <h2>Fórmula</h2>
@@ -30,7 +30,7 @@ export default {
 <h3>Ano completo, R$ 4.000,00</h3>
 <p>13º bruto: R$ 4.000,00. A 1ª parcela é de R$ 2.000,00. Na 2ª, desconta-se INSS de R$ 368,60; o IR pela tabela seria R$ 114,76, mas a redução zera o valor porque o 13º não passa de R$ 5.000,00. A 2ª parcela fica em R$ 1.631,40, e o total líquido em R$ 3.631,40.</p>
 <h3>Admitido em junho, R$ 2.500,00</h3>
-<p>Com 7 meses trabalhados, o 13º bruto é R$ 1.458,33. A 1ª parcela é R$ 729,17 e, após INSS de R$ 109,37, a 2ª parcela é R$ 619,79.</p>
+<p>Com 7 meses trabalhados no ano (junho a dezembro), o 13º bruto é R$ 1.458,33. A 1ª parcela, paga em 30 de novembro, considera os 6 meses de serviço até novembro: R$ 2.500,00 ÷ 12 × 6 ÷ 2 = R$ 625,00. Após INSS de R$ 109,37, a 2ª parcela é R$ 723,96.</p>
 <h3>Salário de R$ 8.000,00</h3>
 <p>13º bruto de R$ 8.000,00, INSS de R$ 921,51 e IR de R$ 1.037,85 (sem redução, pois passa de R$ 7.350,00). A 2ª parcela cai para R$ 2.040,64: é normal que ela seja bem menor que a primeira.</p>
 <h2>Médias de variáveis</h2>

@@ -115,3 +115,44 @@ test('orçamento NR-1: EMPREGADOR_EM_DIA ON mas ED_CHECKOUT OFF continua indispo
   semRedeExterna(rede);
   semErros(erros, rede);
 });
+
+// CC-SITE-06: os CTAs a.btn ("Ver o que minha empresa precisa", "Ver a adequação NR-1") eram links de texto de 21 px
+// (nenhuma regra .btn existia), o Voltar (.btn.sec) era igual ao primário e o #f-func da jornada tinha fonte de 13,3 px.
+// A varredura de todas as páginas em 390 px está no toque.spec.mjs; aqui fica o caso das páginas do Empregador nas duas
+// larguras, com o Voltar em contorno.
+const medir = (loc) => loc.evaluate((el) => {
+  const cs = getComputedStyle(el);
+  return { altura: el.getBoundingClientRect().height, fonte: parseFloat(cs.fontSize), fundo: cs.backgroundColor, sublinhado: cs.textDecorationLine };
+});
+for (const [url, rotulo] of [['/empregador-em-dia/', 'Ver o que minha empresa precisa'], ['/empregador-em-dia/jornada-42h/', 'Ver a adequação NR-1'], ['/empregador-em-dia/avaliacao-rapida-nr1/resultado/', 'Ver o que minha empresa precisa']]) {
+  test(`CC-SITE-06 ${url}: "${rotulo}" com cara de botão, 44 px ou mais`, async ({ page }) => {
+    await page.goto(url);
+    await assentar(page);
+    const ctas = await page.locator('a.btn', { hasText: rotulo }).all();
+    expect(ctas.length, `${url}: a.btn "${rotulo}" na página`).toBeGreaterThan(0);
+    for (const cta of ctas) {
+      const m = await medir(cta);
+      expect(m.altura, `${url}: a.btn "${rotulo}" com ${m.altura}px de altura`).toBeGreaterThanOrEqual(44);
+      expect(m.fundo, 'a.btn com fundo').not.toBe('rgba(0, 0, 0, 0)');
+      expect(m.sublinhado, 'a.btn sem sublinhado').toBe('none');
+    }
+    if (url.includes('jornada')) {
+      const m = await medir(page.locator('#f-func'));
+      expect(m.fonte, '#f-func com fonte de 16 px ou mais (abaixo disso o iOS dá zoom no foco)').toBeGreaterThanOrEqual(16);
+      expect(m.altura).toBeGreaterThanOrEqual(44);
+    }
+  });
+}
+
+test('CC-SITE-06 avaliação rápida: Voltar (.btn.sec) em contorno, diferente do Continuar', async ({ page }) => {
+  await page.goto('/empregador-em-dia/avaliacao-rapida-nr1/');
+  await assentar(page);
+  await page.locator('input[name="faixa"][value="20-50"]').check();
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await expect(page.getByText('Passo 2 de 3')).toBeVisible();
+  const voltar = await medir(page.getByRole('button', { name: 'Voltar' }));
+  const continuar = await medir(page.getByRole('button', { name: 'Continuar' }));
+  expect(voltar.fundo, 'Voltar sem fundo (contorno)').toBe('rgba(0, 0, 0, 0)');
+  expect(continuar.fundo).not.toBe('rgba(0, 0, 0, 0)');
+  expect(voltar.altura).toBeGreaterThanOrEqual(44);
+});

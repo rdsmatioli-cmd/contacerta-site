@@ -16,24 +16,27 @@ const near = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, `${msg ?? ''}
 // ---------- CC-PRECO-01
 test('CC-PRECO-01: CBS e IBS sugeridos por ano seguem a regra da transição', () => {
   const s = (ano) => C.aliquotasPadraoPreco(ano);
-  assert.deepEqual(s(2027), { cbsPct: 9.11, ibsPct: 0.1 });
-  assert.deepEqual(s(2028), { cbsPct: 9.11, ibsPct: 0.1 });
-  assert.deepEqual(s(2029), { cbsPct: 9.21, ibsPct: 1.87 });
-  assert.deepEqual(s('2030'), { cbsPct: 9.21, ibsPct: 3.74 });
-  assert.deepEqual(s(2031), { cbsPct: 9.21, ibsPct: 5.61 });
-  assert.deepEqual(s(2032), { cbsPct: 9.21, ibsPct: 7.48 });
-  assert.deepEqual(s(2033), { cbsPct: 9.21, ibsPct: 18.7 });
+  // CBS: referência de 2027 calculada pelo TCU em 28/10/2026 (11,3%), menos 0,1 ponto em 2027-2028 (LC 214/2025, art. 347).
+  assert.deepEqual(s(2027), { cbsPct: 11.2, ibsPct: 0.1 });
+  assert.deepEqual(s(2028), { cbsPct: 11.2, ibsPct: 0.1 });
+  assert.deepEqual(s(2029), { cbsPct: 11.3, ibsPct: 1.87 });
+  assert.deepEqual(s('2030'), { cbsPct: 11.3, ibsPct: 3.74 });
+  assert.deepEqual(s(2031), { cbsPct: 11.3, ibsPct: 5.61 });
+  assert.deepEqual(s(2032), { cbsPct: 11.3, ibsPct: 7.48 });
+  assert.deepEqual(s(2033), { cbsPct: 11.3, ibsPct: 18.7 });
   assert.equal(s(2040), null);
   // Com as alíquotas do ano, o preço bate com a calculadora da transição em todos os anos (mesmas premissas).
-  const t = C.transicaoCbsIbs({ precoAtual: 1000, cbsRefPct: 9.21, ibsRefPct: 18.7 });
+  const t = C.transicaoCbsIbs({ precoAtual: 1000, cbsRefPct: C.CBS_REFERENCIA_2027.pct, ibsRefPct: C.IBS_REFERENCIA_PREMISSA_PCT });
   for (const ano of [2027, 2028, 2029, 2030, 2031, 2032, 2033]) {
     const a = s(ano);
     const p = C.precoReforma({ precoAtual: 1000, tributosAtuaisPct: 8.65, issPct: 5, ano, cbsPct: a.cbsPct, ibsPct: a.ibsPct });
     assert.equal(p.total, t.anos.find((x) => x.ano === ano).totalCliente, String(ano));
   }
-  // O caso do achado: 2033 com os campos de 2027 dava R$ 997,63; com os do ano, R$ 1.168,46.
+  // O caso do achado: 2033 com os campos de 2027 dava R$ 997,63; com os do ano, R$ 1.168,46 (premissas de então:
+  // CBS 9,11/9,21). Com a referência do TCU (11,3%), o total de 2033 com as alíquotas do ano é R$ 1.187,55.
   assert.equal(C.precoReforma({ precoAtual: 1000, tributosAtuaisPct: 8.65, issPct: 5, ano: 2033, cbsPct: 9.11, ibsPct: 0.1 }).total, 997.63);
-  assert.equal(C.precoReforma({ precoAtual: 1000, tributosAtuaisPct: 8.65, issPct: 5, ano: 2033, cbsPct: s(2033).cbsPct, ibsPct: s(2033).ibsPct }).total, 1168.46);
+  assert.equal(C.precoReforma({ precoAtual: 1000, tributosAtuaisPct: 8.65, issPct: 5, ano: 2033, cbsPct: 9.21, ibsPct: 18.7 }).total, 1168.46);
+  assert.equal(C.precoReforma({ precoAtual: 1000, tributosAtuaisPct: 8.65, issPct: 5, ano: 2033, cbsPct: s(2033).cbsPct, ibsPct: s(2033).ibsPct }).total, 1187.55);
 });
 
 test('CC-PRECO-01: ui.js preenche por ano só sem edição, avisa IBS de 0,1% a partir de 2029 e mostra as alíquotas usadas', () => {
@@ -44,7 +47,7 @@ test('CC-PRECO-01: ui.js preenche por ano só sem edição, avisa IBS de 0,1% a 
   assert.match(ui, /CBS \$\{n6\.format\(d\.cbs\)\}% e IBS \$\{n6\.format\(d\.ibs\)\}% nesta simulação/);
   const html = ler('preco-reforma-tributaria/index.html');
   // os valores padrão do HTML são os de 2027 (ano selecionado), e a página explica o preenchimento
-  assert.match(inputDe(html, 'f-cbs'), /value="9,11"/);
+  assert.match(inputDe(html, 'f-cbs'), /value="11,2"/);
   assert.match(inputDe(html, 'f-ibs'), /value="0,1"/);
   assert.match(html, /<option value="2027" selected>/);
   assert.match(html, /ao trocar o ano, a calculadora preenche a estimativa do ano/);

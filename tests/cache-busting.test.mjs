@@ -17,7 +17,7 @@ test('a varredura acha os ?v= das páginas, do modulepreload, dos imports entre 
     ['assets/js/ui.js', 'assets/js/valida.js'], ['assets/js/calc.js', 'assets/js/tabelas.js'], ['assets/js/valida.js', 'assets/js/calc.js'],
     ['index.html', 'assets/style.css'], ['404.html', 'assets/style.css'], ['rescisao/index.html', 'assets/js/ui.js']]) assert.ok(de(arquivo, alvo), `${arquivo} -> ${alvo}`);
   const calc = refs.find((r) => r.arquivo === 'rescisao/index.html' && r.alvo === 'assets/js/calc.js');
-  assert.ok(calc && readFileSync(join(RAIZ, 'rescisao/index.html'), 'utf8').includes(`<link rel="modulepreload" href="/assets/js/calc.js?v=${calc.v}">`), 'modulepreload fora da varredura');
+  assert.ok(calc && readFileSync(join(RAIZ, 'rescisao/index.html'), 'utf8').includes(`<link rel="modulepreload" href="/assets/js/calc.js?v=${calc.v}" fetchpriority="low">`), 'modulepreload fora da varredura');
   for (const a of SO_LEITURA) assert.ok(refs.filter((r) => r.alvo === a).length >= 50, a);
   assert.ok(!refs.some((r) => r.arquivo.startsWith('tests/')));
 });
