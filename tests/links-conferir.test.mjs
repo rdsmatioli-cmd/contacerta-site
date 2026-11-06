@@ -1,12 +1,13 @@
 // tests/links/conferir-links.mjs (checagem semanal dos links externos), sem internet: extração dos links do HTML e
 // classificação contra um servidor local em 127.0.0.1 (404, redirecionamento que termina em 404, laço de cookie,
 // bloqueio de robô, 5xx persistente e passageiro, tempo esgotado) e contra erros simulados de DNS e TLS; segunda
-// passada no fim da rodada e parâmetro de afiliado fora da URL conferida.
+// passada no fim da rodada e parâmetro de afiliado fora da URL conferida. Formulário (action, formaction) não é link, e
+// host de outro produto da empresa (NAO_BUSCAR: Creditrilha, checkout do Licitações) nunca recebe requisição.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
-import { extrairLinks, mapearLinks, conferir, conferirTodos, resumoMarkdown, semAfiliado } from './links/conferir-links.mjs';
+import { extrairLinks, mapearLinks, conferir, conferirTodos, resumoMarkdown, semAfiliado, naoBuscar, NAO_BUSCAR } from './links/conferir-links.mjs';
 
 test('extrai só links externos, sem fragmento, com entidades decodificadas e sem repetir', () => {
   const html = `<!doctype html><head>
@@ -22,6 +23,15 @@ test('extrai só links externos, sem fragmento, com entidades decodificadas e se
   ]);
 });
 
+test('formulário não é link: <form action> e formaction de <button>/<input> ficam de fora', () => {
+  const html = `<form class="le-form" action="https://docs.google.com/forms/d/e/abc/formResponse" method="post">
+<input name="x"><button type="submit" formaction="https://licitacoes-checkout.exemplo.workers.dev/checkout?produto=radar">Assinar</button>
+<input type="submit" formaction='https://pagamento.exemplo/pagar' value="Pagar"></form>
+<form method="post" action="https://outro.exemplo/enviar"><button>Enviar</button></form>
+<a href="https://exemplo.com/guia">guia</a>`;
+  assert.deepEqual(extrairLinks(html), ['https://exemplo.com/guia']);
+});
+
 test('o mapa do site ignora tests/ e o próprio domínio e guarda as páginas de cada link', () => {
   const { paginas, mapa } = mapearLinks(fileURLToPath(new URL('../', import.meta.url)));
   assert.ok(paginas.length >= 50);
@@ -31,6 +41,30 @@ test('o mapa do site ignora tests/ e o próprio domínio e guarda as páginas de
     assert.doesNotMatch(new URL(url).hostname, /contacertabr\.com\.br$/);
     for (const p of onde) assert.match(p, /^\/(\S*\/|\S+\.html)?$/, p);
   }
+});
+
+test('o mapa do site não leva ao conferidor envio de formulário nem host de outro produto da empresa', () => {
+  const { mapa, proprios } = mapearLinks(fileURLToPath(new URL('../', import.meta.url)));
+  for (const url of mapa.keys()) {
+    assert.doesNotMatch(url, /creditrilha|workers\.dev|formResponse|docs\.google\.com\/forms/i, url);
+    assert.equal(naoBuscar(url), false, url);
+  }
+  for (const [url, onde] of proprios) {
+    assert.equal(naoBuscar(url), true, url);
+    assert.ok(onde.size >= 1, url);
+  }
+});
+
+test('NAO_BUSCAR: Creditrilha (com e sem www) e o checkout do Licitações; parecidos ficam de fora', () => {
+  for (const u of ['https://www.creditrilha.com.br/blog/simples-hibrido/', 'https://creditrilha.com.br/', 'http://CREDITRILHA.com.br/x',
+    'https://licitacoes-checkout.rds-matioli.workers.dev/checkout?produto=radar', 'https://licitacoes-checkout.outra-conta.workers.dev/portal']) {
+    assert.equal(naoBuscar(u), true, u);
+  }
+  for (const u of ['https://creditrilha.com.br.exemplo.com/', 'https://naocreditrilha.com.br/', 'https://outro.rds-matioli.workers.dev/',
+    'https://exemplo.com/?u=creditrilha.com.br', 'nao-e-url']) {
+    assert.equal(naoBuscar(u), false, u);
+  }
+  assert.ok(Array.isArray(NAO_BUSCAR) && NAO_BUSCAR.length >= 2);
 });
 
 // ---------- servidor local ----------
@@ -50,6 +84,7 @@ before(async () => {
       case '/410': res.statusCode = 410; return res.end();
       case '/redir-ok': return ir(301, '/ok');
       case '/redir-404': return ir(302, `${base}/404`);
+      case '/para-creditrilha': return ir(302, 'https://www.creditrilha.com.br/blog/simples-hibrido/');
       case '/laco': return ir(302, '/laco');
       // Como caixa.gov.br: grava um cookie e redireciona para a mesma URL; só com o cookie responde 200.
       case '/laco-cookie': return /(^|;\s*)seguro=sim/.test(req.headers.cookie || '') ? res.end('ok') : ir(302, '/laco-cookie', { 'set-cookie': 'seguro=sim; path=/' });
@@ -99,6 +134,49 @@ for (const [caminho, classe, motivo, tentativas] of casos) {
     if (!caminho.startsWith('/laco')) assert.equal(visitas.get(caminho) - antes, tentativas);
   });
 }
+
+// Requisição que sair do 127.0.0.1 derruba o teste: prova que o host da NAO_BUSCAR não foi chamado.
+const soLocal = (chamadas = []) => async (url, init) => {
+  chamadas.push(url);
+  if (new URL(url).hostname !== '127.0.0.1') throw new Error(`requisição para fora do teste: ${url}`);
+  return fetch(url, init);
+};
+test('NAO_BUSCAR: nenhuma requisição ao host, nem na segunda tentativa; sai como não conferido (próprio)', async () => {
+  for (const u of ['https://www.creditrilha.com.br/blog/simples-hibrido/', 'https://licitacoes-checkout.rds-matioli.workers.dev/checkout?produto=radar-anual']) {
+    const chamadas = [];
+    const r = await conferir(u, { ...rapido, fetch: soLocal(chamadas) });
+    assert.deepEqual(chamadas, [], u);
+    assert.equal(r.classe, 'PROPRIO', u);
+    assert.match(r.motivo, /^não conferido \(próprio\)/);
+    assert.equal(r.tentativas, undefined);
+  }
+});
+
+test('NAO_BUSCAR no servidor local do teste: o servidor não recebe nada', async () => {
+  const antes = ordem.length;
+  const r = await conferir(`${base}/ok?proprio=1`, { ...rapido, naoBuscar: [/^127\.0\.0\.1$/] });
+  assert.equal(r.classe, 'PROPRIO');
+  assert.equal(ordem.length, antes, 'o servidor local não pode receber a requisição');
+  const todos = await conferirTodos([`${base}/404?proprio=2`, `${base}/ok?proprio=3`], { ...rapido, naoBuscar: [/^127\.0\.0\.1$/] });
+  assert.deepEqual(todos.map((x) => x.classe), ['PROPRIO', 'PROPRIO']);
+  assert.equal(ordem.length, antes);
+});
+
+test('redirecionamento para host da NAO_BUSCAR para antes de segui-lo', async () => {
+  const chamadas = [];
+  const r = await conferir(`${base}/para-creditrilha`, { ...rapido, fetch: soLocal(chamadas) });
+  assert.deepEqual(chamadas, [`${base}/para-creditrilha`]);
+  assert.equal(r.classe, 'PROPRIO');
+  assert.match(r.motivo, /^não conferido \(próprio\) depois de redirecionar para https:\/\/www\.creditrilha\.com\.br\/blog\/simples-hibrido\//);
+});
+
+test('conferirTodos: só o link de fora da NAO_BUSCAR vai à rede', async () => {
+  const chamadas = [];
+  const urls = ['https://www.creditrilha.com.br/blog/simples-hibrido/', `${base}/ok?todos=1`, 'https://licitacoes-checkout.rds-matioli.workers.dev/checkout?produto=radar'];
+  const r = await conferirTodos(urls, { ...rapido, fetch: soLocal(chamadas) });
+  assert.deepEqual(chamadas, [`${base}/ok?todos=1`]);
+  assert.deepEqual(r.map((x) => [x.url, x.classe]), [[urls[0], 'PROPRIO'], [urls[1], 'OK'], [urls[2], 'PROPRIO']]);
+});
 
 const erroDe = (code) => async () => { throw new TypeError('fetch failed', { cause: Object.assign(new Error(code), { code }) }); };
 test('DNS que não resolve: QUEBRADO; cadeia TLS incompleta: NAO_CONFERIDO (aviso)', async () => {
@@ -155,4 +233,16 @@ test('resumo: link quebrado com as páginas onde aparece; aviso separado', () =>
   assert.match(md, /3 links externos únicos em 3 páginas: 1 OK, 1 quebrado, 1 com bloqueio de robô e 0 não conferidos/);
   assert.match(md, /### Quebrados\n\n\| Link \| Resultado \| Páginas \|\n\|---\|---\|---\|\n\| https:\/\/a\.exemplo\/x \| HTTP 404 depois de redirecionar para https:\/\/a\.exemplo\/y \| \/das-mei\/, \/markup\/ \|/);
   assert.match(md, /### Bloqueio de robô \(aviso, não falha\)[^]*\| https:\/\/b\.exemplo\/ \| HTTP 403 \| \/ \|/);
+});
+
+test('resumo: link de outro produto da empresa sai como não conferido (próprio), fora da contagem e sem falhar', () => {
+  const mapa = new Map([['https://a.exemplo/', new Set(['/'])], ['https://www.creditrilha.com.br/blog/x/', new Set(['/simples-hibrido/'])]]);
+  const resultados = [
+    { url: 'https://a.exemplo/', classe: 'OK', motivo: 'HTTP 200' },
+    { url: 'https://www.creditrilha.com.br/blog/x/', classe: 'PROPRIO', motivo: 'não conferido (próprio): outro produto da empresa, sem nenhuma requisição a ele' },
+  ];
+  const md = resumoMarkdown({ paginas: ['index.html', 'simples-hibrido/index.html'], mapa, resultados });
+  assert.match(md, /1 link externo único em 2 páginas: 1 OK, 0 quebrados, 0 com bloqueio de robô e 0 não conferidos \(os dois últimos são aviso, não falha\)\. Fora da conta: 1 link de outro produto da empresa, não conferido \(próprio\), sem nenhuma requisição\./);
+  assert.match(md, /### Não conferidos \(próprio\)\n\n[^#]*\| https:\/\/www\.creditrilha\.com\.br\/blog\/x\/ \| não conferido \(próprio\)[^|]* \| \/simples-hibrido\/ \|/);
+  assert.doesNotMatch(md, /### Quebrados/);
 });

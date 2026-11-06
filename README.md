@@ -32,6 +32,31 @@ Os testes exigem **Node 22** (ver `.nvmrc`). Rode na raiz do repositório:
 node --test 'tests/*.test.mjs'
 ```
 
+`tests/oraculo-2026.test.mjs` (incluído no comando acima) confere o INSS e o IRRF de 2026, com a redução da Lei
+15.270/2025, nas bordas das faixas e no salário líquido, contra valores digitados das fontes oficiais, sem importar
+`assets/js/tabelas.js`. As tabelas do oráculo ficam em `tests/oraculo/oficial-2026.mjs`, em centavos, com a fonte e a
+data da conferência. Tabela nova (outro ano, portaria nova) muda os dois lados: `tabelas.js` e o oráculo, com o texto
+da fonte oficial.
+
+### Testes por propriedade (tests/oraculo)
+
+`tests/oraculo/propriedades.test.mjs` cobre as invariantes das fórmulas com o fast-check (versão exata em
+`tests/oraculo/package-lock.json`; dependência só desses testes, e o glob da raiz não alcança a subpasta): INSS e IRRF
+de 2026 iguais ao oráculo para qualquer valor e IRRF entre 0 e o imposto pela tabela; rendimento até R$ 5.000,00 sem
+IRRF com qualquer dedução; salário líquido, 13º e férias que não diminuem com o bruto (fora o arredondamento a
+centavo de cada desconto, no máximo 2 centavos); `r2`; o número formatado em pt-BR lido de volta pelo `lerNumeroBR`;
+rescisão (matriz motivo x aviso, líquido = verbas − descontos e nunca negativo, aviso pela metade só no acordo
+indenizado, avos de 0 a 12); taxa implícita do parcelado; Price e SAC. A semente é fixa, e a falha mostra o
+contraexemplo já reduzido; `ORACULO_SEMENTE=<número>` troca a semente numa execução local, para explorar outros casos.
+
+```sh
+(cd tests/oraculo && npm ci --ignore-scripts)
+node --test 'tests/oraculo/*.test.mjs'
+```
+
+O job `check` do CI roda os dois comandos depois do `node --test` da raiz. Para atualizar o fast-check: em
+`tests/oraculo`, `npm install -D --save-exact fast-check@<versão>` e commit do `package.json` e do `package-lock.json`.
+
 ## Testes de navegador (e2e)
 
 O job `e2e` do CI roda o Playwright (versão exata em `tests/e2e/package-lock.json`, só Chromium) em 390 px e
@@ -41,7 +66,11 @@ erro; nada do Google antes de clicar no banner de cookies nem depois de Recusar,
 aparece depois de Aceitar. Calculadora desligada fica sem `data-calc` e com o botão `disabled`. O mesmo job passa o
 axe-core (`@axe-core/playwright`, versão exata no lockfile) em todas as páginas, nas duas larguras e nos temas claro e
 escuro (`prefers-color-scheme`), com as regras WCAG 2.0, 2.1 e 2.2 A e AA: falha só com violação serious ou critical;
-moderate e minor saem no log. O Playwright serve o site com `python3 -m http.server` em 127.0.0.1:8191 (`E2E_PORTA`
+moderate e minor saem no log. Em 390 px, o `toque.spec.mjs` pega o que o axe e o Lighthouse deixam passar, em todas
+as páginas: campo (input, select, textarea, fora checkbox, radio e o honeypot `.le-hp`) com menos de 44 px de altura
+ou fonte abaixo de 16 px (o iOS dá zoom no foco), `a.btn` ou botão com menos de 44 px e, nas calculadoras e no
+`/irpf/` depois do envio, célula de tabela além da borda de um ancestral com overflow hidden/clip que não rola (use
+o `.rolagem` do `ui.js`). O Playwright serve o site com `python3 -m http.server` em 127.0.0.1:8191 (`E2E_PORTA`
 troca a porta), aborta e registra toda requisição HTTP ou WebSocket a outro host e registra as dicas de conexão para
 fora (`preconnect`, `dns-prefetch`...); o Chromium sobe sem proxy, nem o do ambiente, e sem DNS. Local:
 
@@ -53,7 +82,7 @@ npx playwright test                                        # -g "markup" roda s�
 ```
 
 Quando falha, a mensagem diz o quê: resultado sem número, envio que recarrega a página, erro de console, elementos
-que passam da borda, URL de outro host pedida, URL do Google pedida antes do aceite, violação de acessibilidade
+que passam da borda, campo, botão ou célula fora do padrão de toque (página, seletor e medida), URL de outro host pedida, URL do Google pedida antes do aceite, violação de acessibilidade
 (página, tema, regra do axe e seletor do elemento). No CI, capturas e traces ficam no artefato `e2e-falhas`
 (`npx playwright show-trace` abre o `.zip`). Corrija a página, não o teste. Nenhuma página pode pedir nada de outro
 host antes do aceite (imagem, vídeo, fonte, script de terceiro, `preconnect`): isso derruba o e2e de propósito, e
@@ -72,6 +101,13 @@ Playwright: em `tests/e2e`, `npm install -D --save-exact @playwright/test@<vers�
 nova tentativa 60 s depois do fim da primeira passada. Em link de afiliado, o parâmetro do afiliado (`tag=` da
 Amazon, `indicacao=`) sai da URL conferida, para a checagem não contar como clique.
 
+Entram `href`, `src`, `poster`, `cite` e as URLs do JSON-LD. Destino de envio de formulário (`action`, `formaction`)
+não é link e fica de fora: um GET nele pode gravar resposta ou abrir sessão de pagamento. Hosts de outros produtos da
+empresa (`NAO_BUSCAR` no script: `creditrilha.com.br` e `licitacoes-checkout.*.workers.dev`) não recebem nenhuma
+requisição, nem quando outro link redireciona para eles: cada acesso ao Creditrilha grava no banco dele, e o checkout
+do Licitações abriria sessão de pagamento. Eles saem no resumo como "não conferido (próprio)", sem falhar o job; link
+para outro produto novo da empresa entra nessa lista antes de ir ao ar.
+
 O job falha só com QUEBRADO: 404, 410 e os demais 4xx fora da lista de robô (400, 402, 422...); 5xx nas duas
 tentativas; erro de DNS, de rede (conexão recusada ou fechada) ou de certificado (expirado, autoassinado, de outro
 nome); tempo esgotado duas vezes; mais de 15 redirecionamentos, 3xx sem destino ou redirecionamento que termina em
@@ -84,6 +120,14 @@ navegador: se abrir normalmente, rode o workflow de novo antes de mexer; se a fa
 bloqueia o IP do GitHub), registre numa issue em vez de remover o link; se estiver quebrado de fato, troque ou remova
 o link nessas páginas. O GitHub desliga o agendamento depois de 60 dias sem atividade no repositório: reative em
 Actions se isso acontecer.
+
+## Imagens de compartilhamento (og:image)
+
+As artes de `og/` têm 1200x630 e o mesmo layout (marca, selo, título, subtítulo, chips e o ícone da página).
+`node tools/og.mjs <nome>` gera `og/<nome>.jpg` a partir da tabela `ARTES` do script, com o Playwright de `tests/e2e`
+(`npm ci --ignore-scripts` lá) e a fonte de `/fonts`, sem rede; `CHROME_PATH` aponta outro Chromium. Os textos da arte
+saem do que a página já diz. Página sem arte própria usa `og/padrao.jpg`: `tests/og-imagens.test.mjs` falha com arte
+copiada de outra página (bytes iguais com outro nome) e com medida diferente da declarada em `og:image:width/height`.
 
 ## Lighthouse
 
@@ -98,11 +142,43 @@ node tests/lighthouse/rodar.mjs --base http://127.0.0.1:8080 --saida /tmp/lighth
 
 `CHROME_PATH` escolhe o Chrome. `--perfis mobile` roda só um perfil; `--so-verificar` só confere os JSON já gerados.
 
+## IndexNow (Bing)
+
+O IndexNow avisa o Bing (e Yandex, Seznam, Naver e Yep, que compartilham os envios) das URLs novas ou alteradas; o
+Google não usa o protocolo. Na auditoria de 01/11/2026, nada no código impedia o Bing de indexar o site (robots.txt
+com `Allow: /` e o sitemap, nenhuma página indexável com noindex, canonical e og:url iguais à URL, www e http com 301
+para `https://contacertabr.com.br/`), mas não havia chave nem rotina de envio.
+
+A chave é o arquivo `<32 hex>.txt` da raiz, com a própria chave como conteúdo, sem quebra de linha. Ela é pública por
+desenho: o buscador baixa `https://contacertabr.com.br/<chave>.txt` para conferir que o envio veio do dono do site.
+Não apague nem renomeie o arquivo à toa: sem ele no ar, o envio volta 403. Para trocar a chave, substitua o arquivo
+pelo da chave nova (o `tests/indexnow.test.mjs` exige um só na raiz) e só envie de novo depois do deploy.
+
+O envio é manual e do operador (Rodrigo), nunca do CI. Depois que o deploy da main (Actions > Pages) publicou as
+páginas alteradas, na raiz do repositório atualizado:
+
+```sh
+node tests/manutencao/indexnow.mjs --desde 2026-11-01            # só imprime o payload (padrão, sem rede)
+node tests/manutencao/indexnow.mjs --desde 2026-11-01 --enviar   # confere a chave no ar e faz o POST
+```
+
+O payload (`host`, `key`, `keyLocation`, `urlList`) leva só URLs do `sitemap.xml`, as de `lastmod` maior ou igual a
+`--desde` (sem `--desde`, todas: use no primeiro envio). Com `--enviar`, o script primeiro baixa a chave publicada e
+só faz o POST em `https://api.indexnow.org/indexnow` se ela bater com a do repositório. Respostas: 200 ou 202
+(aceito; 202 = a chave ainda vai ser conferida), 400 (formato), 403 (chave não encontrada no ar), 422 (URL de outro
+host), 429 (muitas requisições: espere). Atrás de proxy, `NODE_USE_ENV_PROXY=1`. Envie só URLs que mudaram de fato:
+reenviar o site inteiro toda vez não acelera nada.
+
+Fica fora do repositório, no painel do Bing Webmaster Tools: cadastrar e verificar o site (dá para importar do
+Google Search Console) e enviar o sitemap. O `_headers` não vale no GitHub Pages: nenhum `X-Robots-Tag` sai dele.
+
 ## Runbook: publicação da política de privacidade
 
 A publicação (`.github/workflows/pages.yml`, só a partir da main) roda a trava da data da política antes do upload:
 data `<=` hoje (America/Sao_Paulo) num push que não altera `privacidade/index.html`; data `=` hoje num push que a
 altera, num `workflow_dispatch` ou num push sem base conhecida. O log do passo mostra a regra aplicada e os SHAs.
+"Altera" é mudança de conteúdo: a troca do `?v=` que o `cache.mjs` faz em todas as páginas quando um CSS ou JS muda
+não conta (`tests/manutencao/politica-alterada.mjs`, o mesmo critério no `ci.yml` e no `pages.yml`).
 
 Se a publicação de um push que alterou a política falhar (trava, upload ou deploy), não espere o próximo push: no
 mesmo dia, rode Actions > Pages > Run workflow na main (`workflow_dispatch`, regra `= hoje`). Em outro dia, ajuste
@@ -112,14 +188,14 @@ evita que um push posterior sem mudança na política publique a versão nova co
 
 ## Dependabot e workflows
 
-`.github/dependabot.yml` abre no dia 1 de cada mês PRs das actions e de `tests/e2e`, só com versão publicada há pelo
-menos 14 dias: minor e patch num PR agrupado por ecossistema, e o major de cada dependência em PR separado (no máximo
-3 PRs abertos por ecossistema); merge manual, com o CI verde. A primeira verificação costuma rodar logo que o arquivo
-chega à main, sem esperar o dia 1; em 19/10/2026, isso quer dizer um PR para `actions/checkout` v7 e outro para
-`actions/setup-node` v7. As versões fixadas nos comandos do `ci.yml` (zizmor, html-validate, Lighthouse) não passam
-pelo Dependabot: atualize à mão, com versão publicada há pelo menos 14 dias. Os alertas e as atualizações de segurança
-do Dependabot são uma opção do repositório, em Settings > Advanced Security. O CI roda em push (menos nas branches
-`dependabot/**`) e em PR, então cada PR do Dependabot roda o CI uma vez.
+`.github/dependabot.yml` abre no dia 1 de cada mês PRs das actions, de `tests/e2e` e de `tests/oraculo`, só com
+versão publicada há pelo menos 14 dias: minor e patch num PR agrupado por ecossistema, e o major de cada dependência
+em PR separado (no máximo 3 PRs abertos por ecossistema); merge manual, com o CI verde. A primeira verificação
+costuma rodar logo que o arquivo chega à main, sem esperar o dia 1; em 19/10/2026, isso quer dizer um PR para
+`actions/checkout` v7 e outro para `actions/setup-node` v7. As versões fixadas nos comandos do `ci.yml` (zizmor,
+html-validate, Lighthouse) não passam pelo Dependabot: atualize à mão, com versão publicada há pelo menos 14 dias. Os
+alertas e as atualizações de segurança do Dependabot são uma opção do repositório, em Settings > Advanced Security. O
+CI roda em push (menos nas branches `dependabot/**`) e em PR, então cada PR do Dependabot roda o CI uma vez.
 
 O job `check` instala o zizmor 1.30.1 num venv, com o sha256 do wheel conferido pelo pip (`--require-hashes`), e passa
 o perfil padrão em `.github/` (offline, sem token). Ele falha com: action por tag ou branch em vez de SHA, checkout

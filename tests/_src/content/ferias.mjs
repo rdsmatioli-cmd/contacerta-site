@@ -12,8 +12,8 @@ export default {
   campos: [
     { n: 'salario', l: 'Salário bruto mensal', t: 'money', v: 4000 },
     { n: 'media', l: 'Média de horas extras e adicionais', t: 'money', v: 0 },
-    { n: 'dias', l: 'Dias deste período de férias, somando os dias vendidos', t: 'int', v: 30, min: 5, max: 30, ajuda: 'Calcula um período por vez.', ajudaMaisRotulo: 'Regras para dividir as férias', ajudaMais: 'Com a concordância do empregado, as férias podem ser divididas em até 3 períodos: um com pelo menos 14 dias corridos e os outros com pelo menos 5 dias corridos cada (art. 134, § 1º, da CLT). As férias não podem começar nos 2 dias antes de feriado ou do descanso semanal remunerado (art. 134, § 3º).' },
-    { n: 'vender', l: 'Vender 1/3 das férias (abono pecuniário)', t: 'check', v: false },
+    { n: 'diasGozo', l: 'Dias de gozo neste período', t: 'int', v: 30, min: 5, max: 30, ajuda: 'Só os dias de descanso, sem os vendidos. Calcula um período por vez.', ajudaMaisRotulo: 'Regras para dividir as férias', ajudaMais: 'Com a concordância do empregado, as férias podem ser divididas em até 3 períodos: um com pelo menos 14 dias corridos e os outros com pelo menos 5 dias corridos cada (art. 134, § 1º, da CLT). As férias não podem começar nos 2 dias antes de feriado ou do descanso semanal remunerado (art. 134, § 3º).' },
+    { n: 'diasAbono', l: 'Dias vendidos (abono)', t: 'int', v: 0, max: 10, avisoMax: 'O abono é de até 1/3 das férias, no máximo 10 dias; o cálculo usou 10.', ajuda: 'Até 1/3 das férias a que você tem direito: 30 dias dão 10; 24 dão 8; 18 dão 6; 12 dão 4 (as faltas reduzem o direito). Use 0 se não vender.' },
     { n: 'dependentes', l: 'Dependentes para IR', t: 'int', v: 0 },
   ],
   aviso: 'Estimativa. Aqui o INSS é calculado só sobre férias + 1/3; na folha, ele é somado ao salário do mesmo mês de competência e pode variar alguns reais. Médias de variáveis e convenções coletivas também alteram o valor.',

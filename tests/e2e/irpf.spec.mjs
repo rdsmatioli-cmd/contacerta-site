@@ -1,6 +1,6 @@
 // /irpf/ (motor próprio, irpf.js): o JS habilita Simular, o envio mostra o resultado estimado sem recarregar,
 // a captura (R2-09) nunca bloqueia o resultado e segue oculta com IRPF_CAPTURA=false; sem checkout; sem rede externa.
-import { test, expect, semErros, semRedeExterna, semRolagemHorizontal, assentar } from './fixtures.mjs';
+import { test, expect, semErros, semRedeExterna, semRolagemHorizontal, assentar, celulasCortadas } from './fixtures.mjs';
 import { PROPRIOS } from './site.mjs';
 
 test('descoberta: /irpf/ é simulador de motor próprio', () => {
@@ -19,6 +19,15 @@ test('/irpf/: resultado primeiro, captura depois e desligada, sem erro', async (
   const resultado = page.locator('#resultado');
   await expect(resultado).toContainText('R$');
   await expect(resultado).toContainText(/estimad/i);
+  // CC-CALC-A11Y-01: o #resultado não é região viva; o leitor de tela recebe só a frase curta do valor principal.
+  await expect(resultado).toHaveAttribute('aria-live', 'off');
+  await expect(page.locator('#resultado-anuncio')).toHaveText(/^(Restituição estimada|Saldo a pagar estimado): R\$\s[\d.]+,\d{2}$/);
+  // CC-SITE-05: valor principal no .destaque do site; a tabela de 7 colunas rola no .rolagem em vez de ser cortada pelo
+  // overflow hidden do section.calc (o semRolagemHorizontal não vê o corte).
+  await expect(resultado.locator('.destaque')).toBeVisible();
+  await expect(resultado.locator('.destaque')).toHaveText(/^(Restituição estimada|Saldo a pagar estimado)\s+R\$\s[\d.]+,\d{2}$/);
+  await expect(resultado.locator('.rolagem[role="region"][tabindex="0"] table')).toHaveCount(1);
+  expect(await celulasCortadas(page), 'células da tabela além da borda de um ancestral que não rola').toEqual([]);
   expect(await page.evaluate(() => window.__semRecarga), 'o envio não recarregou a página').toBe(true);
   await expect(page.locator('#irpf-captura'), 'IRPF_CAPTURA=false').toBeHidden();
   await expect(page.locator('#irpf-captura button[type="submit"]')).toBeDisabled();

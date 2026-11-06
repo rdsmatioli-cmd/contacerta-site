@@ -4,6 +4,8 @@
 // Medido em 18/10/2026 (4G lento e CPU 4x emulados, cache desligado, 11 a 15 carregamentos por variante): pré-carregar
 // também tabelas.js e valida.js deixa a calculadora pronta ~150 ms antes, mas atrasa o FCP e o LCP em ~90 ms (disputa
 // banda com o CSS, a fonte e o lcm-consent.js); por isso só o calc.js tem modulepreload.
+// A-CC51-01 (31/10/2026): com o calc.js e o ui.js maiores, o ui.js e o modulepreload do calc.js vão com
+// fetchpriority="low", para não disputar banda com o CSS e o lcm-consent.js (Lighthouse mobile: FCP 2,3 s -> 1,7 s).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -29,18 +31,18 @@ function importsDe(url, vistos = new Set()) {
   return vistos;
 }
 
-const comUi = paginas.filter((p) => /<script type="module" src="\/assets\/js\/ui\.js\?v=[0-9a-f]+"><\/script>/.test(ler(p)));
+const comUi = paginas.filter((p) => /<script type="module" src="\/assets\/js\/ui\.js\?v=[0-9a-f]+" fetchpriority="low"><\/script>/.test(ler(p)));
 test('as 29 calculadoras carregam o ui.js como módulo e pré-carregam o calc.js', () => {
   assert.equal(comUi.length, 29);
-  for (const p of comUi) assert.match(ler(p), /<link rel="modulepreload" href="\/assets\/js\/calc\.js\?v=[0-9a-f]+">/, p);
+  for (const p of comUi) assert.match(ler(p), /<link rel="modulepreload" href="\/assets\/js\/calc\.js\?v=[0-9a-f]+" fetchpriority="low">/, p);
 });
 
 for (const p of paginas) {
   test(`${p}: modulepreload só de imports do ui.js, com o mesmo ?v=`, () => {
     const html = ler(p);
-    const pre = [...html.matchAll(/<link rel="modulepreload" href="([^"]+)">/g)].map((m) => m[1]);
+    const pre = [...html.matchAll(/<link rel="modulepreload" href="([^"]+)"(?: fetchpriority="low")?>/g)].map((m) => m[1]);
     if (!comUi.includes(p)) { assert.deepEqual(pre, []); return; }
-    const ui = html.match(/<script type="module" src="(\/assets\/js\/ui\.js\?v=[0-9a-f]+)"><\/script>/)[1];
+    const ui = html.match(/<script type="module" src="(\/assets\/js\/ui\.js\?v=[0-9a-f]+)" fetchpriority="low"><\/script>/)[1];
     const grafo = importsDe(ui);
     for (const u of pre) {
       assert.ok(grafo.has(u), `${u} não é import do ui.js (ou o ?v= difere do import)`);

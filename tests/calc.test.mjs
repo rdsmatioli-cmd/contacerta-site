@@ -61,13 +61,19 @@ test('13º salário', () => {
   const d = C.decimoTerceiro({ salario: 3000, meses: 12 });
   assert.equal(d.bruto, 3000); assert.equal(d.primeira, 1500); assert.equal(d.inss, 248.6); assert.equal(d.irrf, 0); assert.equal(d.segunda, 1251.4);
   const p = C.decimoTerceiro({ salario: 2400, meses: 6 });
-  assert.equal(p.bruto, 1200); assert.equal(p.primeira, 600); assert.equal(p.inss, 90);
+  // menos de 12 meses: 1ª parcela = metade de 1/12 por mês de serviço até o pagamento em novembro (Decreto 10.854/2021,
+  // art. 78, § 4º): 5 meses (julho a novembro) -> 2.400 ÷ 12 × 5 ÷ 2 = 500
+  assert.equal(p.bruto, 1200); assert.equal(p.primeira, 500); assert.equal(p.mesesPrimeira, 5); assert.equal(p.inss, 90);
+  assert.equal(p.segunda, 610); assert.equal(p.liquidoTotal, C.r2(p.bruto - p.inss - p.irrf));
+  assert.equal(C.decimoTerceiro({ salario: 2400, meses: 6, mesesAte1aParcela: 4 }).primeira, 400);
+  assert.equal(C.decimoTerceiro({ salario: 2400, meses: 1 }).primeira, 0); // só dezembro: sem adiantamento
+  assert.equal(C.decimoTerceiro({ salario: 3000, meses: 12, mediaVariaveis: 600 }).primeira, 1800); // caput: metade do mês anterior
 });
 
 test('Férias', () => {
   let f = C.ferias({ salario: 3000 });
   assert.equal(f.terco, 1000); assert.equal(f.inss, 368.6); assert.equal(f.irrf, 0); assert.equal(f.liquido, 3631.4);
-  f = C.ferias({ salario: 3000, venderDias: true });
+  f = C.ferias({ salario: 3000, diasGozo: 20, diasAbono: 10 });
   assert.equal(f.diasGozo, 20); assert.equal(f.diasAbono, 10); assert.equal(f.abono, 1000); assert.equal(f.tercoAbono, 333.33);
   assert.equal(f.inss, 215.69); assert.equal(f.bruto, 4000); assert.equal(f.liquido, 3784.31);
 });
@@ -358,8 +364,9 @@ test('Crédito travado: crédito, parcela em risco e custo financeiro', () => {
 
 test('Calendário da reforma: próximo marco e fase', () => {
   const r = C.calendarioReforma('2026-10-10');
-  assert.equal(r.proximo.data, '2026-10-30');
-  assert.equal(r.proximo.dias, 20);
+  assert.equal(r.proximo.data, '2026-10-28'); // cálculo do TCU da CBS de 2027 (marco incluído em 31/10/2026)
+  assert.equal(r.proximo.dias, 18);
+  assert.equal(C.calendarioReforma('2026-10-29').proximo.data, '2026-10-30');
   assert.equal(r.fase, 'Teste');
   assert.equal(C.calendarioReforma('2027-06-01').proximo.data, '2029-01-01');
   assert.equal(C.calendarioReforma('2034-01-01').proximo, null);

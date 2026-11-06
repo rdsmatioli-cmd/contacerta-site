@@ -1,0 +1,12 @@
+{
+  "name": "contacerta-oraculo",
+  "private": true,
+  "description": "Testes por propriedade das fórmulas (fast-check). Fora da raiz de propósito: o site e o node --test da raiz não têm dependências.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test '*.test.mjs'"
+  },
+  "devDependencies": {
+    "fast-check": "4.10.2"
+  }
+}
