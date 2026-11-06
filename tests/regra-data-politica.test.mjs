@@ -149,7 +149,7 @@ test('API: o success mais novo vale; inactive com success no histórico conta; f
 test('API: paginação e ordem errada ainda escolhem o success mais novo', async () => {
   const pagina1 = [{ id: 1, sha: A, environment: 'github-pages', created_at: '2026-11-01T00:00:00Z' }];
   const pagina2 = [{ id: 2, sha: B, environment: 'github-pages', created_at: '2026-11-06T00:00:00Z' }];
-  const link = '<https://api.github.com/repos/o/r/deployments?page=2>; rel="next"';
+  const link = '<https://api.github.com/repositories/1410982718/deployments?environment=github-pages&per_page=100&page=2>; rel="next", <https://api.github.com/repositories/1410982718/deployments?environment=github-pages&per_page=100&page=73>; rel="last"';
   const fetchImpl = async (url) => {
     if (url.includes('page=2')) return resposta(pagina2);
     if (url.includes('/deployments?')) return resposta(pagina1, { link });
@@ -191,13 +191,28 @@ test('API: erro HTTP, status ilegível do mais novo, link externo ou entrada inv
   const externo = await ultimoDeployComSucesso({
     repo: 'o/r',
     token: 'secreto',
+    fetchImpl: fetchQueRegistra(async (url) => {
+      if (url.includes('/statuses')) return resposta([{ state: 'success' }]);
+      return resposta([{ id: 4, sha: C, environment: 'github-pages', created_at: '2026-11-06T18:31:27Z' }], {
+        link: '<https://evil.example/repos/o/r/deployments?page=2>; rel="next"',
+      });
+    }),
+  });
+  assert.equal(externo.sha, C);
+  assert.equal(externo.erro, '');
+  assert.equal(chamadas.some((u) => u.includes('evil.example')), false);
+
+  chamadas.length = 0;
+  const vazio = await ultimoDeployComSucesso({
+    repo: 'o/r',
+    token: 'secreto',
     fetchImpl: fetchQueRegistra(async () => resposta([], {
       link: '<https://evil.example/repos/o/r/deployments?page=2>; rel="next"',
     })),
   });
-  assert.equal(externo.sha, null);
-  assert.match(externo.erro, /fora do GitHub/);
-  assert.deepEqual(chamadas, ['https://api.github.com/repos/o/r/deployments?environment=github-pages&per_page=100']);
+  assert.equal(vazio.sha, null);
+  assert.match(vazio.erro, /fora do GitHub/);
+  assert.equal(chamadas.some((u) => u.includes('evil.example')), false);
 
   chamadas.length = 0;
   const repo = await ultimoDeployComSucesso({ repo: '../x', token: 't', fetchImpl: fetchQueRegistra(async () => { throw new Error('nao'); }) });

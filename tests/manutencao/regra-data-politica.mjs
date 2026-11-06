@@ -69,18 +69,21 @@ export function decidirRegra({ evento, antes, deploy, alterada }) {
   return { regra: HOJE, origem, base: sha, motivo };
 }
 
-// link rel=next só é seguido se continuar em /repos/<repo>/deployments na API do GitHub.
+// O Link rel=next da API de deployments usa /repositories/<id>/deployments (não /repos/<owner>/<repo>/...).
+// Os dois caminhos, só em https://api.github.com, podem ser seguidos. Qualquer outro host interrompe a paginação
+// sem apagar o que já foi lido: a lista vem do mais novo para o mais antigo.
 export function proximaPagina(link, repo) {
   if (!link) return { url: null };
   for (const parte of String(link).split(',')) {
     if (!/rel="next"/.test(parte)) continue;
     const m = parte.match(/<([^>]+)>/);
-    if (!m) return { url: null, erro: 'paginação da API sem URL; consulta interrompida.' };
+    if (!m) return { url: null, erro: 'paginação da API sem URL; seguimos com o que já foi lido.' };
     let u;
-    try { u = new URL(m[1]); } catch { return { url: null, erro: 'paginação da API com URL inválida; consulta interrompida.' }; }
-    const prefixo = `/repos/${repo}/deployments`;
-    if (u.origin !== 'https://api.github.com' || !u.pathname.startsWith(prefixo)) {
-      return { url: null, erro: 'paginação da API apontou para fora do GitHub; consulta interrompida.' };
+    try { u = new URL(m[1]); } catch { return { url: null, erro: 'paginação da API com URL inválida; seguimos com o que já foi lido.' }; }
+    const noRepo = u.pathname === `/repos/${repo}/deployments` || u.pathname.startsWith(`/repos/${repo}/deployments/`);
+    const porId = /^\/repositories\/\d+\/deployments\/?$/.test(u.pathname);
+    if (u.origin !== 'https://api.github.com' || (!noRepo && !porId)) {
+      return { url: null, erro: 'paginação da API apontou para fora do GitHub; seguimos com o que já foi lido.' };
     }
     return { url: u.toString() };
   }
@@ -107,24 +110,37 @@ export async function ultimoDeployComSucesso({ repo, token, fetchImpl }) {
   if (typeof fetchImpl !== 'function') return { sha: null, erro: 'cliente HTTP ausente; base do deploy não resolvida.' };
 
   const lista = [];
+  let falhaPaginacao = '';
   let url = `https://api.github.com/repos/${repo}/deployments?environment=${encodeURIComponent(AMBIENTE)}&per_page=100`;
+  const guardarFalha = (msg) => {
+    if (!lista.length) return { sha: null, erro: msg };
+    falhaPaginacao = msg;
+    return null;
+  };
   try {
     for (let pagina = 0; pagina < 5 && url; pagina++) {
       const res = await fetchImpl(url, opcoes(token));
       if (!res || res.ok !== true) {
-        return { sha: null, erro: `API de deployments respondeu HTTP ${res && res.status != null ? res.status : 'sem resposta'}.` };
+        const parado = guardarFalha(`API de deployments respondeu HTTP ${res && res.status != null ? res.status : 'sem resposta'}.`);
+        if (parado) return parado;
+        break;
       }
       const body = await res.json();
-      if (!Array.isArray(body)) return { sha: null, erro: 'API de deployments devolveu um corpo inválido.' };
+      if (!Array.isArray(body)) {
+        const parado = guardarFalha('API de deployments devolveu um corpo inválido.');
+        if (parado) return parado;
+        break;
+      }
       lista.push(...body);
       const link = res.headers && typeof res.headers.get === 'function' ? res.headers.get('link') : null;
       const prox = proximaPagina(link, repo);
-      if (prox.erro) return { sha: null, erro: prox.erro };
+      if (prox.erro) { falhaPaginacao = prox.erro; break; }
       url = prox.url;
       if (!url || body.length === 0) break;
     }
   } catch (e) {
-    return { sha: null, erro: `falha ao consultar deployments (${redigir(e.message)}).` };
+    const parado = guardarFalha(`falha ao consultar deployments (${redigir(e.message)}).`);
+    if (parado) return parado;
   }
 
   lista.sort((a, b) => {
@@ -151,7 +167,7 @@ export async function ultimoDeployComSucesso({ repo, token, fetchImpl }) {
   } catch (e) {
     return { sha: null, erro: `falha ao consultar status de deployment (${redigir(e.message)}).` };
   }
-  return { sha: null, erro: '' };
+  return { sha: null, erro: falhaPaginacao };
 }
 
 function gitPadrao(args, cwd) {
