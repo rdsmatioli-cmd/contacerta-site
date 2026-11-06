@@ -25,7 +25,7 @@ jobs:
       - name: Testes (node --test)
         run: node --test 'tests/*.test.mjs'
       # M-PR33-01: trava da data da política (tests/politica-data.test.mjs), obrigatória no PR que altera
-      # privacidade/index.html (git diff --name-only origin/<base>...HEAD). Nos demais PRs e em push/main o teste acima a
+      # privacidade/index.html (conteúdo normalizado só no ?v=, tests/manutencao/politica-alterada.mjs). Nos demais PRs e em push/main o teste acima a
       # pula, para não quebrar PRs sem relação com a política no dia seguinte. A publicação é barrada no pages.yml.
       # Antes do merge de um PR que altera a política, reexecute este job no próprio dia.
       - name: PR altera a política de privacidade?
@@ -33,8 +33,10 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           git fetch --no-tags --quiet origin "+refs/heads/${GITHUB_BASE_REF}:refs/remotes/origin/${GITHUB_BASE_REF}"
-          # Só ?v= (cache-busting) não conta como alteração da política: -I ignora hunks em que toda linha casa o padrão.
-          if git diff -I '\?v=[0-9a-f]{10}' "origin/${GITHUB_BASE_REF}...HEAD" -- privacidade/index.html | grep -q '^@@'; then
+          # Parecer 7b078e76 (B-CC60-J02): comparação do arquivo inteiro após normalizar só /\?v=[0-9a-f]+/; base
+          # ausente/ilegível = alterada (ramo estrito). Lógica e testes: tests/manutencao/politica-alterada.mjs.
+          BASE="$(git merge-base "origin/${GITHUB_BASE_REF}" HEAD 2>/dev/null || true)"
+          if [ "$(node tests/manutencao/politica-alterada.mjs "$BASE")" != false ]; then
             echo 'alterada=true' >>"$GITHUB_OUTPUT"
             echo 'privacidade/index.html alterada neste PR: trava da data ativa.'
           else
