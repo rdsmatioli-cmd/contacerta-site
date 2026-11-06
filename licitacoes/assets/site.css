@@ -206,6 +206,8 @@ footer .ver{margin-top:12px;font:450 11px/16px var(--mono);color:var(--ink-2);te
 /* Tabela sem invólucro .tab-rolar (posts live e política): rola dentro de si, não a página. Sem overflow:hidden em
    .doc table (B-CC60-J01: cortava colunas a 320-768); esta regra fica depois da base, mesma especificidade. */
 @media(max-width:1023px){.doc table{display:block;max-width:100%;overflow:auto;-webkit-overflow-scrolling:touch}}
+/* Tabela dentro do invólucro .tbl-rolagem (CC-SITE-13, main): quem rola é a região focável, não a tabela. */
+@media(max-width:1023px){.doc .tbl-rolagem>table{display:table;max-width:none;overflow:visible}}
 .doc th,.doc td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
 .doc th{background:var(--n50);font-weight:600;color:var(--ink);font-size:13px}
 .doc tr:last-child td{border-bottom:0}
