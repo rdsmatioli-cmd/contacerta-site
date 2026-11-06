@@ -2,7 +2,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
-import { LINKS_PAGAMENTO, ROTULOS, NA_PAGINA, PAGINA_ASSINAR, PAGINA_OBRIGADO, PAGINAS_SEM_REFERRER } from './config-pagamento-links.mjs';
+import { render } from './manutencao/licitacoes-links-pagamento.mjs';
+import { LINKS_PAGAMENTO, ROTULOS, EM_BREVE, NA_PAGINA, PAGINA_ASSINAR, PAGINA_OBRIGADO, PAGINAS_SEM_REFERRER } from './config-pagamento-links.mjs';
 
 const ler = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const hrefsStripe = (h) => [...h.matchAll(/href="(https:\/\/buy\.stripe\.com\/[^"]*)"/g)].map((m) => m[1]);
@@ -13,14 +14,20 @@ test('config: URL vazia ou https://buy.stripe.com/<id>, sem repetir', () => {
   assert.equal(new Set(v).size, v.length);
   for (const u of v) assert.match(u, /^https:\/\/buy\.stripe\.com\/[A-Za-z0-9_]+$/);
 });
-test('assinar/: cada produto com URL tem o link; sem URL mostra "em breve" sem link', () => {
-  const h = ler(PAGINA_ASSINAR);
+test('assinar/ no repositório: todos "em breve" (S-PL1 muda só a constante)', () => {
+  const vazio = Object.fromEntries(NA_PAGINA.map((k) => [k, '']));
+  assert.equal(ler(PAGINA_ASSINAR), render(ler(PAGINA_ASSINAR), vazio));
+  const cheio = render(ler(PAGINA_ASSINAR), Object.fromEntries(NA_PAGINA.map((k, i) => [k, `https://buy.stripe.com/teste${i}`])));
+  assert.equal(hrefsStripe(cheio).length, 3);
+});
+test('assinar/ como o Pages publica (render da constante): URL = link, vazio = "em breve" sem link', () => {
+  const h = render(ler(PAGINA_ASSINAR));
   assert.deepEqual(hrefsStripe(h), NA_PAGINA.map((k) => LINKS_PAGAMENTO[k]).filter(Boolean));
   for (const k of NA_PAGINA) {
     const bloco = (h.match(new RegExp(`<p class="compra" data-produto="${k}">[\\s\\S]*?</p>`)) || [])[0];
     assert.ok(bloco, k);
     if (LINKS_PAGAMENTO[k]) assert.ok(bloco.includes(`<a class="btn" href="${LINKS_PAGAMENTO[k]}">${ROTULOS[k]}</a>`), k);
-    else { assert.match(bloco, /aria-disabled="true">[^<]*em breve<\/span>/, k); assert.doesNotMatch(bloco, /<a\b/, k); }
+    else { assert.ok(bloco.includes(`aria-disabled="true">${EM_BREVE[k]}</span>`), k); assert.doesNotMatch(bloco, /<a\b/, k); }
   }
   assert.ok(!LINKS_PAGAMENTO.montagemEntrega || !h.includes(LINKS_PAGAMENTO.montagemEntrega), 'entrega só pelo atendimento');
 });
@@ -54,7 +61,8 @@ test('Termos 1.5 (cobranca/): sem "indisponível", aceite versão 1.5, links de 
   const h = ler('licitacoes/cobranca/index.html');
   assert.match(h, /TERMOS-VENDA-LICITACOES-1\.5/);
   assert.doesNotMatch(h, /temporariamente indisponível|Assinaturas em breve|versão 1\.3\)|nenhuma contratação/);
-  assert.ok(h.includes('(link, versão 1.5)'));
+  assert.ok(h.includes('Termos de Venda do Licitações, versão 1.5 (contacertabr.com.br/licitacoes/cobranca/)'));
+  assert.doesNotMatch(h, /[Tt]este gratuito:|\(link, versão/);
   const cfg = Object.values(LINKS_PAGAMENTO).filter(Boolean);
   for (const u of hrefsStripe(h)) assert.ok(cfg.includes(u), u);
 });
