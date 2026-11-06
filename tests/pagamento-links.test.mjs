@@ -70,3 +70,10 @@ test('Termos 1.5 (cobranca/): sem "indisponível", aceite versão 1.5, links de 
 test('produção: pelo menos um produto com URL LIVE na config', { skip: process.env.LINKS_PAGAMENTO_PRODUCAO !== '1' && 'só no build do Pages' }, () => {
   assert.ok(NA_PAGINA.some((k) => LINKS_PAGAMENTO[k]), 'nenhum link de pagamento: /licitacoes/assinar/ não deve ir ao ar');
 });
+// DEC CPO 7a1eaf70 (D1, D3): Radar entregue por e-mail, sem login, painel ou plataforma. (Nos Termos, "login"/"senha"
+// só aparecem como o login/senha do próprio cliente no portal de compras do órgão, que a LCM não recebe.)
+test('Radar sem promessa de login, painel, dashboard, área logada ou plataforma', () => {
+  for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO]) assert.doesNotMatch(ler(p), /login|painel|dashboard|área logada|plataforma/i, p);
+  assert.doesNotMatch(ler('licitacoes/cobranca/index.html'), /painel|dashboard|área logada|plataforma/i);
+  assert.match(ler(PAGINA_ASSINAR), /envio semanal, por e-mail/);
+});
