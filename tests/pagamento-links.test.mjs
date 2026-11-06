@@ -83,3 +83,11 @@ test('Radar sem promessa de login, painel, dashboard, área logada ou plataforma
   assert.doesNotMatch(ler('licitacoes/cobranca/index.html'), /primeiro acesso ao serviço|data em que o acesso termina/);
   for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO, 'licitacoes/cobranca/index.html']) assert.doesNotMatch(ler(p), /custom_field|<input/i, p);
 });
+// Guarda de deploy: link de sandbox (test_) nunca vai ao ar.
+test('DEPLOY=1 / build do Pages: nenhuma URL de Payment Link de sandbox (/test_)', { skip: process.env.DEPLOY !== '1' && process.env.LINKS_PAGAMENTO_PRODUCAO !== '1' && 'só com DEPLOY=1 ou no build do Pages' }, () => {
+  for (const [k, u] of Object.entries(LINKS_PAGAMENTO)) assert.ok(!u.includes('/test_'), `${k}: URL de sandbox`);
+});
+test('guarda de sandbox detecta /test_ (autoteste, roda sempre)', () => {
+  assert.ok('https://buy.stripe.com/test_abc'.includes('/test_'));
+  assert.ok(!'https://buy.stripe.com/abc'.includes('/test_'));
+});
