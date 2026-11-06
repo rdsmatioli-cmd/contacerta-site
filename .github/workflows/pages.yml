@@ -42,6 +42,9 @@ jobs:
             echo "saída inesperada da trava; publicação barrada."
             exit 1
           fi
+      # DEC CPO be1e019d (E1): /termos-de-venda/ não publica com placeholder do ADV.
+      - name: Trava de placeholder em /termos-de-venda/
+        run: LINKS_PAGAMENTO_PRODUCAO=1 node --test tests/termos-de-venda.test.mjs
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       # Só o conteúdo do site: os mesmos arquivos que o Pages legado serve hoje, sem tests, node_modules, .github,
       # .git e os arquivos de configuração (.gitattributes, .htmlvalidate.json, .nvmrc). Mantém .nojekyll e CNAME.
