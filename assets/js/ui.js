@@ -1,7 +1,7 @@
 // Liga os formulários às funções de cálculo. Sem dependências externas.
-import * as C from './calc.js?v=f36af3e12b';
+import * as C from './calc.js?v=68c65f234f';
 import { INDICADORES } from './tabelas.js?v=2469a7d685';
-import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas, validarDiasFerias, validarData, validarOrdemDatas } from './valida.js?v=48fffebbde';
+import { validarNumero, attrNum, validarFeriasVencidas, validarDataPagamento, validarAviso, periodosVisiveisDobra, alertaFeriasVencidas, validarDiasFerias, validarData, validarOrdemDatas } from './valida.js?v=b9bcbc6e47';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const n2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -589,13 +589,13 @@ const CALCS = {
     const msg = {
       baixo: 'Mantenha o monitoramento e registre no inventário de riscos que os fatores foram avaliados.',
       moderado: 'Há fatores que merecem medidas de prevenção no plano de ação, com prazo e responsável.',
-      alto: 'Priorize os fatores abaixo no plano de ação e ouça os trabalhadores para confirmar o diagnóstico.',
+      alto: 'Priorize os fatores abaixo no plano de ação e ouça os trabalhadores para confirmar a avaliação rápida NR-1.',
       muitoAlto: 'Trate os fatores abaixo como prioridade e procure apoio de profissional de SST para a avaliação no PGR.',
     }[r.nivel];
     const falta = r.completo ? '' : `<p class="nota">Você respondeu ${r.respondidos} de ${r.total} perguntas. O resultado considera só as respondidas.</p>`;
     const prio = r.prioridades.length
       ? `<p class="nota"><strong>Fatores para priorizar e exemplos de medidas:</strong></p><ul>${r.prioridades.map((p) => `<li><strong>${esc(p.t)}.</strong> ${esc(p.medida)}</li>`).join('')}</ul>`
-      : '<p class="nota">Nenhum fator apareceu com frequência. Registre a avaliação e repita o diagnóstico após mudanças na organização do trabalho.</p>';
+      : '<p class="nota">Nenhum fator apareceu com frequência. Registre a avaliação e repita a avaliação rápida NR-1 após mudanças na organização do trabalho.</p>';
     return destaque('Nível indicativo', C.NR1_NIVEIS[r.nivel]) + `<p class="nota">${msg}</p>` + falta + prio
       + '<p class="nota">Resultado orientativo, baseado na percepção de quem respondeu. Não é laudo, não avalia a saúde de ninguém e não substitui a avaliação de riscos do PGR feita com profissional de SST.</p>';
   },

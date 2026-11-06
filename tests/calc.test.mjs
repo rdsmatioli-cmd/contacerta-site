@@ -374,7 +374,7 @@ test('Calendário da reforma: próximo marco e fase', () => {
   assert.ok(C.MARCOS_REFORMA.every((m, i, a) => i === 0 || a[i - 1].data < m.data), 'marcos em ordem');
 });
 
-test('Diagnóstico NR-1: níveis, respostas parciais e prioridades', () => {
+test('Avaliação rápida NR-1: níveis, respostas parciais e prioridades', () => {
   const vazio = C.nr1Diagnostico({});
   assert.equal(vazio.respondidos, 0); assert.equal(vazio.nivel, null); assert.equal(vazio.total, 12);
   const todos = (v) => Object.fromEntries(C.NR1_FATORES.map(([k]) => [k, String(v)]));
