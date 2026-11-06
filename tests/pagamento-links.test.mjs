@@ -74,10 +74,10 @@ test('produção: pelo menos um produto com URL LIVE na config', { skip: process
 // só aparecem como o login/senha do próprio cliente no portal de compras do órgão, que a LCM não recebe.)
 test('Radar sem promessa de login, painel, dashboard, área logada ou plataforma', () => {
   for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO]) {
-    const tx = ler(p).replace('não há login, painel nem acesso a plataforma', '').replace('sem login nem painel', '');
+    const tx = ler(p).replace('não há login, painel nem acesso a plataforma', '').replaceAll('sem login nem painel', '');
     assert.doesNotMatch(tx, /login|painel|dashboard|área logada|área do cliente|plataforma|acess/i, p);
   }
-  assert.doesNotMatch(ler('licitacoes/cobranca/index.html').replace('não há login, painel nem acesso a plataforma', ''), /painel|dashboard|área logada|plataforma/i);
+  assert.doesNotMatch(ler('licitacoes/cobranca/index.html').replace('não há login, painel nem acesso a plataforma', '').replaceAll('sem login nem painel', ''), /painel|dashboard|área logada|plataforma/i);
   assert.match(ler(PAGINA_ASSINAR), /envio semanal, por e-mail/);
   assert.match(ler(PAGINA_ASSINAR), /O serviço começa após a emissão da nota fiscal\./);
   assert.doesNotMatch(ler('licitacoes/cobranca/index.html'), /primeiro acesso ao serviço|data em que o acesso termina/);
@@ -90,4 +90,10 @@ test('DEPLOY=1 / build do Pages: nenhuma URL de Payment Link de sandbox (/test_)
 test('guarda de sandbox detecta /test_ (autoteste, roda sempre)', () => {
   assert.ok('https://buy.stripe.com/test_abc'.includes('/test_'));
   assert.ok(!'https://buy.stripe.com/abc'.includes('/test_'));
+});
+// Adendo ADV A-2 fd1fc8e6: aviso literal antes de cada link de pagamento; sem corte mensal (decisão CPO pendente).
+test('assinar/: aviso A-2 antes de cada produto; sem texto de fechamento mensal', () => {
+  const h = ler(PAGINA_ASSINAR);
+  for (const k of NA_PAGINA) assert.match(h, new RegExp(`<p class="aviso-fiscal">Depois da confirmação do pagamento, a Conta Certa enviará um e-mail pedindo o CNPJ da empresa\\.[^<]*</p>\\n<p class="compra" data-produto="${k}">`), k);
+  for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO, 'licitacoes/cobranca/index.html']) assert.doesNotMatch(ler(p), /encerramento do mês/, p);
 });
