@@ -31,9 +31,9 @@ for (const url of PAGS) {
 }
 
 const CASOS = [
-  ['20-50', 'oferta', 'R$ 1.490', 'R$ 745 agora e R$ 745'],
-  ['51-100', 'oferta', 'R$ 2.290', 'R$ 1.145 agora e R$ 1.145'],
-  ['101-200', 'oferta', 'R$ 3.490', 'R$ 1.745 agora e R$ 1.745'],
+  ['20-50', 'oferta', 'R$ 1.490', 'À vista'],
+  ['51-100', 'em-breve', null, null],
+  ['101-200', 'em-breve', null, null],
   ['lt20', 'simplificada', null, null],
   ['gt200', 'sob-consulta', null, null],
 ];
@@ -105,7 +105,7 @@ test('flag ON jornada 42h: conta aberta com divisor 210 e etapa de 40 h', async 
   semErros(erros, rede);
 });
 
-test('orçamento NR-1: EMPREGADOR_EM_DIA ON mas ED_CHECKOUT OFF continua indisponível', async ({ page, rede, erros }) => {
+test('orçamento NR-1: ED_ORCAMENTO_NR1 OFF continua indisponível', async ({ page, rede, erros }) => {
   await ligar(page);
   await page.goto('/empregador-em-dia/orcamento-nr1/');
   await assentar(page);
@@ -124,7 +124,7 @@ const medir = (loc) => loc.evaluate((el) => {
   const cs = getComputedStyle(el);
   return { altura: el.getBoundingClientRect().height, fonte: parseFloat(cs.fontSize), fundo: cs.backgroundColor, sublinhado: cs.textDecorationLine };
 });
-for (const [url, rotulo] of [['/empregador-em-dia/', 'Ver o que minha empresa precisa'], ['/empregador-em-dia/jornada-42h/', 'Ver a adequação NR-1'], ['/empregador-em-dia/avaliacao-rapida-nr1/resultado/', 'Ver o que minha empresa precisa']]) {
+for (const [url, rotulo] of [['/empregador-em-dia/', 'Ver o que minha empresa precisa'], ['/empregador-em-dia/jornada-42h/', 'Empregador em Dia — avaliação rápida NR-1'], ['/empregador-em-dia/avaliacao-rapida-nr1/resultado/', 'Ver o que minha empresa precisa']]) {
   test(`CC-SITE-06 ${url}: "${rotulo}" com cara de botão, 44 px ou mais`, async ({ page }) => {
     await page.goto(url);
     await assentar(page);
@@ -143,6 +143,44 @@ for (const [url, rotulo] of [['/empregador-em-dia/', 'Ver o que minha empresa pr
     }
   });
 }
+
+test('pagamento: link vazio não mostra o botão', async ({ page, rede, erros }) => {
+  await page.goto('/empregador-em-dia/pagamento/');
+  await assentar(page);
+  await expect(page.locator('#ed-off')).toBeVisible();
+  await expect(page.locator('[data-ed-pagar]')).toBeHidden();
+  expect(rede.tentativas.filter((u) => /stripe\.com/i.test(u))).toEqual([]);
+  semRedeExterna(rede);
+  semErros(erros, rede);
+});
+
+test('pagamento: link válido redireciona só com o e-mail, sem pedido à Stripe antes do clique', async ({ page }) => {
+  const link = 'https://buy.stripe.com/exemplo?locale=pt-BR';
+  await page.route(/\/assets\/js\/empregador\/config\.js/, async (route) => {
+    const r = await route.fetch();
+    const corpo = (await r.text()).replace("ED_PAYMENT_LINK_20_50 = ''", `ED_PAYMENT_LINK_20_50 = '${link}'`);
+    await route.fulfill({ response: r, body: corpo });
+  });
+  const stripe = [];
+  page.on('request', (r) => { if (/stripe\.com/i.test(r.url())) stripe.push(r.url()); });
+  await page.goto('/empregador-em-dia/pagamento/');
+  const botao = page.locator('[data-ed-pagar]');
+  await expect(botao).toBeVisible({ timeout: 15000 });
+  expect(stripe).toEqual([]);
+  await expect(botao).toBeDisabled();
+  await page.locator('#pg-nf').fill('financeiro@example.com');
+  await page.locator('[data-ed-aceite]').check();
+  await expect(botao).toBeEnabled();
+  expect(stripe).toEqual([]);
+  const pedido = page.waitForRequest((r) => r.url().startsWith('https://buy.stripe.com/'));
+  await botao.click();
+  const req = await pedido;
+  const u = new URL(req.url());
+  expect(u.searchParams.get('prefilled_email')).toBe('financeiro@example.com');
+  expect(u.searchParams.get('locale')).toBe('pt-BR');
+  expect(u.searchParams.has('client_reference_id')).toBe(false);
+  expect(req.url().includes('/test_')).toBe(false);
+});
 
 test('CC-SITE-06 avaliação rápida: Voltar (.btn.sec) em contorno, diferente do Continuar', async ({ page }) => {
   await page.goto('/empregador-em-dia/avaliacao-rapida-nr1/');

@@ -3,44 +3,47 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { FLAGS, FAIXAS, ED_PAGAMENTO_MODO, LIMIAR_ANALISE } from '../assets/js/empregador/config.js';
+import { FLAGS, FAIXAS, ED_PAGAMENTO_MODO, ED_PAYMENT_LINK_20_50, ED_PAYMENT_LINKS, LIMIAR_ANALISE } from '../assets/js/empregador/config.js';
+import { ctaCheckoutLiberado, linkDePagamentoValido, urlDoLink, TEXTO_OK_PAGINA, VERSAO_TERMOS } from '../assets/js/empregador/textos-checkout.js';
 import { cnpjValido, formatarCnpj, pagamento, andamento } from '../assets/js/empregador/motor.js';
 
 const raiz = new URL('../', import.meta.url).pathname;
 const ler = (p) => readFileSync(join(raiz, p), 'utf8');
-const E3 = ['precos', 'contratar', 'pagamento', 'pagamento/ok', 'pagamento/2', 'painel'].map((c) => `empregador-em-dia/${c}/index.html`);
+const E3 = ['precos', 'contratar', 'pagamento', 'pagamento/ok', 'painel'].map((c) => `empregador-em-dia/${c}/index.html`);
 
-test('E3: ED_CHECKOUT e ED_LOGIN OFF, pagamento em mock (só EMPREGADOR_EM_DIA ON, DEC CEO/CPO 31/10)', () => {
+test('E3: ED_CHECKOUT ligado, login off, pagamento em link vazio', () => {
   assert.equal(FLAGS.EMPREGADOR_EM_DIA, true);
-  assert.equal(FLAGS.ED_CHECKOUT, false);
+  assert.equal(FLAGS.ED_CHECKOUT, true);
   assert.equal(FLAGS.ED_LOGIN, false);
-  assert.equal(ED_PAGAMENTO_MODO, 'mock');
+  assert.equal(FLAGS.ED_ORCAMENTO_NR1, false);
+  assert.equal(ED_PAGAMENTO_MODO, 'link');
+  assert.equal(ED_PAYMENT_LINK_20_50, '');
+  assert.deepEqual(ED_PAYMENT_LINKS, { '20-50': '' });
 });
 
-test('E3: telas atrás de flag (data-ed-e3 dentro de #ed-app hidden), noindex', () => {
+test('E3: noindex; preços e retorno visíveis; contratar, pagamento e painel no aviso', () => {
+  const visiveis = new Set(['empregador-em-dia/precos/index.html', 'empregador-em-dia/pagamento/ok/index.html']);
   for (const p of E3) {
     const h = ler(p);
-    const app = h.indexOf('<div id="ed-app" hidden>');
-    assert.ok(app > 0, p);
-    const gate = h.indexOf('data-ed-e3=');
-    assert.ok(gate > app, `${p}: gate dentro de #ed-app`);
     assert.match(h, /<meta name="robots" content="noindex, nofollow">/, p);
     assert.match(h, p.includes('painel') ? /data-ed-e3="login"/ : /data-ed-e3="checkout"/, p);
+    if (visiveis.has(p)) assert.match(h, /<div id="ed-app">/, p);
+    else assert.match(h, /<div id="ed-app" hidden>/, p);
   }
   const ui = ler('assets/js/empregador/ui.js');
   assert.match(ui, /data-ed-e3="checkout"\]'\) && !FLAGS\.ED_CHECKOUT\) return/);
   assert.match(ui, /data-ed-e3="login"\]'\) && !FLAGS\.ED_LOGIN\) return/);
 });
 
-test('T05: preços e parcelas batem com a tabela; >200 = "Orçamento sob medida", sem "sob consulta"', () => {
+test('T05: 20-50 à vista; 51-200 em breve, sem parcela; >200 = "Orçamento sob medida"', () => {
   const h = ler('empregador-em-dia/precos/index.html');
-  for (const f of FAIXAS.filter((x) => x.preco)) {
-    const m = (f.preco / 2).toLocaleString('pt-BR');
-    assert.ok(h.includes(`R$ ${f.preco.toLocaleString('pt-BR')}</span><span>à vista, ou R$ ${m} agora + R$ ${m} na entrega`), f.id);
-  }
+  assert.ok(h.includes('R$ 1.490</span><span>à vista</span>'));
+  assert.ok(h.includes('data-ed-faixa="51-100"') && h.includes('>Em breve.</span>'));
+  assert.ok(h.includes('data-ed-faixa="101-200"'));
+  assert.ok(!h.includes('745'));
   assert.ok(h.includes('Orçamento sob medida'));
   for (const p of E3) assert.ok(!ler(p).toLowerCase().includes('sob consulta'), p);
-  for (const t of ['Questionário anônimo por link e QR Code', 'Inventário dos riscos psicossociais para apoiar o PGR da sua empresa', 'Plano de ação com prazos e responsáveis', 'Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos']) assert.ok(h.includes(t), t);
+  for (const t of ['Questionário anônimo</li>', 'Inventário dos riscos psicossociais para apoiar o PGR da sua empresa', 'Plano de ação com prazos e responsáveis', 'Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos']) assert.ok(h.includes(t), t);
 });
 
 test('T06: CNPJ por dígito verificador, exemplo fictício válido (D-09), sem Receita/BrasilAPI (D-07)', () => {
@@ -50,7 +53,7 @@ test('T06: CNPJ por dígito verificador, exemplo fictício válido (D-09), sem R
   assert.equal(cnpjValido('123'), false);
   assert.equal(formatarCnpj('11222333000181'), '11.222.333/0001-81');
   const h = ler('empregador-em-dia/contratar/index.html');
-  assert.ok(h.includes('Exemplo: o CNPJ da nota fiscal.'));
+  assert.ok(!h.includes('id="ct-cnpj"') && !h.includes('name="cnpj"'));
   assert.ok(h.includes('id="ct-razao"') && h.includes('required'));
   assert.match(h, /id="ct-whats"(?![^>]*required)[^>]*>/);
   const js = ler('assets/js/empregador/ui.js') + ler('assets/js/empregador/motor.js');
@@ -66,7 +69,7 @@ test('T07/T12: à vista = preço cheio agora e 0 na entrega; 50/50 soma o preço
   }
   assert.equal(pagamento('gt200', 'avista'), null);
   assert.equal(pagamento('lt20', 'metade'), null);
-  for (const p of ['empregador-em-dia/pagamento/index.html', 'empregador-em-dia/pagamento/2/index.html']) assert.match(ler(p), /data-ed-mock>Modo teste/, p);
+  assert.ok(!ler('empregador-em-dia/pagamento/index.html').includes('data-ed-mock'));
 });
 
 test('T07 CA 3: nenhuma chave live nem payload Pix real no repositório publicável', () => {
@@ -81,11 +84,15 @@ test('T07 CA 3: nenhuma chave live nem payload Pix real no repositório publicá
   assert.deepEqual(achados, []);
 });
 
-test('T08: link curto aleatório (>= 5, sem CNPJ) e variante à vista sem 2ª parcela', () => {
+test('T08: o redirect leva só o e-mail e não grava pedido falso', () => {
   const ui = ler('assets/js/empregador/ui.js');
-  assert.match(ui, /link: codigo\(6\)/);
-  assert.match(ui, /crypto\.getRandomValues/);
-  assert.match(ui, /p\.forma === 'avista' \? 'você recebe o relatório' :/);
+  assert.match(ui, /location\.assign\(urlDoLink\(ED_PAYMENT_LINKS\['20-50'\], form\.nf\.value\.trim\(\)\)\)/);
+  assert.doesNotMatch(ui, /client_reference_id|codigo\(6\)|Pagamento recebido/);
+  const url = urlDoLink('https://buy.stripe.com/abc?locale=pt-BR', 'financeiro@example.com');
+  const u = new URL(url);
+  assert.equal(u.searchParams.get('prefilled_email'), 'financeiro@example.com');
+  assert.equal(u.searchParams.get('locale'), 'pt-BR');
+  assert.equal(u.searchParams.get('client_reference_id'), null);
 });
 
 test('T10: percentual arredondado para baixo; "já dá para analisar" a partir de 70% (config)', () => {
@@ -107,13 +114,13 @@ test('G-2 (NR-1 d8e801e9): revisão da avaliação de riscos (não do PGR), sem 
   for (const p of E3) { const h = ler(p); assert.ok(!/Revisão do PGR|Incluído em todas as faixas|12 meses/i.test(h), p); }
 });
 test('M-01 (Advogado 31f8fa10): validade em toda superfície de preço', () => {
-  for (const p of ['precos', 'pagamento', 'pagamento/2', 'avaliacao-rapida-nr1/resultado', 'orcamento-nr1']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(VAL), p);
+  for (const p of ['precos', 'pagamento', 'avaliacao-rapida-nr1/resultado', 'orcamento-nr1']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(VAL), p);
 });
 test('M-02: sem afirmação de SST incluído; slot data-ed-sst preenchido pelo ui.js (sem texto fixo)', () => {
-  for (const p of ['precos', 'pagamento/ok', 'painel']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.ok(h.includes('<p class="ed-sst" data-ed-sst></p>'), p); assert.ok(!h.includes(SST), p); assert.ok(!/profissional de SST analisa|Análise do SST|Análise por profissional/.test(h), p); }
+  for (const p of ['precos', 'painel']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.ok(h.includes('<p class="ed-sst" data-ed-sst></p>'), p); assert.ok(!h.includes(SST), p); assert.ok(!/profissional de SST analisa|Análise do SST|Análise por profissional/.test(h), p); }
 });
 test('M-03/M-04/M-05: aviso LGPD em contratar e pagamento; Me avise com consentimento; fornecedor no rodapé', () => {
-  for (const p of ['contratar', 'pagamento', 'pagamento/2']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.match(h, /art\. 7º, V/, p); assert.match(h, /art\. 18/, p); assert.ok(h.includes('href="/privacidade/"'), p); }
+  for (const p of ['contratar', 'pagamento']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.match(h, /art\. 7º, V/, p); assert.match(h, /art\. 18/, p); assert.ok(h.includes('href="/privacidade/"'), p); }
   const r = ler('empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html');
   // F-1 (Advogado d39ff580): com ED_ME_AVISE OFF, o resultado não tem formulário, campo de e-mail nem botão "Me avise".
   assert.ok(!/id="ed-avise|type="email"|Me avise/.test(r));
@@ -127,14 +134,30 @@ test('G-3 NR-1 9f7f0070: prazo do resultado definido no contrato', () => {
   assert.ok(!h.includes('conforme contratado pelo estabelecimento'));
 });
 
-test('B-PR42-08 QA ebbc1144: botões Copiar (Pix e link) têm listener com retorno', () => {
-  const js = readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8');
-  assert.match(js, /copiar\(\$\('\[data-ed-copiar="pix"\]'\), \(\) => \$\('\[data-ed="pix"\]'\)\.textContent\.trim\(\)\)/);
-  assert.match(js, /copiar\(\$\('\[data-ed-copiar="ok-link"\]'\)/);
-  assert.match(js, /navigator\.clipboard\.writeText/);
-  assert.match(js, /'Copiado'/);
-  for (const f of ['pagamento', 'pagamento/2']) {
-    const h = readFileSync(new URL(`../empregador-em-dia/${f}/index.html`, import.meta.url), 'utf8');
-    assert.ok(h.includes('<p aria-live="polite"><button type="button" class="btn sec" data-ed-copiar="pix">Copiar código Pix</button></p>'), f);
+test('link vazio ou de teste não libera o botão; constante commitada sem /test_', () => {
+  assert.equal(linkDePagamentoValido(''), false);
+  assert.equal(linkDePagamentoValido('http://buy.stripe.com/abc'), false);
+  assert.equal(linkDePagamentoValido('https://buy.stripe.com/test_abc'), false);
+  assert.equal(linkDePagamentoValido('https://buy.stripe.com/abc'), true);
+  assert.equal(ctaCheckoutLiberado(''), false);
+  assert.equal(ctaCheckoutLiberado('https://buy.stripe.com/test_live'), false);
+  assert.equal(ctaCheckoutLiberado('https://exemplo.com/test_'), false);
+  assert.equal(ctaCheckoutLiberado('https://buy.stripe.com/abc123'), true);
+  const cfg = ler('assets/js/empregador/config.js');
+  for (const m of cfg.matchAll(/ED_PAYMENT_LINK\w*\s*=\s*'([^']*)'/g)) assert.ok(!m[1].includes('/test_'), m[0]);
+  assert.equal(VERSAO_TERMOS, 'TERMOS-EMPREGADOR-1.2');
+  const ok = ler('empregador-em-dia/pagamento/ok/index.html');
+  assert.ok(ok.includes('Pedido recebido.'));
+  assert.ok(!ok.includes('envie o link'));
+  assert.ok(!ok.includes('Agora:'));
+  const norm = (s) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const i = ok.indexOf('id="ed-pg-ok"');
+  const sec = ok.slice(ok.indexOf('>', i) + 1, ok.indexOf('</section>', i));
+  assert.equal(norm(sec), norm(TEXTO_OK_PAGINA));
+  for (const p of [...E3, 'empregador-em-dia/index.html']) assert.ok(!ler(p).includes('Adequação NR-1'), p);
+  assert.ok(!ler('termos/index.html').includes('Adequação NR-1'));
+  for (const p of ['contratar', 'pagamento']) {
+    const h = ler(`empregador-em-dia/${p}/index.html`);
+    assert.ok(!/<(input|select|textarea)\b[^>]*\bname="cnpj"/i.test(h), p);
   }
 });
