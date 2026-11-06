@@ -95,3 +95,23 @@ test('assinar/: aviso A-2 antes de cada produto; corte mensal nas 3 páginas', (
   assert.equal(ler('licitacoes/cobranca/index.html').split(corte).length - 1, 2);
   assert.doesNotMatch(ler('licitacoes/index.html'), /em preparação|Ainda não há inscrição|Não pede senha/);
 });
+
+// Adendo ADV f27cdb3a (1): restaura as asserções apagadas em 331adc11 (DEC CPO 7a1eaf70 D1/D3; sem custom_field).
+// (Nos Termos, "login"/"senha" só aparecem como o login/senha do próprio cliente no portal do órgão.)
+test('Radar sem promessa de login, painel, dashboard, área logada ou plataforma; sem custom_field/<input', () => {
+  for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO]) {
+    const tx = ler(p).replace('não há login, painel nem acesso a plataforma', '').replaceAll('sem login nem painel', '');
+    assert.doesNotMatch(tx, /login|painel|dashboard|área logada|área do cliente|plataforma|acess/i, p);
+  }
+  assert.doesNotMatch(ler('licitacoes/cobranca/index.html').replace('não há login, painel nem acesso a plataforma', '').replaceAll('sem login nem painel', ''), /painel|dashboard|área logada|plataforma/i);
+  assert.match(ler(PAGINA_ASSINAR), /envio semanal, por e-mail/);
+  assert.match(ler(PAGINA_ASSINAR), /O serviço começa após a emissão da nota fiscal\./);
+  assert.doesNotMatch(ler('licitacoes/cobranca/index.html'), /primeiro acesso ao serviço|data em que o acesso termina/);
+  for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO, 'licitacoes/cobranca/index.html', 'licitacoes/index.html']) assert.doesNotMatch(ler(p), /custom_field|<input/i, p);
+});
+// Adendo ADV f27cdb3a (2): "em preparação" fora do ar no blog e em editais/.
+test('blog e editais/: sem "em preparação"; link para a página de planos', () => {
+  for (const p of ['licitacoes/blog/pregoes-material-de-limpeza-pncp.html', 'licitacoes/editais/material-de-limpeza.html']) {
+    const h = ler(p); assert.doesNotMatch(h, /em preparação/i, p); assert.ok(h.includes('href="../assinar/"'), p);
+  }
+});
