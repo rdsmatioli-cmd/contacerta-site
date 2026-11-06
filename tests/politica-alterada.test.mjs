@@ -1,54 +1,67 @@
-// A trava "data = hoje" da política (M-PR33-01) só liga quando o conteúdo de privacidade/index.html muda.
-// A troca do ?v= feita pelo cache.mjs não é mudança da política (tests/manutencao/politica-alterada.mjs).
-import test from 'node:test';
+// B-CC60-J02 / parecer 7b078e76: trava da data da política. Só a troca do hex de ?v= não é alteração; todo o resto é.
+import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { politicaAlterada, semCache } from './manutencao/politica-alterada.mjs';
+import { alterada, normalizar, politicaAlterada } from './manutencao/politica-alterada.mjs';
 
-const script = fileURLToPath(new URL('./manutencao/politica-alterada.mjs', import.meta.url));
+const BASE = '<link rel="stylesheet" href="/assets/style.css?v=3ed109e95e">\n<p>Compartilhamos com o operador A.</p>\n';
 
-test('só o ?v= do cache mudou: política não alterada', () => {
-  const antes = '<link rel="stylesheet" href="/assets/style.css?v=03383b6fea"><p>Última atualização: 30/10/2026</p>';
-  const depois = '<link rel="stylesheet" href="/assets/style.css?v=2a691a6948"><p>Última atualização: 30/10/2026</p>';
-  assert.equal(politicaAlterada(antes, depois), false);
+test('só ?v= mudou: não alterada', () => {
+  assert.equal(alterada(BASE, BASE.replace('3ed109e95e', '0123abcdef')), false);
+});
+test('texto mudou: alterada', () => {
+  assert.equal(alterada(BASE, BASE.replace('operador A.', 'operadores A e B.')), true);
+});
+test('texto mudou na MESMA linha do ?v= (com ?v= também trocado): alterada', () => {
+  const a = '<link rel="stylesheet" href="/assets/style.css?v=3ed109e95e"><p>Compartilhamos com o operador A.</p>\n';
+  const b = '<link rel="stylesheet" href="/assets/style.css?v=0123abcdef"><p>Compartilhamos com os operadores A e B.</p>\n';
+  assert.equal(alterada(a, b), true);
+});
+test('outro atributo ou link mudou: alterada', () => {
+  assert.equal(alterada(BASE, BASE.replace('/assets/style.css', '/assets/outro.css')), true);
+  assert.equal(alterada(BASE, BASE.replace('rel="stylesheet"', 'rel="preload"')), true);
+  assert.equal(alterada(BASE, BASE.replace('?v=3ed109e95e', '?x=3ed109e95e')), true);
+  assert.equal(alterada(BASE, BASE.replace('?v=3ed109e95e', '?v=NAOHEX')), true, 'só hex é normalizado');
+});
+test('base ausente ou ilegível: ramo estrito (alterada)', () => {
+  assert.equal(alterada(null, BASE), true);
+  assert.equal(alterada(BASE, null), true);
+  assert.equal(politicaAlterada('ref-que-nao-existe-xyz', undefined), true);
+  assert.equal(politicaAlterada('', undefined), true);
+  assert.equal(politicaAlterada(undefined, undefined), true);
+});
+test('normalização limitada a ?v=[0-9a-f]+', () => {
+  assert.equal(normalizar('a?v=abc123 b?v=ZZ c?w=abc'), 'a?v= b?v=ZZ c?w=abc');
 });
 
-test('texto da política mudou (junto ou não com o ?v=): alterada', () => {
-  const antes = '<link href="/assets/style.css?v=03383b6fea"><p>Seção 10</p>';
-  assert.equal(politicaAlterada(antes, '<link href="/assets/style.css?v=03383b6fea"><p>Seção 10 nova</p>'), true);
-  assert.equal(politicaAlterada(antes, '<link href="/assets/style.css?v=2a691a6948"><p>Seção 10 nova</p>'), true);
-  assert.equal(politicaAlterada(antes, '<link href="/assets/style.css?v=03383b6fea"><p>Seção 10</p><p>Seção 11</p>'), true);
-});
-
-test('arquivo ausente no commit de base conta como alterada', () => {
-  assert.equal(politicaAlterada(null, '<p>x</p>'), true);
-});
-
-test('semCache só toca no hash hexadecimal do ?v=', () => {
-  assert.equal(semCache('a.css?v=abc123 b?v=XYZ c?vv=abc'), 'a.css?v= b?v=XYZ c?vv=abc');
-});
-
-test('script num repositório temporário: ?v= novo = false; texto novo = true; commit inexistente = true', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'politica-alterada-'));
+test('CLI em repositório git temporário: cache-only false, texto mesma linha true, base sem arquivo true', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pol-'));
+  const git = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  const cli = fileURLToPath(new URL('./manutencao/politica-alterada.mjs', import.meta.url));
+  const rodar = (...a) => execFileSync(process.execPath, [cli, ...a], { cwd: dir, encoding: 'utf8' }).trim();
   try {
-    const git = (...a) => execFileSync('git', a, { cwd: dir, stdio: 'ignore' });
-    const arq = join(dir, 'privacidade', 'index.html');
+    git('init', '-q'); git('config', 'user.email', 't@t'); git('config', 'user.name', 't');
+    writeFileSync(join(dir, 'x.txt'), 'x'); git('add', '.'); git('commit', '-qm', 'sem politica');
+    const semArquivo = git('rev-parse', 'HEAD');
     mkdirSync(join(dir, 'privacidade'));
-    git('init', '-q');
-    writeFileSync(arq, '<link href="/assets/style.css?v=03383b6fea"><p>Última atualização: 30/10/2026</p>\n');
-    git('add', '.');
-    git('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '-m', 'base');
-    const saida = (commit) => execFileSync(process.execPath, [script, commit], { cwd: dir, encoding: 'utf8' }).trim();
-    writeFileSync(arq, '<link href="/assets/style.css?v=2a691a6948"><p>Última atualização: 30/10/2026</p>\n');
-    assert.equal(saida('HEAD'), 'false');
-    writeFileSync(arq, '<link href="/assets/style.css?v=2a691a6948"><p>Última atualização: 31/10/2026</p>\n');
-    assert.equal(saida('HEAD'), 'true');
-    assert.equal(saida('0000000000000000000000000000000000000000'), 'true');
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
+    const f = join(dir, 'privacidade/index.html');
+    writeFileSync(f, BASE); git('add', '.'); git('commit', '-qm', 'base');
+    const base = git('rev-parse', 'HEAD');
+    assert.equal(rodar(semArquivo), 'true');
+    writeFileSync(f, BASE.replace('3ed109e95e', 'aaaaaaaaaa'));
+    assert.equal(rodar(base), 'false');
+    git('commit', '-qam', 'cache'); const cache = git('rev-parse', 'HEAD');
+    assert.equal(rodar(base, cache), 'false');
+    writeFileSync(f, readFileSync(f, 'utf8').replace('operador A.', 'operadores A e B.'));
+    assert.equal(rodar(base), 'true');
+    const umaLinha = (v, t) => `<link href="/s.css?v=${v}"><p>${t}</p>\n`;
+    writeFileSync(f, umaLinha('1111111111', 'A')); git('commit', '-qam', 'l1'); const l1 = git('rev-parse', 'HEAD');
+    writeFileSync(f, umaLinha('2222222222', 'A e B'));
+    assert.equal(rodar(l1), 'true');
+    assert.equal(rodar('0000000000000000000000000000000000000000'), 'true');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });

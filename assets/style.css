@@ -561,3 +561,5 @@ main p a,main li a,main dd a{overflow-wrap:anywhere}
 .resultado .rolagem+table.res{margin-top:14px}
 /* Até 480 px a tabela .res vira bloco (Round 2, acima): a legenda acompanha, na largura toda, alinhada às linhas. */
 @media (max-width:480px){div:not(.tabela-rolar)>table.res>caption{display:block;padding:10px 12px 2px}}
+/* Blog: URL longa em texto puro (Fontes) não alarga a página em 320-412 */
+main article p,main article li{overflow-wrap:anywhere}
