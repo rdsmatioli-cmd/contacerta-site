@@ -54,7 +54,7 @@ test('obrigado/: em /licitacoes/obrigado/ (não em assinar/obrigado/), sem link 
   const h = ler(PAGINA_OBRIGADO);
   assert.deepEqual(hrefsStripe(h), []);
   assert.ok(h.includes('mailto:contato@contacertabr.com.br'));
-  assert.doesNotMatch(h, /[Pp]agamento (recebido|confirmado)/, 'vedado pelo parecer ADV 4e6fa371');
+  assert.doesNotMatch(h, /[Pp]agamento (recebido|confirmado)|sessionStorage/, 'vedado (ADV 4e6fa371, 4decb25a)');
 });
 test('home do /licitacoes/ tem CTA para assinar/', () => assert.ok(ler('licitacoes/index.html').includes('href="assinar/"')));
 test('Termos 1.5 (cobranca/): sem "indisponível", aceite versão 1.5, links de compra só da config', () => {
@@ -73,7 +73,13 @@ test('produção: pelo menos um produto com URL LIVE na config', { skip: process
 // DEC CPO 7a1eaf70 (D1, D3): Radar entregue por e-mail, sem login, painel ou plataforma. (Nos Termos, "login"/"senha"
 // só aparecem como o login/senha do próprio cliente no portal de compras do órgão, que a LCM não recebe.)
 test('Radar sem promessa de login, painel, dashboard, área logada ou plataforma', () => {
-  for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO]) assert.doesNotMatch(ler(p), /login|painel|dashboard|área logada|plataforma/i, p);
-  assert.doesNotMatch(ler('licitacoes/cobranca/index.html'), /painel|dashboard|área logada|plataforma/i);
+  for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO]) {
+    const tx = ler(p).replace('não há login, painel nem acesso a plataforma', '').replace('sem login nem painel', '');
+    assert.doesNotMatch(tx, /login|painel|dashboard|área logada|área do cliente|plataforma|acess/i, p);
+  }
+  assert.doesNotMatch(ler('licitacoes/cobranca/index.html').replace('não há login, painel nem acesso a plataforma', ''), /painel|dashboard|área logada|plataforma/i);
   assert.match(ler(PAGINA_ASSINAR), /envio semanal, por e-mail/);
+  assert.match(ler(PAGINA_ASSINAR), /O serviço começa após a emissão da nota fiscal\./);
+  assert.doesNotMatch(ler('licitacoes/cobranca/index.html'), /primeiro acesso ao serviço|data em que o acesso termina/);
+  for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO, 'licitacoes/cobranca/index.html']) assert.doesNotMatch(ler(p), /custom_field|<input/i, p);
 });
