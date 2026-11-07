@@ -1,7 +1,7 @@
 // Empregador em Dia: abertura do questionário de 12 fatores (P-08 v4, mockup 3e03e516 p. 2; DE ACORDO do Advogado
 // 34e72bad). UI atrás de FLAGS.ED_QUIZ_12 (OFF). [PRAZO] preenchido com o texto literal do parecer 1da103db (opção A).
 // [CONTATO DO ENCARREGADO] e [CANAL DA EMPRESA / CIPA] seguem em aberto: com placeholder, renderizar falha.
-import { FLAGS } from './config.js?v=678a5768a3';
+import { FLAGS } from './config.js?v=f7cf376197';
 
 export const PRAZO_RETENCAO = 'até 30 dias depois que a empresa recebe o resultado do grupo (no máximo 90 dias depois que o questionário fecha)';
 export const PLACEHOLDER = /\[[^\]\n]*[A-ZÇÃÕÁÉÍÓÚ]{3,}[^\]\n]*\]/;
@@ -13,7 +13,7 @@ export function textosAbertura({ empresa, razaoSocial, encarregado = '[CONTATO D
     titulo: 'Como está o seu trabalho?',
     intro: 'São 12 perguntas sobre as condições e a organização do seu trabalho. Leva uns 3 minutos.',
     regras: [
-      'Suas respostas não ficam ligadas a você: não pedimos nome, e-mail nem matrícula, não guardamos seu IP nem o horário exato, e o link é de uso único. A empresa só vê o resultado do grupo, e só se o grupo tiver 5 ou mais respostas.',
+      'Suas respostas não ficam ligadas a você: não pedimos nome, e-mail nem matrícula, não guardamos seu IP nem o horário exato. A empresa só vê o resultado do grupo, e só se o grupo tiver 5 ou mais respostas.',
       'É voluntário: você pode parar ou pular perguntas.',
       'Participar ou não participar não traz nenhuma consequência no seu trabalho. A empresa não sabe quem respondeu.',
       'Avalia as condições de trabalho. Não é avaliação psicológica.',

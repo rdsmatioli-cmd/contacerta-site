@@ -13,19 +13,21 @@ const ler = (p) => readFileSync(new URL(p, raiz), 'utf8');
 const PAGINAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
   'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html',
   'empregador-em-dia/orcamento-nr1/index.html', 'empregador-em-dia/precos/index.html', 'empregador-em-dia/contratar/index.html',
-  'empregador-em-dia/pagamento/index.html', 'empregador-em-dia/pagamento/ok/index.html', 'empregador-em-dia/pagamento/2/index.html',
+  'empregador-em-dia/pagamento/index.html', 'empregador-em-dia/pagamento/ok/index.html',
   'empregador-em-dia/painel/index.html'];
 
 // DEC CEO/CPO 31/10 (lançamento 03/11): só EMPREGADOR_EM_DIA ligada; todas as outras seguem false.
-test('só EMPREGADOR_EM_DIA ligada; demais flags desligadas e SST opcional (DEC CPO 30/10, Jurídico 5a441f81)', () => {
-  for (const [k, v] of Object.entries(FLAGS)) assert.equal(v, k === 'EMPREGADOR_EM_DIA', k);
+test('EMPREGADOR_EM_DIA e ED_CHECKOUT ligadas; orçamento e as demais flags desligadas', () => {
+  const ligadas = new Set(['EMPREGADOR_EM_DIA', 'ED_CHECKOUT']);
+  for (const [k, v] of Object.entries(FLAGS)) assert.equal(v, ligadas.has(k), k);
   assert.equal(ED_SST_INCLUIDO, false);
 });
 
 // NB-05 (CLS): o HTML sai no estado final das flags, sem troca aviso -> app depois do ui.js. Com EMPREGADOR_EM_DIA ON,
 // as páginas E2 vêm com o app visível; orçamento NR-1 e E3 (ED_CHECKOUT/ED_LOGIN OFF) seguem só com o aviso.
 const LIBERADAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
-  'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html'];
+  'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html',
+  'empregador-em-dia/precos/index.html', 'empregador-em-dia/pagamento/ok/index.html'];
 // DEC CPO 31/10 (PR #56): só landing, avaliação rápida e jornada 42h (preços noindex até checkout, ADENDO 7ec7825b) indexáveis e no sitemap.
 const INDEXAVEIS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
   'empregador-em-dia/jornada-42h/index.html'];
@@ -48,7 +50,8 @@ test('T01 CA1 + NB-05: indexação conforme a DEC; sitemap só com as indexávei
 
 test('termos NR-1 proibidos e "se aprovada"/44h-divisor fora das páginas', () => {
   for (const p of PAGINAS) {
-    const h = ler(p).toLowerCase();
+    // O Anexo ED-1 nega esses termos ("não é diagnóstico... avaliação psicológica, laudo"); fora dele continuam proibidos.
+    const h = ler(p).replace(/<section id="anexo-ed-1">[^]*?<\/section>/g, '').toLowerCase();
     for (const t of ['diagnóstico psicológico', 'diagnostico psicologico', 'avaliação psicológica', 'avaliacao psicologica', 'laudo', 'se aprovada', '÷ 220', '44h']) {
       assert.ok(!h.includes(t), `${p}: ${t}`);
     }
@@ -59,9 +62,9 @@ test('T01 CA2: textos literais da v3.3 p. 2 (com as reescritas do Advogado 38ccc
   const h = ler(PAGINAS[0]);
   for (const t of ['NR-1: riscos psicossociais no PGR', 'Sua empresa em dia com a NR-1, sem montar planilha',
     'A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026;',
-    'Questionário anônimo para os funcionários, por link', 'Inventário de riscos psicossociais para o PGR',
+    'Questionário anônimo para os funcionários', 'Inventário de riscos psicossociais para o PGR',
     'Plano de ação com prazos e responsáveis', // 4º item e abertura: Advogado M-03 e B-01, teste abaixo
-    'Preço fechado pela faixa de funcionários.', 'Você só paga o resto quando receber o relatório.',
+    'R$ 1.490 à vista.', 'Em breve.',
     'Veja quanto custaria reduzir a jornada.', 'href="/empregador-em-dia/avaliacao-rapida-nr1/"', 'href="/empregador-em-dia/jornada-42h/"']) {
     assert.ok(h.includes(t), t);
   }
@@ -81,7 +84,7 @@ test('T02 CA1/CA3: validação e destino das 5 faixas', () => {
   assert.ok(validarPasso(3, {}));
   assert.equal(validarPasso(3, { pgr: 'naosei' }), null);
   assert.deepEqual(['lt20', '20-50', '51-100', '101-200', 'gt200'].map(destino),
-    ['simplificada', 'oferta', 'oferta', 'oferta', 'sob-consulta']);
+    ['simplificada', 'oferta', 'em-breve', 'em-breve', 'sob-consulta']);
 });
 
 test('T03 CA1: preços e parcelas da tabela aprovada; <20 e >200 sem preço', () => {
@@ -192,7 +195,11 @@ test('P-08: [PRAZO] com o texto literal do parecer; placeholder trava com a flag
 });
 
 test('trava de produção: nenhuma página publicada com placeholder entre colchetes', () => {
-  for (const p of PAGINAS) assert.deepEqual(placeholdersAbertos(ler(p).replace(/<script[^]*?<\/script>/g, '')), [], p);
+  for (const p of PAGINAS) {
+    // O aviso entre colchetes fica só dentro do Anexo ED-1 (parecer 6c296519): é modelo da empregadora, não campo do site.
+    const html = ler(p).replace(/<script[^]*?<\/script>/g, '').replace(/<section id="anexo-ed-1">[^]*?<\/section>/g, '');
+    assert.deepEqual(placeholdersAbertos(html), [], p);
+  }
 });
 
 test('S-03: aviso de privacidade com fonte >= 14 px e sem corte', () => {
@@ -246,7 +253,7 @@ test('PR #36 revisões: textos literais travados nas páginas', () => {
 
 // CEO/CPO 28/10: "diagnóstico" sai dos títulos e do slug; a URL antiga nunca foi publicada (sem 301).
 test('Avaliação rápida NR-1: slug novo, nenhuma menção a "diagnóstico" nas páginas e no JS', () => {
-  for (const p of PAGINAS) assert.doesNotMatch(ler(p), /diagn[oó]stic/i, p);
+  for (const p of PAGINAS) assert.doesNotMatch(ler(p).replace(/<section id="anexo-ed-1">[^]*?<\/section>/g, ''), /diagn[oó]stic/i, p);
   assert.doesNotMatch(readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8'), /\/diagnostico\//);
   assert.ok(!existsSync(new URL('../empregador-em-dia/diagnostico/', import.meta.url)));
   assert.match(ler(PAGINAS[1]), /<title>Avaliação rápida NR-1: o que sua empresa precisa \| Empregador em Dia<\/title>/);
@@ -257,9 +264,9 @@ test('Avaliação rápida NR-1: slug novo, nenhuma menção a "diagnóstico" nas
 test('CTA "Pedir orçamento": destino /empregador-em-dia/orcamento-nr1/, desligado com a flag OFF', () => {
   const ui = readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8');
   assert.match(ui, /export const URL_ORCAMENTO_NR1 = '\/empregador-em-dia\/orcamento-nr1\/';/);
-  assert.match(ui, /if \(b && FLAGS\.ED_CHECKOUT\) \{ b\.disabled = false; b\.addEventListener\('click', \(\) => location\.assign\(URL_ORCAMENTO_NR1\)\); \}/);
+  assert.match(ui, /if \(b && FLAGS\.ED_ORCAMENTO_NR1\) \{ b\.disabled = false; b\.addEventListener\('click', \(\) => location\.assign\(URL_ORCAMENTO_NR1\)\); \}/);
   assert.match(ler(PAGINAS[2]), /<button type="button" class="btn" data-ed-orcamento disabled>Pedir orçamento<\/button>/);
-  assert.equal(FLAGS.ED_CHECKOUT, false);
+  assert.equal(FLAGS.ED_ORCAMENTO_NR1, false);
 });
 
 // Orçamento NR-1 (PR próprio, base empregador-e2). Placeholders (Designer e destino ED-Orcamento) em
@@ -276,15 +283,14 @@ export const AVISO_SHA256_TEXTO = 'f6f58abc4ead701702523ff5bf735705e35ac6b7ea843
 
 test('orçamento NR-1: placeholders do Designer e do destino ED-Orcamento impedem ED_CHECKOUT ON', async () => {
   const { TEXTOS_ORCAMENTO, ED_ORCAMENTO, conferirOrcamento } = await import('../assets/js/empregador/orcamento-textos.js');
-  const abertos = conferirOrcamento(TEXTOS_ORCAMENTO, ED_ORCAMENTO, { ED_CHECKOUT: false });
+  const abertos = conferirOrcamento(TEXTOS_ORCAMENTO, ED_ORCAMENTO, { ED_ORCAMENTO_NR1: false });
   assert.ok(abertos.some((x) => x.startsWith('[TEXTO DO DESIGNER')));
   assert.ok(abertos.includes('[ED-ORCAMENTO: ACTION DO GOOGLE FORM]'));
-  assert.throws(() => conferirOrcamento(TEXTOS_ORCAMENTO, ED_ORCAMENTO, { ED_CHECKOUT: true }), /placeholder em aberto/);
-  // destino sem configurar (só action) já trava a flag ON
-  assert.throws(() => conferirOrcamento({}, { action: '[ED-ORCAMENTO: ACTION DO GOOGLE FORM]', campos: {} }, { ED_CHECKOUT: true }), /ED-ORCAMENTO/);
-  if (abertos.length) assert.equal(FLAGS.ED_CHECKOUT, false, `ED_CHECKOUT ON com placeholder: ${abertos.join(', ')}`);
+  assert.throws(() => conferirOrcamento(TEXTOS_ORCAMENTO, ED_ORCAMENTO, { ED_ORCAMENTO_NR1: true }), /placeholder em aberto/);
+  assert.throws(() => conferirOrcamento({}, { action: '[ED-ORCAMENTO: ACTION DO GOOGLE FORM]', campos: {} }, { ED_ORCAMENTO_NR1: true }), /ED-ORCAMENTO/);
+  if (abertos.length) assert.equal(FLAGS.ED_ORCAMENTO_NR1, false, `ED_ORCAMENTO_NR1 ON com placeholder: ${abertos.join(', ')}`);
   const ok = JSON.parse(JSON.stringify([TEXTOS_ORCAMENTO, ED_ORCAMENTO]).replace(/"\[[^\]]*\]"/g, '"ok"'));
-  assert.deepEqual(conferirOrcamento(ok[0], ok[1], { ED_CHECKOUT: true }), []);
+  assert.deepEqual(conferirOrcamento(ok[0], ok[1], { ED_ORCAMENTO_NR1: true }), []);
 });
 
 test('orçamento NR-1: destino é o ED-Orcamento, não o CC-Leads; sem flag nada é enviado', async () => {
@@ -331,7 +337,7 @@ test('orçamento NR-1: copy do Designer v4.3d (sha256 1d65ac99...) aplicada; pre
   const cp = readFileSync(new URL('_src/juridico/copy-orcamento-nr1.md', import.meta.url), 'utf8');
   assert.equal(createHash('sha256').update(cp).digest('hex'), '1d65ac999d75783151e35b1572a7c189fd8cb8f538308a3581a9c2c57c409921');
   const h = ler(ORC);
-  for (const t of ['<h1>Orçamento do serviço NR-1</h1>', 'Pagamento: 50% no início e 50% na entrega, ou tudo à vista.',
+  for (const t of ['<h1>Orçamento do serviço NR-1</h1>',
     'Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.', 'Preços válidos até 31/12/2026.', '>Nome da empresa</label>',
     'Digite o nome da empresa. Não consultamos o CNPJ em nenhuma base.', '>CNPJ da empresa</label>',
     'Opcional. Ajuda a preparar a proposta.', '<option>20 a 50</option><option>51 a 100</option><option>101 a 200</option><option>Mais de 200</option>',

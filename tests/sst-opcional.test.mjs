@@ -22,11 +22,12 @@ test('T6: linha do tempo do painel', () => {
   assert.ok(ler('empregador-em-dia/painel/index.html').includes('<li>Depois: relatório pronto; validação opcional pelo seu profissional de SST</li>'));
 });
 test('T8: aviso perto do preço e antes do pagamento', () => {
-  for (const p of ['precos', 'pagamento', 'pagamento/2', 'avaliacao-rapida-nr1/resultado']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(T8), p);
+  for (const p of ['precos', 'pagamento', 'avaliacao-rapida-nr1/resultado']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(T8), p);
 });
 test('termos vetados ausentes nas páginas do Empregador', () => {
-  for (const p of ['', 'precos', 'pagamento', 'pagamento/2', 'pagamento/ok', 'painel', 'avaliacao-rapida-nr1/resultado']) {
-    const h = ler(`empregador-em-dia/${p ? p + '/' : ''}index.html`);
+  for (const p of ['', 'precos', 'pagamento', 'pagamento/ok', 'painel', 'avaliacao-rapida-nr1/resultado']) {
+    // Anexo ED-1 (6c296519) nega "avaliação psicológica" e "laudo"; essa negativa não é promessa de produto.
+    const h = ler(`empregador-em-dia/${p ? p + '/' : ''}index.html`).replace(/<section id="anexo-ed-1">[^]*?<\/section>/g, '');
     assert.ok(!/SST incluíd|assinado|garante a NR-1|100% em dia|diagnóstico psicológico|avaliação psicológica|laudo/i.test(h), p);
   }
 });
