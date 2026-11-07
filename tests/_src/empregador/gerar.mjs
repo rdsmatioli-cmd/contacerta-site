@@ -284,7 +284,7 @@ pagina({
 <p>Serviço: ${NOME_PRODUTO}</p>
 <p>Faixa: 20 a 50 empregados, até 4 grupos ou setores</p>
 <p>Preço: R$ 1.490,00 à vista</p>
-<p>Forma de pagamento: cartão de crédito, Pix ou boleto, à vista, pelo link de pagamento da Stripe</p>
+<p>Forma de pagamento: cartão de crédito ou Pix, à vista, pelo link de pagamento da Stripe</p>
 <p><a href="${LINK_TERMOS_VENDA}">Termos de Uso, item 6</a></p>
 <p data-ed-validade>Preços válidos até 31/12/2026.</p>
 <p class="ed-aviso-sst">O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.</p></section>
@@ -310,7 +310,7 @@ pagina({
   conteudo: `<section data-ed-e3="checkout" id="ed-pg-ok">
 <h1>Pedido recebido.</h1>
 <p>A Stripe envia o recibo para o e-mail que você informou. Se não chegar em alguns minutos, confira a caixa de spam.</p>
-<p>Se você pagou por boleto, o pedido fica em processamento até a Stripe confirmar o pagamento, o que pode levar até 1 dia útil após o pagamento. Confirmaremos por e-mail quando a Stripe confirmar; os prazos contam dessa confirmação.</p>
+<p>Se você pagou com Pix, a compra é confirmada quando a Stripe confirmar o pagamento, normalmente em instantes. Confirmaremos por e-mail; os prazos contam dessa confirmação.</p>
 <h2>Próximos passos</h2>
 <p>1. Após a confirmação do pagamento pela Stripe, pedimos por e-mail o CNPJ e, se necessário, somente o total de empregados ativos na data da compra. Não envie CPF ou dados individuais de trabalhadores.</p>
 <p>2. A emissão da nota é prevista para até 1 dia útil após a confirmação do pagamento, se os dados fiscais necessários estiverem disponíveis e corretos e a empresa for elegível. Sem o CNPJ, a faixa confirmada e a nota emitida corretamente, não iniciamos o serviço. Se a nota não puder ser emitida corretamente até o primeiro limite entre 3 dias úteis após a confirmação do pagamento e o encerramento do mês dessa confirmação, às 23h59 no horário de Brasília (America/Sao_Paulo, UTC-3), cancelamos a compra e providenciamos estorno integral na forma do item 6.16 dos Termos, sem pedido seu.</p>
