@@ -264,6 +264,10 @@ pagina({
 <p>Você pode pedir confirmação, acesso, correção, cópia, exclusão e informação sobre com quem compartilhamos seus dados (LGPD, art. 18). Escreva para contato@contacertabr.com.br.</p>
 <p>Mais detalhes na nossa Política de Privacidade: <a href="/privacidade/">https://contacertabr.com.br/privacidade/</a></p></section>
 <p class="campo-msg" id="ct-msg" role="alert" hidden></p>
+<p>Faixa: 20 a 50 empregados, até 4 grupos ou setores</p>
+<p>Preço: R$ 1.490,00 à vista</p>
+<p>${INICIO_SERVICO}</p>
+<p>${PRAZO_RELATORIO}</p>
 <button type="submit" disabled class="btn">Continuar para pagamento</button>
 </form>`,
 });

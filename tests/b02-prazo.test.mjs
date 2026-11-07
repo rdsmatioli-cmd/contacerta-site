@@ -15,4 +15,24 @@ test('B-02: prazo literal na oferta e nos termos', () => {
   assert.ok(termos.includes(PRAZO_RELATORIO));
   assert.ok(!termos.includes('o prazo do item d recomeça'));
   assert.ok(!termos.includes('definido no contrato, após o questionário'));
+  const velho = [
+    'Prazo estimado de entrega',
+    'meta de respostas atingida',
+    'relatório em até 5 dias úteis',
+    'questionário em 1 dia útil',
+    '5 dias úteis contados do recebimento',
+    '5 dias úteis após o pagamento',
+    '5 dias úteis após o recebimento',
+  ];
+  for (const p of [
+    'termos/index.html',
+    'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html',
+    'empregador-em-dia/pagamento/index.html',
+    'empregador-em-dia/pagamento/ok/index.html',
+    'empregador-em-dia/contratar/index.html',
+  ]) {
+    const h = ler(p);
+    assert.ok(h.includes(PRAZO_RELATORIO), p);
+    for (const t of velho) assert.ok(!h.includes(t), `${p}: ${t}`);
+  }
 });
