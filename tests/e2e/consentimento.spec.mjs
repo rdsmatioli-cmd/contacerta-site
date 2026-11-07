@@ -95,7 +95,9 @@ test('home: Aceitar medição sem a caixa de transferência não pede o Google',
   await expect(banner(page).locator('[data-lcmc-transferencia]')).not.toBeChecked();
   await banner(page).locator('[data-lcmc="aceitar"]').click();
   await expect(banner(page)).toBeVisible();
-  await expect(banner(page).locator('#lcmc-nota')).toContainText('Recusar não exige caixa marcada');
+  const nota = banner(page).locator('#lcmc-nota');
+  await expect(nota).toContainText('Recusar não exige caixa marcada');
+  expect(await nota.evaluate((el) => { const r = el.getBoundingClientRect(); return r.height > 0 && r.top >= 0 && r.bottom <= window.innerHeight; })).toBe(true);
   expect(await page.evaluate(() => localStorage.getItem('lcm-consent'))).toBeNull();
   await semGoogle(page, rede, 'depois de Aceitar medição sem a autorização de transferência');
   semErros(erros, rede);
@@ -108,6 +110,7 @@ test('home: Configurar preferências não inicia o GA4; salvar as duas desmarcad
   const medicao = banner(page).locator('[data-lcmc-medicao]');
   await expect(medicao).toBeVisible();
   await expect(medicao).not.toBeChecked();
+  expect(await banner(page).locator('#lcmc-prefs').evaluate((el) => { const r = el.getBoundingClientRect(); return r.height > 0 && r.top >= 0 && r.bottom <= window.innerHeight; })).toBe(true);
   const alvos = await banner(page).locator('#lcmc-prefs .lcmc-opcao, #lcmc-prefs .lcmc-btn').evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().height)));
   expect(alvos.length).toBe(3);
   for (const h of alvos) expect(h).toBeGreaterThanOrEqual(44);

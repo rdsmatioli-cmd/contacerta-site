@@ -221,9 +221,9 @@
     prefs.appendChild(acoesPrefs);
 
     var scroll = el('div', { 'class': 'lcmc-scroll' });
-    scroll.appendChild(h); scroll.appendChild(p); scroll.appendChild(destaque); scroll.appendChild(nota); scroll.appendChild(prefs);
+    scroll.appendChild(h); scroll.appendChild(p); scroll.appendChild(destaque);
     var fixo = el('div', { 'class': 'lcmc-fixo' });
-    fixo.appendChild(acoes); fixo.appendChild(configurar);
+    fixo.appendChild(nota); fixo.appendChild(acoes); fixo.appendChild(configurar); fixo.appendChild(prefs);
     banner.appendChild(scroll); banner.appendChild(fixo);
     banner.setAttribute('aria-describedby', 'lcmc-texto');
     banner.addEventListener('click', function (e) {
@@ -237,6 +237,7 @@
       } else if (acao === 'configurar') {
         nota.hidden = true;
         prefs.hidden = false;
+        ver(destaque);
         if (caixaMed) caixaMed.focus({ preventScroll: true });
       } else if (acao === 'salvar') {
         aplicar(caixaMed.checked === true, caixaTransf.checked === true);
@@ -246,9 +247,17 @@
     (d.body || d.documentElement).appendChild(banner);
     return banner;
   }
+  function ver(el) {
+    var pane = banner && banner.querySelector('.lcmc-scroll');
+    if (!pane || !el) return;
+    var er = el.getBoundingClientRect();
+    var pr = pane.getBoundingClientRect();
+    if (er.top < pr.top || er.bottom > pr.bottom) pane.scrollTop += er.top - pr.top;
+  }
   function mostrarNota() {
     nota.hidden = false;
     nota.textContent = NOTA_ACEITE;
+    ver(banner.querySelector('.lcmc-destaque'));
     nota.focus({ preventScroll: true });
   }
   function aplicar(medicao, transferencia) {

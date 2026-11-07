@@ -26,7 +26,7 @@ const lcm = readFileSync(new URL('../assets/lcm-consent.js', import.meta.url));
 const med = readFileSync(new URL('../assets/js/medicao.js', import.meta.url), 'utf8');
 const priv = readFileSync(new URL('../privacidade/index.html', import.meta.url), 'utf8');
 test('componente lcm-consent.js é o AVISO-COOKIES-1.1 publicado neste SHA', () => {
-  assert.equal(createHash('sha256').update(lcm).digest('hex'), '2ba1f1fb82a45965e1d1ff8452bf71fbde77c064b091b5eae5a43c6d594dee2a');
+  assert.equal(createHash('sha256').update(lcm).digest('hex'), 'cdc2ef9d4267f071cd77b3ca9280c8142d40159b3a2c10f0a5b08cd54e71bdfa');
 });
 test('página usa o componente; nenhum gtag inline nem anonymize_ip', () => {
   assert.match(html, /<script src="\/assets\/lcm-consent\.js\?v=[0-9a-f]+" defer data-ga4="G-D9PCMD9Q2H" data-marca="Conta Certa"[^>]*data-validade-dias="183" data-chaves-legadas="cc-consent-v1" data-eventos="calculo_concluido,cta_click" data-params="calculadora,destino"><\/script>/);

@@ -28,10 +28,10 @@
   .lcmc-destaque{background:#2a2416;border-color:#eef2f7;color:#eef2f7}
   .lcmc-opcao input{accent-color:#eef2f7}
   .lcmc-nota{background:#3a3218;color:#eef2f7;border-color:#eef2f7}}
-/* No celular o aviso não cobre a página: o texto rola e Aceitar/Recusar ficam sempre à vista. */
+/* No celular o texto rola e a nota, os botões e a camada de preferências ficam fora dessa rolagem. */
 @media (max-width:720px){
-  .lcmc{left:8px;right:8px;bottom:8px;max-height:38vh;display:flex;flex-direction:column;overflow:hidden;padding:12px}
-  .lcmc-scroll{overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
+  .lcmc{left:8px;right:8px;bottom:8px;max-height:70vh;display:flex;flex-direction:column;overflow:hidden;padding:12px}
+  .lcmc-scroll{overflow-y:auto;min-height:0;max-height:22vh;-webkit-overflow-scrolling:touch}
   .lcmc-fixo{flex:none;background:var(--lcmc-bg,#ffffff);padding-top:8px}
 }
 @media (max-width:420px){.lcmc{left:8px;right:8px;bottom:8px}}
