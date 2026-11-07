@@ -54,7 +54,7 @@ test('obrigado/: em /licitacoes/obrigado/ (não em assinar/obrigado/), sem link 
   const h = ler(PAGINA_OBRIGADO);
   assert.deepEqual(hrefsStripe(h), []);
   assert.ok(h.includes('mailto:contato@contacertabr.com.br'));
-  assert.doesNotMatch(h, /[Pp]agamento (recebido|confirmado)|sessionStorage/, 'vedado (ADV 4e6fa371, 4decb25a)');
+  assert.doesNotMatch(h.replace('depende do respectivo pagamento confirmado', ''), /[Pp]agamento (recebido|confirmado)|sessionStorage/, 'vedado (ADV 4e6fa371, 4decb25a); exceção: literal L10 do ADV 47da365a');
 });
 test('home do /licitacoes/ tem CTA para assinar/', () => assert.ok(ler('licitacoes/index.html').includes('href="assinar/"')));
 test('Termos 1.5 (cobranca/): sem "indisponível", aceite versão 1.5, links de compra só da config', () => {
@@ -88,7 +88,7 @@ test('guarda de sandbox: URL test_ falha, URL live e vazio passam (autoteste)', 
 // Adendo ADV A-2 fd1fc8e6 + corte mensal (DEC CPO c50de42a; adendo ADV 9efa7cf6): aviso literal antes de cada link.
 test('assinar/: aviso A-2 antes de cada produto; corte mensal nas 3 páginas', () => {
   const h = ler(PAGINA_ASSINAR);
-  for (const k of NA_PAGINA) assert.match(h, new RegExp(`<p class="aviso-fiscal">Depois da confirmação do pagamento, a Conta Certa enviará um e-mail pedindo o CNPJ da empresa\\.[^<]*</p>\\n<p class="compra" data-produto="${k}">`), k);
+  for (const k of NA_PAGINA) assert.match(h, new RegExp(`<p class="aviso-fiscal">Depois da confirmação do pagamento pela Stripe, a Conta Certa enviará um e-mail pedindo o CNPJ da empresa\\.[^<]*</p>\\n<p class="compra" data-produto="${k}">`), k);
   const corte = 'o encerramento do mês dessa confirmação, às 23h59 no horário de Brasília (America/Sao_Paulo, UTC-3)';
   assert.equal(h.split(corte).length - 1, 3);
   assert.equal(ler(PAGINA_OBRIGADO).split(corte).length - 1, 1);
