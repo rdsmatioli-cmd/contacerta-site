@@ -51,6 +51,6 @@ export const ESCALA_5 = Object.freeze(['Nunca', 'Raramente', 'Às vezes', 'Frequ
 export const NOTA_DOMESTICO = 'Para empregado doméstico, a lei específica (LC 150/2015) ainda fala em 44 horas, mas a Emenda Constitucional 141/2026 também vale para ele.';
 // E3: modo link. A URL fica vazia até o follow-up; sem ela o botão de pagamento não aparece.
 export const ED_PAGAMENTO_MODO = 'link';
-export const ED_PAYMENT_LINK_20_50 = '';
+export const ED_PAYMENT_LINK_20_50 = 'https://buy.stripe.com/28EeV6eVmfsieB78VP5gc02';
 export const ED_PAYMENT_LINKS = Object.freeze({ '20-50': ED_PAYMENT_LINK_20_50 });
 export const LIMIAR_ANALISE = 0.7;

@@ -1,7 +1,7 @@
 // Textos do checkout do Empregador em Dia. Literais do Advogado (parecer 4e6fa371, adendo fiscal 1ce8ee4e,
 // coleta agregada af5f88a4, A-2 9be42c06, Anexo ED-1 6c296519). A URL de pagamento fica em config.js e começa vazia.
 // A linha de fornecedores da caixa (ImprovMX/Gmail) do parecer 6c296519 não entra na Política: publicação condicionada a anexo de fornecedores que o site não tem.
-import { FLAGS, ED_PAGAMENTO_MODO, ED_PAYMENT_LINKS } from './config.js?v=f7cf376197';
+import { FLAGS, ED_PAGAMENTO_MODO, ED_PAYMENT_LINKS } from './config.js?v=610f1536e3';
 
 export const NOME_PRODUTO = 'Empregador em Dia — avaliação rápida NR-1';
 export const VERSAO_TERMOS = 'TERMOS-EMPREGADOR-1.2';
