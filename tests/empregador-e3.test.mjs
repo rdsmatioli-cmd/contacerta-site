@@ -210,4 +210,12 @@ test('6.16: prazo de 5 dias úteis e sem prazo antigo de transferência', () => 
   assert.ok(!juntos.includes('1 dia útil após recebê-los'));
   assert.ok(!juntos.includes('2 dias úteis após recebê-los'));
   assert.ok(!juntos.includes('pelo mesmo meio de pagamento, sem pedido seu'));
+  const ed = [ler('termos/index.html'), ler('privacidade/index.html')];
+  const andar = (dir) => { for (const n of readdirSync(join(raiz, dir))) {
+    const p = join(dir, n); const st = statSync(join(raiz, p));
+    if (st.isDirectory()) andar(p); else if (/\.(html|js|mjs)$/.test(n)) ed.push(ler(p));
+  } };
+  andar('empregador-em-dia');
+  andar('assets/js/empregador');
+  assert.ok(!ed.join('\n').toLowerCase().includes('boleto'));
 });

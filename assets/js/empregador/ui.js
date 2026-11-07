@@ -2,7 +2,7 @@
 import { FLAGS, ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, SST_TEXTO_OPCIONAL, FAIXAS, NOTA_DOMESTICO, ED_PAYMENT_LINKS, LIMIAR_ANALISE } from './config.js?v=f7cf376197';
 import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=2d26f7edf2';
 import { destino, oferta, pontosAtencao, textoPgr, validarPasso, faixaPorId, jornada, andamento } from './motor.js?v=a927c8d432';
-import { ctaCheckoutLiberado, urlDoLink } from './textos-checkout.js?v=22e64926e3';
+import { ctaCheckoutLiberado, urlDoLink } from './textos-checkout.js?v=ff83def15d';
 
 const CHAVE = 'ed-diagnostico';
 const brl = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: v % 1 ? 2 : 0 }).replace(/\s/g, ' ');
