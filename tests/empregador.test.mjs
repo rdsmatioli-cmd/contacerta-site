@@ -50,7 +50,8 @@ test('T01 CA1 + NB-05: indexação conforme a DEC; sitemap só com as indexávei
 
 test('termos NR-1 proibidos e "se aprovada"/44h-divisor fora das páginas', () => {
   for (const p of PAGINAS) {
-    const h = ler(p).toLowerCase();
+    // O Anexo ED-1 nega esses termos ("não é diagnóstico... avaliação psicológica, laudo"); fora dele continuam proibidos.
+    const h = ler(p).replace(/<section id="anexo-ed-1">[^]*?<\/section>/g, '').toLowerCase();
     for (const t of ['diagnóstico psicológico', 'diagnostico psicologico', 'avaliação psicológica', 'avaliacao psicologica', 'laudo', 'se aprovada', '÷ 220', '44h']) {
       assert.ok(!h.includes(t), `${p}: ${t}`);
     }
@@ -194,7 +195,11 @@ test('P-08: [PRAZO] com o texto literal do parecer; placeholder trava com a flag
 });
 
 test('trava de produção: nenhuma página publicada com placeholder entre colchetes', () => {
-  for (const p of PAGINAS) assert.deepEqual(placeholdersAbertos(ler(p).replace(/<script[^]*?<\/script>/g, '')), [], p);
+  for (const p of PAGINAS) {
+    // O aviso entre colchetes fica só dentro do Anexo ED-1 (parecer 6c296519): é modelo da empregadora, não campo do site.
+    const html = ler(p).replace(/<script[^]*?<\/script>/g, '').replace(/<section id="anexo-ed-1">[^]*?<\/section>/g, '');
+    assert.deepEqual(placeholdersAbertos(html), [], p);
+  }
 });
 
 test('S-03: aviso de privacidade com fonte >= 14 px e sem corte', () => {
@@ -248,7 +253,7 @@ test('PR #36 revisões: textos literais travados nas páginas', () => {
 
 // CEO/CPO 28/10: "diagnóstico" sai dos títulos e do slug; a URL antiga nunca foi publicada (sem 301).
 test('Avaliação rápida NR-1: slug novo, nenhuma menção a "diagnóstico" nas páginas e no JS', () => {
-  for (const p of PAGINAS) assert.doesNotMatch(ler(p), /diagn[oó]stic/i, p);
+  for (const p of PAGINAS) assert.doesNotMatch(ler(p).replace(/<section id="anexo-ed-1">[^]*?<\/section>/g, ''), /diagn[oó]stic/i, p);
   assert.doesNotMatch(readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8'), /\/diagnostico\//);
   assert.ok(!existsSync(new URL('../empregador-em-dia/diagnostico/', import.meta.url)));
   assert.match(ler(PAGINAS[1]), /<title>Avaliação rápida NR-1: o que sua empresa precisa \| Empregador em Dia<\/title>/);

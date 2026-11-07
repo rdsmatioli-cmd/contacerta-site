@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { FAIXAS, FLAGS } from '../../../assets/js/empregador/config.js';
-import { ctaCheckoutLiberado, TEXTO_ACEITE, LINHA_ANTES_STRIPE, LINK_TERMOS_VENDA, NOME_PRODUTO } from '../../../assets/js/empregador/textos-checkout.js';
+import { ctaCheckoutLiberado, TEXTO_ACEITE, LINHA_ANTES_STRIPE, LINK_TERMOS_VENDA, NOME_PRODUTO, htmlAnexoEd1, INICIO_SERVICO, PRAZO_RELATORIO, ARREPENDIMENTO_ED1 } from '../../../assets/js/empregador/textos-checkout.js';
 
 const raiz = fileURLToPath(new URL('../../../', import.meta.url));
 const molde = readFileSync(join(raiz, 'tabelas-oficiais-2026/obrigado/index.html'), 'utf8');
@@ -135,7 +135,8 @@ pagina({
 <ul class="ed-cartoes"><li><strong>Seu porte</strong><span data-ed="porte"></span></li><li><strong>Pontos de atenção</strong><span data-ed="pontos"></span></li><li><strong>PGR</strong><span data-ed="pgr"></span></li></ul>
 <div class="ed-oferta"><h2>${NOME_PRODUTO} para <span data-ed="porte2"></span></h2><p class="ed-preco" data-ed="preco"></p><p data-ed="parcelas"></p><p data-ed-validade>Preços válidos até 31/12/2026.</p><p class="ed-sst" data-ed-sst></p><p class="ed-aviso-sst">O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.</p>
 <p><button type="button" class="btn" data-ed-contratar hidden disabled>Contratar</button></p></div>
-<p>Prazo estimado de entrega: 5 dias úteis após o pagamento confirmado e o encerramento do questionário (meta de respostas atingida)</p></section>
+<p>${INICIO_SERVICO}</p>
+<p>${PRAZO_RELATORIO}</p></section>
 <section data-ed-res="em-breve" hidden><h1>Em breve</h1></section>
 <section data-ed-res="simplificada" hidden><h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>
 <p>MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.</p>
@@ -283,6 +284,7 @@ pagina({
 <p><a href="${LINK_TERMOS_VENDA}">Termos de Uso, item 6</a></p>
 <p data-ed-validade>Preços válidos até 31/12/2026.</p>
 <p class="ed-aviso-sst">O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.</p></section>
+${htmlAnexoEd1()}
 <label class="ed-op"><input type="checkbox" name="aceite" data-ed-aceite required> ${TEXTO_ACEITE}</label>
 <p class="campo-msg" id="pg-msg" role="alert" hidden></p>
 <p>${LINHA_ANTES_STRIPE}</p>
@@ -308,8 +310,8 @@ pagina({
 <p>1. Após a confirmação do pagamento pela Stripe, pedimos por e-mail o CNPJ e, se necessário, somente o total de empregados ativos na data da compra. Não envie CPF ou dados individuais de trabalhadores.</p>
 <p>2. A emissão da nota é prevista para até 1 dia útil após a confirmação do pagamento, se os dados fiscais necessários estiverem disponíveis e corretos e a empresa for elegível. Sem o CNPJ, a faixa confirmada e a nota emitida corretamente, não iniciamos o serviço. Se a nota não puder ser emitida corretamente até o primeiro limite entre 3 dias úteis após a confirmação do pagamento e o encerramento do mês dessa confirmação, às 23h59 no horário de Brasília (America/Sao_Paulo, UTC-3), cancelamos a compra e providenciamos estorno integral pela Stripe, sem pedido seu.</p>
 <p>3. Com a nota emitida e a elegibilidade confirmada, enviamos por e-mail em até 1 dia útil o kit e as instruções para aplicação interna pela empregadora. A LCM só recebe arquivo novo de resultados agregados e protegidos, nunca respostas individuais. Google Forms não é utilizado nesta modalidade.</p>
-<p>4. Confirmamos o recebimento dos resultados agregados em até 1 dia útil. O relatório é enviado por e-mail em até 5 dias úteis após o recebimento completo dos resultados agregados utilizáveis, conforme o modelo e as condições contratadas, sem alteração unilateral dos seus direitos.</p>
-<p>Desistência: você pode desistir em até 7 dias, com estorno integral, escrevendo para <a href="mailto:contato@contacertabr.com.br">contato@contacertabr.com.br</a>.</p>
+<p>4. ${PRAZO_RELATORIO}</p>
+${ARREPENDIMENTO_ED1.map((p) => '<p>' + p + '</p>').join('\n')}
 <p>Dúvidas: <a href="mailto:contato@contacertabr.com.br">contato@contacertabr.com.br</a>. Atendimento só por e-mail.</p>
 <p>Condições de venda: <a href="${LINK_TERMOS_VENDA}">Termos de Uso, item 6</a> · <a href="/privacidade/">Política de Privacidade</a></p>
 </section>`,

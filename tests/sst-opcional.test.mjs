@@ -26,7 +26,8 @@ test('T8: aviso perto do preço e antes do pagamento', () => {
 });
 test('termos vetados ausentes nas páginas do Empregador', () => {
   for (const p of ['', 'precos', 'pagamento', 'pagamento/ok', 'painel', 'avaliacao-rapida-nr1/resultado']) {
-    const h = ler(`empregador-em-dia/${p ? p + '/' : ''}index.html`);
+    // Anexo ED-1 (6c296519) nega "avaliação psicológica" e "laudo"; essa negativa não é promessa de produto.
+    const h = ler(`empregador-em-dia/${p ? p + '/' : ''}index.html`).replace(/<section id="anexo-ed-1">[^]*?<\/section>/g, '');
     assert.ok(!/SST incluíd|assinado|garante a NR-1|100% em dia|diagnóstico psicológico|avaliação psicológica|laudo/i.test(h), p);
   }
 });

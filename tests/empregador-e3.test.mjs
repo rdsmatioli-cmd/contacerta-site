@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { FLAGS, FAIXAS, ED_PAGAMENTO_MODO, ED_PAYMENT_LINK_20_50, ED_PAYMENT_LINKS, LIMIAR_ANALISE } from '../assets/js/empregador/config.js';
-import { ctaCheckoutLiberado, linkDePagamentoValido, urlDoLink, TEXTO_OK_PAGINA, VERSAO_TERMOS } from '../assets/js/empregador/textos-checkout.js';
+import { ctaCheckoutLiberado, linkDePagamentoValido, urlDoLink, TEXTO_OK_PAGINA, VERSAO_TERMOS, ARREPENDIMENTO_ED1, htmlAnexoEd1, PRAZO_RELATORIO } from '../assets/js/empregador/textos-checkout.js';
 import { cnpjValido, formatarCnpj, pagamento, andamento } from '../assets/js/empregador/motor.js';
 
 const raiz = new URL('../', import.meta.url).pathname;
@@ -127,9 +127,10 @@ test('M-03/M-04/M-05: aviso LGPD em contratar e pagamento; Me avise com consenti
   for (const p of ['empregador-em-dia/index.html', ...E3]) assert.ok(ler(p).includes('RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20'), p);
 });
 
-test('G-3 NR-1 9f7f0070: prazo do resultado definido no contrato', () => {
+test('G-3 NR-1 9f7f0070: prazo do resultado é o literal do Anexo ED-1', () => {
   const h = readFileSync(new URL('../empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', import.meta.url), 'utf8');
-  assert.ok(h.includes('Prazo estimado de entrega: 5 dias úteis após o pagamento confirmado e o encerramento do questionário (meta de respostas atingida)'));
+  assert.ok(h.includes(PRAZO_RELATORIO));
+  assert.ok(!h.includes('Prazo estimado de entrega'));
   assert.ok(!h.includes('profissional de SST após o questionário'));
   assert.ok(!h.includes('conforme contratado pelo estabelecimento'));
 });
@@ -160,4 +161,34 @@ test('link vazio ou de teste não libera o botão; constante commitada sem /test
     const h = ler(`empregador-em-dia/${p}/index.html`);
     assert.ok(!/<(input|select|textarea)\b[^>]*\bname="cnpj"/i.test(h), p);
   }
+});
+
+test('Anexo ED-1 visível antes do botão; aceite obrigatório; arrependimento = §6', () => {
+  const norm = (s) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const esperado = norm(ARREPENDIMENTO_ED1.join('\n'));
+  const proibido = /7 dias[\s\S]{0,80}?do pagamento/;
+  const pag = ler('empregador-em-dia/pagamento/index.html');
+  const anexo = htmlAnexoEd1();
+  assert.ok(pag.includes(anexo));
+  assert.ok(pag.indexOf('id="anexo-ed-1"') < pag.indexOf('data-ed-pagar'));
+  assert.match(pag, /name="aceite"[^>]*required/);
+  assert.ok(pag.includes('TERMOS-EMPREGADOR-1.2'));
+  const termos = ler('termos/index.html');
+  const item = termos.slice(termos.indexOf('id="empregador-em-dia"'), termos.indexOf('<h2>7. Legislação</h2>'));
+  assert.ok(item.includes(anexo));
+  assert.ok(item.includes('Versão: TERMOS-EMPREGADOR-1.2 · Data: 07/11/2026'));
+  const a = item.indexOf(ARREPENDIMENTO_ED1[0]);
+  const b = item.indexOf('6.8 Cancelamento');
+  assert.equal(norm(item.slice(a, b)), esperado);
+  const ok = ler('empregador-em-dia/pagamento/ok/index.html');
+  const c = ok.indexOf(ARREPENDIMENTO_ED1[0]);
+  const d = ok.indexOf('Dúvidas:');
+  assert.equal(norm(ok.slice(c, d)), esperado);
+  for (const p of ['termos/index.html', 'empregador-em-dia/pagamento/index.html', 'empregador-em-dia/pagamento/ok/index.html']) {
+    assert.doesNotMatch(ler(p), proibido, p);
+    assert.doesNotMatch(ler(p), /mesmo dia útil ou/, p);
+    assert.doesNotMatch(ler(p), /contados do pagamento/, p);
+  }
+  assert.match(item, /até o dia útil seguinte ao cancelamento/);
+  assert.match(item, /até o dia útil seguinte à constatação/);
 });
