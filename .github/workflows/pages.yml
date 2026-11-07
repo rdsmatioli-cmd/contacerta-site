@@ -42,6 +42,9 @@ jobs:
             echo "saída inesperada da trava; publicação barrada."
             exit 1
           fi
+      # DEC CEO 06/11 20h24: /licitacoes/assinar/ não publica link de pagamento de sandbox (/test_); slot vazio publica "em breve".
+      - name: Trava dos links de pagamento do Licitações (sem /test_)
+        run: LINKS_PAGAMENTO_PRODUCAO=1 node --test tests/pagamento-links.test.mjs
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       # Só o conteúdo do site: os mesmos arquivos que o Pages legado serve hoje, sem tests, node_modules, .github,
       # .git e os arquivos de configuração (.gitattributes, .htmlvalidate.json, .nvmrc). Mantém .nojekyll e CNAME.
@@ -61,6 +64,9 @@ jobs:
             echo '/empregador-em-dia/ no artefato com DEPLOY_EMPREGADOR=0'; exit 1
           fi
           echo "DEPLOY_EMPREGADOR=$DEPLOY_EMPREGADOR; /empregador-em-dia/ no artefato: $([ -e "$RUNNER_TEMP/_site/empregador-em-dia" ] && echo sim || echo não)"
+      # DEC CEO 06/11 20h50: links de pagamento do Licitações vêm só da constante (tests/config-pagamento-links.mjs).
+      - name: Links de pagamento do Licitações no _site
+        run: node tests/manutencao/licitacoes-links-pagamento.mjs "$RUNNER_TEMP/_site"
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: ${{ runner.temp }}/_site

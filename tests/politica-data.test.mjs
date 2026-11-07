@@ -6,7 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { PUBLICACAO_LICITACOES } from './publicacao-licitacoes.mjs';
+import { PUBLICACAO_LICITACOES, PUBLICACAO_TERMOS_LICITACOES } from './publicacao-licitacoes.mjs';
 
 // DEC CPO (a) (A-PR35-14, 26/10/2026): as 3 datas (política, pílula e item 12 do aviso) e a dos Termos ficam como
 // [DATA DE PUBLICAÇÃO] até o commit do deploy; vermelho só por esse placeholder é aceito antes do deploy, sem bump diário.
@@ -115,7 +115,7 @@ test('errosDatas: placeholder falha sempre; data != hoje só quando exigida', ()
 
 test('licitações: Termos = PUBLICACAO_LICITACOES, sem placeholder', () => {
   const paginas = Object.fromEntries(PAGINAS_TRAVADAS.map((p) => [p, ler(p)]));
-  const { erros } = travaLicitacoes({ publicacao: PUBLICACAO_LICITACOES, paginas });
+  const { erros } = travaLicitacoes({ publicacao: PUBLICACAO_TERMOS_LICITACOES, paginas });
   assert.deepEqual(erros, [], erros.join('\n'));
 });
 
