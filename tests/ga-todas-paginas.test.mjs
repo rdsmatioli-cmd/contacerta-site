@@ -2,7 +2,7 @@
 // não só para a NR-1 (nr1-m01.test.mjs). Varre recursivamente todo *.html (fora .git e a verificação
 // google*.html, o mesmo escopo do html-validate no CI):
 // - nenhuma página carrega o Google por conta própria (gtag(, googletagmanager, google-analytics, dataLayer, anonymize_ip);
-// - fora de /licitacoes/, o GA4 só entra pelo componente lcm-consent (ac527630), uma única vez, e a página
+// - fora de /licitacoes/, o GA4 só entra pelo componente lcm-consent (AVISO-COOKIES-1.1), uma única vez, e a página
 //   tem o botão para rever a escolha;
 // - /licitacoes/ promete "sem ferramentas de análise": nada de lcm-consent, data-ga4, ID de medição nem
 //   script de outro domínio, e a CSP da página só aceita script do próprio site.
