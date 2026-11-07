@@ -1,6 +1,7 @@
-/* lcm-consent.css v1.0.0 - aviso de cookies LCM (sem dependencias externas).
-   Paridade visual Aceitar/Recusar (G-06): os dois botoes usam a MESMA classe .lcmc-btn,
-   mesmo tamanho, mesma cor de fundo, na mesma linha. Proibido transformar Recusar em link de texto. */
+/* lcm-consent.css v1.1.0 - aviso de cookies LCM (sem dependencias externas).
+   Paridade visual Aceitar medicao/Recusar (G-06): os dois botoes usam a MESMA classe .lcmc-btn,
+   mesmo tamanho, mesma cor de fundo, na mesma linha. Proibido transformar Recusar em link de texto.
+   Configurar preferencias e a camada de preferencias ficam visiveis, com alvo de toque >= 44px. */
 .lcmc{position:fixed;left:16px;right:16px;bottom:16px;z-index:2147483000;max-width:760px;margin:0 auto;
   background:var(--lcmc-bg,#ffffff);color:var(--lcmc-fg,#14213d);border:1px solid var(--lcmc-borda,#c9d1dc);
   border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:16px 18px;font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
@@ -13,6 +14,25 @@
   font:600 15px/1.2 inherit;font-family:inherit;border:2px solid var(--lcmc-btn-bg,#14213d);
   background:var(--lcmc-btn-bg,#14213d);color:var(--lcmc-btn-fg,#ffffff)}
 .lcmc-btn:focus-visible{outline:3px solid var(--lcmc-foco,#f2b705);outline-offset:2px}
-@media (prefers-color-scheme:dark){.lcmc{--lcmc-bg:#101826;--lcmc-fg:#eef2f7;--lcmc-borda:#2c3a50;--lcmc-btn-bg:#eef2f7;--lcmc-btn-fg:#101826}}
-@media (max-width:420px){.lcmc{left:8px;right:8px;bottom:8px;padding:14px}}
+.lcmc{overflow-wrap:break-word}
+.lcmc-destaque{margin:0 0 12px;padding:10px 12px;border:2px solid var(--lcmc-btn-bg,#14213d);border-radius:8px;background:#fff8e6}
+.lcmc-opcao{display:flex;align-items:flex-start;gap:12px;min-height:44px;margin:0;cursor:pointer}
+.lcmc-opcao input{width:24px;height:24px;min-width:24px;min-height:24px;margin:10px 0 0;flex:none;accent-color:#14213d}
+.lcmc-opcao span{padding-top:8px}
+.lcmc-nota{margin:0 0 12px;padding:10px 12px;border-radius:8px;background:#fff3cd;color:#14213d;border:1px solid #14213d}
+.lcmc-nota[hidden],.lcmc-prefs[hidden]{display:none}
+.lcmc-btn.lcmc-config{display:flex;width:100%;margin:12px 0 0;box-sizing:border-box}
+.lcmc-prefs{margin-top:12px}
+.lcmc input:focus-visible{outline:3px solid var(--lcmc-foco,#f2b705);outline-offset:2px}
+@media (prefers-color-scheme:dark){.lcmc{--lcmc-bg:#101826;--lcmc-fg:#eef2f7;--lcmc-borda:#2c3a50;--lcmc-btn-bg:#eef2f7;--lcmc-btn-fg:#101826}
+  .lcmc-destaque{background:#2a2416;border-color:#eef2f7;color:#eef2f7}
+  .lcmc-opcao input{accent-color:#eef2f7}
+  .lcmc-nota{background:#3a3218;color:#eef2f7;border-color:#eef2f7}}
+/* No celular o aviso não cobre a página: o texto rola e Aceitar/Recusar ficam sempre à vista. */
+@media (max-width:720px){
+  .lcmc{left:8px;right:8px;bottom:8px;max-height:38vh;display:flex;flex-direction:column;overflow:hidden;padding:12px}
+  .lcmc-scroll{overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
+  .lcmc-fixo{flex:none;background:var(--lcmc-bg,#ffffff);padding-top:8px}
+}
+@media (max-width:420px){.lcmc{left:8px;right:8px;bottom:8px}}
 @media print{.lcmc{display:none}}
