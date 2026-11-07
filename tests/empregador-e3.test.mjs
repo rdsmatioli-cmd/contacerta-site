@@ -11,14 +11,16 @@ const raiz = new URL('../', import.meta.url).pathname;
 const ler = (p) => readFileSync(join(raiz, p), 'utf8');
 const E3 = ['precos', 'contratar', 'pagamento', 'pagamento/ok', 'painel'].map((c) => `empregador-em-dia/${c}/index.html`);
 
-test('E3: ED_CHECKOUT ligado, login off, pagamento em link vazio', () => {
+test('E3: ED_CHECKOUT ligado; link vazio ou buy.stripe.com sem /test_', () => {
   assert.equal(FLAGS.EMPREGADOR_EM_DIA, true);
   assert.equal(FLAGS.ED_CHECKOUT, true);
   assert.equal(FLAGS.ED_LOGIN, false);
   assert.equal(FLAGS.ED_ORCAMENTO_NR1, false);
   assert.equal(ED_PAGAMENTO_MODO, 'link');
-  assert.equal(ED_PAYMENT_LINK_20_50, '');
-  assert.deepEqual(ED_PAYMENT_LINKS, { '20-50': '' });
+  assert.ok(ED_PAYMENT_LINK_20_50 === '' || linkDePagamentoValido(ED_PAYMENT_LINK_20_50));
+  assert.equal(ED_PAYMENT_LINKS['20-50'], ED_PAYMENT_LINK_20_50);
+  assert.equal(linkDePagamentoValido('https://buy.stripe.com/test_abc'), false);
+  assert.equal(ctaCheckoutLiberado('https://buy.stripe.com/test_abc'), false);
 });
 
 test('E3: noindex; preços e retorno visíveis; contratar, pagamento e painel no aviso', () => {
@@ -155,8 +157,9 @@ test('link vazio ou de teste não libera o botão; constante commitada sem /test
   const i = ok.indexOf('id="ed-pg-ok"');
   const sec = ok.slice(ok.indexOf('>', i) + 1, ok.indexOf('</section>', i));
   assert.equal(norm(sec), norm(TEXTO_OK_PAGINA));
-  for (const p of [...E3, 'empregador-em-dia/index.html']) assert.ok(!ler(p).includes('Adequação NR-1'), p);
-  assert.ok(!ler('termos/index.html').includes('Adequação NR-1'));
+  const semAdequacao = /adequação nr-1/i;
+  const paginasNome = [...E3, 'empregador-em-dia/index.html', 'empregador-em-dia/orcamento-nr1/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html', 'termos/index.html', 'privacidade/index.html'];
+  for (const p of paginasNome) assert.doesNotMatch(ler(p), semAdequacao, p);
   for (const p of ['contratar', 'pagamento']) {
     const h = ler(`empregador-em-dia/${p}/index.html`);
     assert.ok(!/<(input|select|textarea)\b[^>]*\bname="cnpj"/i.test(h), p);
@@ -191,4 +194,20 @@ test('Anexo ED-1 visível antes do botão; aceite obrigatório; arrependimento =
   }
   assert.match(item, /até o dia útil seguinte ao cancelamento/);
   assert.match(item, /até o dia útil seguinte à constatação/);
+});
+
+test('6.16: prazo de 5 dias úteis e sem prazo antigo de transferência', () => {
+  const trecho = 'transferimos em até 5 dias úteis após recebermos os dados bancários, com atualização monetária em caso de atraso. Esses dados servem só para a devolução e são eliminados após a comprovação,';
+  const cnpj = 'A devolução nunca é retida, reduzida ou condicionada ao envio do CNPJ da empresa para a nota fiscal, à NFS-e ou a qualquer outro documento; havendo atraso, o valor é atualizado monetariamente (CDC, art. 49, parágrafo único).';
+  const arr = 'No arrependimento, a devolução é imediata pela Stripe. Só se a Stripe não conseguir devolver o Pix, fazemos a transferência o quanto antes, em até 5 dias úteis após recebermos os dados bancários, com atualização monetária.';
+  const termos = ler('termos/index.html');
+  assert.ok(termos.includes('6.16 Forma do estorno.'));
+  assert.ok(termos.includes('<h3>6.7 Direito de arrependimento.</h3>'));
+  assert.ok(termos.includes(trecho));
+  assert.ok(termos.includes(cnpj));
+  assert.ok(termos.includes(arr));
+  const juntos = [termos, ler('assets/js/empregador/textos-checkout.js'), ler('empregador-em-dia/pagamento/index.html'), ler('empregador-em-dia/pagamento/ok/index.html'), ler('privacidade/index.html')].join('\n');
+  assert.ok(!juntos.includes('1 dia útil após recebê-los'));
+  assert.ok(!juntos.includes('2 dias úteis após recebê-los'));
+  assert.ok(!juntos.includes('pelo mesmo meio de pagamento, sem pedido seu'));
 });

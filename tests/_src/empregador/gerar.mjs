@@ -189,7 +189,7 @@ const precoEstatico = (id) => FAIXAS.find((f) => f.id === id).preco.toLocaleStri
 pagina({
   caminho: 'empregador-em-dia/orcamento-nr1/',
   titulo: 'Pedir orçamento NR-1 | Empregador em Dia',
-  desc: 'Formulário de pedido de orçamento da adequação NR-1 para empresas com mais de 200 funcionários.',
+  desc: 'Formulário de pedido de orçamento do Empregador em Dia — avaliação rápida NR-1 para empresas com mais de 200 funcionários.',
   conteudo: `<h1>Orçamento do serviço NR-1</h1>
 <table class="ed-tab"><caption>Preços do serviço NR-1</caption><thead><tr><th scope="col">Funcionários</th><th scope="col">Preço</th></tr></thead><tbody>
 <tr><th scope="row">20 a 50</th><td data-ed="orc-preco-20-50">${precoEstatico('20-50')}</td></tr>
@@ -250,7 +250,7 @@ pagina({
 pagina({
   caminho: 'empregador-em-dia/contratar/',
   titulo: 'Dados para o contrato | Empregador em Dia',
-  desc: 'Dados da empresa para o contrato da adequação NR-1.',
+  desc: 'Dados da empresa para o contrato do Empregador em Dia — avaliação rápida NR-1.',
   conteudo: `<form class="ed-form" id="ed-contratar" data-ed-e3="checkout" novalidate>
 <h1>Dados para o contrato</h1>
 <label for="ct-razao">Razão social</label><input id="ct-razao" name="razao" autocomplete="organization" required aria-describedby="aj-razao"><small id="aj-razao">Digite como está no cartão CNPJ. Não consultamos o CNPJ em nenhuma base.</small>
@@ -284,7 +284,7 @@ pagina({
 <p>Serviço: ${NOME_PRODUTO}</p>
 <p>Faixa: 20 a 50 empregados, até 4 grupos ou setores</p>
 <p>Preço: R$ 1.490,00 à vista</p>
-<p>Forma de pagamento: cartão de crédito, à vista, pelo link de pagamento da Stripe</p>
+<p>Forma de pagamento: cartão de crédito, Pix ou boleto, à vista, pelo link de pagamento da Stripe</p>
 <p><a href="${LINK_TERMOS_VENDA}">Termos de Uso, item 6</a></p>
 <p data-ed-validade>Preços válidos até 31/12/2026.</p>
 <p class="ed-aviso-sst">O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.</p></section>
@@ -310,9 +310,10 @@ pagina({
   conteudo: `<section data-ed-e3="checkout" id="ed-pg-ok">
 <h1>Pedido recebido.</h1>
 <p>A Stripe envia o recibo para o e-mail que você informou. Se não chegar em alguns minutos, confira a caixa de spam.</p>
+<p>Se você pagou por boleto, o pedido fica em processamento até a Stripe confirmar o pagamento, o que pode levar até 1 dia útil após o pagamento. Confirmaremos por e-mail quando a Stripe confirmar; os prazos contam dessa confirmação.</p>
 <h2>Próximos passos</h2>
 <p>1. Após a confirmação do pagamento pela Stripe, pedimos por e-mail o CNPJ e, se necessário, somente o total de empregados ativos na data da compra. Não envie CPF ou dados individuais de trabalhadores.</p>
-<p>2. A emissão da nota é prevista para até 1 dia útil após a confirmação do pagamento, se os dados fiscais necessários estiverem disponíveis e corretos e a empresa for elegível. Sem o CNPJ, a faixa confirmada e a nota emitida corretamente, não iniciamos o serviço. Se a nota não puder ser emitida corretamente até o primeiro limite entre 3 dias úteis após a confirmação do pagamento e o encerramento do mês dessa confirmação, às 23h59 no horário de Brasília (America/Sao_Paulo, UTC-3), cancelamos a compra e providenciamos estorno integral pela Stripe, sem pedido seu.</p>
+<p>2. A emissão da nota é prevista para até 1 dia útil após a confirmação do pagamento, se os dados fiscais necessários estiverem disponíveis e corretos e a empresa for elegível. Sem o CNPJ, a faixa confirmada e a nota emitida corretamente, não iniciamos o serviço. Se a nota não puder ser emitida corretamente até o primeiro limite entre 3 dias úteis após a confirmação do pagamento e o encerramento do mês dessa confirmação, às 23h59 no horário de Brasília (America/Sao_Paulo, UTC-3), cancelamos a compra e providenciamos estorno integral na forma do item 6.16 dos Termos, sem pedido seu.</p>
 <p>3. Com a nota emitida e a elegibilidade confirmada, enviamos por e-mail em até 1 dia útil o kit e as instruções para aplicação interna pela empregadora. A LCM só recebe arquivo novo de resultados agregados e protegidos, nunca respostas individuais. Google Forms não é utilizado nesta modalidade.</p>
 <p>4. ${PRAZO_RELATORIO}</p>
 ${ARREPENDIMENTO_ED1.map((p) => '<p>' + p + '</p>').join('\n')}
@@ -324,7 +325,7 @@ ${ARREPENDIMENTO_ED1.map((p) => '<p>' + p + '</p>').join('\n')}
 pagina({
   caminho: 'empregador-em-dia/painel/',
   titulo: 'Acompanhamento | Empregador em Dia',
-  desc: 'Acompanhamento do pedido de adequação NR-1.',
+  desc: 'Acompanhamento do pedido do Empregador em Dia — avaliação rápida NR-1.',
   conteudo: `<section data-ed-e3="login" id="ed-painel">
 <p class="ed-selo">dados de exemplo</p>
 <h1>${NOME_PRODUTO} · <span data-ed="pn-empresa">Farmácia Boa</span></h1>

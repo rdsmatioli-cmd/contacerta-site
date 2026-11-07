@@ -10,6 +10,13 @@ const ligar = (page) => page.route(/\/assets\/js\/empregador\/config\.js/, async
   await route.fulfill({ response: r, body: corpo });
 });
 
+const forcarLink = (page, link) => page.route(/\/assets\/js\/empregador\/config\.js/, async (route) => {
+  const r = await route.fetch();
+  const corpo = (await r.text()).replace(/ED_PAYMENT_LINK_20_50 = '[^']*'/, `ED_PAYMENT_LINK_20_50 = '${link}'`);
+  if (!corpo.includes(`ED_PAYMENT_LINK_20_50 = '${link}'`)) throw new Error('não foi possível forçar ED_PAYMENT_LINK_20_50');
+  await route.fulfill({ response: r, body: corpo });
+});
+
 // DEC CEO/CPO 31/10: EMPREGADOR_EM_DIA ON no arquivo. NB-05 (CLS): o app já vem visível no HTML, antes do ui.js, sem
 // troca aviso -> app; o orçamento NR-1 (ED_CHECKOUT OFF) segue só com o aviso.
 for (const url of PAGS) {
@@ -145,6 +152,7 @@ for (const [url, rotulo] of [['/empregador-em-dia/', 'Ver o que minha empresa pr
 }
 
 test('pagamento: link vazio não mostra o botão', async ({ page, rede, erros }) => {
+  await forcarLink(page, '');
   await page.goto('/empregador-em-dia/pagamento/');
   await assentar(page);
   await expect(page.locator('#ed-off')).toBeVisible();
@@ -156,11 +164,7 @@ test('pagamento: link vazio não mostra o botão', async ({ page, rede, erros })
 
 test('pagamento: link válido redireciona só com o e-mail, sem pedido à Stripe antes do clique', async ({ page }) => {
   const link = 'https://buy.stripe.com/exemplo?locale=pt-BR';
-  await page.route(/\/assets\/js\/empregador\/config\.js/, async (route) => {
-    const r = await route.fetch();
-    const corpo = (await r.text()).replace("ED_PAYMENT_LINK_20_50 = ''", `ED_PAYMENT_LINK_20_50 = '${link}'`);
-    await route.fulfill({ response: r, body: corpo });
-  });
+  await forcarLink(page, link);
   const stripe = [];
   page.on('request', (r) => { if (/stripe\.com/i.test(r.url())) stripe.push(r.url()); });
   await page.goto('/empregador-em-dia/pagamento/');
