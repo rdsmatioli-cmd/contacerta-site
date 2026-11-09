@@ -37,6 +37,21 @@ test('E3: noindex; preços e retorno visíveis; contratar, pagamento e painel no
   assert.match(ui, /data-ed-e3="login"\]'\) && !FLAGS\.ED_LOGIN\) return/);
 });
 
+test('CLS: contratar e pagamento reservam o formulário antes do ui.js quando o link é válido', () => {
+  for (const p of ['empregador-em-dia/contratar/index.html', 'empregador-em-dia/pagamento/index.html']) {
+    const h = ler(p);
+    assert.match(h, /<div id="ed-app" hidden>/, p);
+    assert.match(h, /<section id="ed-off" class="ed-off">/, p);
+    assert.match(h, /html\[data-ed-checkout="on"\] #ed-app\[hidden\]\{display:block!important\}/, p);
+    assert.match(h, /html\[data-ed-checkout="on"\] \.ed-pagar\[hidden\]\{display:inline-flex!important\}/, p);
+    assert.match(h, /ED_PAYMENT_LINK_20_50 = '\(\[\^'\]\*\)'/, p);
+    assert.match(h, /link\.indexOf\('\/test_'\)<0/, p);
+    assert.ok(h.indexOf('data-ed-checkout') < h.indexOf('id="ed-off"'), p);
+    assert.ok(h.indexOf('getElementById(\'ed-app\')') > h.indexOf('id="ed-app"'), p);
+  }
+  assert.match(ler('empregador-em-dia/pagamento/index.html'), /data-ed-pagar hidden/);
+});
+
 test('T05: 20-50 à vista; 51-200 em breve, sem parcela; >200 = "Orçamento sob medida"', () => {
   const h = ler('empregador-em-dia/precos/index.html');
   assert.ok(h.includes('R$ 1.490</span><span>à vista</span>'));
@@ -179,7 +194,7 @@ test('Anexo ED-1 visível antes do botão; aceite obrigatório; arrependimento =
   const termos = ler('termos/index.html');
   const item = termos.slice(termos.indexOf('id="empregador-em-dia"'), termos.indexOf('<h2>7. Legislação</h2>'));
   assert.ok(item.includes(anexo));
-  assert.ok(item.includes('Versão: TERMOS-EMPREGADOR-1.2 · Data: 07/11/2026'));
+  assert.ok(item.includes('Versão: TERMOS-EMPREGADOR-1.2 · Data: 11/11/2026'));
   const a = item.indexOf(ARREPENDIMENTO_ED1[0]);
   const b = item.indexOf('6.8 Cancelamento');
   assert.equal(norm(item.slice(a, b)), esperado);

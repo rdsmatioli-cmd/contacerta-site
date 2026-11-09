@@ -9,7 +9,7 @@ const raiz = fileURLToPath(new URL('../', import.meta.url));
 const ler = (p) => readFileSync(join(raiz, p), 'utf8');
 const ENDERECO = 'Rua Pais Leme, 215, Conj. 1713, Pinheiros, São Paulo, SP, 05424-150';
 const RODAPE = `RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20 · ${ENDERECO} · contato@contacertabr.com.br`;
-const NOTA = 'Última atualização: 07/11/2026. Nesta versão: incluímos a Stripe como operadora do pagamento do Empregador em Dia na seção 6.';
+const NOTA = 'Última atualização: 11/11/2026. Nesta versão: incluímos a Stripe como operadora do pagamento do Empregador em Dia na seção 6.';
 
 function htmls(d = '') {
   return readdirSync(join(raiz, d)).flatMap((n) => {
@@ -70,7 +70,7 @@ test('B9: /privacidade/ sem Me avise, sem colchetes, sem Zoho nem "Sendinblue SA
 });
 
 test('B8: lastmod da /privacidade/ no sitemap = data da nota de versão', () => {
-  assert.match(ler('sitemap.xml'), /<loc>https:\/\/contacertabr\.com\.br\/privacidade\/<\/loc><lastmod>2026-11-07<\/lastmod>/);
+  assert.match(ler('sitemap.xml'), /<loc>https:\/\/contacertabr\.com\.br\/privacidade\/<\/loc><lastmod>2026-11-11<\/lastmod>/);
 });
 
 test('flags: ED_CHECKOUT ligado, orçamento e Me avise desligados; SST não incluído', () => {

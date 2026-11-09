@@ -18,8 +18,15 @@ const corpoIni = resto.slice(0, resto.indexOf('<main'));
 const rodape = resto.slice(resto.indexOf('</main>') + '</main>'.length);
 const ORIG = 'https://contacertabr.com.br';
 const vUi = ver('assets/js/empregador/ui.js');
+const vCfg = ver('assets/js/empregador/config.js');
 // ed.css vai inline (QA B-PR42-09: sem CSS extra bloqueando a renderização).
 const cssEd = readFileSync(join(raiz, 'assets/js/empregador/ed.css'), 'utf8').trim();
+// CLS do checkout: o HTML de /contratar/ e /pagamento/ nasce no aviso (link vazio no #69). Com o Payment Link
+// no config.js, o ui.js só troca aviso → formulário depois do LCP. O script abaixo lê o config.js antes desses
+// blocos e o CSS reserva o formulário (e o botão) no primeiro quadro. O ui.js repete o mesmo estado, sem deslocar.
+const CLS_CHECKOUT_CSS = '<style>html[data-ed-checkout="on"] #ed-off{display:none!important}html[data-ed-checkout="on"] #ed-app[hidden]{display:block!important}html[data-ed-checkout="on"] .ed-pagar[hidden]{display:inline-flex!important}</style>';
+const clsCheckoutAntes = () => `<script>(function(){try{var x=new XMLHttpRequest();x.open('GET','/assets/js/empregador/config.js?v=${vCfg}',false);x.send();var t=x.responseText||'';var link=(/ED_PAYMENT_LINK_20_50 = '([^']*)'/.exec(t)||[])[1]||'';var modo=(/ED_PAGAMENTO_MODO = '([^']*)'/.exec(t)||[])[1];if(/ED_CHECKOUT:\\s*true/.test(t)&&modo==='link'&&link.indexOf('https://buy.stripe.com/')===0&&link.indexOf('/test_')<0)document.documentElement.setAttribute('data-ed-checkout','on');}catch(e){}})();</script>\n`;
+const clsCheckoutDepois = '<script>if(document.documentElement.getAttribute(\'data-ed-checkout\')===\'on\'){var o=document.getElementById(\'ed-off\'),a=document.getElementById(\'ed-app\');if(o)o.hidden=true;if(a)a.hidden=false;var b=document.querySelector(\'[data-ed-pagar]\');if(b)b.hidden=false;}</script>\n';
 
 const INDEXAVEIS = ['empregador-em-dia/', 'empregador-em-dia/avaliacao-rapida-nr1/', 'empregador-em-dia/jornada-42h/'];
 function pagina({ caminho, titulo, desc, conteudo, selo = true }) {
@@ -31,13 +38,14 @@ function pagina({ caminho, titulo, desc, conteudo, selo = true }) {
     .replaceAll(`${ORIG}/tabelas-oficiais-2026/obrigado/`, url);
   if (INDEXAVEIS.includes(caminho)) h = h.replace('<meta name="robots" content="noindex, nofollow">', '<meta name="robots" content="index, follow, max-image-preview:large">');
   h = h.replace('<link rel="stylesheet" href="/assets/style.css', `<style>${cssEd}</style>\n<link rel="stylesheet" href="/assets/style.css`);
-  // NB-05 (CLS): o HTML já sai no estado final das flags. Com a página liberada, #ed-app vem visível e #ed-off oculto,
-  // sem troca depois do ui.js (que repete o mesmo estado, sem deslocar nada). Mesma regra do iniciar() do ui.js.
   const orcamento = /id="ed-orc"/.test(conteudo);
   const login = /data-ed-e3="login"/.test(conteudo);
   const pagamento = /id="ed-pagamento"/.test(conteudo);
   const contratar = /id="ed-contratar"/.test(conteudo);
   const checkout = /data-ed-e3="checkout"/.test(conteudo);
+  if (pagamento || contratar) h = h.replace(/(<link rel="stylesheet" href="\/assets\/style\.css\?v=[0-9a-f]+">)/, `$1\n${CLS_CHECKOUT_CSS}`);
+  // NB-05 (CLS): o HTML já sai no estado final das flags. Com a página liberada, #ed-app vem visível e #ed-off oculto,
+  // sem troca depois do ui.js (que repete o mesmo estado, sem deslocar nada). Mesma regra do iniciar() do ui.js.
   const liberada = FLAGS.EMPREGADOR_EM_DIA
     && !(orcamento && !FLAGS.ED_ORCAMENTO_NR1)
     && !(login && !FLAGS.ED_LOGIN)
@@ -45,13 +53,13 @@ function pagina({ caminho, titulo, desc, conteudo, selo = true }) {
     && !(checkout && !FLAGS.ED_CHECKOUT);
   const main = `<main id="conteudo" class="caixa ed">
 ${selo ? '<p class="ed-selo">simulação · dados de exemplo</p>' : ''}
-<section id="ed-off" class="ed-off"${liberada ? ' hidden' : ''}><p class="ed-off-t"><strong>Empregador em Dia</strong></p><p>Esta página está em preparação e ainda não está disponível.</p><p><a href="/nr1-riscos-psicossociais/">Leia sobre a NR-1 e os riscos psicossociais</a>.</p></section>
+${(pagamento || contratar) ? clsCheckoutAntes() : ''}<section id="ed-off" class="ed-off"${liberada ? ' hidden' : ''}><p class="ed-off-t"><strong>Empregador em Dia</strong></p><p>Esta página está em preparação e ainda não está disponível.</p><p><a href="/nr1-riscos-psicossociais/">Leia sobre a NR-1 e os riscos psicossociais</a>.</p></section>
 <div id="ed-app"${liberada ? '' : ' hidden'}>
 <nav class="ed-menu" aria-label="Empregador em Dia"><a href="/nr1-riscos-psicossociais/">NR-1</a><a href="/empregador-em-dia/jornada-42h/">Jornada 42h</a><a href="/empregador-em-dia/#preco">Preço</a></nav>
 ${conteudo}
 <nav class="ed-rodape" aria-label="Empregador em Dia: links"><span>Conta Certa · Empregador em Dia</span><a href="/termos/">Termos de uso</a><a href="/privacidade/">Privacidade</a><a href="/contato/">Ajuda</a><a href="/contato/">Contato</a></nav>
 </div>
-<script>(()=>{let f=0;const ir=()=>{if(f++)return;import('/assets/js/empregador/ui.js?v=${vUi}')},ocioso=()=>window.requestIdleCallback?requestIdleCallback(ir,{timeout:1500}):setTimeout(ir,1);addEventListener('load',()=>{let t=setTimeout(ocioso,600);try{new PerformanceObserver(()=>{clearTimeout(t);t=setTimeout(ocioso,600)}).observe({type:'largest-contentful-paint',buffered:true})}catch{}setTimeout(ir,3000)},{once:true})})()</script>
+${(pagamento || contratar) ? clsCheckoutDepois : ''}<script>(()=>{let f=0;const ir=()=>{if(f++)return;import('/assets/js/empregador/ui.js?v=${vUi}')},ocioso=()=>window.requestIdleCallback?requestIdleCallback(ir,{timeout:1500}):setTimeout(ir,1);addEventListener('load',()=>{let t=setTimeout(ocioso,600);try{new PerformanceObserver(()=>{clearTimeout(t);t=setTimeout(ocioso,600)}).observe({type:'largest-contentful-paint',buffered:true})}catch{}setTimeout(ir,3000)},{once:true})})()</script>
 </main>`;
   let out = `${h}</head>${corpoIni}${main}${rodape}`;
   // Sprite só com os símbolos usados, na ordem do primeiro uso (fonte-seo.test.mjs, sprite()).
@@ -292,7 +300,7 @@ ${htmlAnexoEd1()}
 <label class="ed-op"><input type="checkbox" name="aceite" data-ed-aceite required> ${TEXTO_ACEITE}</label>
 <p class="campo-msg" id="pg-msg" role="alert" hidden></p>
 <p>${LINHA_ANTES_STRIPE}</p>
-<button type="submit" disabled class="btn" data-ed-pagar hidden>Continuar para pagamento</button>
+<button type="submit" disabled class="btn ed-pagar" data-ed-pagar hidden>Continuar para pagamento</button>
 <section class="nota le-privacidade" id="pg-aviso" aria-labelledby="pg-aviso-t"><h2 id="pg-aviso-t">Como usamos seus dados</h2>
 <p>Quem cuida dos seus dados é RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services), CNPJ 61.193.879/0001-20, responsável pelo Conta Certa.</p>
 <p>Usamos o e-mail para recibo e nota fiscal e os dados do pedido só para fechar e cumprir o contrato: emitir recibo e nota fiscal, enviar por e-mail o questionário e o relatório e avisar do andamento. A base legal é a LGPD, art. 7º, V (contrato) e, para a nota fiscal, art. 7º, II (obrigação legal).</p>

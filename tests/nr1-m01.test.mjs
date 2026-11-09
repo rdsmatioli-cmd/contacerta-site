@@ -51,7 +51,7 @@ test('política: G-02, G-03, B-01 e M-01; sem AdSense em uso e sem o contador fo
   assert.match(priv, /O Google Analytics é fornecido pelo Google LLC, que atua como operador e pode tratar esses dados nos Estados Unidos e em outros países, com base nas cláusulas contratuais do Google para transferência internacional \(LGPD, art\. 33, II\)\. Os dados de eventos ficam guardados no Google Analytics por 2 meses\. Sua escolha no aviso de cookies vale por 6 meses; depois disso, perguntaremos de novo\./);
   assert.doesNotMatch(priv, /adssettings|aboutads|Este site pode exibir anúncios|link_interno|uso da busca/);
   assert.match(priv, /a conclusão de um cálculo \(só o nome da calculadora\) e cliques em botões de chamada e em links de parceiros \(só o caminho da página ou o domínio do parceiro\)/);
-  const nota = '<p><em>Última atualização: 07/11/2026. Nesta versão: incluímos a Stripe como operadora do pagamento do Empregador em Dia na seção 6.</em></p>'; // B-05; Stripe na seção 6 (parecer 4e6fa371)
+  const nota = '<p><em>Última atualização: 11/11/2026. Nesta versão: incluímos a Stripe como operadora do pagamento do Empregador em Dia na seção 6.</em></p>'; // B-05; Stripe na seção 6 (parecer 4e6fa371)
   assert.ok(priv.includes(nota));
   assert.doesNotMatch(priv.replace(nota, ''), /abacus/i);
 });
