@@ -6,7 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { PUBLICACAO_LICITACOES, PUBLICACAO_TERMOS_LICITACOES } from './publicacao-licitacoes.mjs';
+import { PUBLICACAO_LICITACOES, PUBLICACAO_TERMOS_LICITACOES, PUBLICACAO_AVISO_LICITACOES } from './publicacao-licitacoes.mjs';
 
 // DEC CPO (a) (A-PR35-14, 26/10/2026): as 3 datas (política, pílula e item 12 do aviso) e a dos Termos ficam como
 // [DATA DE PUBLICAÇÃO] até o commit do deploy; vermelho só por esse placeholder é aceito antes do deploy, sem bump diário.
@@ -70,7 +70,7 @@ test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
   assert.equal(hojeSaoPaulo(new Date('2026-10-24T03:00:00Z')), '24/10/2026');
 });
 
-// Mesma trava para o aviso do Licitações (AVISO-LICITACOES-1.11, item 12 e pílula do cabeçalho) e para os Termos de
+// Mesma trava para o aviso do Licitações (AVISO-LICITACOES-1.12, item 12 e pílula do cabeçalho; constante própria PUBLICACAO_AVISO_LICITACOES) e para os Termos de
 // Venda em /licitacoes/cobranca/ ("Data: dd/mm/aaaa"): as datas exibidas têm de ser PUBLICACAO_LICITACOES (constante).
 // Decisão do CPO (r11, 23/10/2026 19h17): o placeholder [DATA DE PUBLICAÇÃO] dos Termos fica no PR e só é preenchido
 // no commit do deploy, depois do OK do CEO. DEC CPO 19h33 (QA A-PR35-01): a trava de placeholder roda em todo CI e
@@ -96,13 +96,13 @@ export function travaLicitacoes({ publicacao, paginas }) {
   return { erros };
 }
 
-test('licitações: datas do aviso (item 12 e pílula) = PUBLICACAO_LICITACOES', () => {
+test('licitações: datas do aviso (item 12 e pílula) = PUBLICACAO_AVISO_LICITACOES', () => {
   const aviso = ler('licitacoes/politica.html');
   const itens = [...aviso.matchAll(new RegExp(`Versão AVISO-LICITACOES-[\\d.]+, de ${DATA_OU_PH}\\.`, 'g'))].map((m) => m[1]);
   const pilula = [...aviso.matchAll(new RegExp(`Versão AVISO-LICITACOES-[\\d.]+<\\/span><span class="pill n">${DATA_OU_PH}<`, 'g'))].map((m) => m[1]);
   assert.equal(itens.length, 1, 'esperada uma "Versão AVISO-LICITACOES-x, de dd/mm/aaaa." no aviso');
   assert.equal(pilula.length, 1, 'esperada uma data na pílula de versão do aviso');
-  const erros = errosDatas([['aviso (item 12)', itens[0]], ['aviso (pílula)', pilula[0]]], { exigeHoje: true, hoje: PUBLICACAO_LICITACOES });
+  const erros = errosDatas([['aviso (item 12)', itens[0]], ['aviso (pílula)', pilula[0]]], { exigeHoje: true, hoje: PUBLICACAO_AVISO_LICITACOES });
   assert.deepEqual(erros, [], erros.join('\n'));
 });
 
