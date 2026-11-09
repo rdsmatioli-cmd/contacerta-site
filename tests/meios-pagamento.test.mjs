@@ -1,4 +1,5 @@
 // DEC CEO 21h28: Radar só cartão; Montagem cartão ou Pix; boleto desligado. Texto dos adendos ADV 22428393 + 722a154e.
+// Item 6 L7[0] inclui A3 (ADV 0b29815b / DEC CPO B): CPF só Montagem; Radar exige CNPJ.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
