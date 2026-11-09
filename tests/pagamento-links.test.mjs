@@ -86,9 +86,14 @@ test('guarda de sandbox: URL test_ falha, URL live e vazio passam (autoteste)', 
   assert.equal(ruim({ a: 'https://buy.stripe.com/abc', b: '' }), false);
 });
 // Adendo ADV A-2 fd1fc8e6 + corte mensal (DEC CPO c50de42a; adendo ADV 9efa7cf6): aviso literal antes de cada link.
-test('assinar/: aviso A-2 antes de cada produto; corte mensal nas 3 páginas', () => {
+test('assinar/: aviso A-2 antes de cada produto (A3: radar-cnpj entre aviso e botão Radar); corte mensal nas 3 páginas', () => {
   const h = ler(PAGINA_ASSINAR);
-  for (const k of NA_PAGINA) assert.match(h, new RegExp(`<p class="aviso-fiscal">Depois da confirmação do pagamento pela Stripe, a Conta Certa enviará um e-mail pedindo o CNPJ da empresa\\.[^<]*</p>\\n<p class="compra" data-produto="${k}">`), k);
+  for (const k of NA_PAGINA) {
+    const cnpjRadar = (k === 'radarMensal' || k === 'radarAnual')
+      ? '<p class="radar-cnpj">Somente para empresas com CNPJ.</p>\\n'
+      : '';
+    assert.match(h, new RegExp(`<p class="aviso-fiscal">Depois da confirmação do pagamento pela Stripe, a Conta Certa enviará um e-mail pedindo o CNPJ da empresa\\.[^<]*</p>\\n${cnpjRadar}<p class="compra" data-produto="${k}">`), k);
+  }
   const corte = 'o encerramento do mês dessa confirmação, às 23h59 no horário de Brasília (America/Sao_Paulo, UTC-3)';
   assert.equal(h.split(corte).length - 1, 3);
   assert.equal(ler(PAGINA_OBRIGADO).split(corte).length - 1, 1);
