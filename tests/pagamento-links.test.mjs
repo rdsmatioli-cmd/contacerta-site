@@ -73,8 +73,17 @@ test('slot vazio: assinar/ renderiza "em breve" em todos os produtos, sem href p
   assert.deepEqual(hrefsStripe(h), []);
   for (const k of NA_PAGINA) assert.ok(h.includes(`aria-disabled="true">${EM_BREVE[k]}</span>`), k);
 });
-test('repositório: nenhuma URL de sandbox na config', () => {
+test('repositório: nenhuma URL de sandbox na config nem nas páginas', () => {
   for (const [k, u] of Object.entries(LINKS_PAGAMENTO)) assert.ok(!u.includes('/test_'), k);
+  for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO, 'licitacoes/cobranca/index.html', 'licitacoes/index.html']) assert.doesNotMatch(ler(p), /buy\.stripe\.com\/test_|7Re0[0-9]/, p);
+});
+// S-PL1 (CEO 06/11 21h18): os 3 produtos da página com URL LIVE; o saldo da Montagem nunca vai à página.
+test('S-PL1: config com as 3 URLs LIVE; Pages renderiza os 3 links e nenhum "em breve"', () => {
+  assert.deepEqual(NA_PAGINA.map((k) => LINKS_PAGAMENTO[k]), ['https://buy.stripe.com/00w9AM9B2a7Y2Spfkd5gc03', 'https://buy.stripe.com/dRmeV68wYa7Y50xeg95gc04', 'https://buy.stripe.com/cNiaEQfZq1Bs64B4Fz5gc00']);
+  const h = render(ler(PAGINA_ASSINAR));
+  assert.equal(hrefsStripe(h).length, 3);
+  for (const k of NA_PAGINA) assert.ok(!h.includes(EM_BREVE[k]), k);
+  assert.ok(!h.includes('00w6oA6oQ5RI8cJ5JD5gc01'), 'saldo fora da página');
 });
 // Guarda de deploy: link de sandbox (test_) nunca vai ao ar.
 test('DEPLOY=1 / build do Pages: nenhuma URL de Payment Link de sandbox (/test_)', { skip: process.env.DEPLOY !== '1' && process.env.LINKS_PAGAMENTO_PRODUCAO !== '1' && 'só com DEPLOY=1 ou no build do Pages' }, () => {
