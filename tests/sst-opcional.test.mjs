@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, SST_TEXTO_OPCIONAL } from '../assets/js/empregador/config.js';
 const ler = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
 const T2 = 'SST: validação técnica opcional, não incluída no preço. Contratada e paga diretamente pela sua empresa.';
-const T8 = 'O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR.';
+const T8 = 'O Conta Certa fornece material para a coleta interna do questionário e um relatório orientativo dos resultados agregados como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR, do inventário de riscos e do plano de ação são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.';
 test('T2: textos literais e flag false', () => {
   assert.equal(SST_TEXTO_OPCIONAL, T2);
   assert.equal(SST_TEXTO_EM_DEFINICAO, 'SST: em definição, não incluído no preço');

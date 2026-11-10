@@ -60,7 +60,9 @@ test('T05: 20-50 à vista; 51-200 em breve, sem parcela; >200 = "Orçamento sob 
   assert.ok(!h.includes('745'));
   assert.ok(h.includes('Orçamento sob medida'));
   for (const p of E3) assert.ok(!ler(p).toLowerCase().includes('sob consulta'), p);
-  for (const t of ['Questionário anônimo</li>', 'Inventário dos riscos psicossociais para apoiar o PGR da sua empresa', 'Plano de ação com prazos e responsáveis', 'Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos']) assert.ok(h.includes(t), t);
+  for (const t of ['Material e instruções para a coleta interna do questionário pela sua empresa', 'Modelo para enviar só resultados agregados e protegidos', 'Relatório orientativo por grupo ou setor, com limitações e sugestões de referência para ações', 'Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos', 'Não inclui inventário de riscos, plano de ação técnico nem PGR: eles continuam com a sua empresa.']) assert.ok(h.includes(t), t);
+  assert.ok(!h.includes('O PGR continua com a sua empresa: o inventário e o plano de ação entram nele.'));
+  assert.ok(!h.includes('simulação · dados de exemplo'));
 });
 
 test('T06: CNPJ por dígito verificador, exemplo fictício válido (D-09), sem Receita/BrasilAPI (D-07)', () => {
@@ -72,7 +74,10 @@ test('T06: CNPJ por dígito verificador, exemplo fictício válido (D-09), sem R
   const h = ler('empregador-em-dia/contratar/index.html');
   assert.ok(!h.includes('id="ct-cnpj"') && !h.includes('name="cnpj"'));
   assert.ok(h.includes('id="ct-razao"') && h.includes('required'));
-  assert.match(h, /id="ct-whats"(?![^>]*required)[^>]*>/);
+  assert.ok(!h.includes('ct-whats') && !/whatsapp/i.test(h));
+  assert.ok(h.includes('Razão social, nome e e-mail ficam só neste navegador até você seguir para o pagamento; esta página não os envia ao Conta Certa.'));
+  assert.ok(!h.includes('simulação · dados de exemplo'));
+  assert.ok(!/whatsapp/i.test(ler('assets/js/empregador/ui.js')));
   const js = ler('assets/js/empregador/ui.js') + ler('assets/js/empregador/motor.js');
   assert.ok(!/brasilapi\.com|receitaws\.com|receita\.fazenda\.gov/i.test(js));
 });

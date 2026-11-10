@@ -72,6 +72,9 @@ ${(pagamento || contratar) ? clsCheckoutDepois : ''}<script>(()=>{let f=0;const 
   writeFileSync(join(raiz, caminho, 'index.html'), out);
 }
 
+// ADV-ED69-01: oferta pública alinhada aos Termos (sem prometer inventário, plano de ação ou PGR).
+const AVISO_T8 = 'O Conta Certa fornece material para a coleta interna do questionário e um relatório orientativo dos resultados agregados como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR, do inventário de riscos e do plano de ação são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.';
+const LISTA_ENTREGA = '<ul class="ed-lista"><li>Material e instruções para a coleta interna do questionário pela sua empresa</li><li>Modelo para enviar só resultados agregados e protegidos</li><li>Relatório orientativo por grupo ou setor, com limitações e sugestões de referência para ações</li><li>Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos</li></ul><p>Não inclui inventário de riscos, plano de ação técnico nem PGR: eles continuam com a sua empresa.</p>';
 const radio = (nome, opcoes, ajudaId) => opcoes.map(([v, t]) =>
   `<label class="ed-op"><input type="radio" name="${nome}" value="${v}" aria-describedby="${ajudaId}"> ${t}</label>`).join('');
 const check = (nome, opcoes, ajudaId) => opcoes.map(([v, t]) =>
@@ -80,14 +83,15 @@ const check = (nome, opcoes, ajudaId) => opcoes.map(([v, t]) =>
 pagina({
   caminho: 'empregador-em-dia/',
   titulo: 'Empregador em Dia: NR-1 e riscos psicossociais no PGR',
-  desc: 'Adequação da sua empresa à NR-1: questionário anônimo aos funcionários, inventário de riscos psicossociais e plano de ação para incluir no PGR.',
+  desc: 'Avaliação rápida NR-1 para empresas de 20 a 50 empregados: sua empresa aplica o questionário internamente e recebe um relatório orientativo dos resultados agregados. Não substitui o PGR.',
+  selo: false,
   conteudo: `<section class="ed-hero" data-ed-tela="1">
 <p class="cat-pill">NR-1: riscos psicossociais no PGR</p>
-<h1>Sua empresa em dia com a NR-1, sem montar planilha</h1>
-<p class="lead">A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua). A gente aplica o questionário anônimo e você recebe o inventário e o plano de ação para o PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora.</p>
+<h1>Avaliação rápida NR-1 dos riscos psicossociais, sem montar planilha</h1>
+<p class="lead">A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua). Sua empresa aplica o questionário internamente, com o nosso material e instruções, e nos envia só resultados agregados e protegidos; você recebe um relatório orientativo com sugestões de referência para ações, que pode servir de ponto de partida para o inventário de riscos e o plano de ação que a sua empresa elabora no PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora.</p>
 <p><a class="btn" href="/empregador-em-dia/avaliacao-rapida-nr1/">Ver o que minha empresa precisa</a></p>
 <h2>O que você recebe</h2>
-<ul class="ed-lista"><li>Questionário anônimo para os funcionários</li><li>Inventário de riscos psicossociais para o PGR</li><li>Plano de ação com prazos e responsáveis</li><li>Relatório com o resultado do grupo para anexar ao PGR (pode ser revisado por um profissional de SST, se você quiser)</li></ul>
+${LISTA_ENTREGA}
 <p class="ed-sst" data-ed-sst></p>
 </section>
 <ul class="ed-cartoes" id="preco">
@@ -141,7 +145,7 @@ pagina({
 <section data-ed-res="vazio"><h1>Faça a avaliação rápida NR-1 primeiro</h1><p><a class="btn" href="/empregador-em-dia/avaliacao-rapida-nr1/">Ver o que minha empresa precisa</a></p></section>
 <section data-ed-res="oferta" hidden><h1>Sua empresa deve avaliar os riscos psicossociais no PGR</h1>
 <ul class="ed-cartoes"><li><strong>Seu porte</strong><span data-ed="porte"></span></li><li><strong>Pontos de atenção</strong><span data-ed="pontos"></span></li><li><strong>PGR</strong><span data-ed="pgr"></span></li></ul>
-<div class="ed-oferta"><h2>${NOME_PRODUTO} para <span data-ed="porte2"></span></h2><p class="ed-preco" data-ed="preco"></p><p data-ed="parcelas"></p><p data-ed-validade>Preços válidos até 31/12/2026.</p><p class="ed-sst" data-ed-sst></p><p class="ed-aviso-sst">O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.</p>
+<div class="ed-oferta"><h2>${NOME_PRODUTO} para <span data-ed="porte2"></span></h2><p class="ed-preco" data-ed="preco"></p><p data-ed="parcelas"></p><p data-ed-validade>Preços válidos até 31/12/2026.</p><p class="ed-sst" data-ed-sst></p><p class="ed-aviso-sst">${AVISO_T8}</p>
 <p><button type="button" class="btn" data-ed-contratar hidden disabled>Contratar</button></p></div>
 <p>${INICIO_SERVICO}</p>
 <p>${PRAZO_RELATORIO}</p></section>
@@ -149,7 +153,7 @@ pagina({
 <section data-ed-res="simplificada" hidden><h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>
 <p>MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.</p>
 <ul class="ed-cartoes"><li><strong>Guia gratuito para pequenas empresas</strong><span>Checklist de 1 página com o que avaliar, um modelo de plano de ação e como anexar ao PGR.</span><button type="button" class="btn" disabled>Receber o guia por e-mail</button></li></ul>
-<p><a href="/contato/">Quer mesmo assim a adequação completa? Fale com a gente.</a></p></section>
+<p><a href="/contato/">Quer mesmo assim um serviço sob medida? Fale com a gente.</a></p></section>
 <section data-ed-res="sob-consulta" hidden><h1>Para mais de 200 funcionários, fazemos um orçamento</h1>
 <p>Com várias unidades ou turnos, o questionário e a análise mudam. Orçamento sob medida, caso a caso.</p>
 <p class="ed-sst" data-ed-sst></p>
@@ -244,30 +248,30 @@ pagina({
   caminho: 'empregador-em-dia/precos/',
   titulo: `${NOME_PRODUTO} | preço`,
   desc: 'Preço da faixa de 20 a 50 funcionários, à vista.',
+  selo: false,
   conteudo: `<h1 data-ed-e3="checkout">Preço fechado pela faixa de funcionários</h1>
 <ul class="ed-cartoes">${card('20-50')}${card('51-100')}${card('101-200')}</ul>
 <p>Menos de 20 funcionários: <a href="/empregador-em-dia/avaliacao-rapida-nr1/">veja a opção gratuita</a>. Mais de 200: <a href="/empregador-em-dia/orcamento-nr1/">Orçamento sob medida</a>.</p>
 <p data-ed-validade>Preços válidos até 31/12/2026.</p>
 <h2>O que o serviço entrega</h2>
-<ul class="ed-lista"><li>Questionário anônimo</li><li>Inventário dos riscos psicossociais para apoiar o PGR da sua empresa</li><li>Plano de ação com prazos e responsáveis</li><li>Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos</li></ul>
-<p>O PGR continua com a sua empresa: o inventário e o plano de ação entram nele.</p>
+${LISTA_ENTREGA}
 <p class="ed-sst" data-ed-sst></p>
-<p class="ed-aviso-sst">O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.</p>`,
+<p class="ed-aviso-sst">${AVISO_T8}</p>`,
 });
 
 pagina({
   caminho: 'empregador-em-dia/contratar/',
   titulo: 'Dados para o contrato | Empregador em Dia',
   desc: 'Dados da empresa para o contrato do Empregador em Dia — avaliação rápida NR-1.',
+  selo: false,
   conteudo: `<form class="ed-form" id="ed-contratar" data-ed-e3="checkout" novalidate>
 <h1>Dados para o contrato</h1>
 <label for="ct-razao">Razão social</label><input id="ct-razao" name="razao" autocomplete="organization" required aria-describedby="aj-razao"><small id="aj-razao">Digite como está no cartão CNPJ. Não consultamos o CNPJ em nenhuma base.</small>
 <label for="ct-nome">Seu nome</label><input id="ct-nome" name="nome" autocomplete="name" required aria-describedby="aj-nome"><small id="aj-nome">Quem responde pela empresa neste serviço. Exemplo: o dono ou o gerente de RH.</small>
 <label for="ct-email">E-mail</label><input id="ct-email" name="email" type="email" autocomplete="email" required aria-describedby="aj-email"><small id="aj-email">Recebe por e-mail o questionário e o relatório. Exemplo: o e-mail do RH.</small>
-<label for="ct-whats">WhatsApp (opcional)</label><input id="ct-whats" name="whatsapp" type="tel" autocomplete="tel" aria-describedby="aj-whats"><small id="aj-whats">Só para avisos do andamento. Exemplo: celular do RH.</small>
 <section class="nota le-privacidade" id="ct-aviso" aria-labelledby="ct-aviso-t"><h2 id="ct-aviso-t">Como usamos seus dados</h2>
 <p>Quem cuida dos seus dados é RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services), CNPJ 61.193.879/0001-20, responsável pelo Conta Certa.</p>
-<p>Usamos razão social, seu nome, e-mail e WhatsApp (se informado) só para fechar e cumprir o contrato: emitir recibo e nota fiscal, enviar por e-mail o questionário e o relatório e avisar do andamento. A base legal é a LGPD, art. 7º, V (contrato) e, para a nota fiscal, art. 7º, II (obrigação legal).</p>
+<p>Razão social, nome e e-mail ficam só neste navegador até você seguir para o pagamento; esta página não os envia ao Conta Certa. O e-mail é levado à página da Stripe, e recebemos da Stripe os dados informados no pagamento. Usamos esses dados só para fechar e cumprir o contrato: recibo e nota fiscal, envio por e-mail do kit e do relatório e avisos do andamento. A base legal é a LGPD, art. 7º, V (contrato) e, para a nota fiscal, art. 7º, II (obrigação legal).</p>
 <p>Guardamos esses dados enquanto o contrato durar e, depois, pelo prazo que a lei fiscal exige. Não vendemos nem cedemos seus dados.</p>
 <p>Você pode pedir confirmação, acesso, correção, cópia, exclusão e informação sobre com quem compartilhamos seus dados (LGPD, art. 18). Escreva para contato@contacertabr.com.br.</p>
 <p>Mais detalhes na nossa Política de Privacidade: <a href="/privacidade/">https://contacertabr.com.br/privacidade/</a></p></section>
@@ -284,6 +288,7 @@ pagina({
   caminho: 'empregador-em-dia/pagamento/',
   titulo: 'Pagamento | Empregador em Dia',
   desc: 'Pagamento à vista da faixa de 20 a 50 funcionários.',
+  selo: false,
   conteudo: `<form class="ed-form" id="ed-pagamento" data-ed-e3="checkout" data-ed-parcela="1" novalidate>
 <p class="ed-passo">Dados ✓ › Pagamento</p>
 <h1>Pagamento</h1>
@@ -295,7 +300,7 @@ pagina({
 <p>Forma de pagamento: cartão de crédito ou Pix, à vista, pelo link de pagamento da Stripe</p>
 <p><a href="${LINK_TERMOS_VENDA}">Termos de Uso, item 6</a></p>
 <p data-ed-validade>Preços válidos até 31/12/2026.</p>
-<p class="ed-aviso-sst">O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.</p></section>
+<p class="ed-aviso-sst">${AVISO_T8}</p></section>
 ${htmlAnexoEd1()}
 <label class="ed-op"><input type="checkbox" name="aceite" data-ed-aceite required> ${TEXTO_ACEITE}</label>
 <p class="campo-msg" id="pg-msg" role="alert" hidden></p>
