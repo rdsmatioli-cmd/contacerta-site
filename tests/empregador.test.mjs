@@ -60,10 +60,12 @@ test('termos NR-1 proibidos e "se aprovada"/44h-divisor fora das páginas', () =
 
 test('T01 CA2: textos literais da v3.3 p. 2 (com as reescritas do Advogado 38ccc6e0)', () => {
   const h = ler(PAGINAS[0]);
-  for (const t of ['NR-1: riscos psicossociais no PGR', 'Sua empresa em dia com a NR-1, sem montar planilha',
+  for (const t of ['NR-1: riscos psicossociais no PGR', 'Avaliação rápida NR-1 dos riscos psicossociais, sem montar planilha',
     'A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026;',
-    'Questionário anônimo para os funcionários', 'Inventário de riscos psicossociais para o PGR',
-    'Plano de ação com prazos e responsáveis', // 4º item e abertura: Advogado M-03 e B-01, teste abaixo
+    'Material e instruções para a coleta interna do questionário pela sua empresa',
+    'Modelo para enviar só resultados agregados e protegidos',
+    'Relatório orientativo por grupo ou setor, com limitações e sugestões de referência para ações',
+    'Não inclui inventário de riscos, plano de ação técnico nem PGR: eles continuam com a sua empresa.',
     'R$ 1.490 à vista.', 'Em breve.',
     'Veja quanto custaria reduzir a jornada.', 'href="/empregador-em-dia/avaliacao-rapida-nr1/"', 'href="/empregador-em-dia/jornada-42h/"']) {
     assert.ok(h.includes(t), t);
@@ -244,10 +246,12 @@ test('PR #36 revisões: textos literais travados nas páginas', () => {
   assert.doesNotMatch(res, /type="checkbox"[^>]*checked/);
   assert.doesNotMatch(res, /menos de 20 funcionários, você pode|precisa incluir os riscos/i);
   for (const t of [
-    '<li>Relatório com o resultado do grupo para anexar ao PGR (pode ser revisado por um profissional de SST, se você quiser)</li>',
-    'A gente aplica o questionário anônimo e você recebe o inventário e o plano de ação para o PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora.',
+    'Sua empresa aplica o questionário internamente, com o nosso material e instruções, e nos envia só resultados agregados e protegidos; você recebe um relatório orientativo com sugestões de referência para ações, que pode servir de ponto de partida para o inventário de riscos e o plano de ação que a sua empresa elabora no PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora.',
     '(desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua)',
+    'Avaliação rápida NR-1 para empresas de 20 a 50 empregados: sua empresa aplica o questionário internamente e recebe um relatório orientativo dos resultados agregados. Não substitui o PGR.',
   ]) assert.ok(lan.includes(t), t);
+  assert.ok(!lan.includes('simulação · dados de exemplo'));
+  assert.ok(!lan.includes('A gente aplica o questionário anônimo'));
   assert.doesNotMatch(lan, /assinado|profissional de segurança do trabalho analisa/i);
 });
 

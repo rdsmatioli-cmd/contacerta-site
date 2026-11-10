@@ -9,7 +9,7 @@ const raiz = fileURLToPath(new URL('../', import.meta.url));
 const ler = (p) => readFileSync(join(raiz, p), 'utf8');
 const ENDERECO = 'Rua Pais Leme, 215, Conj. 1713, Pinheiros, São Paulo, SP, 05424-150';
 const RODAPE = `RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20 · ${ENDERECO} · contato@contacertabr.com.br`;
-const NOTA = 'Última atualização: 11/11/2026. Nesta versão: incluímos a Stripe como operadora do pagamento do Empregador em Dia na seção 6.';
+const NOTA = 'Última atualização: 11/11/2026. Nesta versão: incluímos a Stripe como operadora do pagamento do Empregador em Dia na seção 6 e corrigimos a seção 10.';
 
 function htmls(d = '') {
   return readdirSync(join(raiz, d)).flatMap((n) => {
@@ -54,13 +54,16 @@ test('B6/B7/B1-B3/E: /privacidade/ com controlador e endereço, nota de versão,
   assert.ok(h.includes(`${ENDERECO} · contato@contacertabr.com.br`), 'rodapé na /privacidade/');
 });
 
-test('B9: /privacidade/ sem Me avise, sem colchetes, sem Zoho nem "Sendinblue SAS /"; Stripe só na seção 6 (parecer 4e6fa371)', () => {
+test('B9: /privacidade/ sem Me avise, sem colchetes, sem Zoho nem "Sendinblue SAS /"; Stripe na seção 6, no cabeçalho e na seção 10 (ADV-ED69-03)', () => {
   const c = corpoPolitica();
   const v = visivel(c);
   assert.doesNotMatch(v, /[[\]]/);
   assert.doesNotMatch(c, /Zoho|Sendinblue SAS \//);
-  const sem6 = c.replace(/<h2 id="orcamento-nr1">[^]*?(?=<h2>7\.)/, '').replace(/incluímos a Stripe como operadora[^<]*/, '');
+  const sem6 = c.replace(/<h2 id="orcamento-nr1">[^]*?(?=<h2>7\.)/, '').replace(/incluímos a Stripe como operadora[^<]*/, '').replace(/<p>Fornecedores que tratam dados para o Conta Certa:[^]*?<\/p>/, '');
   assert.doesNotMatch(sem6, /Stripe/);
+  assert.ok(c.includes('Stripe Brasil Soluções de Pagamento - Instituição de Pagamento Ltda, com apoio da Stripe, Inc. (pagamento do Empregador em Dia, cartão ou Pix; Estados Unidos; art. 33, IX, com art. 7º, V; seção 6);'));
+  assert.ok(c.includes('Por obrigação legal, os dados da nota fiscal do Empregador em Dia são enviados ao Emissor Nacional e ao Sistema Nacional da NFS-e e às administrações tributárias competentes (LGPD, art. 7º, II; seção 6). Hoje o Conta Certa não usa provedor de WhatsApp nem aviso "Me avise"; esta política será atualizada antes que qualquer um deles entre em uso.'));
+  assert.ok(!c.includes('não usa processador de pagamento'));
   const secoes = [...c.matchAll(/<h2[^>]*>(\d+)\. /g)].map((m) => +m[1]);
   assert.deepEqual(secoes, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
   assert.doesNotMatch(c, /<h[23][^>]*>[^<]*(Contratação e pagamento|Me avise|WhatsApp|[Nn]ota fiscal)/);
