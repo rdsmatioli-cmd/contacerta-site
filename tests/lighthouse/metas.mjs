@@ -29,7 +29,6 @@ export const URLS_NOINDEX = [
   '/empregador-em-dia/contratar/',
   '/empregador-em-dia/pagamento/',
   '/empregador-em-dia/pagamento/ok/',
-  '/empregador-em-dia/pagamento/2/',
   '/empregador-em-dia/painel/',
 ];
 // DEC CPO 31/10 (PR #56, go-live 03/11): páginas indexáveis do Empregador em Dia, mesmas metas das URLS.

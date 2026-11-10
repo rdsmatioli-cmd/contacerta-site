@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, SST_TEXTO_OPCIONAL } from '../assets/js/empregador/config.js';
 const ler = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
 const T2 = 'SST: validação técnica opcional, não incluída no preço. Contratada e paga diretamente pela sua empresa.';
-const T8 = 'O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR.';
+const T8 = 'O Conta Certa fornece material para a coleta interna do questionário e um relatório orientativo dos resultados agregados como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR, do inventário de riscos e do plano de ação são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.';
 test('T2: textos literais e flag false', () => {
   assert.equal(SST_TEXTO_OPCIONAL, T2);
   assert.equal(SST_TEXTO_EM_DEFINICAO, 'SST: em definição, não incluído no preço');
@@ -22,11 +22,12 @@ test('T6: linha do tempo do painel', () => {
   assert.ok(ler('empregador-em-dia/painel/index.html').includes('<li>Depois: relatório pronto; validação opcional pelo seu profissional de SST</li>'));
 });
 test('T8: aviso perto do preço e antes do pagamento', () => {
-  for (const p of ['precos', 'pagamento', 'pagamento/2', 'avaliacao-rapida-nr1/resultado']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(T8), p);
+  for (const p of ['precos', 'pagamento', 'avaliacao-rapida-nr1/resultado']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(T8), p);
 });
 test('termos vetados ausentes nas páginas do Empregador', () => {
-  for (const p of ['', 'precos', 'pagamento', 'pagamento/2', 'pagamento/ok', 'painel', 'avaliacao-rapida-nr1/resultado']) {
-    const h = ler(`empregador-em-dia/${p ? p + '/' : ''}index.html`);
+  for (const p of ['', 'precos', 'pagamento', 'pagamento/ok', 'painel', 'avaliacao-rapida-nr1/resultado']) {
+    // Anexo ED-1 (6c296519) nega "avaliação psicológica" e "laudo"; essa negativa não é promessa de produto.
+    const h = ler(`empregador-em-dia/${p ? p + '/' : ''}index.html`).replace(/<section id="anexo-ed-1">[^]*?<\/section>/g, '');
     assert.ok(!/SST incluíd|assinado|garante a NR-1|100% em dia|diagnóstico psicológico|avaliação psicológica|laudo/i.test(h), p);
   }
 });
