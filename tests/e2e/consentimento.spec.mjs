@@ -65,6 +65,7 @@ for (const p of PAGINAS) {
     await assentar(page);
     await semGoogle(page, rede, 'antes do aceite');
 
+    await banner(page).locator('[data-lcmc-transferencia]').check();
     await banner(page).locator('[data-lcmc="aceitar"]').click();
     await expect(banner(page)).toBeHidden();
     await expect.poll(() => rede.google().length, { message: 'depois de Aceitar, o navegador tenta carregar o GA' }).toBeGreaterThan(0);
@@ -87,6 +88,85 @@ for (const p of PAGINAS) {
   });
 }
 
+test('home: Aceitar medição sem a caixa de transferência não pede o Google', async ({ page, rede, erros }) => {
+  await page.goto('/');
+  await expect(banner(page)).toBeVisible();
+  await assentar(page);
+  await expect(banner(page).locator('[data-lcmc-transferencia]')).not.toBeChecked();
+  await banner(page).locator('[data-lcmc="aceitar"]').click();
+  await expect(banner(page)).toBeVisible();
+  const nota = banner(page).locator('#lcmc-nota');
+  await expect(nota).toContainText('Recusar não exige caixa marcada');
+  expect(await nota.evaluate((el) => { const r = el.getBoundingClientRect(); return r.height > 0 && r.top >= 0 && r.bottom <= window.innerHeight; })).toBe(true);
+  expect(await page.evaluate(() => localStorage.getItem('lcm-consent'))).toBeNull();
+  await semGoogle(page, rede, 'depois de Aceitar medição sem a autorização de transferência');
+  semErros(erros, rede);
+});
+
+test('home: Configurar preferências não inicia o GA4; salvar as duas desmarcadas recusa', async ({ page, rede, erros }) => {
+  await page.goto('/');
+  await expect(banner(page)).toBeVisible();
+  await banner(page).locator('[data-lcmc="configurar"]').click();
+  const medicao = banner(page).locator('[data-lcmc-medicao]');
+  await expect(medicao).toBeVisible();
+  await expect(medicao).not.toBeChecked();
+  expect(await banner(page).locator('#lcmc-prefs').evaluate((el) => { const r = el.getBoundingClientRect(); return r.height > 0 && r.top >= 0 && r.bottom <= window.innerHeight; })).toBe(true);
+  const alvos = await banner(page).locator('#lcmc-prefs .lcmc-opcao, #lcmc-prefs .lcmc-btn').evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().height)));
+  expect(alvos.length).toBe(3);
+  for (const h of alvos) expect(h).toBeGreaterThanOrEqual(44);
+  await expect(banner(page).locator('[data-lcmc-transferencia]')).not.toBeChecked();
+  await semGoogle(page, rede, 'com a camada de preferências aberta');
+  await banner(page).locator('[data-lcmc="salvar"]').click();
+  await expect(banner(page)).toBeHidden();
+  const o = await page.evaluate(() => JSON.parse(localStorage.getItem('lcm-consent')));
+  expect(o).toMatchObject({ v: 'recusado', medicao: false, transferencia: false, versao: 'AVISO-COOKIES-1.1' });
+  expect(o.em).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  await semGoogle(page, rede, 'depois de salvar as duas desmarcadas');
+  semErros(erros, rede);
+});
+
+test('home: as duas autorizações carregam o GA; revogar para, limpa cookies e vale na recarga e em outra página', async ({ page, rede, erros }) => {
+  await page.goto('/');
+  await expect(banner(page)).toBeVisible();
+  await banner(page).locator('[data-lcmc-transferencia]').check();
+  await banner(page).locator('[data-lcmc="aceitar"]').click();
+  await expect(banner(page)).toBeHidden();
+  await expect.poll(() => rede.google().length).toBeGreaterThan(0);
+  await page.evaluate(() => {
+    document.cookie = '_ga=GA1.1.111.111; path=/';
+    document.cookie = '_ga_TESTE=GS1.1.1; path=/';
+  });
+  await page.locator('button.cc-rever').click();
+  await expect(banner(page)).toBeVisible();
+  await banner(page).locator('[data-lcmc="recusar"]').click();
+  await expect(banner(page)).toBeHidden();
+  expect(await page.evaluate(() => document.cookie)).not.toMatch(/(?:^|; )_ga/);
+  const gravado = await page.evaluate(() => JSON.parse(localStorage.getItem('lcm-consent')));
+  expect(gravado).toMatchObject({ v: 'recusado', medicao: false, transferencia: false, versao: 'AVISO-COOKIES-1.1' });
+  const pedidos = rede.google().length;
+  await page.reload();
+  await assentar(page);
+  await expect(banner(page)).toBeHidden();
+  expect(rede.google().length).toBe(pedidos);
+  await page.goto('/contato/');
+  await assentar(page);
+  await expect(banner(page)).toBeHidden();
+  expect(rede.google().length).toBe(pedidos);
+  expect(await page.evaluate(() => document.cookie)).not.toMatch(/(?:^|; )_ga/);
+  semErros(erros, rede);
+});
+
+test('home: escolha aceita da versão 1.0 volta a mostrar o aviso e não carrega o GA4', async ({ page, rede, erros }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('lcm-consent', JSON.stringify({ v: 'aceito', em: '2026-11-06', versao: 'AVISO-COOKIES-1.0' }));
+  });
+  await page.goto('/');
+  await expect(banner(page)).toBeVisible();
+  await assentar(page);
+  await semGoogle(page, rede, 'com aceite antigo AVISO-COOKIES-1.0');
+  semErros(erros, rede);
+});
+
 // CC-SITE-11: o `font:600 15px/1.2 inherit` do lcm-consent.css é descartado inteiro (inherit não entra no atalho), e a
 // regra global button{} do style.css vazava nos botões do aviso (16,8 px, peso 800, margin-top de 22 px). O componente
 // fica intacto; o style.css define a fonte e zera margem, espaçamento e largura do .lcmc-btn. Os dois botões seguem
@@ -103,6 +183,11 @@ test('aviso de cookies: botões com 15 px, peso 600, sem a margem nem a largura 
   expect(aceitar).toMatchObject({ fonte: '15px', peso: '600', linha: '18px', margem: '0px', espacamento: 'normal' });
   expect(recusar, 'Recusar igual a Aceitar (G-06)').toEqual(aceitar);
   expect(aceitar.altura).toBeGreaterThanOrEqual(44);
+  const alturas = await banner(page).locator('.lcmc-opcao, [data-lcmc="configurar"]').evaluateAll((els) => els
+    .filter((el) => !el.closest('[hidden]') && el.getClientRects().length)
+    .map((el) => Math.round(el.getBoundingClientRect().height)));
+  expect(alturas.length).toBeGreaterThanOrEqual(2);
+  for (const h of alturas) expect(h).toBeGreaterThanOrEqual(44);
 });
 
 // Revisão do CC-SITE-11: button:hover e button:active do style.css (0,1,1) ganhavam do .lcmc-btn (0,1,0). No Recusar,

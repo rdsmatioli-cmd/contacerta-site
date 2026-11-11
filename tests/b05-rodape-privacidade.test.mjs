@@ -1,4 +1,4 @@
-// B-05 + operadores finais (Advogado: minuta 8ee9ece9, seções B7-B9 e C; nota de capa d39ff580, F-1 a F-3; endereço 20dad5c7).
+// B-05 + operadores finais (Advogado: minuta 8ee9ece9, seções B7-B9 e C; nota de capa d39ff580, F-1 a F-3; endereço 20dad5c7; literal ADV 897a0fa3).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -9,7 +9,7 @@ const raiz = fileURLToPath(new URL('../', import.meta.url));
 const ler = (p) => readFileSync(join(raiz, p), 'utf8');
 const ENDERECO = 'Rua Pais Leme, 215, Conj. 1713, Pinheiros, São Paulo, SP, 05424-150';
 const RODAPE = `RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20 · ${ENDERECO} · contato@contacertabr.com.br`;
-const NOTA = 'Última atualização: 11/11/2026. Nesta versão: incluímos a Stripe como operadora do pagamento do Empregador em Dia na seção 6 e corrigimos a seção 10.';
+const NOTA = 'Última atualização: 12/11/2026. Nesta versão: incluímos a Stripe como operadora do pagamento do Empregador em Dia na seção 6, detalhamos a medição pelo Google Analytics 4 na seção 8 (dados técnicos, consentimento do art. 7º, I, autorização específica de transferência do art. 33, VIII e registro da escolha por 183 dias) e corrigimos a seção 10, que passa a listar a Stripe entre os fornecedores e alinha o Google Analytics 4 a essa base.';
 
 function htmls(d = '') {
   return readdirSync(join(raiz, d)).flatMap((n) => {

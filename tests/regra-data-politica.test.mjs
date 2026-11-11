@@ -1,5 +1,6 @@
 // Base da trava M-PR33-01 na publicação: push com before segue igual; dispatch e push sem base usam o último
-// deploy com sucesso. A data do arquivo real (30/10/2026) passa com NOT_FUTURE e falha com TODAY.
+// deploy com sucesso. O spawn abaixo lê a data real de privacidade/index.html: passado falha em TODAY,
+// hoje passa nas duas, futuro (dia de publicação ainda não chegado em America/Sao_Paulo) falha nas duas.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync, execFileSync } from 'node:child_process';
@@ -360,11 +361,21 @@ test('clone raso real: ?v= não liga a trava; texto na mesma linha liga; SHA ile
   }
 });
 
-test('dispatch: a política publicada em 11/11/2026 segue a trava (hoje ou futuro)', () => {
+function hojeSaoPaulo() {
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric' })
+    .formatToParts(new Date()).map((x) => [x.type, x.value]));
+  return `${p.day}/${p.month}/${p.year}`;
+}
+const ordemData = (d) => d.split('/').reverse().join('');
+
+test('dispatch: NOT_FUTURE se a política não mudou; TODAY se mudou; o arquivo real obedece o relógio', () => {
   const igual = regra({ evento: 'workflow_dispatch', deploy: { sha: B, legivel: true }, alterada: () => false });
   const mudou = regra({ evento: 'workflow_dispatch', deploy: { sha: B, legivel: true }, alterada: () => true });
   assert.equal(igual.regra, NAO_FUTURA);
   assert.equal(mudou.regra, HOJE);
+  const html = readFileSync(new URL('../privacidade/index.html', import.meta.url), 'utf8');
+  const data = html.match(/Última atualização: (\d{2}\/\d{2}\/\d{4})\./)[1];
+  const hoje = hojeSaoPaulo();
   const arquivo = fileURLToPath(new URL('./politica-data.test.mjs', import.meta.url));
   const rodar = (extra) => {
     const env = { ...process.env };
@@ -374,21 +385,26 @@ test('dispatch: a política publicada em 11/11/2026 segue a trava (hoje ou futur
     Object.assign(env, extra);
     return spawnSync(process.execPath, ['--test', arquivo], { env, encoding: 'utf8' });
   };
-  const hoje = new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
-  const publicada = '11/11/2026';
-  const ordem = (d) => d.split('/').reverse().join('');
-  const futura = ordem(publicada) > ordem(hoje);
-  const passou = rodar({ REQUIRE_POLICY_DATE_NOT_FUTURE: '1' });
-  if (futura) assert.notEqual(passou.status, 0, `${passou.stdout}\n${passou.stderr}`);
-  else {
-    assert.equal(passou.status, 0, `${passou.stdout}\n${passou.stderr}`);
-    assert.match(passou.stdout, /ok \d+ - privacidade: "Última atualização" não está no futuro/);
-  }
-  const hojeExigido = rodar({ REQUIRE_POLICY_DATE_TODAY: '1' });
-  if (hoje === publicada) assert.equal(hojeExigido.status, 0, `${hojeExigido.stdout}\n${hojeExigido.stderr}`);
-  else {
-    assert.notEqual(hojeExigido.status, 0);
-    assert.match(`${hojeExigido.stdout}\n${hojeExigido.stderr}`, /política diz 11\/11\/2026/);
+  const futuro = rodar({ REQUIRE_POLICY_DATE_NOT_FUTURE: '1' });
+  const noDia = rodar({ REQUIRE_POLICY_DATE_TODAY: '1' });
+  const texto = (r) => `${r.stdout}\n${r.stderr}`;
+  const cita = new RegExp(data.replaceAll('/', '\\/'));
+  if (ordemData(data) > ordemData(hoje)) {
+    assert.notEqual(futuro.status, 0, texto(futuro));
+    assert.match(texto(futuro), cita);
+    assert.notEqual(noDia.status, 0);
+    assert.match(texto(noDia), new RegExp(`política diz ${data.replaceAll('/', '\\/')}`));
+  } else if (data === hoje) {
+    assert.equal(futuro.status, 0, texto(futuro));
+    assert.match(futuro.stdout, /ok \d+ - privacidade: "Última atualização" não está no futuro/);
+    assert.doesNotMatch(futuro.stdout, /não está no futuro[\s\S]*# SKIP/);
+    assert.equal(noDia.status, 0, texto(noDia));
+  } else {
+    assert.equal(futuro.status, 0, texto(futuro));
+    assert.match(futuro.stdout, /ok \d+ - privacidade: "Última atualização" não está no futuro/);
+    assert.doesNotMatch(futuro.stdout, /não está no futuro[\s\S]*# SKIP/);
+    assert.notEqual(noDia.status, 0);
+    assert.match(texto(noDia), new RegExp(`política diz ${data.replaceAll('/', '\\/')}`));
   }
 });
 

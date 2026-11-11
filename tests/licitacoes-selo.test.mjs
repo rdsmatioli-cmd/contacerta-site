@@ -35,7 +35,7 @@ function seloMetodoA(bytes) {
 
 function checarSelo(lista, lerPagina, esperado) {
   const doSelo = paginasDoSelo(lista);
-  assert.equal(doSelo.length, 8, `páginas em /licitacoes/: ${doSelo.join(', ')}`);
+  assert.equal(doSelo.length, 10, `páginas em /licitacoes/: ${doSelo.join(', ')}`);
   const divergentes = [];
   for (const p of doSelo) {
     const achados = selos(lerPagina(p));
