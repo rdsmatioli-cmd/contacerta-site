@@ -83,6 +83,8 @@ const SEM_LINK_INTERNO = new Map([
   // Lista de espera com o envio desligado desde 16/10: links-sem-destino.test.mjs (CC-SITE-03) proíbe link para ela
   // fora dela, de /privacidade/ e de /sobre/. Continuar indexável e no sitemap é decisão à parte.
   [`${ORIGEM}/lista-de-espera/`, 'lista de espera desligada (CC-SITE-03)'],
+  // Índice de termos da Stripe (DEC CPO be1e019d, adendo ADV 63f0d25f): indexável, mas o link no rodapé/termos é decisão à parte.
+  [`${ORIGEM}/termos-de-venda/`, 'índice de termos Stripe, link interno pendente de decisão'],
 ]);
 
 test('malha interna: toda URL do sitemap fora de /licitacoes/ é alcançável pela home seguindo links', () => {
