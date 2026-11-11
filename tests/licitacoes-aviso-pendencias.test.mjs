@@ -1,10 +1,9 @@
-// PR-A1 (Aviso AVISO-LICITACOES-1.13, ordem CEO 11/11/2026 19h17; parecer ADV 96efcc39, item 6). Trava de merge:
-// este teste FALHA enquanto licitacoes/politica.html tiver placeholder entre colchetes ([MAIÚSCULAS]) ou marcador
-// PENDENTE-*. O ADV não publica o 1.13 com colchetes: A1-2, a 2ª frase do A1-5 e o [LOCAL DA CÓPIA] do A1-7 dependem
-// da prova do CEO (nome, contrato ou termos e país do fornecedor da plataforma e da máquina); a última frase do A1-4
-// depende da condição B-2; [DATA DA PUBLICAÇÃO] entra no commit do deploy. Só fica verde quando tudo estiver
-// preenchido com literal do ADV e os marcadores tiverem saído. Não enfraquecer: é a garantia de que o PR não entra
-// incompleto.
+// PR-A1 (Aviso AVISO-LICITACOES-1.13; ordem CEO 11/11/2026 19h17 e 19h27). Literal final: parecer ADV rev. 2
+// 80715017 (seção 7), que substitui o item 6 do 96efcc39. Trava de merge: este teste FALHA enquanto
+// licitacoes/politica.html tiver placeholder entre colchetes ([MAIÚSCULAS]) ou marcador PENDENTE-*. No literal final só
+// resta o placeholder do rito [DD/MM/AAAA DA PUBLICAÇÃO] (pílula e item 12), preenchido no SHA da publicação; o
+// [SELO 12] já está calculado (método A). Só fica verde com a data preenchida. Não enfraquecer: é a garantia de que o
+// PR não entra incompleto.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
