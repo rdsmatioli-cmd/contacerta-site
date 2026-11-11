@@ -20,13 +20,13 @@ test('ui.js restaura os nomes, habilita o botão e impede o envio nativo', () =>
   assert.match(ui, /\[data-requer-js\]/);
   assert.match(ui, /addEventListener\('submit', \(e\) => \{ e\.preventDefault\(\)/);
 });
-// GA4 via componente consent/ (ac527630): CP-01, CP-04, CP-05, CP-06 (CONFERENCIA_GA4_PUBLICADO 1562e4ae).
+// GA4 via assets/lcm-consent.js (AVISO-COOKIES-1.1): CP-01, CP-04, CP-05, CP-06 e as duas autorizações.
 import { createHash } from 'node:crypto';
 const lcm = readFileSync(new URL('../assets/lcm-consent.js', import.meta.url));
 const med = readFileSync(new URL('../assets/js/medicao.js', import.meta.url), 'utf8');
 const priv = readFileSync(new URL('../privacidade/index.html', import.meta.url), 'utf8');
-test('componente lcm-consent.js é o ac527630, sem alteração', () => {
-  assert.equal(createHash('sha256').update(lcm).digest('hex'), 'ac527630b355304038715e0129d0e9e8adf1f10329862850cefff8933eab86d0');
+test('componente lcm-consent.js é o AVISO-COOKIES-1.1 publicado neste SHA', () => {
+  assert.equal(createHash('sha256').update(lcm).digest('hex'), 'eb9eaa9122faa596df96b4b9d5845871f5d7705c4915430234abc9413ee6c261');
 });
 test('página usa o componente; nenhum gtag inline nem anonymize_ip', () => {
   assert.match(html, /<script src="\/assets\/lcm-consent\.js\?v=[0-9a-f]+" defer data-ga4="G-D9PCMD9Q2H" data-marca="Conta Certa"[^>]*data-validade-dias="183" data-chaves-legadas="cc-consent-v1" data-eventos="calculo_concluido,cta_click" data-params="calculadora,destino"><\/script>/);
@@ -38,7 +38,7 @@ test('componente: signals desligados, URL sem query, escolha com data e versão 
   assert.match(s, /allow_google_signals: false/); assert.match(s, /allow_ad_personalization_signals: false/);
   assert.doesNotMatch(s, /anonymize_ip/);
   assert.match(s, /return x\.origin \+ x\.pathname/);
-  assert.match(s, /JSON\.stringify\(\{ v: v, em: hoje\(\), versao: VERSAO \}\)/);
+  assert.match(s, /medicao: m,\s*transferencia: t,\s*em: em,\s*versao: versao/);
 });
 test('medicao.js: só calculo_concluido e cta_click, via lcmTrack, destino sem query', () => {
   const ev = [...med.matchAll(/t\('([a-z_]+)'/g)].map((m) => m[1]).sort();
@@ -48,10 +48,14 @@ test('medicao.js: só calculo_concluido e cta_click, via lcmTrack, destino sem q
 });
 test('política: G-02, G-03, B-01 e M-01; sem AdSense em uso e sem o contador fora da nota de versão', () => {
   assert.match(priv, /<p>Hoje este site não exibe anúncios nem usa cookies de publicidade\. Se passarmos a exibir anúncios do Google AdSense, esta política será atualizada antes e os cookies de publicidade só serão usados com o seu consentimento, pedido separadamente no aviso de cookies\.<\/p>/);
-  assert.match(priv, /O Google Analytics é fornecido pelo Google LLC, que atua como operador e pode tratar esses dados nos Estados Unidos e em outros países, com base nas cláusulas contratuais do Google para transferência internacional \(LGPD, art\. 33, II\)\. Os dados de eventos ficam guardados no Google Analytics por 2 meses\. Sua escolha no aviso de cookies vale por 6 meses; depois disso, perguntaremos de novo\./);
+  assert.match(priv, /A base legal desta medição é o seu consentimento \(LGPD, art\. 7º, I\)\. Os cookies de medição contêm identificadores aleatórios ou pseudônimos do navegador\./);
+  assert.match(priv, /O Google LLC pode tratar esses dados nos Estados Unidos e em outros países onde o Google e seus suboperadores operam\. Essa transferência para a medição de audiência depende da sua autorização específica e destacada no aviso de cookies \(LGPD, art\. 33, VIII\), separada do consentimento para a medição\./);
+  assert.match(priv, /Sua escolha no aviso de cookies, com a data e a versão do aviso, fica guardada no armazenamento local do navegador por 183 dias; depois disso ou se a versão do aviso mudar, perguntaremos de novo\./);
+  assert.match(priv, /O prazo de guarda de 2 meses se refere aos dados de eventos no GA4, e não à validade dos cookies\./);
+  assert.doesNotMatch(priv, /art\. 33, II(?!I)/);
   assert.doesNotMatch(priv, /adssettings|aboutads|Este site pode exibir anúncios|link_interno|uso da busca/);
   assert.match(priv, /a conclusão de um cálculo \(só o nome da calculadora\) e cliques em botões de chamada e em links de parceiros \(só o caminho da página ou o domínio do parceiro\)/);
-  const nota = '<p><em>Última atualização: 30/10/2026. Nesta versão: incluímos o endereço da sede da LCM e atualizamos os nomes empresariais do Brevo e do ImprovMX nas seções 4 e 5.</em></p>'; // B-05 + operadores (Advogado 8ee9ece9, B7)
+  const nota = '<p><em>Última atualização: 11/11/2026. Nesta versão: detalhamos a medição pelo Google Analytics 4 na seção 8 (dados técnicos, consentimento do art. 7º, I, autorização específica de transferência do art. 33, VIII e registro da escolha por 183 dias) e alinhamos a seção 10 a essa base.</em></p>';
   assert.ok(priv.includes(nota));
   assert.doesNotMatch(priv.replace(nota, ''), /abacus/i);
 });
