@@ -360,7 +360,7 @@ test('clone raso real: ?v= não liga a trava; texto na mesma linha liga; SHA ile
   }
 });
 
-test('dispatch: a política publicada em 07/11/2026 segue a trava (hoje ou futuro)', () => {
+test('dispatch: a política publicada em 11/11/2026 segue a trava (hoje ou futuro)', () => {
   const igual = regra({ evento: 'workflow_dispatch', deploy: { sha: B, legivel: true }, alterada: () => false });
   const mudou = regra({ evento: 'workflow_dispatch', deploy: { sha: B, legivel: true }, alterada: () => true });
   assert.equal(igual.regra, NAO_FUTURA);
@@ -375,7 +375,7 @@ test('dispatch: a política publicada em 07/11/2026 segue a trava (hoje ou futur
     return spawnSync(process.execPath, ['--test', arquivo], { env, encoding: 'utf8' });
   };
   const hoje = new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
-  const publicada = '07/11/2026';
+  const publicada = '11/11/2026';
   const ordem = (d) => d.split('/').reverse().join('');
   const futura = ordem(publicada) > ordem(hoje);
   const passou = rodar({ REQUIRE_POLICY_DATE_NOT_FUTURE: '1' });
@@ -388,7 +388,7 @@ test('dispatch: a política publicada em 07/11/2026 segue a trava (hoje ou futur
   if (hoje === publicada) assert.equal(hojeExigido.status, 0, `${hojeExigido.stdout}\n${hojeExigido.stderr}`);
   else {
     assert.notEqual(hojeExigido.status, 0);
-    assert.match(`${hojeExigido.stdout}\n${hojeExigido.stderr}`, /política diz 07\/11\/2026/);
+    assert.match(`${hojeExigido.stdout}\n${hojeExigido.stderr}`, /política diz 11\/11\/2026/);
   }
 });
 
