@@ -33,10 +33,10 @@ export function pontosAtencao({ onde = [], metas, reclamacao } = {}) {
 
 export function textoPgr(pgr) {
   return {
-    'sst': 'Feito por empresa de SST: o relatório entra como anexo',
-    'proprio': 'Feito pela empresa: o relatório entra como anexo',
-    'nao': 'Não tem: incluímos orientação',
-    'naosei': 'Não sabe se tem: incluímos orientação',
+    'sst': 'Feito por empresa de SST: o relatório pode ser analisado e anexado ao inventário de riscos',
+    'proprio': 'Feito pela empresa: o relatório pode ser analisado e anexado ao inventário de riscos',
+    'nao': 'Não tem: o PGR, quando exigido, é da empresa; este serviço não o substitui',
+    'naosei': 'Não sabe se tem: confirme com o RH ou a empresa de SST; este serviço não substitui o PGR',
   }[pgr] || null;
 }
 

@@ -88,7 +88,7 @@ pagina({
   conteudo: `<section class="ed-hero" data-ed-tela="1">
 <p class="cat-pill">NR-1: riscos psicossociais no PGR</p>
 <h1>Avaliação rápida NR-1 dos riscos psicossociais, sem montar planilha</h1>
-<p class="lead">A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua). Sua empresa aplica o questionário internamente, com o nosso material e instruções, e nos envia só resultados agregados e protegidos; você recebe um relatório orientativo com sugestões de referência para ações, que pode servir de ponto de partida para o inventário de riscos e o plano de ação que a sua empresa elabora no PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora.</p>
+<p class="lead">A NR-1 agora inclui os fatores de risco psicossociais relacionados ao trabalho, como sobrecarga e assédio, no gerenciamento de riscos da empresa (desde 26/05/2026). As multas e sanções baseadas nesse ponto estão suspensas provisoriamente pelo STF na ADPF 1316 (situação conferida em 11/11/2026, sem data final divulgada); a obrigação de identificar e avaliar esses riscos continua. Sua empresa aplica o questionário internamente, com o nosso material e instruções, e nos envia só resultados agregados e protegidos; você recebe um relatório orientativo com sugestões de referência para ações, que pode servir de ponto de partida para o inventário de riscos e o plano de ação que a sua empresa elabora no PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Neste serviço ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora, que deve definir quem conduz a avaliação de riscos, com conhecimento técnico adequado.</p>
 <p><a class="btn" href="/empregador-em-dia/avaliacao-rapida-nr1/">Ver o que minha empresa precisa</a></p>
 <h2>O que você recebe</h2>
 ${LISTA_ENTREGA}
@@ -105,7 +105,7 @@ ${LISTA_ENTREGA}
 pagina({
   caminho: 'empregador-em-dia/avaliacao-rapida-nr1/',
   titulo: 'Avaliação rápida NR-1: o que sua empresa precisa | Empregador em Dia',
-  desc: 'Responda três perguntas sobre a sua empresa e veja o que falta para incluir os riscos psicossociais no PGR e cumprir a NR-1. Resultado na hora.',
+  desc: 'Responda três perguntas sobre a sua empresa e veja pontos de atenção para incluir os riscos psicossociais no PGR. Resultado orientativo, na hora; não é avaliação de riscos.',
   conteudo: `<h1>Avaliação rápida NR-1</h1>
 <form class="ed-form" id="ed-diag" novalidate>
 <fieldset data-passo="1"><legend><span class="ed-passo">Passo 1 de 3</span> Quantas pessoas trabalham na empresa?</legend>
@@ -121,7 +121,7 @@ pagina({
 <p class="ajuda" id="aj-onde"><small>Pode marcar mais de um. Exemplo: uma rede de farmácias marca "Loja ou atendimento ao público".</small></p>
 <p class="ed-rotulo">Tem metas de venda ou de produção?</p>
 <div class="ed-ops">${radio('metas', [['sim', 'Sim'], ['nao', 'Não'], ['asvezes', 'Às vezes']], 'aj-metas')}</div>
-<p class="ajuda" id="aj-metas"><small>Metas apertadas são um dos riscos que a NR-1 pede para avaliar. Exemplo: vendedores com meta mensal.</small></p>
+<p class="ajuda" id="aj-metas"><small>Metas que geram excesso de demandas (sobrecarga) são um dos fatores de risco psicossocial citados pelo guia do MTE. Exemplo: vendedores com meta mensal.</small></p>
 <p class="ed-rotulo">Alguém já reclamou de assédio ou de excesso de trabalho?</p>
 <div class="ed-ops">${radio('reclamacao', [['sim', 'Sim'], ['nao', 'Não'], ['naodizer', 'Prefiro não dizer']], 'aj-recl')}</div>
 <p class="ajuda" id="aj-recl"><small>Esta resposta fica só no seu navegador. Exemplo: uma queixa no RH no último ano.</small></p>
@@ -151,7 +151,7 @@ pagina({
 <p>${PRAZO_RELATORIO}</p></section>
 <section data-ed-res="em-breve" hidden><h1>Em breve</h1></section>
 <section data-ed-res="simplificada" hidden><h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>
-<p>MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.</p>
+<p>O MEI e as microempresas ou empresas de pequeno porte de grau de risco 1 ou 2 que, no levantamento preliminar de perigos, não identificarem exposição a agentes físicos, químicos ou biológicos conforme a NR-9 e fizerem a declaração digital prevista na NR-1 podem ficar dispensados de elaborar o PGR (NR-1, itens 1.8.1 e 1.8.4). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.</p>
 <ul class="ed-cartoes"><li><strong>Guia gratuito para pequenas empresas</strong><span>Checklist de 1 página com o que avaliar, um modelo de plano de ação e como anexar ao PGR.</span><button type="button" class="btn" disabled>Receber o guia por e-mail</button></li></ul>
 <p><a href="/contato/">Quer mesmo assim um serviço sob medida? Fale com a gente.</a></p></section>
 <section data-ed-res="sob-consulta" hidden><h1>Para mais de 200 funcionários, fazemos um orçamento</h1>

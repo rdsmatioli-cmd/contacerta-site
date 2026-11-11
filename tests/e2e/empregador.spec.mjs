@@ -75,7 +75,7 @@ for (const [faixa, destino, preco, parcelas] of CASOS) {
       expect(txt).toContain(preco);
       expect(txt).toContain(parcelas);
       expect(txt).toContain('Metas de venda · atendimento ao público');
-      expect(txt).toContain('Não sabe se tem: incluímos orientação');
+      expect(txt).toContain('Não sabe se tem: confirme com o RH ou a empresa de SST; este serviço não substitui o PGR');
       expect(txt).toContain('validação técnica opcional, não incluída no preço'); // ED_SST_INCLUIDO=false (DEC CPO 30/10, Jurídico 5a441f81 T2)
     } else {
       expect(txt).not.toContain('R$');

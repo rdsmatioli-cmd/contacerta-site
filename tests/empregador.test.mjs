@@ -61,7 +61,7 @@ test('termos NR-1 proibidos e "se aprovada"/44h-divisor fora das páginas', () =
 test('T01 CA2: textos literais da v3.3 p. 2 (com as reescritas do Advogado 38ccc6e0)', () => {
   const h = ler(PAGINAS[0]);
   for (const t of ['NR-1: riscos psicossociais no PGR', 'Avaliação rápida NR-1 dos riscos psicossociais, sem montar planilha',
-    'A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026;',
+    'A NR-1 agora inclui os fatores de risco psicossociais relacionados ao trabalho, como sobrecarga e assédio, no gerenciamento de riscos da empresa (desde 26/05/2026).',
     'Material e instruções para a coleta interna do questionário pela sua empresa',
     'Modelo para enviar só resultados agregados e protegidos',
     'Relatório orientativo por grupo ou setor, com limitações e sugestões de referência para ações',
@@ -239,15 +239,15 @@ test('PR #36 revisões: textos literais travados nas páginas', () => {
   assert.ok(jor.indexOf('data-ed="aviso-m02"') < jor.indexOf('<section class="ed-conta"'), 'aviso antes do resultado');
   for (const t of [
     '<h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>',
-    'MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.',
+    'O MEI e as microempresas ou empresas de pequeno porte de grau de risco 1 ou 2 que, no levantamento preliminar de perigos, não identificarem exposição a agentes físicos, químicos ou biológicos conforme a NR-9 e fizerem a declaração digital prevista na NR-1 podem ficar dispensados de elaborar o PGR (NR-1, itens 1.8.1 e 1.8.4). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.',
     '<h1>Sua empresa deve avaliar os riscos psicossociais no PGR</h1>',
   ]) assert.ok(res.includes(t), t);
   assert.doesNotMatch(res, /<input type="email"|id="ed-avise"/); // F-1 (d39ff580): Me avise fora com ED_ME_AVISE OFF
   assert.doesNotMatch(res, /type="checkbox"[^>]*checked/);
   assert.doesNotMatch(res, /menos de 20 funcionários, você pode|precisa incluir os riscos/i);
   for (const t of [
-    'Sua empresa aplica o questionário internamente, com o nosso material e instruções, e nos envia só resultados agregados e protegidos; você recebe um relatório orientativo com sugestões de referência para ações, que pode servir de ponto de partida para o inventário de riscos e o plano de ação que a sua empresa elabora no PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora.',
-    '(desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua)',
+    'Sua empresa aplica o questionário internamente, com o nosso material e instruções, e nos envia só resultados agregados e protegidos; você recebe um relatório orientativo com sugestões de referência para ações, que pode servir de ponto de partida para o inventário de riscos e o plano de ação que a sua empresa elabora no PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Neste serviço ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora, que deve definir quem conduz a avaliação de riscos, com conhecimento técnico adequado.',
+    'As multas e sanções baseadas nesse ponto estão suspensas provisoriamente pelo STF na ADPF 1316 (situação conferida em 11/11/2026, sem data final divulgada); a obrigação de identificar e avaliar esses riscos continua.',
     'Avaliação rápida NR-1 para empresas de 20 a 50 empregados: sua empresa aplica o questionário internamente e recebe um relatório orientativo dos resultados agregados. Não substitui o PGR.',
   ]) assert.ok(lan.includes(t), t);
   assert.ok(!lan.includes('simulação · dados de exemplo'));
