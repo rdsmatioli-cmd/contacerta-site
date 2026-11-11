@@ -30,7 +30,7 @@ test('texto da caixa de transferência é o da minuta, com a seção 8 da Conta 
 test('corpo do aviso da Conta Certa permanece o texto atual', () => {
   assert.equal(
     textoCorpo('Conta Certa', 'RODRIGO DE SIMONE MATIOLI LTDA (CNPJ 61.193.879/0001-20)'),
-    'Conta Certa, operada por RODRIGO DE SIMONE MATIOLI LTDA (CNPJ 61.193.879/0001-20), quer usar cookies do Google Analytics, fornecido pelo Google, para medir de forma agregada como o site é usado. Esses dados podem ser tratados pelo Google fora do Brasil. Os cookies só são ativados se você clicar em Aceitar; se recusar, o site funciona normalmente. Não usamos cookies de publicidade. Você pode mudar sua escolha a qualquer momento em "Preferências de cookies", no rodapé. Saiba mais na ',
+    'Conta Certa, operada por RODRIGO DE SIMONE MATIOLI LTDA (CNPJ 61.193.879/0001-20), quer usar cookies do GA4, fornecido pelo Google, para medir de forma agregada como o site é usado. Esses dados podem ser tratados pelo Google fora do Brasil. Os cookies só são ativados se você clicar em Aceitar medição; se recusar, o site funciona normalmente. Não usamos cookies de publicidade. Você pode mudar sua escolha a qualquer momento em "Preferências de cookies", no rodapé. Saiba mais na ',
   );
 });
 

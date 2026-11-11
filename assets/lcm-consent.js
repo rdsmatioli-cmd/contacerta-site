@@ -32,7 +32,7 @@
   var NOTA_ACEITE = 'A medição só começa com as duas autorizações: marque a caixa de transferência acima e clique de novo em Aceitar medição. Se não quiser autorizar a transferência, clique em Recusar. Recusar não exige caixa marcada, e o site continua disponível.';
 
   function textoCorpo(marca, controlador) {
-    return marca + ', operada por ' + controlador + ', quer usar cookies do Google Analytics, fornecido pelo Google, para medir de forma agregada como o site é usado. Esses dados podem ser tratados pelo Google fora do Brasil. Os cookies só são ativados se você clicar em Aceitar; se recusar, o site funciona normalmente. Não usamos cookies de publicidade. Você pode mudar sua escolha a qualquer momento em "Preferências de cookies", no rodapé. Saiba mais na ';
+    return marca + ', operada por ' + controlador + ', quer usar cookies do GA4, fornecido pelo Google, para medir de forma agregada como o site é usado. Esses dados podem ser tratados pelo Google fora do Brasil. Os cookies só são ativados se você clicar em Aceitar medição; se recusar, o site funciona normalmente. Não usamos cookies de publicidade. Você pode mudar sua escolha a qualquer momento em "Preferências de cookies", no rodapé. Saiba mais na ';
   }
 
   function textoTransferencia(secao) {

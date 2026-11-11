@@ -26,7 +26,7 @@ const lcm = readFileSync(new URL('../assets/lcm-consent.js', import.meta.url));
 const med = readFileSync(new URL('../assets/js/medicao.js', import.meta.url), 'utf8');
 const priv = readFileSync(new URL('../privacidade/index.html', import.meta.url), 'utf8');
 test('componente lcm-consent.js é o AVISO-COOKIES-1.1 publicado neste SHA', () => {
-  assert.equal(createHash('sha256').update(lcm).digest('hex'), 'cdc2ef9d4267f071cd77b3ca9280c8142d40159b3a2c10f0a5b08cd54e71bdfa');
+  assert.equal(createHash('sha256').update(lcm).digest('hex'), 'eb9eaa9122faa596df96b4b9d5845871f5d7705c4915430234abc9413ee6c261');
 });
 test('página usa o componente; nenhum gtag inline nem anonymize_ip', () => {
   assert.match(html, /<script src="\/assets\/lcm-consent\.js\?v=[0-9a-f]+" defer data-ga4="G-D9PCMD9Q2H" data-marca="Conta Certa"[^>]*data-validade-dias="183" data-chaves-legadas="cc-consent-v1" data-eventos="calculo_concluido,cta_click" data-params="calculadora,destino"><\/script>/);
@@ -55,7 +55,7 @@ test('política: G-02, G-03, B-01 e M-01; sem AdSense em uso e sem o contador fo
   assert.doesNotMatch(priv, /art\. 33, II(?!I)/);
   assert.doesNotMatch(priv, /adssettings|aboutads|Este site pode exibir anúncios|link_interno|uso da busca/);
   assert.match(priv, /a conclusão de um cálculo \(só o nome da calculadora\) e cliques em botões de chamada e em links de parceiros \(só o caminho da página ou o domínio do parceiro\)/);
-  const nota = '<p><em>Última atualização: 07/11/2026. Nesta versão: detalhamos a medição pelo Google Analytics 4 na seção 8 (dados técnicos, consentimento do art. 7º, I, autorização específica de transferência do art. 33, VIII e registro da escolha por 183 dias) e alinhamos a seção 10 a essa base.</em></p>';
+  const nota = '<p><em>Última atualização: 11/11/2026. Nesta versão: detalhamos a medição pelo Google Analytics 4 na seção 8 (dados técnicos, consentimento do art. 7º, I, autorização específica de transferência do art. 33, VIII e registro da escolha por 183 dias) e alinhamos a seção 10 a essa base.</em></p>';
   assert.ok(priv.includes(nota));
   assert.doesNotMatch(priv.replace(nota, ''), /abacus/i);
 });
