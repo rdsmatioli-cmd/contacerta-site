@@ -9,4 +9,4 @@ export const PUBLICACAO_TERMOS_LICITACOES = '11/11/2026';
 // Aviso AVISO-LICITACOES-1.12 (adendo ADV 4780ea74 §8): data real do deploy do SHA do aviso, planejado para 11/11/2026
 // (LIVE 11/11 12h BRT; limite 12/11 12h, DEC CEO ff164978). Separada da data dos Termos. Se o deploy escorregar,
 // troque esta data, o item 12, a pílula e o selo (método A) no mesmo commit: é um SHA novo e exige nova revisão.
-export const PUBLICACAO_AVISO_LICITACOES = '11/11/2026';
+export const PUBLICACAO_AVISO_LICITACOES = '13/11/2026';
