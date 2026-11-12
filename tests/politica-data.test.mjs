@@ -34,7 +34,7 @@ export function errosDatas(pares, { exigeHoje, hoje }) {
   for (const [nome, d] of pares) {
     if (d === PH) e.push(`${nome}: placeholder ${PH} pendente (preencher no commit do deploy, DEC CPO (a))`);
     else if (!dataValida(d)) e.push(`${nome} diz ${d}, que não é uma data válida`);
-    else if (exigeHoje && d !== hoje && !(d === '16/11/2026' && ordem('16/11/2026') >= ordem(hoje))) e.push(`${nome} diz ${d}, mas hoje em America/Sao_Paulo é ${hoje}`);
+    else if (exigeHoje && d !== hoje) e.push(`${nome} diz ${d}, mas hoje em America/Sao_Paulo é ${hoje}`);
   }
   return e;
 }
@@ -62,7 +62,7 @@ test('privacidade: "Última atualização" não está no futuro (publicação se
   const erros = errosDatas([['política', datas[0]]], { exigeHoje: false, hoje: hojeSaoPaulo() });
   assert.deepEqual(erros, [], erros.join('\n'));
   const hoje = hojeSaoPaulo();
-  assert.ok(ordem(datas[0]) <= ordem(hoje) || (datas[0] === '16/11/2026' && ordem('16/11/2026') >= ordem(hoje)), `a política diz ${datas[0]}, depois de hoje em America/Sao_Paulo (${hoje})`);
+  assert.ok(ordem(datas[0]) <= ordem(hoje), `a política diz ${datas[0]}, depois de hoje em America/Sao_Paulo (${hoje})`);
 });
 
 test('hojeSaoPaulo equivale a TZ=America/Sao_Paulo date +%d/%m/%Y', () => {
