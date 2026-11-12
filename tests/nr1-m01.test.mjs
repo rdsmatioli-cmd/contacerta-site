@@ -55,7 +55,7 @@ test('política: G-02, G-03, B-01 e M-01; sem AdSense em uso e sem o contador fo
   assert.doesNotMatch(priv, /art\. 33, II(?!I)/);
   assert.doesNotMatch(priv, /adssettings|aboutads|Este site pode exibir anúncios|link_interno|uso da busca/);
   assert.match(priv, /a conclusão de um cálculo \(só o nome da calculadora\) e cliques em botões de chamada e em links de parceiros \(só o caminho da página ou o domínio do parceiro\)/);
-  const nota = '<p><em>Última atualização: 12/11/2026. Nesta versão: incluímos a Stripe como operadora do pagamento do Empregador em Dia na seção 6, detalhamos a medição pelo Google Analytics 4 na seção 8 (dados técnicos, consentimento do art. 7º, I, autorização específica de transferência do art. 33, VIII e registro da escolha por 183 dias) e corrigimos a seção 10, que passa a listar a Stripe entre os fornecedores e alinha o Google Analytics 4 a essa base.</em></p>'; // B-05; literal ADV 897a0fa3
+  const nota = '<p><em>Última atualização: 16/11/2026. Nesta versão: incluímos a Stripe como operadora do pagamento do Empregador em Dia na seção 6, detalhamos a medição pelo Google Analytics 4 na seção 8 (dados técnicos, consentimento do art. 7º, I, autorização específica de transferência do art. 33, VIII e registro da escolha por 183 dias) e corrigimos a seção 10, que passa a listar a Stripe entre os fornecedores e alinha o Google Analytics 4 a essa base.</em></p>'; // B-05; literal ADV 897a0fa3
   assert.ok(priv.includes(nota));
   assert.doesNotMatch(priv.replace(nota, ''), /abacus/i);
 });

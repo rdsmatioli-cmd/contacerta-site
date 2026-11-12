@@ -28,7 +28,7 @@ const clsCheckoutDepois = '<script>if(document.documentElement.getAttribute(\'da
 
 const INDEXAVEIS = ['empregador-em-dia/', 'empregador-em-dia/jornada-42h/'];
 const TITULO_OFF = {
-  'empregador-em-dia/orcamento-nr1/': 'Pedir orçamento NR-1 | Empregador em Dia',
+  'empregador-em-dia/orcamento-nr1/': 'Pedir orçamento | Empregador em Dia',
 };
 // DEC CEO 11/11 19h20 e parecer ADV 8cb75b8d §8: com a flag OFF o HTML servido é só o aviso.
 export const AVISO_ED = 'Esta página está em preparação e ainda não está disponível.';
@@ -374,7 +374,7 @@ pagina({
   desc: 'Acompanhamento do pedido do Empregador em Dia.',
   conteudo: `<section data-ed-e3="login" id="ed-painel">
 <p class="ed-selo">dados de exemplo</p>
-<h1>Empregador em Dia · <span data-ed="pn-empresa">Farmácia Boa</span></h1>
+<h1>Empregador em Dia · <span data-ed="pn-empresa">[EMPRESA]</span></h1>
 <p>Pedido <span data-ed="pn-pedido">ED-2026-10-0087</span> · iniciado em <span data-ed="pn-inicio">27/10/2026</span></p>
 <nav class="ed-menu" aria-label="Painel"><a href="#andamento">Andamento</a><a href="#respostas">Respostas</a><a href="#relatorio">Relatório</a><a href="#pagamentos">Pagamentos</a><a href="/contato/">Ajuda</a></nav>
 <ul class="ed-cartoes" id="andamento">

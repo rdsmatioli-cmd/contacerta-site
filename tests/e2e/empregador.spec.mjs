@@ -1,5 +1,6 @@
 // PR-0: EMPREGADOR_EM_DIA OFF. O HTML servido é só o aviso; o fluxo de venda fica no gerador (flag ON).
 import { test, expect, semErros, semRedeExterna, assentar } from './fixtures.mjs';
+import { textoPgr } from '../../assets/js/empregador/motor.js';
 
 const PAGS = [
   '/empregador-em-dia/',
@@ -30,6 +31,13 @@ for (const url of PAGS) {
     semErros(erros, rede);
   });
 }
+
+test('A4: texto do PGR no resultado usa os literais novos', () => {
+  expect(textoPgr('sst')).toBe('Feito por empresa de SST: o relatório pode ser analisado e anexado ao inventário de riscos');
+  expect(textoPgr('proprio')).toBe('Feito pela empresa: o relatório pode ser analisado e anexado ao inventário de riscos');
+  expect(textoPgr('nao')).toBe('Não tem: o PGR, quando exigido, é da empresa; este serviço não o substitui');
+  expect(textoPgr('naosei')).toBe('Não sabe se tem: confirme com o RH ou a empresa de SST; este serviço não substitui o PGR');
+});
 
 test('PR-0: /empregador-em-dia/pagamento/2/ não existe', async ({ page }) => {
   const resposta = await page.goto('/empregador-em-dia/pagamento/2/');

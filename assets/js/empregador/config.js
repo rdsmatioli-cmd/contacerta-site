@@ -19,7 +19,7 @@ export const SST_TEXTO_OPCIONAL = 'SST: validação técnica opcional, não incl
 // Tabela aprovada (16/10; CFO eb62ca5d). Única fonte de preço.
 export const FAIXAS = Object.freeze([
   { id: 'lt20', rotulo: 'Menos de 20', min: 1, max: 19, preco: null },
-  { id: '20-50', rotulo: '40 a 50', min: 20, max: 50, preco: 1490, grupos: 4 },
+  { id: '20-50', rotulo: '40 a 50', min: 40, max: 50, preco: 1490, grupos: 1 },
   { id: '51-100', rotulo: '51 a 100', min: 51, max: 100, preco: 2290, grupos: 8 },
   { id: '101-200', rotulo: '101 a 200', min: 101, max: 200, preco: 3490, grupos: 12 },
   { id: 'gt200', rotulo: 'Mais de 200', min: 201, max: Infinity, preco: null }, // DEC 95a76e17: sob medida

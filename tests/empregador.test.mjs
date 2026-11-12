@@ -116,7 +116,7 @@ test('T03 CA1: preços e parcelas da tabela aprovada; <20 e >200 sem preço', ()
     [[1490, 745, 745], [2290, 1145, 1145], [3490, 1745, 1745]]);
   assert.equal(oferta('lt20'), null);
   assert.equal(oferta('gt200'), null);
-  assert.deepEqual(FAIXAS.filter((f) => f.grupos).map((f) => f.grupos), [4, 8, 12]);
+  assert.deepEqual(FAIXAS.filter((f) => f.grupos).map((f) => f.grupos), [1, 8, 12]);
 });
 
 test('T03 CA2: bloco <20 e bloco >200 sem "R$" no HTML', () => {
