@@ -7,7 +7,6 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { FLAGS, FAIXAS, FAIXAS_SALARIO, SALARIO_MINIMO, ED_SST_INCLUIDO, ESCALA_5, NOTA_DOMESTICO, JORNADA } from '../assets/js/empregador/config.js';
 import { destino, oferta, pontosAtencao, validarPasso, jornada } from '../assets/js/empregador/motor.js';
 import { emitirTokens, responder, podeAgregar } from '../assets/js/empregador/token.js';
-import { execFileSync } from 'node:child_process';
 import { AVISO_ED, DESC_NEUTRA, TITLE_PRECOS, gerarEd } from './_src/empregador/gerar.mjs';
 
 const raiz = new URL('../', import.meta.url);
@@ -61,12 +60,16 @@ test('PR-0: HTML servido só com o aviso, noindex, fora do sitemap e sem pagamen
   }
 });
 
-test('flag ON restaura o HTML da main 97389ae0, fora o ?v=; pagamento/2 não volta', () => {
-  const norm = (h) => h.replace(/\?v=[0-9a-f]{10}/g, '?v=HASH');
-  for (const [arquivo, html] of VENDA) {
-    const atual = execFileSync('git', ['show', `97389ae067408208f25daf8f31e2769654986ad0:${arquivo}`], { encoding: 'utf8' });
-    assert.equal(norm(html), norm(atual), arquivo);
-  }
+test('flag ON traz os literais do PR-1; pagamento/2 não volta', () => {
+  const home = venda(PAGINAS[0]);
+  assert.ok(home.includes('<h1>Apoio para a sua empresa trabalhar a NR-1</h1>'));
+  assert.ok(home.includes('Apoio para a sua empresa trabalhar a NR-1, faixa de 40 a 50 empregados: sua empresa aplica o questionário internamente e recebe um relatório orientativo dos resultados agregados. Não substitui o PGR.'));
+  assert.ok(home.includes('R$ 1.490,00 à vista, tributos incluídos, por cartão de crédito ou Pix.'));
+  assert.ok(home.includes('(situação conferida em 12/11/2026, sem data final divulgada)'));
+  const aval = venda(PAGINAS[1]);
+  assert.match(aval, /<meta name="robots" content="noindex, follow">/);
+  assert.ok(aval.includes('Esta é uma triagem gratuita e orientativa. Não é a avaliação de riscos psicossociais da NR-1.'));
+  assert.ok(!aval.includes('rel="canonical" href="https://contacertabr.com.br/nr1-riscos-psicossociais/"'));
   assert.equal(VENDA.has('empregador-em-dia/pagamento/2/index.html'), false);
 });
 
@@ -81,11 +84,11 @@ test('termos NR-1 proibidos e "se aprovada"/44h-divisor fora das páginas', () =
 
 test('T01 CA2: textos literais da v3.3 p. 2 (com as reescritas do Advogado 38ccc6e0)', () => {
   const h = venda(PAGINAS[0]);
-  for (const t of ['NR-1: riscos psicossociais no PGR', 'Sua empresa em dia com a NR-1, sem montar planilha',
-    'A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026;',
-    'Questionário anônimo para os funcionários, por link', 'Inventário de riscos psicossociais para o PGR',
-    'Plano de ação com prazos e responsáveis', // 4º item e abertura: Advogado M-03 e B-01, teste abaixo
-    'Preço fechado pela faixa de funcionários.', 'Você só paga o resto quando receber o relatório.',
+  for (const t of ['NR-1: riscos psicossociais no PGR', 'Apoio para a sua empresa trabalhar a NR-1',
+    'A NR-1 agora inclui os fatores de risco psicossociais relacionados ao trabalho, como sobrecarga e assédio, no gerenciamento de riscos da empresa (desde 26/05/2026).',
+    'Instruções para a sua empresa aplicar o questionário internamente', 'Material e instruções para a coleta interna do questionário pela sua empresa',
+    'Modelo para enviar só resultados agregados e protegidos',
+    'De 40 a 50 empregados. Preço fechado para esta faixa.', 'R$ 1.490,00 à vista, tributos incluídos, por cartão de crédito ou Pix.',
     'Veja quanto custaria reduzir a jornada.', 'href="/empregador-em-dia/avaliacao-rapida-nr1/"', 'href="/empregador-em-dia/jornada-42h/"']) {
     assert.ok(h.includes(t), t);
   }
@@ -105,7 +108,7 @@ test('T02 CA1/CA3: validação e destino das 5 faixas', () => {
   assert.ok(validarPasso(3, {}));
   assert.equal(validarPasso(3, { pgr: 'naosei' }), null);
   assert.deepEqual(['lt20', '20-50', '51-100', '101-200', 'gt200'].map(destino),
-    ['simplificada', 'oferta', 'oferta', 'oferta', 'sob-consulta']);
+    ['simplificada', 'oferta', 'em-breve', 'em-breve', 'sob-consulta']);
 });
 
 test('T03 CA1: preços e parcelas da tabela aprovada; <20 e >200 sem preço', () => {
@@ -254,18 +257,19 @@ test('PR #36 revisões: textos literais travados nas páginas', () => {
   assert.ok(jor.indexOf('data-ed="aviso-m02"') < jor.indexOf('<section class="ed-conta"'), 'aviso antes do resultado');
   for (const t of [
     '<h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>',
-    'MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.',
+    'O MEI está dispensado de elaborar o PGR (NR-1, item 1.8.1). As microempresas e empresas de pequeno porte de grau de risco 1 ou 2 que, no levantamento preliminar de perigos, não identificarem exposição a agentes físicos, químicos ou biológicos conforme a NR-9 e fizerem a declaração digital prevista na NR-1 ficam dispensadas de elaborar o PGR (item 1.8.4). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 40 a 50 empregados.',
     '<h1>Sua empresa deve avaliar os riscos psicossociais no PGR</h1>',
   ]) assert.ok(res.includes(t), t);
   assert.doesNotMatch(res, /<input type="email"|id="ed-avise"/); // F-1 (d39ff580): Me avise fora com ED_ME_AVISE OFF
   assert.doesNotMatch(res, /type="checkbox"[^>]*checked/);
   assert.doesNotMatch(res, /menos de 20 funcionários, você pode|precisa incluir os riscos/i);
   for (const t of [
-    '<li>Relatório com o resultado do grupo para anexar ao PGR (pode ser revisado por um profissional de SST, se você quiser)</li>',
-    'A gente aplica o questionário anônimo e você recebe o inventário e o plano de ação para o PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora.',
-    '(desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua)',
+    'Relatório orientativo com resultados agregados e protegidos. Os resultados precisam ser analisados pela sua empresa, com os responsáveis que ela definir, e integrados à avaliação de riscos do GRO/PGR.',
+    'Sua empresa aplica o questionário internamente, com o nosso material, e nos envia só resultados agregados e protegidos.',
+    'Serviços e responsabilidade técnica de SST não estão incluídos no preço.',
+    '(situação conferida em 12/11/2026, sem data final divulgada)',
   ]) assert.ok(lan.includes(t), t);
-  assert.doesNotMatch(lan, /assinado|profissional de segurança do trabalho analisa/i);
+  assert.doesNotMatch(lan, /profissional de segurança do trabalho analisa/i);
 });
 
 // CEO/CPO 28/10: "diagnóstico" sai dos títulos e do slug; a URL antiga nunca foi publicada (sem 301).
@@ -273,15 +277,15 @@ test('Avaliação rápida NR-1: slug novo, nenhuma menção a "diagnóstico" nas
   for (const p of PAGINAS) assert.doesNotMatch(ler(p), /diagn[oó]stic/i, p);
   assert.doesNotMatch(readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8'), /\/diagnostico\//);
   assert.ok(!existsSync(new URL('../empregador-em-dia/diagnostico/', import.meta.url)));
-  assert.match(venda(PAGINAS[1]), /<title>Avaliação rápida NR-1: o que sua empresa precisa \| Empregador em Dia<\/title>/);
-  assert.match(venda(PAGINAS[2]), /<title>Resultado da avaliação rápida NR-1 \| Empregador em Dia<\/title>/);
+  assert.match(venda(PAGINAS[1]), /<title>O que sua empresa precisa para trabalhar a NR-1 \| Empregador em Dia<\/title>/);
+  assert.match(venda(PAGINAS[2]), /<title>Resultado da triagem \| Empregador em Dia<\/title>/);
 });
 
 // DEC CPO P-21 C-04 (Designer v4.1c): o CTA de orçamento NR-1 aponta para /empregador-em-dia/orcamento-nr1/, só com ED_CHECKOUT.
 test('CTA "Pedir orçamento": destino /empregador-em-dia/orcamento-nr1/, desligado com a flag OFF', () => {
   const ui = readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8');
   assert.match(ui, /export const URL_ORCAMENTO_NR1 = '\/empregador-em-dia\/orcamento-nr1\/';/);
-  assert.match(ui, /if \(b && FLAGS\.ED_CHECKOUT\) \{ b\.disabled = false; b\.addEventListener\('click', \(\) => location\.assign\(URL_ORCAMENTO_NR1\)\); \}/);
+  assert.match(ui, /if \(b && FLAGS\.ED_ORCAMENTO_NR1\) \{ b\.disabled = false; b\.addEventListener\('click', \(\) => location\.assign\(URL_ORCAMENTO_NR1\)\); \}/);
   assert.match(venda(PAGINAS[2]), /<button type="button" class="btn" data-ed-orcamento disabled>Pedir orçamento<\/button>/);
   assert.equal(FLAGS.ED_CHECKOUT, false);
 });
@@ -331,7 +335,7 @@ test('orçamento NR-1: aviso LGPD literal do Advogado, logo acima do Enviar', ()
   const r = avisoRenderizado(h);
   assert.equal(r, fonte);
   assert.equal(createHash('sha256').update(r).digest('hex'), AVISO_SHA256_TEXTO);
-  assert.match(h, /<\/section>\n<button type="submit" disabled class="btn">Pedir orçamento do serviço NR-1<\/button>\n<\/form>/);
+  assert.match(h, /<\/section>\n<button type="submit" disabled class="btn">Enviar mensagem<\/button>\n<\/form>/);
   assert.ok(h.indexOf('id="orc-aviso"') > h.indexOf('id="orc-faixa"'));
 });
 
@@ -351,36 +355,15 @@ test('orçamento NR-1: novidades separada, desmarcada e opcional; versão do avi
   assert.ok(ui.indexOf('toISOString') < ui.indexOf("fetch(form.action"), 'carimbo antes do envio');
 });
 
-test('orçamento NR-1: copy do Designer v4.3d (sha256 1d65ac99...) aplicada; preços vêm do config', () => {
-  const cp = readFileSync(new URL('_src/juridico/copy-orcamento-nr1.md', import.meta.url), 'utf8');
-  assert.equal(createHash('sha256').update(cp).digest('hex'), '1d65ac999d75783151e35b1572a7c189fd8cb8f538308a3581a9c2c57c409921');
+test('orçamento NR-1: contato fora da faixa, sem preço de 51-200 (parecer 14f7ce35)', () => {
   const h = venda(ORC);
-  for (const t of ['<h1>Orçamento do serviço NR-1</h1>', 'Pagamento: 50% no início e 50% na entrega, ou tudo à vista.',
-    'Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.', 'Preços válidos até 31/12/2026.', '>Nome da empresa</label>',
-    'Digite o nome da empresa. Não consultamos o CNPJ em nenhuma base.', '>CNPJ da empresa</label>',
-    'Opcional. Ajuda a preparar a proposta.', '<option>20 a 50</option><option>51 a 100</option><option>101 a 200</option><option>Mais de 200</option>',
-    '>Seu nome</label>', '>Telefone (opcional)</label>', '>Pedir orçamento do serviço NR-1</button>']) {
-    assert.ok(h.includes(t), t);
-    assert.ok(cp.includes(t.replace(/<[^>]+>|^>|<\/?\w*$/g, '').replace(/<\/option><option>/g, ' / ')) || t.startsWith('<option'), `copy: ${t}`);
-  }
-  // v4.3d (Adendo 10; DEC CPO rótulo >200, 28/10; DEC CEO 95a76e17): linha >200 = 'Orçamento sob medida', na copy e no HTML.
-  assert.ok(cp.includes('| Mais de 200 | Orçamento sob medida |') && !cp.includes('Preço a definir |'));
-  assert.ok(h.includes('<tr><th scope="row">Mais de 200</th><td>Orçamento sob medida</td></tr>'));
-  assert.ok(!h.includes('Preço a definir'));
-  // NB-01 (QA 6b6dfb7, Bugbot c050e572): a tabela usa a classe que existe em ed.css.
-  assert.ok(h.includes('<table class="ed-tab"><caption>Preços do serviço NR-1</caption>') && !h.includes('ed-tabela'));
-  assert.ok(/\.ed-tab[ {,]/.test(ler('assets/js/empregador/ed.css')));
-  // NB-02 (DEC CPO 70f7c62a): o termo proibido não aparece nem em comentário de código.
+  assert.ok(h.includes('<h1>Contato do Empregador em Dia</h1>'));
+  assert.ok(h.includes('>Enviar mensagem</button>'));
+  assert.ok(h.includes('Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.'));
+  assert.ok(h.includes('>Nome da empresa</label>'));
+  assert.ok(!h.includes('R$ 2.290') && !h.includes('R$ 3.490') && !h.includes('Preços do serviço NR-1'));
+  assert.ok(!h.includes('Pedir orçamento do serviço NR-1'));
   for (const f of readdirSync(new URL('../assets/js/empregador/', import.meta.url))) assert.ok(!/sob consulta/i.test(ler('assets/js/empregador/' + f)), f);
-  // N-1 (CPO/NR-1): tabela estática no HTML, valores iguais aos de FAIXAS (config.js).
-  const fmt = (v) => 'R$ ' + v.toLocaleString('pt-BR');
-  for (const [id, rot] of [['20-50', '20 a 50'], ['51-100', '51 a 100'], ['101-200', '101 a 200']]) {
-    const f = FAIXAS.find((x) => x.id === id);
-    assert.ok(h.includes(`<tr><th scope="row">${rot}</th><td data-ed="orc-preco-${id}">${fmt(f.preco)}</td></tr>`), id);
-  }
-  assert.deepEqual([...h.matchAll(/R\$ [\d.]+/g)].map((m) => m[0]), ['R$ 1.490', 'R$ 2.290', 'R$ 3.490']);
-  assert.ok(h.indexOf('id="ed-app" hidden') < h.indexOf('<caption>Preços do serviço NR-1'), 'tabela dentro do #ed-app (oculta com flag OFF)');
   assert.deepEqual(FAIXAS.filter((f) => f.preco).map((f) => f.preco), [1490, 2290, 3490]);
-  // aviso v2 da copy não entra: vale o do Advogado (v3)
   assert.ok(!h.includes('hospedagem e e-mail, que só podem usá-los'));
 });

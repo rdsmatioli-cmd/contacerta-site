@@ -73,12 +73,11 @@ test('B9: /privacidade/ sem Me avise, sem colchetes, sem Zoho nem "Sendinblue SA
 });
 
 test('B8: lastmod da /privacidade/ no sitemap = data da nota de versão', () => {
-  assert.match(ler('sitemap.xml'), /<loc>https:\/\/contacertabr\.com\.br\/privacidade\/<\/loc><lastmod>2026-11-11<\/lastmod>/);
+  assert.match(ler('sitemap.xml'), /<loc>https:\/\/contacertabr\.com\.br\/privacidade\/<\/loc><lastmod>2026-11-12<\/lastmod>/);
 });
 
-test('flags: ED_CHECKOUT ligado, orçamento e Me avise desligados; SST não incluído', () => {
+test('flags: checkout, orçamento e Me avise desligados; SST não incluído', () => {
   const cfg = ler('assets/js/empregador/config.js');
-  assert.match(cfg, /ED_CHECKOUT: true/);
-  for (const f of ['ED_ORCAMENTO_NR1', 'ED_ME_AVISE', 'ED_QUIZ_12', 'ED_LOGIN']) assert.match(cfg, new RegExp(`${f}: false`), f);
+  for (const f of ['ED_CHECKOUT', 'ED_ORCAMENTO_NR1', 'ED_ME_AVISE', 'ED_QUIZ_12', 'ED_LOGIN']) assert.match(cfg, new RegExp(`${f}: false`), f);
   assert.doesNotMatch(cfg, /ED_SST_INCLUIDO = true/);
 });

@@ -37,15 +37,14 @@ test('E3: telas atrás de flag (data-ed-e3 dentro de #ed-app hidden), noindex', 
   assert.match(ui, /data-ed-e3="login"\]'\) && !FLAGS\.ED_LOGIN\) return/);
 });
 
-test('T05: preços e parcelas batem com a tabela; >200 = "Orçamento sob medida", sem "sob consulta"', () => {
+test('T05: preço à vista da faixa 40 a 50; 51-200 em breve; sem "sob consulta"', () => {
   const h = ler('empregador-em-dia/precos/index.html');
-  for (const f of FAIXAS.filter((x) => x.preco)) {
-    const m = (f.preco / 2).toLocaleString('pt-BR');
-    assert.ok(h.includes(`R$ ${f.preco.toLocaleString('pt-BR')}</span><span>à vista, ou R$ ${m} agora + R$ ${m} na entrega`), f.id);
-  }
+  assert.ok(h.includes('R$ 1.490,00 à vista, tributos incluídos.'));
+  assert.ok(h.includes('Em breve.'));
+  assert.ok(!h.includes('à vista, ou'));
   assert.ok(h.includes('Orçamento sob medida'));
   for (const p of E3) assert.ok(!ler(p).toLowerCase().includes('sob consulta'), p);
-  for (const t of ['Questionário anônimo por link e QR Code', 'Inventário dos riscos psicossociais para apoiar o PGR da sua empresa', 'Plano de ação com prazos e responsáveis', 'Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos']) assert.ok(h.includes(t), t);
+  for (const t of ['Instruções para a sua empresa aplicar o questionário internamente', 'Material e instruções para a coleta interna do questionário pela sua empresa', 'Modelo para enviar só resultados agregados e protegidos', 'Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos']) assert.ok(h.includes(t), t);
 });
 
 test('T06: CNPJ por dígito verificador, exemplo fictício válido (D-09), sem Receita/BrasilAPI (D-07)', () => {
@@ -55,9 +54,8 @@ test('T06: CNPJ por dígito verificador, exemplo fictício válido (D-09), sem R
   assert.equal(cnpjValido('123'), false);
   assert.equal(formatarCnpj('11222333000181'), '11.222.333/0001-81');
   const h = ler('empregador-em-dia/contratar/index.html');
-  assert.ok(h.includes('Exemplo: o CNPJ da nota fiscal.'));
+  assert.ok(!h.includes('name="cnpj"'));
   assert.ok(h.includes('id="ct-razao"') && h.includes('required'));
-  assert.match(h, /id="ct-whats"(?![^>]*required)[^>]*>/);
   const js = ler('assets/js/empregador/ui.js') + ler('assets/js/empregador/motor.js');
   assert.ok(!/brasilapi\.com|receitaws\.com|receita\.fazenda\.gov/i.test(js));
 });
@@ -71,8 +69,10 @@ test('T07/T12: à vista = preço cheio agora e 0 na entrega; 50/50 soma o preço
   }
   assert.equal(pagamento('gt200', 'avista'), null);
   assert.equal(pagamento('lt20', 'metade'), null);
-  assert.match(ler('empregador-em-dia/pagamento/index.html'), /data-ed-mock>Modo teste/);
-  assert.equal(disco('empregador-em-dia/pagamento/index.html').includes('data-ed-mock>Modo teste'), false);
+  const pag = ler('empregador-em-dia/pagamento/index.html');
+  assert.ok(pag.includes('R$ 1.490,00 à vista'));
+  assert.ok(!/Metade agora/.test(pag));
+  assert.equal(disco('empregador-em-dia/pagamento/index.html').includes('R$ 1.490,00 à vista'), false);
 });
 
 test('T07 CA 3: nenhuma chave live nem payload Pix real no repositório publicável', () => {
@@ -91,7 +91,8 @@ test('T08: link curto aleatório (>= 5, sem CNPJ) e variante à vista sem 2ª pa
   const ui = ler('assets/js/empregador/ui.js');
   assert.match(ui, /link: codigo\(6\)/);
   assert.match(ui, /crypto\.getRandomValues/);
-  assert.match(ui, /p\.forma === 'avista' \? 'você recebe o relatório' :/);
+  assert.match(ui, /set\('ok-entrega', 'você recebe o relatório'\)/);
+  assert.ok(!ui.includes('2ª parcela'));
 });
 
 test('T10: percentual arredondado para baixo; "já dá para analisar" a partir de 70% (config)', () => {
@@ -113,10 +114,10 @@ test('G-2 (NR-1 d8e801e9): revisão da avaliação de riscos (não do PGR), sem 
   for (const p of E3) { const h = ler(p); assert.ok(!/Revisão do PGR|Incluído em todas as faixas|12 meses/i.test(h), p); }
 });
 test('M-01 (Advogado 31f8fa10): validade em toda superfície de preço', () => {
-  for (const p of ['precos', 'pagamento', 'avaliacao-rapida-nr1/resultado', 'orcamento-nr1']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(VAL), p);
+  for (const p of ['precos', 'pagamento', 'avaliacao-rapida-nr1/resultado']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(VAL), p);
 });
 test('M-02: sem afirmação de SST incluído; slot data-ed-sst preenchido pelo ui.js (sem texto fixo)', () => {
-  for (const p of ['precos', 'pagamento/ok', 'painel']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.ok(h.includes('<p class="ed-sst" data-ed-sst></p>'), p); assert.ok(!h.includes(SST), p); assert.ok(!/profissional de SST analisa|Análise do SST|Análise por profissional/.test(h), p); }
+  for (const p of ['precos', 'painel']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.ok(h.includes('<p class="ed-sst" data-ed-sst></p>'), p); assert.ok(!h.includes(SST), p); assert.ok(!/profissional de SST analisa|Análise do SST|Análise por profissional/.test(h), p); }
 });
 test('M-03/M-04/M-05: aviso LGPD em contratar e pagamento; Me avise com consentimento; fornecedor no rodapé', () => {
   for (const p of ['contratar', 'pagamento']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.match(h, /art\. 7º, V/, p); assert.match(h, /art\. 18/, p); assert.ok(h.includes('href="/privacidade/"'), p); }
@@ -129,18 +130,24 @@ test('M-03/M-04/M-05: aviso LGPD em contratar e pagamento; Me avise com consenti
 test('G-3 NR-1 9f7f0070: prazo do resultado definido no contrato (flag ON); ausente do HTML servido', () => {
   const h = ler('empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html');
   assert.equal(disco('empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html').includes('Prazo estimado de entrega'), false);
-  assert.ok(h.includes('Prazo estimado de entrega: 5 dias úteis após o pagamento confirmado e o encerramento do questionário (meta de respostas atingida)'));
+  assert.ok(h.includes('O relatório orientativo será enviado por e-mail em até 5 dias úteis após a data de encerramento da coleta previamente combinada por e-mail com a empresa.'));
+  assert.ok(!h.includes('Prazo estimado de entrega'));
   assert.ok(!h.includes('profissional de SST após o questionário'));
   assert.ok(!h.includes('conforme contratado pelo estabelecimento'));
 });
 
 test('B-PR42-08 QA ebbc1144: botões Copiar (Pix e link) têm listener com retorno', () => {
   const js = readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8');
-  assert.match(js, /copiar\(\$\('\[data-ed-copiar="pix"\]'\), \(\) => \$\('\[data-ed="pix"\]'\)\.textContent\.trim\(\)\)/);
-  assert.match(js, /copiar\(\$\('\[data-ed-copiar="ok-link"\]'\)/);
   assert.match(js, /navigator\.clipboard\.writeText/);
   assert.match(js, /'Copiado'/);
-  const h = ler('empregador-em-dia/pagamento/index.html');
-  assert.ok(h.includes('<p aria-live="polite"><button type="button" class="btn sec" data-ed-copiar="pix">Copiar código Pix</button></p>'));
-  assert.equal(disco('empregador-em-dia/pagamento/index.html').includes('data-ed-copiar="pix"'), false);
+  assert.ok(!js.includes('data-ed-copiar="ok-link"'));
+  const ok = ler('empregador-em-dia/pagamento/ok/index.html');
+  assert.ok(!ok.includes('Copiar link') && !ok.includes('QR Code') && !ok.includes('WhatsApp'));
+  assert.equal(disco('empregador-em-dia/pagamento/ok/index.html').includes('Copiar link'), false);
+});
+
+test('adequação NR-1 continua fora das páginas, dos Termos e da Política', () => {
+  const semAdequacao = /adequação nr-1/i;
+  const paginasNome = [...E3, 'empregador-em-dia/index.html', 'empregador-em-dia/orcamento-nr1/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html', 'termos/index.html', 'privacidade/index.html'];
+  for (const p of paginasNome) assert.doesNotMatch(ler(p), semAdequacao, p);
 });

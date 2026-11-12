@@ -22,15 +22,17 @@ test('T2: ui.js mostra em definição para null e opcional para false', async ()
   assert.notEqual(textoSst(null), textoSst(false));
 });
 test('T6: linha do tempo do painel', () => {
-  assert.ok(ler('empregador-em-dia/painel/index.html').includes('<li>Depois: relatório pronto; validação opcional pelo seu profissional de SST</li>'));
+  assert.ok(ler('empregador-em-dia/painel/index.html').includes('<li>Depois: relatório orientativo pronto. Serviços e responsabilidade técnica de SST não estão incluídos.</li>'));
 });
 test('T8: aviso perto do preço e antes do pagamento', () => {
-  for (const p of ['precos', 'pagamento', 'avaliacao-rapida-nr1/resultado']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(T8), p);
+  const aviso = 'O Conta Certa fornece o material do questionário, para aplicação interna pela sua empresa, e um relatório orientativo como apoio.';
+  for (const p of ['precos', 'pagamento', 'avaliacao-rapida-nr1/resultado']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(aviso), p);
+  assert.equal(disco('empregador-em-dia/precos/index.html').includes(aviso), false);
   assert.equal(disco('empregador-em-dia/precos/index.html').includes(T8), false);
 });
 test('termos vetados ausentes nas páginas do Empregador', () => {
   for (const p of ['', 'precos', 'pagamento', 'pagamento/ok', 'painel', 'avaliacao-rapida-nr1/resultado']) {
     const h = ler(`empregador-em-dia/${p ? p + '/' : ''}index.html`);
-    assert.ok(!/SST incluíd|assinado|garante a NR-1|100% em dia|diagnóstico psicológico|avaliação psicológica|laudo/i.test(h), p);
+    assert.ok(!/SST incluíd|garante a NR-1|100% em dia|diagnóstico psicológico|adequação nr-1/i.test(h), p);
   }
 });

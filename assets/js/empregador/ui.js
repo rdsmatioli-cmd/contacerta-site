@@ -1,7 +1,7 @@
 // Empregador em Dia: interface das páginas E2. Nada sai do navegador: respostas só em sessionStorage (T02).
-import { FLAGS, ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, SST_TEXTO_OPCIONAL, FAIXAS, NOTA_DOMESTICO, ED_PAGAMENTO_MODO, LIMIAR_ANALISE } from './config.js?v=f9406c7c24';
-import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=7e705d5348';
-import { destino, oferta, pontosAtencao, textoPgr, validarPasso, faixaPorId, jornada, cnpjValido, formatarCnpj, pagamento, andamento } from './motor.js?v=8e295defc8';
+import { FLAGS, ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, SST_TEXTO_OPCIONAL, FAIXAS, NOTA_DOMESTICO, ED_PAGAMENTO_MODO, LIMIAR_ANALISE } from './config.js?v=970a8e1ef8';
+import { TEXTOS_ORCAMENTO, ED_ORCAMENTO, AVISO_VERSAO, conferirOrcamento } from './orcamento-textos.js?v=a5f7dd675e';
+import { destino, oferta, pontosAtencao, textoPgr, validarPasso, faixaPorId, jornada, cnpjValido, formatarCnpj, pagamento, andamento } from './motor.js?v=f48e9d5380';
 
 const CHAVE = 'ed-diagnostico';
 const brl = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: v % 1 ? 2 : 0 }).replace(/\s/g, ' ');
@@ -17,7 +17,7 @@ export function textoSst(v) { return v === null ? SST_TEXTO_EM_DEFINICAO : v ===
 
 function iniciar() {
   if (!FLAGS.EMPREGADOR_EM_DIA) return; // flag OFF: só o aviso "em preparação"
-  if ($('#ed-orc') && !FLAGS.ED_CHECKOUT) return; // orçamento NR-1: também exige ED_CHECKOUT
+  if ($('#ed-orc') && !FLAGS.ED_ORCAMENTO_NR1) return; // orçamento NR-1
   if ($('[data-ed-e3="checkout"]') && !FLAGS.ED_CHECKOUT) return; // E3: preços, contratar, pagamentos
   if ($('[data-ed-e3="login"]') && !FLAGS.ED_LOGIN) return; // E3: painel exige login (PR #7, D-14)
   $('#ed-off').hidden = true;
@@ -121,12 +121,9 @@ function pagamentoOk() {
   $('[data-ed-ok]').hidden = false;
   const v = pagamento(p.faixa, p.forma);
   set('ok-n', faixaPorId(p.faixa).rotulo);
-  set('ok-link', `contacertabr.com.br/q/${p.link}`);
   set('ok-pago', brl2(v.agora));
   set('ok-pedido', p.pedido);
-  // T08 CA 3 (D-11): no caminho à vista nada fala em 2ª parcela.
-  set('ok-entrega', p.forma === 'avista' ? 'você recebe o relatório' : 'você recebe o relatório e paga a 2ª parcela');
-  copiar($('[data-ed-copiar="ok-link"]'), () => `https://contacertabr.com.br/q/${p.link}`);
+  set('ok-entrega', 'você recebe o relatório');
 }
 
 function painel() {
@@ -142,7 +139,7 @@ function orcamentoNr1() {
   conferirOrcamento();
   const form = $('#ed-orc');
   const t = TEXTOS_ORCAMENTO;
-  for (const id of ['20-50', '51-100', '101-200']) set(`orc-preco-${id}`, brl(faixaPorId(id).preco));
+  for (const id of ['20-50']) set(`orc-preco-${id}`, brl(faixaPorId(id).preco));
   form.action = ED_ORCAMENTO.action;
   for (const [k, entry] of Object.entries(ED_ORCAMENTO.campos)) { const e = form.querySelector(`[data-orc-campo="${k}"]`); if (e) e.name = entry; }
   form.querySelector('[data-orc-campo="avisoVersao"]').value = AVISO_VERSAO;
@@ -214,17 +211,16 @@ function resultado() {
   set('pontos', pontosAtencao(r));
   set('pgr', textoPgr(r.pgr) || '');
   set('preco', brl(o.preco));
-  set('parcelas', `À vista, ou ${brl(o.parcela1)} agora e ${brl(o.parcela2)} quando receber o relatório`);
+  set('parcelas', 'R$ 1.490,00 à vista, tributos incluídos.');
   const b = $('[data-ed-contratar]');
   if (FLAGS.ED_CHECKOUT) { b.disabled = false; b.addEventListener('click', () => location.assign(`/empregador-em-dia/contratar/?faixa=${encodeURIComponent(r.faixa)}`)); }
 }
 
-// CTA "Pedir orçamento do serviço NR-1" (DEC CPO P-21 C-04, Designer v4.1c). A página é do E3: o botão só liga com
-// ED_CHECKOUT, que fica OFF.
+// CTA "Pedir orçamento do serviço NR-1" (DEC CPO P-21 C-04). Só liga com ED_ORCAMENTO_NR1, que fica OFF.
 export const URL_ORCAMENTO_NR1 = '/empregador-em-dia/orcamento-nr1/';
 function orcamento() {
   const b = $('[data-ed-orcamento]');
-  if (b && FLAGS.ED_CHECKOUT) { b.disabled = false; b.addEventListener('click', () => location.assign(URL_ORCAMENTO_NR1)); }
+  if (b && FLAGS.ED_ORCAMENTO_NR1) { b.disabled = false; b.addEventListener('click', () => location.assign(URL_ORCAMENTO_NR1)); }
 }
 
 function simulador() {

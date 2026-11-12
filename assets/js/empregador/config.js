@@ -3,6 +3,7 @@
 export const FLAGS = Object.freeze({
   EMPREGADOR_EM_DIA: false, // páginas: com false, o HTML servido é só o aviso (PR-0, DEC CEO 11/11 19h20)
   ED_CHECKOUT: false, // checkout/contratar (E3)
+  ED_ORCAMENTO_NR1: false, // formulário /empregador-em-dia/orcamento-nr1/; fechado neste SHA
   ED_ME_AVISE: false, // captura "Me avise" (<20)
   ED_GUIA: false, // guia gratuito (E4, D-06)
   ED_QUIZ_12: false, // questionário de 12 fatores (UI aguarda OK do CEO + visualização do Rodrigo)
@@ -18,7 +19,7 @@ export const SST_TEXTO_OPCIONAL = 'SST: validação técnica opcional, não incl
 // Tabela aprovada (16/10; CFO eb62ca5d). Única fonte de preço.
 export const FAIXAS = Object.freeze([
   { id: 'lt20', rotulo: 'Menos de 20', min: 1, max: 19, preco: null },
-  { id: '20-50', rotulo: '20 a 50', min: 20, max: 50, preco: 1490, grupos: 4 },
+  { id: '20-50', rotulo: '40 a 50', min: 20, max: 50, preco: 1490, grupos: 4 },
   { id: '51-100', rotulo: '51 a 100', min: 51, max: 100, preco: 2290, grupos: 8 },
   { id: '101-200', rotulo: '101 a 200', min: 101, max: 200, preco: 3490, grupos: 12 },
   { id: 'gt200', rotulo: 'Mais de 200', min: 201, max: Infinity, preco: null }, // DEC 95a76e17: sob medida
@@ -50,4 +51,6 @@ export const ESCALA_5 = Object.freeze(['Nunca', 'Raramente', 'Às vezes', 'Frequ
 export const NOTA_DOMESTICO = 'Para empregado doméstico, a lei específica (LC 150/2015) ainda fala em 44 horas, mas a Emenda Constitucional 141/2026 também vale para ele.';
 // E3 (backlog v3 T07, T10): checkout só em mock (D-22); limiar de respostas para a análise vem daqui (T10 CA 2).
 export const ED_PAGAMENTO_MODO = 'mock'; // 'mock' até a ativação live aprovada (E6); nenhuma chave no repositório
+export const ED_PAYMENT_LINK_20_50 = '';
+export const ED_PAYMENT_LINKS = Object.freeze({ '20-50': ED_PAYMENT_LINK_20_50 });
 export const LIMIAR_ANALISE = 0.7;

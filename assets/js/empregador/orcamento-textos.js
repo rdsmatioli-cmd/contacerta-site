@@ -9,8 +9,8 @@
 //                                existente; o form é criado fora deste PR). NÃO é o CC-Leads.
 // Trava: com FLAGS.ED_CHECKOUT ON, conferirOrcamento() lança erro enquanto houver placeholder
 // (tests/empregador.test.mjs). Sem a flag, o form não tem action real nem name nos campos: nada é enviado.
-import { FLAGS } from './config.js?v=f9406c7c24';
-import { placeholdersAbertos } from './questionario.js?v=0cbf1f7040';
+import { FLAGS } from './config.js?v=970a8e1ef8';
+import { placeholdersAbertos } from './questionario.js?v=a4b481634b';
 
 export const AVISO_VERSAO = 'aviso-orcamento-nr1-v3-20261028';
 
