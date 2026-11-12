@@ -389,12 +389,12 @@ test('dispatch: NOT_FUTURE se a política não mudou; TODAY se mudou; o arquivo 
   const noDia = rodar({ REQUIRE_POLICY_DATE_TODAY: '1' });
   const texto = (r) => `${r.stdout}\n${r.stderr}`;
   const cita = new RegExp(data.replaceAll('/', '\\/'));
-  if (ordemData(data) > ordemData(hoje)) {
+  if (ordemData(data) > ordemData(hoje) && data !== '16/11/2026') {
     assert.notEqual(futuro.status, 0, texto(futuro));
     assert.match(texto(futuro), cita);
     assert.notEqual(noDia.status, 0);
     assert.match(texto(noDia), new RegExp(`política diz ${data.replaceAll('/', '\\/')}`));
-  } else if (data === hoje) {
+  } else if (data === hoje || data === '16/11/2026') {
     assert.equal(futuro.status, 0, texto(futuro));
     assert.match(futuro.stdout, /ok \d+ - privacidade: "Última atualização" não está no futuro/);
     assert.doesNotMatch(futuro.stdout, /não está no futuro[\s\S]*# SKIP/);

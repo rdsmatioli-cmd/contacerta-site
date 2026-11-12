@@ -339,7 +339,7 @@ ${htmlAnexoEd1()}
 <button type="submit" disabled class="btn ed-pagar" data-ed-pagar hidden>Continuar para pagamento</button>
 <section class="nota le-privacidade" id="pg-aviso" aria-labelledby="pg-aviso-t"><h2 id="pg-aviso-t">Como usamos seus dados</h2>
 <p>Quem cuida dos seus dados é RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services), CNPJ 61.193.879/0001-20, responsável pelo Conta Certa.</p>
-<p>Usamos o e-mail para recibo e nota fiscal e os dados do pedido só para fechar e cumprir o contrato do Empregador em Dia: emitir recibo e nota fiscal, enviar as instruções e o material da coleta interna, receber só resultados agregados e protegidos, e enviar o relatório e os avisos de andamento. A base legal é a LGPD, art. 7º, V (contrato) e, para a nota fiscal, art. 7º, II (obrigação legal).</p>
+<p>Usamos o e-mail para recibo e nota fiscal e os dados do pedido só para fechar e cumprir o contrato do Empregador em Dia: emitir recibo e nota fiscal, enviar por e-mail o kit de coleta interna, as instruções e o relatório, receber só resultados agregados e protegidos, e os avisos de andamento. A base legal é a LGPD, art. 7º, V (contrato) e, para a nota fiscal, art. 7º, II (obrigação legal).</p>
 <p>Guardamos esses dados enquanto o contrato durar e, depois, pelo prazo que a lei fiscal exige. Não vendemos nem cedemos seus dados.</p>
 <p>Você pode pedir confirmação, acesso, correção, cópia, exclusão e informação sobre com quem compartilhamos seus dados (LGPD, art. 18). Escreva para contato@contacertabr.com.br.</p>
 <p>Mais detalhes na nossa Política de Privacidade: <a href="/privacidade/">https://contacertabr.com.br/privacidade/</a></p></section>

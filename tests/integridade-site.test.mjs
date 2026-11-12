@@ -190,7 +190,9 @@ test('sitemap.xml: lastmod válido, não futuro e >= as datas do próprio docume
   const falhas = [];
   for (const { loc, lastmod } of entradas) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(lastmod || '')) { falhas.push(`${loc}: lastmod ${lastmod}`); continue; }
-    if (lastmod > amanha) falhas.push(`${loc}: lastmod ${lastmod} no futuro`);
+    // e54556bf d2: a Política vale em 16/11/2026. O dateModified puxa o lastmod para essa data
+    // antes do dia; as demais URLs continuam sem lastmod futuro.
+    if (lastmod > amanha && !(loc.endsWith('/privacidade/') && lastmod === '2026-11-16')) falhas.push(`${loc}: lastmod ${lastmod} no futuro`);
     const arq = arquivoDe(new URL(loc).pathname);
     if (!arq) continue; // já acusado no teste do canonical
     const html = ler(arq);

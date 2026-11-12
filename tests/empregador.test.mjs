@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { FLAGS, FAIXAS, FAIXAS_SALARIO, SALARIO_MINIMO, ED_SST_INCLUIDO, ESCALA_5, NOTA_DOMESTICO, JORNADA } from '../assets/js/empregador/config.js';
-import { destino, oferta, pontosAtencao, validarPasso, jornada } from '../assets/js/empregador/motor.js';
+import { destino, oferta, pontosAtencao, textoPgr, validarPasso, jornada } from '../assets/js/empregador/motor.js';
 import { emitirTokens, responder, podeAgregar } from '../assets/js/empregador/token.js';
 import { AVISO_ED, DESC_NEUTRA, TITLE_PRECOS, gerarEd } from './_src/empregador/gerar.mjs';
 
@@ -109,6 +109,13 @@ test('T02 CA1/CA3: validação e destino das 5 faixas', () => {
   assert.equal(validarPasso(3, { pgr: 'naosei' }), null);
   assert.deepEqual(['lt20', '20-50', '51-100', '101-200', 'gt200'].map(destino),
     ['simplificada', 'oferta', 'em-breve', 'em-breve', 'sob-consulta']);
+});
+
+test('A4: textoPgr usa os literais novos do parecer 02815534', () => {
+  assert.equal(textoPgr('sst'), 'Feito por empresa de SST: o relatório pode ser analisado e anexado ao inventário de riscos');
+  assert.equal(textoPgr('proprio'), 'Feito pela empresa: o relatório pode ser analisado e anexado ao inventário de riscos');
+  assert.equal(textoPgr('nao'), 'Não tem: o PGR, quando exigido, é da empresa; este serviço não o substitui');
+  assert.equal(textoPgr('naosei'), 'Não sabe se tem: confirme com o RH ou a empresa de SST; este serviço não substitui o PGR');
 });
 
 test('T03 CA1: preços e parcelas da tabela aprovada; <20 e >200 sem preço', () => {
