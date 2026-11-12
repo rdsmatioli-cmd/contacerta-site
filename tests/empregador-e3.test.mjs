@@ -3,66 +3,49 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { FLAGS, FAIXAS, ED_PAGAMENTO_MODO, ED_PAYMENT_LINK_20_50, ED_PAYMENT_LINKS, LIMIAR_ANALISE } from '../assets/js/empregador/config.js';
-import { ctaCheckoutLiberado, linkDePagamentoValido, urlDoLink, TEXTO_OK_PAGINA, VERSAO_TERMOS, ARREPENDIMENTO_ED1, htmlAnexoEd1, PRAZO_RELATORIO } from '../assets/js/empregador/textos-checkout.js';
+import { FLAGS, FAIXAS, ED_PAGAMENTO_MODO, LIMIAR_ANALISE } from '../assets/js/empregador/config.js';
 import { cnpjValido, formatarCnpj, pagamento, andamento } from '../assets/js/empregador/motor.js';
+import { existsSync } from 'node:fs';
+import { gerarEd } from './_src/empregador/gerar.mjs';
 
 const raiz = new URL('../', import.meta.url).pathname;
-const ler = (p) => readFileSync(join(raiz, p), 'utf8');
+const disco = (p) => readFileSync(join(raiz, p), 'utf8');
+const VENDA = new Map(gerarEd({ flag: true, escrever: false }).map((p) => [`${p.caminho}index.html`, p.html]));
+const ler = (p) => VENDA.get(p) ?? disco(p);
 const E3 = ['precos', 'contratar', 'pagamento', 'pagamento/ok', 'painel'].map((c) => `empregador-em-dia/${c}/index.html`);
 
-test('E3: ED_CHECKOUT ligado; link vazio ou buy.stripe.com sem /test_', () => {
-  assert.equal(FLAGS.EMPREGADOR_EM_DIA, true);
-  assert.equal(FLAGS.ED_CHECKOUT, true);
+test('E3: ED_CHECKOUT, ED_LOGIN e EMPREGADOR_EM_DIA OFF, pagamento em mock (PR-0)', () => {
+  assert.equal(FLAGS.EMPREGADOR_EM_DIA, false);
+  assert.equal(existsSync(join(raiz, 'empregador-em-dia/pagamento/2/index.html')), false);
+  assert.equal(FLAGS.ED_CHECKOUT, false);
   assert.equal(FLAGS.ED_LOGIN, false);
-  assert.equal(FLAGS.ED_ORCAMENTO_NR1, false);
-  assert.equal(ED_PAGAMENTO_MODO, 'link');
-  assert.ok(ED_PAYMENT_LINK_20_50 === '' || linkDePagamentoValido(ED_PAYMENT_LINK_20_50));
-  assert.equal(ED_PAYMENT_LINKS['20-50'], ED_PAYMENT_LINK_20_50);
-  assert.equal(linkDePagamentoValido('https://buy.stripe.com/test_abc'), false);
-  assert.equal(ctaCheckoutLiberado('https://buy.stripe.com/test_abc'), false);
+  assert.equal(ED_PAGAMENTO_MODO, 'mock');
 });
 
-test('E3: noindex; preços e retorno visíveis; contratar, pagamento e painel no aviso', () => {
-  const visiveis = new Set(['empregador-em-dia/precos/index.html', 'empregador-em-dia/pagamento/ok/index.html']);
+test('E3: telas atrás de flag (data-ed-e3 dentro de #ed-app hidden), noindex', () => {
   for (const p of E3) {
     const h = ler(p);
+    const app = h.indexOf('<div id="ed-app" hidden>');
+    assert.ok(app > 0, p);
+    const gate = h.indexOf('data-ed-e3=');
+    assert.ok(gate > app, `${p}: gate dentro de #ed-app`);
     assert.match(h, /<meta name="robots" content="noindex, nofollow">/, p);
     assert.match(h, p.includes('painel') ? /data-ed-e3="login"/ : /data-ed-e3="checkout"/, p);
-    if (visiveis.has(p)) assert.match(h, /<div id="ed-app">/, p);
-    else assert.match(h, /<div id="ed-app" hidden>/, p);
   }
   const ui = ler('assets/js/empregador/ui.js');
   assert.match(ui, /data-ed-e3="checkout"\]'\) && !FLAGS\.ED_CHECKOUT\) return/);
   assert.match(ui, /data-ed-e3="login"\]'\) && !FLAGS\.ED_LOGIN\) return/);
 });
 
-test('CLS: contratar e pagamento reservam o formulário antes do ui.js quando o link é válido', () => {
-  for (const p of ['empregador-em-dia/contratar/index.html', 'empregador-em-dia/pagamento/index.html']) {
-    const h = ler(p);
-    assert.match(h, /<div id="ed-app" hidden>/, p);
-    assert.match(h, /<section id="ed-off" class="ed-off">/, p);
-    assert.match(h, /html\[data-ed-checkout="on"\] #ed-app\[hidden\]\{display:block!important\}/, p);
-    assert.match(h, /html\[data-ed-checkout="on"\] \.ed-pagar\[hidden\]\{display:inline-flex!important\}/, p);
-    assert.match(h, /ED_PAYMENT_LINK_20_50 = '\(\[\^'\]\*\)'/, p);
-    assert.match(h, /link\.indexOf\('\/test_'\)<0/, p);
-    assert.ok(h.indexOf('data-ed-checkout') < h.indexOf('id="ed-off"'), p);
-    assert.ok(h.indexOf('getElementById(\'ed-app\')') > h.indexOf('id="ed-app"'), p);
-  }
-  assert.match(ler('empregador-em-dia/pagamento/index.html'), /data-ed-pagar hidden/);
-});
-
-test('T05: 20-50 à vista; 51-200 em breve, sem parcela; >200 = "Orçamento sob medida"', () => {
+test('T05: preços e parcelas batem com a tabela; >200 = "Orçamento sob medida", sem "sob consulta"', () => {
   const h = ler('empregador-em-dia/precos/index.html');
-  assert.ok(h.includes('R$ 1.490</span><span>à vista</span>'));
-  assert.ok(h.includes('data-ed-faixa="51-100"') && h.includes('>Em breve.</span>'));
-  assert.ok(h.includes('data-ed-faixa="101-200"'));
-  assert.ok(!h.includes('745'));
+  for (const f of FAIXAS.filter((x) => x.preco)) {
+    const m = (f.preco / 2).toLocaleString('pt-BR');
+    assert.ok(h.includes(`R$ ${f.preco.toLocaleString('pt-BR')}</span><span>à vista, ou R$ ${m} agora + R$ ${m} na entrega`), f.id);
+  }
   assert.ok(h.includes('Orçamento sob medida'));
   for (const p of E3) assert.ok(!ler(p).toLowerCase().includes('sob consulta'), p);
-  for (const t of ['Material e instruções para a coleta interna do questionário pela sua empresa', 'Modelo para enviar só resultados agregados e protegidos', 'Relatório orientativo por grupo ou setor, com limitações e sugestões de referência para ações', 'Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos', 'Não inclui inventário de riscos, plano de ação técnico nem PGR: eles continuam com a sua empresa.']) assert.ok(h.includes(t), t);
-  assert.ok(!h.includes('O PGR continua com a sua empresa: o inventário e o plano de ação entram nele.'));
-  assert.ok(!h.includes('simulação · dados de exemplo'));
+  for (const t of ['Questionário anônimo por link e QR Code', 'Inventário dos riscos psicossociais para apoiar o PGR da sua empresa', 'Plano de ação com prazos e responsáveis', 'Lembrete de revisão: a NR-1 pede revisar a avaliação de riscos pelo menos a cada 2 anos']) assert.ok(h.includes(t), t);
 });
 
 test('T06: CNPJ por dígito verificador, exemplo fictício válido (D-09), sem Receita/BrasilAPI (D-07)', () => {
@@ -72,12 +55,9 @@ test('T06: CNPJ por dígito verificador, exemplo fictício válido (D-09), sem R
   assert.equal(cnpjValido('123'), false);
   assert.equal(formatarCnpj('11222333000181'), '11.222.333/0001-81');
   const h = ler('empregador-em-dia/contratar/index.html');
-  assert.ok(!h.includes('id="ct-cnpj"') && !h.includes('name="cnpj"'));
+  assert.ok(h.includes('Exemplo: o CNPJ da nota fiscal.'));
   assert.ok(h.includes('id="ct-razao"') && h.includes('required'));
-  assert.ok(!h.includes('ct-whats') && !/whatsapp/i.test(h));
-  assert.ok(h.includes('Razão social, nome e e-mail ficam só neste navegador até você seguir para o pagamento; esta página não os envia ao Conta Certa.'));
-  assert.ok(!h.includes('simulação · dados de exemplo'));
-  assert.ok(!/whatsapp/i.test(ler('assets/js/empregador/ui.js')));
+  assert.match(h, /id="ct-whats"(?![^>]*required)[^>]*>/);
   const js = ler('assets/js/empregador/ui.js') + ler('assets/js/empregador/motor.js');
   assert.ok(!/brasilapi\.com|receitaws\.com|receita\.fazenda\.gov/i.test(js));
 });
@@ -91,7 +71,8 @@ test('T07/T12: à vista = preço cheio agora e 0 na entrega; 50/50 soma o preço
   }
   assert.equal(pagamento('gt200', 'avista'), null);
   assert.equal(pagamento('lt20', 'metade'), null);
-  assert.ok(!ler('empregador-em-dia/pagamento/index.html').includes('data-ed-mock'));
+  assert.match(ler('empregador-em-dia/pagamento/index.html'), /data-ed-mock>Modo teste/);
+  assert.equal(disco('empregador-em-dia/pagamento/index.html').includes('data-ed-mock>Modo teste'), false);
 });
 
 test('T07 CA 3: nenhuma chave live nem payload Pix real no repositório publicável', () => {
@@ -106,15 +87,11 @@ test('T07 CA 3: nenhuma chave live nem payload Pix real no repositório publicá
   assert.deepEqual(achados, []);
 });
 
-test('T08: o redirect leva só o e-mail e não grava pedido falso', () => {
+test('T08: link curto aleatório (>= 5, sem CNPJ) e variante à vista sem 2ª parcela', () => {
   const ui = ler('assets/js/empregador/ui.js');
-  assert.match(ui, /location\.assign\(urlDoLink\(ED_PAYMENT_LINKS\['20-50'\], form\.nf\.value\.trim\(\)\)\)/);
-  assert.doesNotMatch(ui, /client_reference_id|codigo\(6\)|Pagamento recebido/);
-  const url = urlDoLink('https://buy.stripe.com/abc?locale=pt-BR', 'financeiro@example.com');
-  const u = new URL(url);
-  assert.equal(u.searchParams.get('prefilled_email'), 'financeiro@example.com');
-  assert.equal(u.searchParams.get('locale'), 'pt-BR');
-  assert.equal(u.searchParams.get('client_reference_id'), null);
+  assert.match(ui, /link: codigo\(6\)/);
+  assert.match(ui, /crypto\.getRandomValues/);
+  assert.match(ui, /p\.forma === 'avista' \? 'você recebe o relatório' :/);
 });
 
 test('T10: percentual arredondado para baixo; "já dá para analisar" a partir de 70% (config)', () => {
@@ -139,7 +116,7 @@ test('M-01 (Advogado 31f8fa10): validade em toda superfície de preço', () => {
   for (const p of ['precos', 'pagamento', 'avaliacao-rapida-nr1/resultado', 'orcamento-nr1']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(VAL), p);
 });
 test('M-02: sem afirmação de SST incluído; slot data-ed-sst preenchido pelo ui.js (sem texto fixo)', () => {
-  for (const p of ['precos', 'painel']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.ok(h.includes('<p class="ed-sst" data-ed-sst></p>'), p); assert.ok(!h.includes(SST), p); assert.ok(!/profissional de SST analisa|Análise do SST|Análise por profissional/.test(h), p); }
+  for (const p of ['precos', 'pagamento/ok', 'painel']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.ok(h.includes('<p class="ed-sst" data-ed-sst></p>'), p); assert.ok(!h.includes(SST), p); assert.ok(!/profissional de SST analisa|Análise do SST|Análise por profissional/.test(h), p); }
 });
 test('M-03/M-04/M-05: aviso LGPD em contratar e pagamento; Me avise com consentimento; fornecedor no rodapé', () => {
   for (const p of ['contratar', 'pagamento']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.match(h, /art\. 7º, V/, p); assert.match(h, /art\. 18/, p); assert.ok(h.includes('href="/privacidade/"'), p); }
@@ -149,93 +126,21 @@ test('M-03/M-04/M-05: aviso LGPD em contratar e pagamento; Me avise com consenti
   for (const p of ['empregador-em-dia/index.html', ...E3]) assert.ok(ler(p).includes('RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20'), p);
 });
 
-test('G-3 NR-1 9f7f0070: prazo do resultado é o literal do Anexo ED-1', () => {
-  const h = readFileSync(new URL('../empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', import.meta.url), 'utf8');
-  assert.ok(h.includes(PRAZO_RELATORIO));
-  assert.ok(!h.includes('Prazo estimado de entrega'));
+test('G-3 NR-1 9f7f0070: prazo do resultado definido no contrato (flag ON); ausente do HTML servido', () => {
+  const h = ler('empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html');
+  assert.equal(disco('empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html').includes('Prazo estimado de entrega'), false);
+  assert.ok(h.includes('Prazo estimado de entrega: 5 dias úteis após o pagamento confirmado e o encerramento do questionário (meta de respostas atingida)'));
   assert.ok(!h.includes('profissional de SST após o questionário'));
   assert.ok(!h.includes('conforme contratado pelo estabelecimento'));
 });
 
-test('link vazio ou de teste não libera o botão; constante commitada sem /test_', () => {
-  assert.equal(linkDePagamentoValido(''), false);
-  assert.equal(linkDePagamentoValido('http://buy.stripe.com/abc'), false);
-  assert.equal(linkDePagamentoValido('https://buy.stripe.com/test_abc'), false);
-  assert.equal(linkDePagamentoValido('https://buy.stripe.com/abc'), true);
-  assert.equal(ctaCheckoutLiberado(''), false);
-  assert.equal(ctaCheckoutLiberado('https://buy.stripe.com/test_live'), false);
-  assert.equal(ctaCheckoutLiberado('https://exemplo.com/test_'), false);
-  assert.equal(ctaCheckoutLiberado('https://buy.stripe.com/abc123'), true);
-  const cfg = ler('assets/js/empregador/config.js');
-  for (const m of cfg.matchAll(/ED_PAYMENT_LINK\w*\s*=\s*'([^']*)'/g)) assert.ok(!m[1].includes('/test_'), m[0]);
-  assert.equal(VERSAO_TERMOS, 'TERMOS-EMPREGADOR-1.2');
-  const ok = ler('empregador-em-dia/pagamento/ok/index.html');
-  assert.ok(ok.includes('Pedido recebido.'));
-  assert.ok(!ok.includes('envie o link'));
-  assert.ok(!ok.includes('Agora:'));
-  const norm = (s) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
-  const i = ok.indexOf('id="ed-pg-ok"');
-  const sec = ok.slice(ok.indexOf('>', i) + 1, ok.indexOf('</section>', i));
-  assert.equal(norm(sec), norm(TEXTO_OK_PAGINA));
-  const semAdequacao = /adequação nr-1/i;
-  const paginasNome = [...E3, 'empregador-em-dia/index.html', 'empregador-em-dia/orcamento-nr1/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html', 'termos/index.html', 'privacidade/index.html'];
-  for (const p of paginasNome) assert.doesNotMatch(ler(p), semAdequacao, p);
-  for (const p of ['contratar', 'pagamento']) {
-    const h = ler(`empregador-em-dia/${p}/index.html`);
-    assert.ok(!/<(input|select|textarea)\b[^>]*\bname="cnpj"/i.test(h), p);
-  }
-});
-
-test('Anexo ED-1 visível antes do botão; aceite obrigatório; arrependimento = §6', () => {
-  const norm = (s) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
-  const esperado = norm(ARREPENDIMENTO_ED1.join('\n'));
-  const proibido = /7 dias[\s\S]{0,80}?do pagamento/;
-  const pag = ler('empregador-em-dia/pagamento/index.html');
-  const anexo = htmlAnexoEd1();
-  assert.ok(pag.includes(anexo));
-  assert.ok(pag.indexOf('id="anexo-ed-1"') < pag.indexOf('data-ed-pagar'));
-  assert.match(pag, /name="aceite"[^>]*required/);
-  assert.ok(pag.includes('TERMOS-EMPREGADOR-1.2'));
-  const termos = ler('termos/index.html');
-  const item = termos.slice(termos.indexOf('id="empregador-em-dia"'), termos.indexOf('<h2>7. Legislação</h2>'));
-  assert.ok(item.includes(anexo));
-  assert.ok(item.includes('Versão: TERMOS-EMPREGADOR-1.2 · Data: 11/11/2026'));
-  const a = item.indexOf(ARREPENDIMENTO_ED1[0]);
-  const b = item.indexOf('6.8 Cancelamento');
-  assert.equal(norm(item.slice(a, b)), esperado);
-  const ok = ler('empregador-em-dia/pagamento/ok/index.html');
-  const c = ok.indexOf(ARREPENDIMENTO_ED1[0]);
-  const d = ok.indexOf('Dúvidas:');
-  assert.equal(norm(ok.slice(c, d)), esperado);
-  for (const p of ['termos/index.html', 'empregador-em-dia/pagamento/index.html', 'empregador-em-dia/pagamento/ok/index.html']) {
-    assert.doesNotMatch(ler(p), proibido, p);
-    assert.doesNotMatch(ler(p), /mesmo dia útil ou/, p);
-    assert.doesNotMatch(ler(p), /contados do pagamento/, p);
-  }
-  assert.match(item, /até o dia útil seguinte ao cancelamento/);
-  assert.match(item, /até o dia útil seguinte à constatação/);
-});
-
-test('6.16: prazo de 5 dias úteis e sem prazo antigo de transferência', () => {
-  const trecho = 'transferimos em até 5 dias úteis após recebermos os dados bancários, com atualização monetária em caso de atraso. Esses dados servem só para a devolução e são eliminados após a comprovação,';
-  const cnpj = 'A devolução nunca é retida, reduzida ou condicionada ao envio do CNPJ da empresa para a nota fiscal, à NFS-e ou a qualquer outro documento; havendo atraso, o valor é atualizado monetariamente (CDC, art. 49, parágrafo único).';
-  const arr = 'No arrependimento, a devolução é imediata pela Stripe. Só se a Stripe não conseguir devolver o Pix, fazemos a transferência o quanto antes, em até 5 dias úteis após recebermos os dados bancários, com atualização monetária.';
-  const termos = ler('termos/index.html');
-  assert.ok(termos.includes('6.16 Forma do estorno.'));
-  assert.ok(termos.includes('<h3>6.7 Direito de arrependimento.</h3>'));
-  assert.ok(termos.includes(trecho));
-  assert.ok(termos.includes(cnpj));
-  assert.ok(termos.includes(arr));
-  const juntos = [termos, ler('assets/js/empregador/textos-checkout.js'), ler('empregador-em-dia/pagamento/index.html'), ler('empregador-em-dia/pagamento/ok/index.html'), ler('privacidade/index.html')].join('\n');
-  assert.ok(!juntos.includes('1 dia útil após recebê-los'));
-  assert.ok(!juntos.includes('2 dias úteis após recebê-los'));
-  assert.ok(!juntos.includes('pelo mesmo meio de pagamento, sem pedido seu'));
-  const ed = [ler('termos/index.html'), ler('privacidade/index.html')];
-  const andar = (dir) => { for (const n of readdirSync(join(raiz, dir))) {
-    const p = join(dir, n); const st = statSync(join(raiz, p));
-    if (st.isDirectory()) andar(p); else if (/\.(html|js|mjs)$/.test(n)) ed.push(ler(p));
-  } };
-  andar('empregador-em-dia');
-  andar('assets/js/empregador');
-  assert.ok(!ed.join('\n').toLowerCase().includes('boleto'));
+test('B-PR42-08 QA ebbc1144: botões Copiar (Pix e link) têm listener com retorno', () => {
+  const js = readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8');
+  assert.match(js, /copiar\(\$\('\[data-ed-copiar="pix"\]'\), \(\) => \$\('\[data-ed="pix"\]'\)\.textContent\.trim\(\)\)/);
+  assert.match(js, /copiar\(\$\('\[data-ed-copiar="ok-link"\]'\)/);
+  assert.match(js, /navigator\.clipboard\.writeText/);
+  assert.match(js, /'Copiado'/);
+  const h = ler('empregador-em-dia/pagamento/index.html');
+  assert.ok(h.includes('<p aria-live="polite"><button type="button" class="btn sec" data-ed-copiar="pix">Copiar código Pix</button></p>'));
+  assert.equal(disco('empregador-em-dia/pagamento/index.html').includes('data-ed-copiar="pix"'), false);
 });

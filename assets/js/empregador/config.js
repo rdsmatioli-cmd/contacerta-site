@@ -1,9 +1,8 @@
 // Empregador em Dia: configuração única (backlog v2 81dfa1e0; OK do CEO a1dc9f21; DEC 95a76e17; CFO 0619d010).
 // Flags: tudo desligado. Ligar só em homologação, com OK do CEO.
 export const FLAGS = Object.freeze({
-  EMPREGADOR_EM_DIA: true, // páginas: com false, só o aviso "em preparação" (DEC CEO/CPO 31/10: ON para o lançamento de 03/11)
-  ED_CHECKOUT: true, // só o passo de pagamento (E3). O formulário de orçamento é ED_ORCAMENTO_NR1.
-  ED_ORCAMENTO_NR1: false, // formulário /empregador-em-dia/orcamento-nr1/ (placeholders seguem fora do ar)
+  EMPREGADOR_EM_DIA: false, // páginas: com false, o HTML servido é só o aviso (PR-0, DEC CEO 11/11 19h20)
+  ED_CHECKOUT: false, // checkout/contratar (E3)
   ED_ME_AVISE: false, // captura "Me avise" (<20)
   ED_GUIA: false, // guia gratuito (E4, D-06)
   ED_QUIZ_12: false, // questionário de 12 fatores (UI aguarda OK do CEO + visualização do Rodrigo)
@@ -49,8 +48,6 @@ export const ANONIMATO = Object.freeze({ minimoRespostas: 5, tipoToken: 'individ
 export const ESCALA_5 = Object.freeze(['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre']);
 // Adendo 2 do Advogado (02eb5fb1): nota para empregador doméstico no simulador 42h (EC 141; CF art. 7º, § 1º).
 export const NOTA_DOMESTICO = 'Para empregado doméstico, a lei específica (LC 150/2015) ainda fala em 44 horas, mas a Emenda Constitucional 141/2026 também vale para ele.';
-// E3: modo link. A URL fica vazia até o follow-up; sem ela o botão de pagamento não aparece.
-export const ED_PAGAMENTO_MODO = 'link';
-export const ED_PAYMENT_LINK_20_50 = 'https://buy.stripe.com/28EeV6eVmfsieB78VP5gc02';
-export const ED_PAYMENT_LINKS = Object.freeze({ '20-50': ED_PAYMENT_LINK_20_50 });
+// E3 (backlog v3 T07, T10): checkout só em mock (D-22); limiar de respostas para a análise vem daqui (T10 CA 2).
+export const ED_PAGAMENTO_MODO = 'mock'; // 'mock' até a ativação live aprovada (E6); nenhuma chave no repositório
 export const LIMIAR_ANALISE = 0.7;

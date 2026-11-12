@@ -7,51 +7,72 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { FLAGS, FAIXAS, FAIXAS_SALARIO, SALARIO_MINIMO, ED_SST_INCLUIDO, ESCALA_5, NOTA_DOMESTICO, JORNADA } from '../assets/js/empregador/config.js';
 import { destino, oferta, pontosAtencao, validarPasso, jornada } from '../assets/js/empregador/motor.js';
 import { emitirTokens, responder, podeAgregar } from '../assets/js/empregador/token.js';
+import { execFileSync } from 'node:child_process';
+import { AVISO_ED, DESC_NEUTRA, TITLE_PRECOS, gerarEd } from './_src/empregador/gerar.mjs';
 
 const raiz = new URL('../', import.meta.url);
 const ler = (p) => readFileSync(new URL(p, raiz), 'utf8');
+const VENDA = new Map(gerarEd({ flag: true, escrever: false }).map((p) => [`${p.caminho}index.html`, p.html]));
+const venda = (p) => { const h = VENDA.get(p); assert.ok(h, p); return h; };
 const PAGINAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
   'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html',
   'empregador-em-dia/orcamento-nr1/index.html', 'empregador-em-dia/precos/index.html', 'empregador-em-dia/contratar/index.html',
   'empregador-em-dia/pagamento/index.html', 'empregador-em-dia/pagamento/ok/index.html',
   'empregador-em-dia/painel/index.html'];
+const DESC_NEUTRA_PAGINAS = new Set([
+  'empregador-em-dia/index.html', 'empregador-em-dia/precos/index.html',
+  'empregador-em-dia/avaliacao-rapida-nr1/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html',
+  'empregador-em-dia/jornada-42h/index.html', 'empregador-em-dia/pagamento/index.html',
+  'empregador-em-dia/pagamento/ok/index.html', 'empregador-em-dia/contratar/index.html',
+  'empregador-em-dia/orcamento-nr1/index.html', 'empregador-em-dia/painel/index.html',
+]);
+const TITULO_PREPARACAO_PAGINAS = new Set([
+  'empregador-em-dia/precos/index.html',
+  'empregador-em-dia/avaliacao-rapida-nr1/index.html',
+  'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html',
+  'empregador-em-dia/jornada-42h/index.html',
+]);
 
-// DEC CEO/CPO 31/10 (lançamento 03/11): só EMPREGADOR_EM_DIA ligada; todas as outras seguem false.
-test('EMPREGADOR_EM_DIA e ED_CHECKOUT ligadas; orçamento e as demais flags desligadas', () => {
-  const ligadas = new Set(['EMPREGADOR_EM_DIA', 'ED_CHECKOUT']);
-  for (const [k, v] of Object.entries(FLAGS)) assert.equal(v, ligadas.has(k), k);
+// PR-0 (DEC CEO 11/11 19h20): EMPREGADOR_EM_DIA OFF. As outras flags seguem false.
+test('flags do Empregador em Dia desligadas e SST opcional (PR-0)', () => {
+  for (const [k, v] of Object.entries(FLAGS)) assert.equal(v, false, k);
   assert.equal(ED_SST_INCLUIDO, false);
 });
 
-// NB-05 (CLS): o HTML sai no estado final das flags, sem troca aviso -> app depois do ui.js. Com EMPREGADOR_EM_DIA ON,
-// as páginas E2 vêm com o app visível; orçamento NR-1 e E3 (ED_CHECKOUT/ED_LOGIN OFF) seguem só com o aviso.
-const LIBERADAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
-  'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'empregador-em-dia/jornada-42h/index.html',
-  'empregador-em-dia/precos/index.html', 'empregador-em-dia/pagamento/ok/index.html'];
-// DEC CPO 31/10 (PR #56): só landing, avaliação rápida e jornada 42h (preços noindex até checkout, ADENDO 7ec7825b) indexáveis e no sitemap.
-const INDEXAVEIS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/index.html',
-  'empregador-em-dia/jornada-42h/index.html'];
-test('T01 CA1 + NB-05: indexação conforme a DEC; sitemap só com as indexáveis; estado final no HTML (sem troca)', () => {
-  const sitemap = ler('sitemap.xml');
-  const noSitemap = [...sitemap.matchAll(/<loc>https:\/\/contacertabr\.com\.br\/(empregador-em-dia\/[^<]*)<\/loc>/g)].map((m) => `${m[1]}index.html`);
-  assert.deepEqual(noSitemap.sort(), [...INDEXAVEIS].sort(), 'sitemap');
+test('PR-0: HTML servido só com o aviso, noindex, fora do sitemap e sem pagamento/2', () => {
+  assert.doesNotMatch(ler('sitemap.xml'), /empregador-em-dia/);
+  assert.equal(existsSync(new URL('../empregador-em-dia/pagamento/2/index.html', import.meta.url)), false);
   for (const p of PAGINAS) {
     const h = ler(p);
-    assert.match(h, INDEXAVEIS.includes(p) ? /<meta name="robots" content="index, follow, max-image-preview:large">/ : /<meta name="robots" content="noindex, nofollow">/, p);
-    if (LIBERADAS.includes(p)) {
-      assert.match(h, /<section id="ed-off" class="ed-off" hidden>/, p);
-      assert.match(h, /<div id="ed-app">/, p);
-    } else {
-      assert.match(h, /<section id="ed-off" class="ed-off">/, p);
-      assert.match(h, /<div id="ed-app" hidden>/, p);
+    assert.equal(h.includes('id="ed-app"'), false, p);
+    assert.match(h, /<meta name="robots" content="noindex">/, p);
+    assert.ok(h.includes(AVISO_ED), p);
+    assert.doesNotMatch(h, /inventário|plano de ação|questionário|Eduzz/i, p);
+    if (TITULO_PREPARACAO_PAGINAS.has(p)) {
+      assert.match(h, new RegExp(`<title>${TITLE_PRECOS}</title>`));
+      assert.match(h, new RegExp(`property="og:title" content="${TITLE_PRECOS}"`));
+      assert.match(h, new RegExp(`name="twitter:title" content="${TITLE_PRECOS}"`));
+    }
+    if (DESC_NEUTRA_PAGINAS.has(p)) {
+      for (const attr of ['name="description"', 'property="og:description"', 'name="twitter:description"']) {
+        assert.ok(h.includes(`<meta ${attr} content="${DESC_NEUTRA}">`), `${p} ${attr}`);
+      }
     }
   }
 });
 
+test('flag ON restaura o HTML da main 97389ae0, fora o ?v=; pagamento/2 não volta', () => {
+  const norm = (h) => h.replace(/\?v=[0-9a-f]{10}/g, '?v=HASH');
+  for (const [arquivo, html] of VENDA) {
+    const atual = execFileSync('git', ['show', `97389ae067408208f25daf8f31e2769654986ad0:${arquivo}`], { encoding: 'utf8' });
+    assert.equal(norm(html), norm(atual), arquivo);
+  }
+  assert.equal(VENDA.has('empregador-em-dia/pagamento/2/index.html'), false);
+});
+
 test('termos NR-1 proibidos e "se aprovada"/44h-divisor fora das páginas', () => {
   for (const p of PAGINAS) {
-    // O Anexo ED-1 nega esses termos ("não é diagnóstico... avaliação psicológica, laudo"); fora dele continuam proibidos.
-    const h = ler(p).replace(/<section id="anexo-ed-1">[^]*?<\/section>/g, '').toLowerCase();
+    const h = ler(p).toLowerCase();
     for (const t of ['diagnóstico psicológico', 'diagnostico psicologico', 'avaliação psicológica', 'avaliacao psicologica', 'laudo', 'se aprovada', '÷ 220', '44h']) {
       assert.ok(!h.includes(t), `${p}: ${t}`);
     }
@@ -59,21 +80,19 @@ test('termos NR-1 proibidos e "se aprovada"/44h-divisor fora das páginas', () =
 });
 
 test('T01 CA2: textos literais da v3.3 p. 2 (com as reescritas do Advogado 38ccc6e0)', () => {
-  const h = ler(PAGINAS[0]);
-  for (const t of ['NR-1: riscos psicossociais no PGR', 'Avaliação rápida NR-1 dos riscos psicossociais, sem montar planilha',
-    'A NR-1 agora inclui os fatores de risco psicossociais relacionados ao trabalho, como sobrecarga e assédio, no gerenciamento de riscos da empresa (desde 26/05/2026).',
-    'Material e instruções para a coleta interna do questionário pela sua empresa',
-    'Modelo para enviar só resultados agregados e protegidos',
-    'Relatório orientativo por grupo ou setor, com limitações e sugestões de referência para ações',
-    'Não inclui inventário de riscos, plano de ação técnico nem PGR: eles continuam com a sua empresa.',
-    'R$ 1.490 à vista.', 'Em breve.',
+  const h = venda(PAGINAS[0]);
+  for (const t of ['NR-1: riscos psicossociais no PGR', 'Sua empresa em dia com a NR-1, sem montar planilha',
+    'A NR-1 agora pede que a empresa avalie estresse, sobrecarga e assédio no trabalho (desde 26/05/2026;',
+    'Questionário anônimo para os funcionários, por link', 'Inventário de riscos psicossociais para o PGR',
+    'Plano de ação com prazos e responsáveis', // 4º item e abertura: Advogado M-03 e B-01, teste abaixo
+    'Preço fechado pela faixa de funcionários.', 'Você só paga o resto quando receber o relatório.',
     'Veja quanto custaria reduzir a jornada.', 'href="/empregador-em-dia/avaliacao-rapida-nr1/"', 'href="/empregador-em-dia/jornada-42h/"']) {
     assert.ok(h.includes(t), t);
   }
 });
 
 test('T02 CA5: "Passo n de 3", nunca "de 4"', () => {
-  const h = ler(PAGINAS[1]);
+  const h = venda(PAGINAS[1]);
   for (const n of [1, 2, 3]) assert.ok(h.includes(`Passo ${n} de 3`));
   assert.ok(!/de 4/.test(h));
 });
@@ -86,7 +105,7 @@ test('T02 CA1/CA3: validação e destino das 5 faixas', () => {
   assert.ok(validarPasso(3, {}));
   assert.equal(validarPasso(3, { pgr: 'naosei' }), null);
   assert.deepEqual(['lt20', '20-50', '51-100', '101-200', 'gt200'].map(destino),
-    ['simplificada', 'oferta', 'em-breve', 'em-breve', 'sob-consulta']);
+    ['simplificada', 'oferta', 'oferta', 'oferta', 'sob-consulta']);
 });
 
 test('T03 CA1: preços e parcelas da tabela aprovada; <20 e >200 sem preço', () => {
@@ -98,7 +117,7 @@ test('T03 CA1: preços e parcelas da tabela aprovada; <20 e >200 sem preço', ()
 });
 
 test('T03 CA2: bloco <20 e bloco >200 sem "R$" no HTML', () => {
-  const h = ler(PAGINAS[2]);
+  const h = venda(PAGINAS[2]);
   for (const k of ['simplificada', 'sob-consulta']) {
     const bloco = h.match(new RegExp(`<section data-ed-res="${k}"[^]*?</section>`))[0];
     assert.ok(!bloco.includes('R$'), k);
@@ -123,7 +142,7 @@ test('T15 CA2: inteiro >= 1; meios de faixa do CFO/CEO, nenhum abaixo do mínimo
   for (const n of [0, -1, 1.5, NaN]) assert.throws(() => jornada({ funcionarios: n, faixaSalario: '2a3' }));
   assert.deepEqual(FAIXAS_SALARIO.map((f) => f.meio), [1810.5, 2500, 4000, 5000]);
   for (const f of FAIXAS_SALARIO) assert.ok(f.meio >= SALARIO_MINIMO);
-  const h = ler(PAGINAS[3]);
+  const h = venda(PAGINAS[3]);
   assert.ok(h.includes('A Emenda Constitucional 141/2026 reduz a jornada máxima para 42 horas por semana a partir de 16/12/2026 e para 40 horas a partir de 16/12/2027, sem redução de salário.'));
   assert.ok(h.includes('salário ÷ <span data-ed="div42">210</span> horas'));
   // M-02 (parecer jurídico 05, alternativa; decisão do CPO): divisor 210 mantido, com aviso visível
@@ -197,11 +216,7 @@ test('P-08: [PRAZO] com o texto literal do parecer; placeholder trava com a flag
 });
 
 test('trava de produção: nenhuma página publicada com placeholder entre colchetes', () => {
-  for (const p of PAGINAS) {
-    // O aviso entre colchetes fica só dentro do Anexo ED-1 (parecer 6c296519): é modelo da empregadora, não campo do site.
-    const html = ler(p).replace(/<script[^]*?<\/script>/g, '').replace(/<section id="anexo-ed-1">[^]*?<\/section>/g, '');
-    assert.deepEqual(placeholdersAbertos(html), [], p);
-  }
+  for (const p of PAGINAS) assert.deepEqual(placeholdersAbertos(ler(p).replace(/<script[^]*?<\/script>/g, '')), [], p);
 });
 
 test('S-03: aviso de privacidade com fonte >= 14 px e sem corte', () => {
@@ -219,7 +234,7 @@ test('B-05 (backlog v3 229abc9b): caso extra com divisor 220 reproduz a conta da
 // Correções de texto do PR #36 (28/10): NR-1 a5488be6 (achados 1 e 2), Advogado 38ccc6e0 (M-02 a M-04-E2, B-01) e adendo 113ef689 (fonte final: M-01 unificado, M-05, B-02, B-03; S-01 retirada),
 // Tributário 93bf69ba (F-01 unificado no M-01 do Advogado, F-02). Literais: qualquer mudança exige nova revisão.
 test('PR #36 revisões: textos literais travados nas páginas', () => {
-  const pg = (c) => readFileSync(new URL(`../empregador-em-dia/${c}index.html`, import.meta.url), 'utf8');
+  const pg = (c) => venda(`empregador-em-dia/${c}index.html`);
   const jor = pg('jornada-42h/'), res = pg('avaliacao-rapida-nr1/resultado/'), lan = pg('');
   for (const t of [ // adendo do Advogado 113ef689: M-05, M-01 unificado (NR-1/Tributário), B-02 ajustado, B-03
     'A conta mostra um cenário: a empresa mantém 44 horas por semana em 5 dias, respeitando os 2 dias de repouso semanal exigidos a partir de 16/12/2026 e o limite de 2 horas extras por dia (CLT, art. 59), e paga como extra as horas acima do novo limite. Não é uma recomendação: hora extra fixa todo mês tem efeitos trabalhistas e pode ser questionada. Reduzir a jornada, reorganizar escalas ou contratar são alternativas.',
@@ -239,38 +254,36 @@ test('PR #36 revisões: textos literais travados nas páginas', () => {
   assert.ok(jor.indexOf('data-ed="aviso-m02"') < jor.indexOf('<section class="ed-conta"'), 'aviso antes do resultado');
   for (const t of [
     '<h1>Empresas pequenas podem ter regras mais simples na NR-1</h1>',
-    'O MEI e as microempresas ou empresas de pequeno porte de grau de risco 1 ou 2 que, no levantamento preliminar de perigos, não identificarem exposição a agentes físicos, químicos ou biológicos conforme a NR-9 e fizerem a declaração digital prevista na NR-1 podem ficar dispensados de elaborar o PGR (NR-1, itens 1.8.1 e 1.8.4). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.',
+    'MEI e microempresas ou empresas de pequeno porte de grau de risco 1 ou 2, sem exposição a agentes físicos, químicos ou biológicos conforme a NR-9, podem ficar dispensadas de elaborar o PGR (NR-1, itens 1.8). A dispensa vale só para o documento: as demais obrigações continuam. Este serviço foi pensado para 20 a 200 funcionários.',
     '<h1>Sua empresa deve avaliar os riscos psicossociais no PGR</h1>',
   ]) assert.ok(res.includes(t), t);
   assert.doesNotMatch(res, /<input type="email"|id="ed-avise"/); // F-1 (d39ff580): Me avise fora com ED_ME_AVISE OFF
   assert.doesNotMatch(res, /type="checkbox"[^>]*checked/);
   assert.doesNotMatch(res, /menos de 20 funcionários, você pode|precisa incluir os riscos/i);
   for (const t of [
-    'Sua empresa aplica o questionário internamente, com o nosso material e instruções, e nos envia só resultados agregados e protegidos; você recebe um relatório orientativo com sugestões de referência para ações, que pode servir de ponto de partida para o inventário de riscos e o plano de ação que a sua empresa elabora no PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Neste serviço ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora, que deve definir quem conduz a avaliação de riscos, com conhecimento técnico adequado.',
-    'As multas e sanções baseadas nesse ponto estão suspensas provisoriamente pelo STF na ADPF 1316 (situação conferida em 11/11/2026, sem data final divulgada); a obrigação de identificar e avaliar esses riscos continua.',
-    'Avaliação rápida NR-1 para empresas de 20 a 50 empregados: sua empresa aplica o questionário internamente e recebe um relatório orientativo dos resultados agregados. Não substitui o PGR.',
+    '<li>Relatório com o resultado do grupo para anexar ao PGR (pode ser revisado por um profissional de SST, se você quiser)</li>',
+    'A gente aplica o questionário anônimo e você recebe o inventário e o plano de ação para o PGR. A validação técnica por profissional de segurança do trabalho (SST) não está incluída no preço. Ela é opcional e, se você quiser, é contratada e paga diretamente pela sua empresa. A responsabilidade pelo PGR é sempre da empresa empregadora.',
+    '(desde 26/05/2026; as multas sobre esse ponto estão suspensas provisoriamente pelo STF na ADPF 1316, mas a obrigação de avaliar continua)',
   ]) assert.ok(lan.includes(t), t);
-  assert.ok(!lan.includes('simulação · dados de exemplo'));
-  assert.ok(!lan.includes('A gente aplica o questionário anônimo'));
   assert.doesNotMatch(lan, /assinado|profissional de segurança do trabalho analisa/i);
 });
 
 // CEO/CPO 28/10: "diagnóstico" sai dos títulos e do slug; a URL antiga nunca foi publicada (sem 301).
 test('Avaliação rápida NR-1: slug novo, nenhuma menção a "diagnóstico" nas páginas e no JS', () => {
-  for (const p of PAGINAS) assert.doesNotMatch(ler(p).replace(/<section id="anexo-ed-1">[^]*?<\/section>/g, ''), /diagn[oó]stic/i, p);
+  for (const p of PAGINAS) assert.doesNotMatch(ler(p), /diagn[oó]stic/i, p);
   assert.doesNotMatch(readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8'), /\/diagnostico\//);
   assert.ok(!existsSync(new URL('../empregador-em-dia/diagnostico/', import.meta.url)));
-  assert.match(ler(PAGINAS[1]), /<title>Avaliação rápida NR-1: o que sua empresa precisa \| Empregador em Dia<\/title>/);
-  assert.match(ler(PAGINAS[2]), /<title>Resultado da avaliação rápida NR-1 \| Empregador em Dia<\/title>/);
+  assert.match(venda(PAGINAS[1]), /<title>Avaliação rápida NR-1: o que sua empresa precisa \| Empregador em Dia<\/title>/);
+  assert.match(venda(PAGINAS[2]), /<title>Resultado da avaliação rápida NR-1 \| Empregador em Dia<\/title>/);
 });
 
 // DEC CPO P-21 C-04 (Designer v4.1c): o CTA de orçamento NR-1 aponta para /empregador-em-dia/orcamento-nr1/, só com ED_CHECKOUT.
 test('CTA "Pedir orçamento": destino /empregador-em-dia/orcamento-nr1/, desligado com a flag OFF', () => {
   const ui = readFileSync(new URL('../assets/js/empregador/ui.js', import.meta.url), 'utf8');
   assert.match(ui, /export const URL_ORCAMENTO_NR1 = '\/empregador-em-dia\/orcamento-nr1\/';/);
-  assert.match(ui, /if \(b && FLAGS\.ED_ORCAMENTO_NR1\) \{ b\.disabled = false; b\.addEventListener\('click', \(\) => location\.assign\(URL_ORCAMENTO_NR1\)\); \}/);
-  assert.match(ler(PAGINAS[2]), /<button type="button" class="btn" data-ed-orcamento disabled>Pedir orçamento<\/button>/);
-  assert.equal(FLAGS.ED_ORCAMENTO_NR1, false);
+  assert.match(ui, /if \(b && FLAGS\.ED_CHECKOUT\) \{ b\.disabled = false; b\.addEventListener\('click', \(\) => location\.assign\(URL_ORCAMENTO_NR1\)\); \}/);
+  assert.match(venda(PAGINAS[2]), /<button type="button" class="btn" data-ed-orcamento disabled>Pedir orçamento<\/button>/);
+  assert.equal(FLAGS.ED_CHECKOUT, false);
 });
 
 // Orçamento NR-1 (PR próprio, base empregador-e2). Placeholders (Designer e destino ED-Orcamento) em
@@ -287,20 +300,21 @@ export const AVISO_SHA256_TEXTO = 'f6f58abc4ead701702523ff5bf735705e35ac6b7ea843
 
 test('orçamento NR-1: placeholders do Designer e do destino ED-Orcamento impedem ED_CHECKOUT ON', async () => {
   const { TEXTOS_ORCAMENTO, ED_ORCAMENTO, conferirOrcamento } = await import('../assets/js/empregador/orcamento-textos.js');
-  const abertos = conferirOrcamento(TEXTOS_ORCAMENTO, ED_ORCAMENTO, { ED_ORCAMENTO_NR1: false });
+  const abertos = conferirOrcamento(TEXTOS_ORCAMENTO, ED_ORCAMENTO, { ED_CHECKOUT: false });
   assert.ok(abertos.some((x) => x.startsWith('[TEXTO DO DESIGNER')));
   assert.ok(abertos.includes('[ED-ORCAMENTO: ACTION DO GOOGLE FORM]'));
-  assert.throws(() => conferirOrcamento(TEXTOS_ORCAMENTO, ED_ORCAMENTO, { ED_ORCAMENTO_NR1: true }), /placeholder em aberto/);
-  assert.throws(() => conferirOrcamento({}, { action: '[ED-ORCAMENTO: ACTION DO GOOGLE FORM]', campos: {} }, { ED_ORCAMENTO_NR1: true }), /ED-ORCAMENTO/);
-  if (abertos.length) assert.equal(FLAGS.ED_ORCAMENTO_NR1, false, `ED_ORCAMENTO_NR1 ON com placeholder: ${abertos.join(', ')}`);
+  assert.throws(() => conferirOrcamento(TEXTOS_ORCAMENTO, ED_ORCAMENTO, { ED_CHECKOUT: true }), /placeholder em aberto/);
+  // destino sem configurar (só action) já trava a flag ON
+  assert.throws(() => conferirOrcamento({}, { action: '[ED-ORCAMENTO: ACTION DO GOOGLE FORM]', campos: {} }, { ED_CHECKOUT: true }), /ED-ORCAMENTO/);
+  if (abertos.length) assert.equal(FLAGS.ED_CHECKOUT, false, `ED_CHECKOUT ON com placeholder: ${abertos.join(', ')}`);
   const ok = JSON.parse(JSON.stringify([TEXTOS_ORCAMENTO, ED_ORCAMENTO]).replace(/"\[[^\]]*\]"/g, '"ok"'));
-  assert.deepEqual(conferirOrcamento(ok[0], ok[1], { ED_ORCAMENTO_NR1: true }), []);
+  assert.deepEqual(conferirOrcamento(ok[0], ok[1], { ED_CHECKOUT: true }), []);
 });
 
 test('orçamento NR-1: destino é o ED-Orcamento, não o CC-Leads; sem flag nada é enviado', async () => {
   const { ED_ORCAMENTO } = await import('../assets/js/empregador/orcamento-textos.js');
   const ccLeads = ler('tabelas-oficiais-2026/index.html').match(/id="tl-form" action="([^"]+)"/)[1];
-  const h = ler(ORC);
+  const h = venda(ORC);
   const src = ler('assets/js/empregador/orcamento-textos.js') + ler('assets/js/empregador/ui.js');
   assert.ok(!src.includes(ccLeads) && !h.includes(ccLeads), 'CC-Leads não pode ser o destino');
   for (const e of h.match(/entry\.\d+/g) || []) assert.fail(`entry do CC-Leads ou outro no HTML: ${e}`);
@@ -313,7 +327,7 @@ test('orçamento NR-1: aviso LGPD literal do Advogado, logo acima do Enviar', ()
   const md = readFileSync(AVISO_MD, 'utf8');
   assert.equal(createHash('sha256').update(md).digest('hex'), AVISO_SHA256_FONTE_ARQUIVO, 'fonte do Advogado mudou');
   const fonte = md.split('Caixa opcional')[0].split('\n').filter((l) => !l.startsWith('#')).join('\n').trim();
-  const h = ler(ORC);
+  const h = venda(ORC);
   const r = avisoRenderizado(h);
   assert.equal(r, fonte);
   assert.equal(createHash('sha256').update(r).digest('hex'), AVISO_SHA256_TEXTO);
@@ -322,7 +336,7 @@ test('orçamento NR-1: aviso LGPD literal do Advogado, logo acima do Enviar', ()
 });
 
 test('orçamento NR-1: novidades separada, desmarcada e opcional; versão do aviso e data/hora do envio', () => {
-  const h = ler(ORC);
+  const h = venda(ORC);
   const md = readFileSync(AVISO_MD, 'utf8');
   const mkt = md.match(/☐ (.+)/)[1].trim();
   const cx = h.match(/<label class="le-ok"><input type="checkbox" id="orc-novidades"[^>]*>([^<]*)<\/label>/);
@@ -340,8 +354,8 @@ test('orçamento NR-1: novidades separada, desmarcada e opcional; versão do avi
 test('orçamento NR-1: copy do Designer v4.3d (sha256 1d65ac99...) aplicada; preços vêm do config', () => {
   const cp = readFileSync(new URL('_src/juridico/copy-orcamento-nr1.md', import.meta.url), 'utf8');
   assert.equal(createHash('sha256').update(cp).digest('hex'), '1d65ac999d75783151e35b1572a7c189fd8cb8f538308a3581a9c2c57c409921');
-  const h = ler(ORC);
-  for (const t of ['<h1>Orçamento do serviço NR-1</h1>',
+  const h = venda(ORC);
+  for (const t of ['<h1>Orçamento do serviço NR-1</h1>', 'Pagamento: 50% no início e 50% na entrega, ou tudo à vista.',
     'Prazo: retorno em até 2 dias úteis, proposta em até 5 dias úteis.', 'Preços válidos até 31/12/2026.', '>Nome da empresa</label>',
     'Digite o nome da empresa. Não consultamos o CNPJ em nenhuma base.', '>CNPJ da empresa</label>',
     'Opcional. Ajuda a preparar a proposta.', '<option>20 a 50</option><option>51 a 100</option><option>101 a 200</option><option>Mais de 200</option>',

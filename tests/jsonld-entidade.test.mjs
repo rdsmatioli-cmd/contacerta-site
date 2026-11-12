@@ -40,7 +40,7 @@ const blocos = paginas.flatMap((p) => [...ler(p).matchAll(/<script type="applica
 }));
 const nos = blocos.flatMap(({ p, json }) => objetos(json).map((o) => ({ p, o })));
 // Definição = nó com alguma propriedade além de @context/@type/@id (os posts citam a marca como
-// reviewedBy {"@type":"Organization","@id":...}, que é só referência).
+// publisher {"@id":...}, que é só referência).
 const define = (o) => typeof o['@id'] === 'string' && Object.keys(o).some((k) => !['@context', '@type', '@id'].includes(k));
 const definicoes = (id) => nos.filter(({ o }) => o['@id'] === id && define(o));
 
@@ -106,5 +106,18 @@ test('parentOrganization e subOrganization apontam para @id definidos', () => {
       if (o[k] === undefined) continue;
       assert.ok(ids.has(o[k]['@id']), `${p}: ${k} ${JSON.stringify(o[k])}`);
     }
+  }
+});
+
+// reviewedBy é propriedade de WebPage no schema.org, não de Article/BlogPosting; no BlogPosting o Semrush (auditoria de
+// 12/11/2026) e o validador do Google acusam dado estruturado inválido. Os posts antigos usavam e saíram.
+// WebPage e os subtipos dele no schema.org.
+const TIPOS_WEBPAGE = new Set(['WebPage', 'AboutPage', 'CheckoutPage', 'CollectionPage', 'ContactPage', 'FAQPage', 'ItemPage',
+  'MedicalWebPage', 'ProfilePage', 'QAPage', 'RealEstateListing', 'SearchResultsPage']);
+test('reviewedBy não aparece em nó que não seja WebPage', () => {
+  for (const { p, o } of nos) {
+    if (o.reviewedBy === undefined) continue;
+    const tipos = [].concat(o['@type']);
+    assert.ok(tipos.some((t) => TIPOS_WEBPAGE.has(t)), `${p}: reviewedBy em ${tipos.join(', ')}`);
   }
 });

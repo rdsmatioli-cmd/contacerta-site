@@ -77,9 +77,6 @@ test('404.html: noindex, sem rel=canonical e sem og:url', () => {
 const SEM_LINK_INTERNO = new Map([
   // Empregador em Dia (go-live 03/11, DEC CPO 31/10): só as páginas da própria seção levam a ela. Ligar o produto à
   // home, ao menu ou às calculadoras é decisão pendente do Rodrigo (lote 4 da auditoria de 30-31/10/2026).
-  [`${ORIGEM}/empregador-em-dia/`, 'Empregador em Dia, até a decisão'],
-  [`${ORIGEM}/empregador-em-dia/avaliacao-rapida-nr1/`, 'Empregador em Dia, até a decisão'],
-  [`${ORIGEM}/empregador-em-dia/jornada-42h/`, 'Empregador em Dia, até a decisão'],
   // Lista de espera com o envio desligado desde 16/10: links-sem-destino.test.mjs (CC-SITE-03) proíbe link para ela
   // fora dela, de /privacidade/ e de /sobre/. Continuar indexável e no sitemap é decisão à parte.
   [`${ORIGEM}/lista-de-espera/`, 'lista de espera desligada (CC-SITE-03)'],
@@ -148,9 +145,6 @@ test('/irpf/: linha no llms.txt em "Impostos e MEI", com a meta description da p
 const FORA_DO_LLMS = new Map([
   // Empregador em Dia: produto à parte, ainda sem link do resto do site (ver SEM_LINK_INTERNO). Entra no llms.txt
   // junto com a decisão de ligá-lo ao site.
-  [`${ORIGEM}/empregador-em-dia/`, 'Empregador em Dia, até a decisão'],
-  [`${ORIGEM}/empregador-em-dia/avaliacao-rapida-nr1/`, 'Empregador em Dia, até a decisão'],
-  [`${ORIGEM}/empregador-em-dia/jornada-42h/`, 'Empregador em Dia, até a decisão'],
   // Lista de espera desligada desde 16/10: links-sem-destino.test.mjs (CC-SITE-03) exige que o llms.txt não a cite.
   [`${ORIGEM}/lista-de-espera/`, 'lista de espera desligada (CC-SITE-03)'],
 ]);

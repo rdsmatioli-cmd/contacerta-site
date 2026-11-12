@@ -10,6 +10,8 @@ export const PAGINAS = [
   'licitacoes/blog/index.html',
   'licitacoes/blog/como-encontrar-licitacoes.html', 'licitacoes/blog/pregoes-material-de-limpeza-pncp.html',
   'licitacoes/blog/pregao-material-de-expediente-pncp/index.html',
+  'licitacoes/blog/dispensa-de-licitacao/index.html', 'licitacoes/blog/dispensa-x-inexigibilidade/index.html',
+  'licitacoes/blog/o-que-e-licitacao/index.html',
   'licitacoes/editais/material-de-limpeza.html',
 ];
 const ler = (p) => readFileSync(raiz + p, 'utf8');
