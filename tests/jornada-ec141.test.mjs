@@ -94,9 +94,9 @@ test('páginas: ajuda do divisor, repousos, FAQ da EC 141 (FAQPage = visível), 
   assert.equal(he.split('as 42 horas só se completam com compensação de horários ou com a jornada diária ampliada por convenção ou acordo coletivo (EC 141/2026, art. 7º)').length - 1, 2);
 });
 
-// A main (#56, DEC CPO, commit 7ec7825) indexou /empregador-em-dia/jornada-42h/; este teste segue a main.
-test('simulador de 42 h do Empregador em Dia indexado e no sitemap, como na main (#56)', () => {
+// PR-0: a jornada publicada fica noindex e fora do sitemap. O simulador volta com a flag ON (teste do gerador).
+test('simulador de 42 h do Empregador em Dia noindex e fora do sitemap (PR-0)', () => {
   const h = ler('empregador-em-dia/jornada-42h/index.html');
-  assert.match(h, /<meta name="robots" content="index, follow/);
-  assert.ok(ler('sitemap.xml').includes('/empregador-em-dia/jornada-42h/'));
+  assert.match(h, /<meta name="robots" content="noindex">/);
+  assert.equal(ler('sitemap.xml').includes('/empregador-em-dia/jornada-42h/'), false);
 });

@@ -3,7 +3,7 @@
 // Textos literais da v3.3 (4c21797f, p. 2-7 e 19) com as decisões do CEO (becbf681, 95a76e17), o parecer do
 // Advogado (c23c3792) e o CFO (0619d010). Com a flag OFF só o aviso aparece. DEC CPO 31/10 (PR #56): landing, avaliação rápida e jornada 42h
 // indexáveis (ADENDO Advogado 7ec7825b: preços só com checkout) e no sitemap; as demais (preços, resultado, orçamento, contratar, pagamento, painel) seguem noindex.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, realpathSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
@@ -21,23 +21,62 @@ const vUi = ver('assets/js/empregador/ui.js');
 const cssEd = readFileSync(join(raiz, 'assets/js/empregador/ed.css'), 'utf8').trim();
 
 const INDEXAVEIS = ['empregador-em-dia/', 'empregador-em-dia/avaliacao-rapida-nr1/', 'empregador-em-dia/jornada-42h/'];
+// DEC CEO 11/11 19h20 e parecer ADV 8cb75b8d §8: com a flag OFF o HTML servido é só o aviso.
+export const AVISO_ED = 'Esta página está em preparação e ainda não está disponível.';
+export const DESC_NEUTRA = 'Empregador em Dia: serviço em preparação, ainda não disponível para contratação.';
+export const TITLE_PRECOS = 'Empregador em Dia: em preparação';
+const META_PROIBIDA = /inventário|plano de ação|adequação|metade|parcela|questionário anônimo/i;
+const DESC_NEUTRA_SEMPRE = new Set([
+  'empregador-em-dia/',
+  'empregador-em-dia/precos/',
+  'empregador-em-dia/avaliacao-rapida-nr1/',
+  'empregador-em-dia/avaliacao-rapida-nr1/resultado/',
+  'empregador-em-dia/jornada-42h/',
+  'empregador-em-dia/pagamento/',
+  'empregador-em-dia/contratar/',
+  'empregador-em-dia/orcamento-nr1/',
+  'empregador-em-dia/painel/',
+]);
+const TITULO_PREPARACAO = new Set([
+  'empregador-em-dia/precos/',
+  'empregador-em-dia/avaliacao-rapida-nr1/',
+  'empregador-em-dia/avaliacao-rapida-nr1/resultado/',
+  'empregador-em-dia/jornada-42h/',
+]);
+const estado = { flag: FLAGS.EMPREGADOR_EM_DIA, escrever: false, saida: [] };
+
 function pagina({ caminho, titulo, desc, conteudo }) {
+  const flag = estado.flag;
   const url = `${ORIG}/${caminho}`;
+  let tituloFinal = titulo;
+  let descFinal = desc;
+  if (!flag) {
+    if (TITULO_PREPARACAO.has(caminho)) tituloFinal = TITLE_PRECOS;
+    else if (META_PROIBIDA.test(titulo)) throw new Error(`title com termo proibido em ${caminho}: ${titulo}`);
+    if (DESC_NEUTRA_SEMPRE.has(caminho) || META_PROIBIDA.test(desc)) descFinal = DESC_NEUTRA;
+  }
   let h = head0
-    .replace(/<title>[^<]*<\/title>/, `<title>${titulo}</title>`)
-    .replaceAll('Planilha Tabelas oficiais 2026 | Conta Certa', titulo)
-    .replaceAll('Download da planilha Tabelas oficiais 2026 do Conta Certa.', desc)
+    .replace(/<title>[^<]*<\/title>/, `<title>${tituloFinal}</title>`)
+    .replaceAll('Planilha Tabelas oficiais 2026 | Conta Certa', tituloFinal)
+    .replaceAll('Download da planilha Tabelas oficiais 2026 do Conta Certa.', descFinal)
     .replaceAll(`${ORIG}/tabelas-oficiais-2026/obrigado/`, url);
-  if (INDEXAVEIS.includes(caminho)) h = h.replace('<meta name="robots" content="noindex, nofollow">', '<meta name="robots" content="index, follow, max-image-preview:large">');
+  if (flag && INDEXAVEIS.includes(caminho)) h = h.replace('<meta name="robots" content="noindex, nofollow">', '<meta name="robots" content="index, follow, max-image-preview:large">');
+  if (!flag) h = h.replace(/<meta name="robots" content="[^"]*">/, '<meta name="robots" content="noindex">');
   h = h.replace('<link rel="stylesheet" href="/assets/style.css', `<style>${cssEd}</style>\n<link rel="stylesheet" href="/assets/style.css`);
-  // NB-05 (CLS): o HTML já sai no estado final das flags. Com a página liberada, #ed-app vem visível e #ed-off oculto,
-  // sem troca depois do ui.js (que repete o mesmo estado, sem deslocar nada). Mesma regra do iniciar() do ui.js.
-  const liberada = FLAGS.EMPREGADOR_EM_DIA
-    && !(/id="ed-orc"|data-ed-e3="checkout"/.test(conteudo) && !FLAGS.ED_CHECKOUT)
-    && !(/data-ed-e3="login"/.test(conteudo) && !FLAGS.ED_LOGIN);
-  const main = `<main id="conteudo" class="caixa ed">
+  // NB-05 (CLS): com a flag ON o HTML sai no estado final das flags. Com a página liberada, #ed-app vem visível e #ed-off oculto.
+  // PR-0: com a flag OFF o #ed-app e o texto de venda não entram no HTML servido.
+  let main;
+  if (!flag) {
+    main = `<main id="conteudo" class="caixa ed">
+<section id="ed-off" class="ed-off"><p class="ed-off-t"><strong>Empregador em Dia</strong></p><p>${AVISO_ED}</p><p><a href="/nr1-riscos-psicossociais/">Leia sobre a NR-1 e os riscos psicossociais</a>.</p></section>
+</main>`;
+  } else {
+    const liberada = true
+      && !(/id="ed-orc"|data-ed-e3="checkout"/.test(conteudo) && !FLAGS.ED_CHECKOUT)
+      && !(/data-ed-e3="login"/.test(conteudo) && !FLAGS.ED_LOGIN);
+    main = `<main id="conteudo" class="caixa ed">
 <p class="ed-selo">simulação · dados de exemplo</p>
-<section id="ed-off" class="ed-off"${liberada ? ' hidden' : ''}><p class="ed-off-t"><strong>Empregador em Dia</strong></p><p>Esta página está em preparação e ainda não está disponível.</p><p><a href="/nr1-riscos-psicossociais/">Leia sobre a NR-1 e os riscos psicossociais</a>.</p></section>
+<section id="ed-off" class="ed-off"${liberada ? ' hidden' : ''}><p class="ed-off-t"><strong>Empregador em Dia</strong></p><p>${AVISO_ED}</p><p><a href="/nr1-riscos-psicossociais/">Leia sobre a NR-1 e os riscos psicossociais</a>.</p></section>
 <div id="ed-app"${liberada ? '' : ' hidden'}>
 <nav class="ed-menu" aria-label="Empregador em Dia"><a href="/nr1-riscos-psicossociais/">NR-1</a><a href="/empregador-em-dia/jornada-42h/">Jornada 42h</a><a href="/empregador-em-dia/#preco">Preço</a></nav>
 ${conteudo}
@@ -45,6 +84,7 @@ ${conteudo}
 </div>
 <script>(()=>{let f=0;const ir=()=>{if(f++)return;import('/assets/js/empregador/ui.js?v=${vUi}')},ocioso=()=>window.requestIdleCallback?requestIdleCallback(ir,{timeout:1500}):setTimeout(ir,1);addEventListener('load',()=>{let t=setTimeout(ocioso,600);try{new PerformanceObserver(()=>{clearTimeout(t);t=setTimeout(ocioso,600)}).observe({type:'largest-contentful-paint',buffered:true})}catch{}setTimeout(ir,3000)},{once:true})})()</script>
 </main>`;
+  }
   let out = `${h}</head>${corpoIni}${main}${rodape}`;
   // Sprite só com os símbolos usados, na ordem do primeiro uso (fonte-seo.test.mjs, sprite()).
   const sm = out.match(/<svg class="sprite"[^>]*>((?:<symbol\b[^]*?<\/symbol>)*)<\/svg>/);
@@ -52,10 +92,15 @@ ${conteudo}
   const simbolos = new Map([...sm[1].matchAll(/<symbol id="([^"]+)"[^]*?<\/symbol>/g)].map((m) => [m[1], m[0]]));
   const usados = [...new Set([...depois.matchAll(/href="#(i-[\w-]+)"/g)].map((m) => m[1]))].filter((i) => simbolos.has(i));
   out = out.replace(sm[0], sm[0].replace(sm[1], usados.map((i) => simbolos.get(i)).join('')));
-  mkdirSync(join(raiz, caminho), { recursive: true });
-  writeFileSync(join(raiz, caminho, 'index.html'), out);
+  estado.saida.push({ caminho, html: out });
+  if (estado.escrever) {
+    mkdirSync(join(raiz, caminho), { recursive: true });
+    writeFileSync(join(raiz, caminho, 'index.html'), out);
+  }
+  return out;
 }
 
+function montarPaginas() {
 const radio = (nome, opcoes, ajudaId) => opcoes.map(([v, t]) =>
   `<label class="ed-op"><input type="radio" name="${nome}" value="${v}" aria-describedby="${ajudaId}"> ${t}</label>`).join('');
 const check = (nome, opcoes, ajudaId) => opcoes.map(([v, t]) =>
@@ -338,32 +383,18 @@ pagina({
 </section>`,
 });
 
-pagina({
-  caminho: 'empregador-em-dia/pagamento/2/',
-  titulo: 'Pagamento da 2ª parcela | Empregador em Dia',
-  desc: 'Relatório pronto: pagamento da 2ª parcela da adequação NR-1.',
-  conteudo: `<form class="ed-form" id="ed-pagamento" data-ed-e3="checkout" data-ed-parcela="2" novalidate>
-<p class="ed-passo">Dados ✓ › Pagamento › Confirmação</p>
-<h1>Relatório pronto. Falta a 2ª parcela.</h1>
-${MOCK}
-${formaPg}
-<section class="ed-oferta" aria-labelledby="pg2-resumo"><h2 id="pg2-resumo">Resumo do pedido</h2><p data-ed="pg-empresa"></p>
-<table class="ed-tab"><caption>Valores</caption><tbody>
-<tr><th scope="row">Adequação NR-1 · <span data-ed="pg-faixa"></span></th><td data-ed="pg-preco"></td></tr>
-<tr><th scope="row">1ª parcela paga</th><td data-ed="pg-agora"></td></tr>
-<tr><th scope="row">2ª parcela, agora</th><td data-ed="pg-entrega"></td></tr>
-<tr><th scope="row">Total agora</th><td data-ed="pg-total"></td></tr>
-</tbody></table><p>O download do relatório libera assim que o Pix for confirmado.</p><p data-ed-validade>Preços válidos até 31/12/2026.</p><p class="ed-aviso-sst">O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR. A elaboração, implementação e atualização do PGR são de responsabilidade da empresa empregadora. Para contratar a validação técnica, procure diretamente um profissional ou empresa de SST de sua escolha; o Conta Certa não indica nem recebe comissão de fornecedores.</p></section>
-${selos}
-<section class="nota le-privacidade" id="pg-aviso" aria-labelledby="pg-aviso-t"><h2 id="pg-aviso-t">Como usamos seus dados</h2>
-<p>Quem cuida dos seus dados é RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services), CNPJ 61.193.879/0001-20, responsável pelo Conta Certa.</p>
-<p>Usamos o e-mail para recibo e nota fiscal e os dados do pedido só para fechar e cumprir o contrato da adequação NR-1: emitir recibo e nota fiscal, mandar o link do questionário e o relatório e avisar do andamento. A base legal é a LGPD, art. 7º, V (contrato) e, para a nota fiscal, art. 7º, II (obrigação legal).</p>
-<p>Guardamos esses dados enquanto o contrato durar e, depois, pelo prazo que a lei fiscal exige. Não vendemos nem cedemos seus dados.</p>
-<p>Você pode pedir confirmação, acesso, correção, cópia, exclusão e informação sobre com quem compartilhamos seus dados (LGPD, art. 18). Escreva para contato@contacertabr.com.br.</p>
-<p>Mais detalhes na nossa Política de Privacidade: <a href="/privacidade/">https://contacertabr.com.br/privacidade/</a></p></section>
-<p class="campo-msg" id="pg-msg" role="alert" hidden></p>
-<button type="submit" disabled class="btn">Confirmar pagamento</button>
-</form>`,
-});
+}
 
-console.log('ok', vUi);
+export function gerarEd({ flag = FLAGS.EMPREGADOR_EM_DIA, escrever = false } = {}) {
+  estado.flag = flag;
+  estado.escrever = escrever;
+  estado.saida = [];
+  montarPaginas();
+  return estado.saida.slice();
+}
+
+const ehCli = process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+if (ehCli) {
+  gerarEd({ escrever: true });
+  console.log('ok', vUi);
+}

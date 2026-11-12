@@ -7,22 +7,28 @@
 // S-PL1 (CEO 06/11 21h18): URLs LIVE de /workspace/cfo/stripe/payment-links-live-2026-11-06.md (f8a02598). Links de
 // sandbox nunca entram no repositório (preview do QA injeta fora dele); '/test_' falha com DEPLOY=1 e no build do Pages.
 // Vazio = "em breve". montagemEntrega (saldo) nunca vai na página: o atendimento envia o link junto com a entrega.
+// PR-S0 (DEC CEO 11/11/2026 19h17): venda fechada. Os Payment Links LIVE do Radar (KE, KI) e da Montagem (K1) foram
+// desativados na Stripe em 11/11 19h03 e 19h05; os 3 slots ficam vazios e a página mostra só "Em breve", sem link.
+// Reabrir a venda = novo PR que preenche os slots, com QA APTO e GO do CEO (tests/pagamento-links.test.mjs trava).
 export const LINKS_PAGAMENTO = {
-  radarMensal: 'https://buy.stripe.com/00w9AM9B2a7Y2Spfkd5gc03', // R$ 197 por mês
-  radarAnual: 'https://buy.stripe.com/dRmeV68wYa7Y50xeg95gc04', // R$ 1.970 por ano
-  montagemSinal: 'https://buy.stripe.com/cNiaEQfZq1Bs64B4Fz5gc00', // R$ 495 no aceite (50% de R$ 990)
+  radarMensal: '', // R$ 197 por mês
+  radarAnual: '', // R$ 1.970 por ano
+  montagemSinal: '', // R$ 495 no aceite (50% de R$ 990)
   montagemEntrega: '', // R$ 495 na entrega (saldo), só pelo atendimento
 };
+// 'fechada' = nenhum slot preenchido e nenhuma página de licitacoes/ com buy.stripe.com (teste e build do Pages barram).
+export const VENDA_LICITACOES = 'fechada';
 // ===== fim do slot =====
 export const ROTULOS = {
   radarMensal: 'Assinar o Radar mensal (R$ 197 por mês)',
   radarAnual: 'Assinar o Radar anual (R$ 1.970 por ano)',
   montagemSinal: 'Contratar a Montagem de proposta (R$ 990; R$ 495 no aceite)',
 };
+// PR-S0 (DEC CEO 11/11 19h17): texto exato 'Em breve', sem data.
 export const EM_BREVE = {
-  radarMensal: 'Radar mensal (R$ 197 por mês): em breve',
-  radarAnual: 'Radar anual (R$ 1.970 por ano): em breve',
-  montagemSinal: 'Montagem de proposta (R$ 990; R$ 495 no aceite): em breve',
+  radarMensal: 'Em breve',
+  radarAnual: 'Em breve',
+  montagemSinal: 'Em breve',
 };
 export const NA_PAGINA = ['radarMensal', 'radarAnual', 'montagemSinal'];
 export const PAGINA_ASSINAR = 'licitacoes/assinar/index.html';

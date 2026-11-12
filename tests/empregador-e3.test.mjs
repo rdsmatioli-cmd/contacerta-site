@@ -5,13 +5,18 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { FLAGS, FAIXAS, ED_PAGAMENTO_MODO, LIMIAR_ANALISE } from '../assets/js/empregador/config.js';
 import { cnpjValido, formatarCnpj, pagamento, andamento } from '../assets/js/empregador/motor.js';
+import { existsSync } from 'node:fs';
+import { gerarEd } from './_src/empregador/gerar.mjs';
 
 const raiz = new URL('../', import.meta.url).pathname;
-const ler = (p) => readFileSync(join(raiz, p), 'utf8');
-const E3 = ['precos', 'contratar', 'pagamento', 'pagamento/ok', 'pagamento/2', 'painel'].map((c) => `empregador-em-dia/${c}/index.html`);
+const disco = (p) => readFileSync(join(raiz, p), 'utf8');
+const VENDA = new Map(gerarEd({ flag: true, escrever: false }).map((p) => [`${p.caminho}index.html`, p.html]));
+const ler = (p) => VENDA.get(p) ?? disco(p);
+const E3 = ['precos', 'contratar', 'pagamento', 'pagamento/ok', 'painel'].map((c) => `empregador-em-dia/${c}/index.html`);
 
-test('E3: ED_CHECKOUT e ED_LOGIN OFF, pagamento em mock (só EMPREGADOR_EM_DIA ON, DEC CEO/CPO 31/10)', () => {
-  assert.equal(FLAGS.EMPREGADOR_EM_DIA, true);
+test('E3: ED_CHECKOUT, ED_LOGIN e EMPREGADOR_EM_DIA OFF, pagamento em mock (PR-0)', () => {
+  assert.equal(FLAGS.EMPREGADOR_EM_DIA, false);
+  assert.equal(existsSync(join(raiz, 'empregador-em-dia/pagamento/2/index.html')), false);
   assert.equal(FLAGS.ED_CHECKOUT, false);
   assert.equal(FLAGS.ED_LOGIN, false);
   assert.equal(ED_PAGAMENTO_MODO, 'mock');
@@ -66,7 +71,8 @@ test('T07/T12: à vista = preço cheio agora e 0 na entrega; 50/50 soma o preço
   }
   assert.equal(pagamento('gt200', 'avista'), null);
   assert.equal(pagamento('lt20', 'metade'), null);
-  for (const p of ['empregador-em-dia/pagamento/index.html', 'empregador-em-dia/pagamento/2/index.html']) assert.match(ler(p), /data-ed-mock>Modo teste/, p);
+  assert.match(ler('empregador-em-dia/pagamento/index.html'), /data-ed-mock>Modo teste/);
+  assert.equal(disco('empregador-em-dia/pagamento/index.html').includes('data-ed-mock>Modo teste'), false);
 });
 
 test('T07 CA 3: nenhuma chave live nem payload Pix real no repositório publicável', () => {
@@ -107,21 +113,22 @@ test('G-2 (NR-1 d8e801e9): revisão da avaliação de riscos (não do PGR), sem 
   for (const p of E3) { const h = ler(p); assert.ok(!/Revisão do PGR|Incluído em todas as faixas|12 meses/i.test(h), p); }
 });
 test('M-01 (Advogado 31f8fa10): validade em toda superfície de preço', () => {
-  for (const p of ['precos', 'pagamento', 'pagamento/2', 'avaliacao-rapida-nr1/resultado', 'orcamento-nr1']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(VAL), p);
+  for (const p of ['precos', 'pagamento', 'avaliacao-rapida-nr1/resultado', 'orcamento-nr1']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(VAL), p);
 });
 test('M-02: sem afirmação de SST incluído; slot data-ed-sst preenchido pelo ui.js (sem texto fixo)', () => {
   for (const p of ['precos', 'pagamento/ok', 'painel']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.ok(h.includes('<p class="ed-sst" data-ed-sst></p>'), p); assert.ok(!h.includes(SST), p); assert.ok(!/profissional de SST analisa|Análise do SST|Análise por profissional/.test(h), p); }
 });
 test('M-03/M-04/M-05: aviso LGPD em contratar e pagamento; Me avise com consentimento; fornecedor no rodapé', () => {
-  for (const p of ['contratar', 'pagamento', 'pagamento/2']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.match(h, /art\. 7º, V/, p); assert.match(h, /art\. 18/, p); assert.ok(h.includes('href="/privacidade/"'), p); }
+  for (const p of ['contratar', 'pagamento']) { const h = ler(`empregador-em-dia/${p}/index.html`); assert.match(h, /art\. 7º, V/, p); assert.match(h, /art\. 18/, p); assert.ok(h.includes('href="/privacidade/"'), p); }
   const r = ler('empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html');
   // F-1 (Advogado d39ff580): com ED_ME_AVISE OFF, o resultado não tem formulário, campo de e-mail nem botão "Me avise".
   assert.ok(!/id="ed-avise|type="email"|Me avise/.test(r));
   for (const p of ['empregador-em-dia/index.html', ...E3]) assert.ok(ler(p).includes('RODRIGO DE SIMONE MATIOLI LTDA (LCM Global Services) · CNPJ 61.193.879/0001-20'), p);
 });
 
-test('G-3 NR-1 9f7f0070: prazo do resultado definido no contrato', () => {
-  const h = readFileSync(new URL('../empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', import.meta.url), 'utf8');
+test('G-3 NR-1 9f7f0070: prazo do resultado definido no contrato (flag ON); ausente do HTML servido', () => {
+  const h = ler('empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html');
+  assert.equal(disco('empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html').includes('Prazo estimado de entrega'), false);
   assert.ok(h.includes('Prazo estimado de entrega: 5 dias úteis após o pagamento confirmado e o encerramento do questionário (meta de respostas atingida)'));
   assert.ok(!h.includes('profissional de SST após o questionário'));
   assert.ok(!h.includes('conforme contratado pelo estabelecimento'));
@@ -133,8 +140,7 @@ test('B-PR42-08 QA ebbc1144: botões Copiar (Pix e link) têm listener com retor
   assert.match(js, /copiar\(\$\('\[data-ed-copiar="ok-link"\]'\)/);
   assert.match(js, /navigator\.clipboard\.writeText/);
   assert.match(js, /'Copiado'/);
-  for (const f of ['pagamento', 'pagamento/2']) {
-    const h = readFileSync(new URL(`../empregador-em-dia/${f}/index.html`, import.meta.url), 'utf8');
-    assert.ok(h.includes('<p aria-live="polite"><button type="button" class="btn sec" data-ed-copiar="pix">Copiar código Pix</button></p>'), f);
-  }
+  const h = ler('empregador-em-dia/pagamento/index.html');
+  assert.ok(h.includes('<p aria-live="polite"><button type="button" class="btn sec" data-ed-copiar="pix">Copiar código Pix</button></p>'));
+  assert.equal(disco('empregador-em-dia/pagamento/index.html').includes('data-ed-copiar="pix"'), false);
 });
