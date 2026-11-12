@@ -24,6 +24,25 @@ O HTML deste repositório é a fonte oficial: não existe gerador (o antigo `scr
 
 `--conferir` nos dois scripts só confere e sai com 1 se algo divergir.
 
+### Página inicial
+
+A home tem folha própria, `assets/home.css`, carregada só por ela depois do `assets/style.css` (que vale para todas as
+páginas), e as ilustrações ficam em `assets/img/`, em AVIF com WebP de reserva. As seis seções de categoria, a das
+tabelas e a dos guias usam a mesma marcação das outras páginas (`.secao`, `.cards`, `.card`); o desenho delas na home
+vem do `home.css`, por seletor de contexto.
+
+Os números de exemplo da home (salário líquido, rescisão e a frase do IR) não são fixos:
+`tests/home-exemplos.test.mjs` abre o formulário publicado de cada calculadora com os valores padrão e compara com a
+página. O bloco `.app-res` é, byte a byte, o HTML que a calculadora de salário líquido gera; quando uma tabela ou o
+formulário mudar, o teste falha e o bloco novo sai de:
+
+```sh
+node -e "import('./tests/_formulario-minimo.mjs').then(async (m) => console.log((await m.abrirCalculadora('salario-liquido')).out.innerHTML))"
+```
+
+O mesmo teste confere a contagem de calculadoras nos quatro lugares em que ela aparece, as datas de conferência e as
+imagens (`width`, `height`, `alt`, `loading="lazy"` fora do hero e os arquivos de todo `srcset`).
+
 ## Testes
 
 Os testes exigem **Node 22** (ver `.nvmrc`). Rode na raiz do repositório:
