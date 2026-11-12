@@ -29,10 +29,19 @@ const META_PROIBIDA = /inventário|plano de ação|adequação|metade|parcela|qu
 const DESC_NEUTRA_SEMPRE = new Set([
   'empregador-em-dia/',
   'empregador-em-dia/precos/',
+  'empregador-em-dia/avaliacao-rapida-nr1/',
+  'empregador-em-dia/avaliacao-rapida-nr1/resultado/',
+  'empregador-em-dia/jornada-42h/',
   'empregador-em-dia/pagamento/',
   'empregador-em-dia/contratar/',
   'empregador-em-dia/orcamento-nr1/',
   'empregador-em-dia/painel/',
+]);
+const TITULO_PREPARACAO = new Set([
+  'empregador-em-dia/precos/',
+  'empregador-em-dia/avaliacao-rapida-nr1/',
+  'empregador-em-dia/avaliacao-rapida-nr1/resultado/',
+  'empregador-em-dia/jornada-42h/',
 ]);
 const estado = { flag: FLAGS.EMPREGADOR_EM_DIA, escrever: false, saida: [] };
 
@@ -42,7 +51,7 @@ function pagina({ caminho, titulo, desc, conteudo }) {
   let tituloFinal = titulo;
   let descFinal = desc;
   if (!flag) {
-    if (caminho === 'empregador-em-dia/precos/') tituloFinal = TITLE_PRECOS;
+    if (TITULO_PREPARACAO.has(caminho)) tituloFinal = TITLE_PRECOS;
     else if (META_PROIBIDA.test(titulo)) throw new Error(`title com termo proibido em ${caminho}: ${titulo}`);
     if (DESC_NEUTRA_SEMPRE.has(caminho) || META_PROIBIDA.test(desc)) descFinal = DESC_NEUTRA;
   }

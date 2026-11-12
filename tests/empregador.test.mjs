@@ -20,9 +20,17 @@ const PAGINAS = ['empregador-em-dia/index.html', 'empregador-em-dia/avaliacao-ra
   'empregador-em-dia/pagamento/index.html', 'empregador-em-dia/pagamento/ok/index.html',
   'empregador-em-dia/painel/index.html'];
 const DESC_NEUTRA_PAGINAS = new Set([
-  'empregador-em-dia/index.html', 'empregador-em-dia/precos/index.html', 'empregador-em-dia/pagamento/index.html',
+  'empregador-em-dia/index.html', 'empregador-em-dia/precos/index.html',
+  'empregador-em-dia/avaliacao-rapida-nr1/index.html', 'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html',
+  'empregador-em-dia/jornada-42h/index.html', 'empregador-em-dia/pagamento/index.html',
   'empregador-em-dia/pagamento/ok/index.html', 'empregador-em-dia/contratar/index.html',
   'empregador-em-dia/orcamento-nr1/index.html', 'empregador-em-dia/painel/index.html',
+]);
+const TITULO_PREPARACAO_PAGINAS = new Set([
+  'empregador-em-dia/precos/index.html',
+  'empregador-em-dia/avaliacao-rapida-nr1/index.html',
+  'empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html',
+  'empregador-em-dia/jornada-42h/index.html',
 ]);
 
 // PR-0 (DEC CEO 11/11 19h20): EMPREGADOR_EM_DIA OFF. As outras flags seguem false.
@@ -40,7 +48,7 @@ test('PR-0: HTML servido só com o aviso, noindex, fora do sitemap e sem pagamen
     assert.match(h, /<meta name="robots" content="noindex">/, p);
     assert.ok(h.includes(AVISO_ED), p);
     assert.doesNotMatch(h, /inventário|plano de ação|questionário|Eduzz/i, p);
-    if (p === 'empregador-em-dia/precos/index.html') {
+    if (TITULO_PREPARACAO_PAGINAS.has(p)) {
       assert.match(h, new RegExp(`<title>${TITLE_PRECOS}</title>`));
       assert.match(h, new RegExp(`property="og:title" content="${TITLE_PRECOS}"`));
       assert.match(h, new RegExp(`name="twitter:title" content="${TITLE_PRECOS}"`));
