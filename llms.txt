@@ -68,6 +68,12 @@ Os resultados são estimativas e não substituem contador, advogado trabalhista 
 - [Calculadora de IMC](https://contacertabr.com.br/imc/): Cálculo temporariamente indisponível. A página mantém a fórmula do IMC (índice de massa corporal), a tabela de classificação da OMS para adultos e as limitações do índice.
 - [Calculadora de idade exata](https://contacertabr.com.br/idade/): Cálculo temporariamente indisponível. A página mantém o método para calcular a idade exata em anos, meses e dias, exemplos e o tratamento de anos bissextos.
 
+## Imóvel
+
+- [Imóvel: guias de impostos e documentos na compra e venda](https://contacertabr.com.br/imovel/): ITBI, quem paga, quando pagar, escritura e registro, com a fonte de cada regra.
+- [ITBI: o que é, quem cobra e como é calculado em 2026](https://contacertabr.com.br/imovel/blog/itbi-o-que-e/): ITBI é o imposto municipal da compra de imóvel. Veja quando é cobrado, a alíquota, a base de cálculo depois da LC 227/2026 e o valor declarado.
+- [Quem paga o ITBI, comprador ou vendedor, e quando pagar (antes ou depois da escritura)](https://contacertabr.com.br/imovel/blog/quem-paga-itbi/): Em regra, quem paga o ITBI é o comprador. Veja o que diz a lei, se o contrato pode mudar isso e quando pagar: antes da escritura ou no registro.
+
 ## Sobre o site
 
 - [Sobre e metodologia](https://contacertabr.com.br/sobre/): quem mantém o site, como as fontes são verificadas e como as tabelas são atualizadas.
