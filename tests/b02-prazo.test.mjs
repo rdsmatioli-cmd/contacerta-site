@@ -2,10 +2,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { gerarEd } from './_src/empregador/gerar.mjs';
 const ler = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
 const P = 'Prazo estimado de entrega: 5 dias úteis após o pagamento confirmado e o encerramento do questionário (meta de respostas atingida)';
-test('B-02: prazo literal na oferta e nos termos', () => {
-  for (const p of ['empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html', 'termos/index.html']) {
-    const h = ler(p); assert.ok(h.includes(P), p); assert.ok(!h.includes('definido no contrato, após o questionário'), p);
-  }
+test('B-02: prazo literal na oferta (flag ON) e nos termos; ausente do HTML servido', () => {
+  const venda = gerarEd({ flag: true, escrever: false }).find((p) => p.caminho === 'empregador-em-dia/avaliacao-rapida-nr1/resultado/').html;
+  assert.ok(venda.includes(P));
+  assert.ok(!venda.includes('definido no contrato, após o questionário'));
+  const servido = ler('empregador-em-dia/avaliacao-rapida-nr1/resultado/index.html');
+  assert.equal(servido.includes(P), false);
+  const termos = ler('termos/index.html');
+  assert.ok(termos.includes(P));
+  assert.ok(!termos.includes('definido no contrato, após o questionário'));
 });

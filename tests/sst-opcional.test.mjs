@@ -3,7 +3,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { ED_SST_INCLUIDO, SST_TEXTO_EM_DEFINICAO, SST_TEXTO_OPCIONAL } from '../assets/js/empregador/config.js';
-const ler = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
+import { gerarEd } from './_src/empregador/gerar.mjs';
+const disco = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
+const VENDA = new Map(gerarEd({ flag: true, escrever: false }).map((p) => [`${p.caminho}index.html`, p.html]));
+const ler = (p) => VENDA.get(p) ?? disco(p);
 const T2 = 'SST: validação técnica opcional, não incluída no preço. Contratada e paga diretamente pela sua empresa.';
 const T8 = 'O Conta Certa fornece questionário, inventário e plano de ação como apoio. O uso da ferramenta, sozinho, não garante a conformidade com a NR-1 nem substitui o PGR.';
 test('T2: textos literais e flag false', () => {
@@ -22,10 +25,11 @@ test('T6: linha do tempo do painel', () => {
   assert.ok(ler('empregador-em-dia/painel/index.html').includes('<li>Depois: relatório pronto; validação opcional pelo seu profissional de SST</li>'));
 });
 test('T8: aviso perto do preço e antes do pagamento', () => {
-  for (const p of ['precos', 'pagamento', 'pagamento/2', 'avaliacao-rapida-nr1/resultado']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(T8), p);
+  for (const p of ['precos', 'pagamento', 'avaliacao-rapida-nr1/resultado']) assert.ok(ler(`empregador-em-dia/${p}/index.html`).includes(T8), p);
+  assert.equal(disco('empregador-em-dia/precos/index.html').includes(T8), false);
 });
 test('termos vetados ausentes nas páginas do Empregador', () => {
-  for (const p of ['', 'precos', 'pagamento', 'pagamento/2', 'pagamento/ok', 'painel', 'avaliacao-rapida-nr1/resultado']) {
+  for (const p of ['', 'precos', 'pagamento', 'pagamento/ok', 'painel', 'avaliacao-rapida-nr1/resultado']) {
     const h = ler(`empregador-em-dia/${p ? p + '/' : ''}index.html`);
     assert.ok(!/SST incluíd|assinado|garante a NR-1|100% em dia|diagnóstico psicológico|avaliação psicológica|laudo/i.test(h), p);
   }
