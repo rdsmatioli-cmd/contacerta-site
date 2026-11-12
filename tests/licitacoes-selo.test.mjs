@@ -19,7 +19,7 @@ const listar = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
   return d.name.endsWith('.html') ? [relative(raiz, p).split(sep).join('/')] : [];
 });
 // Lista fechada (decisão do CPO, 22/10/2026): só este caminho exato fica fora do selo. Nenhuma regra genérica
-// (meta refresh, noindex): qualquer outra página de /licitacoes/ sem selo continua falhando. Total inclui índice do blog + artigos vigentes (expediente com barra final; gêneros alimentícios removido 31/10/2026).
+// (meta refresh, noindex): qualquer outra página de /licitacoes/ sem selo continua falhando. Total inclui índice do blog + artigos vigentes (expediente com barra final; gêneros alimentícios removido 31/10/2026; lote 1 do blog com 3 guias em 12/11/2026).
 const EXCLUIDAS_DO_SELO = new Set(['licitacoes/privacidade/index.html']);
 const paginasDoSelo = (lista) => lista.filter((p) => !EXCLUIDAS_DO_SELO.has(p)).sort();
 const paginas = paginasDoSelo(listar(pasta));
@@ -35,7 +35,7 @@ function seloMetodoA(bytes) {
 
 function checarSelo(lista, lerPagina, esperado) {
   const doSelo = paginasDoSelo(lista);
-  assert.equal(doSelo.length, 10, `páginas em /licitacoes/: ${doSelo.join(', ')}`);
+  assert.equal(doSelo.length, 13, `páginas em /licitacoes/: ${doSelo.join(', ')}`);
   const divergentes = [];
   for (const p of doSelo) {
     const achados = selos(lerPagina(p));
