@@ -1,9 +1,9 @@
 // Indexação e GEO (lote 4 da auditoria de 30-31/10/2026).
 // CC-SITE-17: o 404.html é servido pelo GitHub Pages, com status 404, em qualquer caminho inexistente; canonical e
 // og:url para /404.html, numa página noindex, mandavam ao buscador sinais contraditórios. Saíram os dois.
-// CC-SITE-14: o /irpf/ estava no sitemap desde 31/10 sem nenhum link interno. Agora toda URL do sitemap fora de
-// /licitacoes/ precisa ser alcançável a partir da home seguindo <a href> internos (o caminho que o robô faz), salvo
-// as exceções comentadas em SEM_LINK_INTERNO.
+// CC-SITE-14: o /irpf/ estava no sitemap desde 31/10 sem nenhum link interno. Agora toda URL do sitemap, inclusive
+// /licitacoes/ e /imovel/, precisa ser alcançável a partir da home seguindo <a href> internos (o caminho que o robô
+// faz), salvo as exceções comentadas em SEM_LINK_INTERNO.
 // CC-SITE-15: o teste antigo só conferia que as URLs citadas no llms.txt e no feed existem; por isso o llms.txt
 // ficou sem /irpf/, /tabelas-oficiais-2026/ e as categorias do blog. Agora toda URL do sitemap fora de /licitacoes/
 // está no llms.txt ou em FORA_DO_LLMS (com o motivo), e todo post indexável de blog/<slug>/ está no feed.xml.
@@ -74,20 +74,41 @@ test('404.html: noindex, sem rel=canonical e sem og:url', () => {
 
 // URLs do sitemap que hoje não recebem link de nenhuma página alcançável pela home. Cada uma com o motivo; quando
 // o motivo deixar de valer, a URL sai daqui (o teste avisa se a exceção ficou sobrando).
+// /empregador-em-dia/ continua sem link a partir do resto do site (os links entram só depois do merge do checkout).
+// As páginas são noindex e não estão no sitemap, então não entram nesta lista.
+// /lista-de-espera/ saiu do sitemap (inativa, noindex). links-sem-destino.test.mjs segue proibindo link para ela.
 const SEM_LINK_INTERNO = new Map([
-  // Empregador em Dia (go-live 03/11, DEC CPO 31/10): só as páginas da própria seção levam a ela. Ligar o produto à
-  // home, ao menu ou às calculadoras é decisão pendente do Rodrigo (lote 4 da auditoria de 30-31/10/2026).
-  // Lista de espera com o envio desligado desde 16/10: links-sem-destino.test.mjs (CC-SITE-03) proíbe link para ela
-  // fora dela, de /privacidade/ e de /sobre/. Continuar indexável e no sitemap é decisão à parte.
-  [`${ORIGEM}/lista-de-espera/`, 'lista de espera desligada (CC-SITE-03)'],
   // Índice de termos da Stripe (DEC CPO be1e019d, adendo ADV 63f0d25f): indexável, mas o link no rodapé/termos é decisão à parte.
   [`${ORIGEM}/termos-de-venda/`, 'índice de termos Stripe, link interno pendente de decisão'],
 ]);
 
-test('malha interna: toda URL do sitemap fora de /licitacoes/ é alcançável pela home seguindo links', () => {
-  assert.ok(foraDeLicitacoes.length >= 50 && alcancaveis.size >= 50);
-  const orfas = foraDeLicitacoes.filter((u) => !alcancaveis.has(arquivoDe(new URL(u).pathname)) && !SEM_LINK_INTERNO.has(u));
+test('malha interna: toda URL do sitemap é alcançável pela home seguindo links', () => {
+  assert.ok(sitemap.length >= 70 && alcancaveis.size >= 70);
+  const orfas = sitemap.filter((u) => !alcancaveis.has(arquivoDe(new URL(u).pathname)) && !SEM_LINK_INTERNO.has(u));
   assert.deepEqual(orfas, []);
+});
+
+test('malha interna: /licitacoes/ e /imovel/ do sitemap não têm página órfã', () => {
+  const alvo = sitemap.filter((u) => {
+    const p = new URL(u).pathname;
+    return p.startsWith('/licitacoes/') || p.startsWith('/imovel/');
+  });
+  for (const u of [
+    `${ORIGEM}/licitacoes/`,
+    `${ORIGEM}/imovel/`,
+    `${ORIGEM}/imovel/blog/itbi-o-que-e/`,
+    `${ORIGEM}/imovel/blog/quem-paga-itbi/`,
+  ]) assert.ok(alvo.includes(u), u);
+  assert.ok(alvo.filter((u) => new URL(u).pathname.startsWith('/licitacoes/')).length >= 10);
+  const orfas = alvo.filter((u) => !alcancaveis.has(arquivoDe(new URL(u).pathname)));
+  assert.deepEqual(orfas, []);
+  for (const u of alvo) assert.equal(SEM_LINK_INTERNO.has(u), false, u);
+});
+
+test('lista de espera inativa: fora do sitemap e noindex; /empregador-em-dia/ segue sem link da home', () => {
+  assert.equal(sitemap.includes(`${ORIGEM}/lista-de-espera/`), false);
+  assert.match(ler('lista-de-espera/index.html'), /<meta name="robots" content="[^"]*noindex/);
+  assert.equal([...alcancaveis].some((a) => a.startsWith('empregador-em-dia/')), false);
 });
 
 test('malha interna: as exceções estão no sitemap e continuam sem link (senão saem da lista)', () => {
@@ -142,11 +163,9 @@ test('/irpf/: linha no llms.txt em "Impostos e MEI", com a meta description da p
 
 // URLs do sitemap (fora de /licitacoes/) que ficam fora do llms.txt, cada uma com o motivo. Exceção que entra no
 // llms.txt ou sai do sitemap derruba o teste, para a lista não envelhecer.
+// Vazia de propósito: a lista de espera saiu do sitemap (inativa) e o llms.txt continua sem citá-la
+// (links-sem-destino.test.mjs). Exceção nova precisa de motivo e de continuar no sitemap.
 const FORA_DO_LLMS = new Map([
-  // Empregador em Dia: produto à parte, ainda sem link do resto do site (ver SEM_LINK_INTERNO). Entra no llms.txt
-  // junto com a decisão de ligá-lo ao site.
-  // Lista de espera desligada desde 16/10: links-sem-destino.test.mjs (CC-SITE-03) exige que o llms.txt não a cite.
-  [`${ORIGEM}/lista-de-espera/`, 'lista de espera desligada (CC-SITE-03)'],
 ]);
 // Categoria do blog sem nenhum post (<ul class="posts"></ul>) fica fora do llms.txt: indicar a um modelo de linguagem
 // uma página vazia não ajuda. Ao ganhar o primeiro post, a categoria passa a ser exigida no llms.txt.
