@@ -19,7 +19,7 @@ Campos de controle (não vão ao HTML): `id`, `palavra_chave`, `secundarias`, `s
 | A6 | rascunho | `/blog/salario-bruto-e-liquido/` | Salário bruto e líquido: diferença e conta passo a passo | salário bruto e líquido |
 | A7 | rascunho | `/blog/dsr-sobre-hora-extra/` | DSR sobre hora extra: como calcular (com exemplo) | dsr hora extra |
 | A9 | rascunho | `/blog/como-dar-entrada-seguro-desemprego/` | Como dar entrada no seguro-desemprego (passo a passo 2026) | como dar entrada no seguro desemprego |
-| A10 | rascunho | `/tabela-inss-2027/` | Tabela do INSS 2027: quando sai e como serão as faixas | tabela inss 2027 |
+| A10 | retido (até a portaria de 2027) | `/tabela-inss-2027/` | Tabela do INSS 2027: quando sai e como serão as faixas | tabela inss 2027 |
 | A14 | rascunho | `/blog/quem-tem-direito-seguro-desemprego/` | Quem tem direito ao seguro-desemprego: regras de 2026 | seguro desemprego quem tem direito |
 | A16 | rascunho | `/blog/rescisao-do-contrato-de-trabalho/` | Rescisão do contrato de trabalho: tipos e verbas de cada um | rescisão do contrato de trabalho |
 | A17 | rascunho | `/blog/o-que-e-decimo-terceiro/` | O que é o 13º salário e quem tem direito | o que é décimo terceiro |

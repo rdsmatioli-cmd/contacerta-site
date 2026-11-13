@@ -11,7 +11,7 @@ ordem: 10
 relacionadas: /tabela-inss-2026/|Tabela do INSS 2026 ;; /inss/|Calculadora de INSS ;; /salario-liquido/|Calculadora de salário líquido
 palavra_chave: tabela inss 2027
 secundarias: inss 2027 ;; faixas do inss 2027 ;; teto do inss 2027
-situacao: rascunho
+situacao: retido
 conferir: Publicar só quando sair a portaria interministerial de 2027 (início de janeiro), trocando a seção de previsão pela tabela oficial; até lá, manter fora do ar.
 revisar_em: 2027-01-15
 ---
