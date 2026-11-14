@@ -16,7 +16,7 @@ ordem: 21
 
 O **Programa de Gerenciamento de Riscos (PGR)** é o conjunto de documentos em que a empresa registra o inventário de riscos e o plano de ação do Gerenciamento de Riscos Ocupacionais (GRO), exigido pela NR-1. Não é um formulário único do governo: é a formalização do que a empresa identificou, avaliou e vai controlá-lo.
 
-Este guia concentra, **na mesma URL**, o que é o PGR, como montá-lo e um **modelo de estrutura para pequena empresa**, inclusive o tratamento diferenciado do **item 1.8** da NR-1 para MEI, ME e EPP. Não existe, e não deve ser criada, a URL `/blog/modelo-de-pgr-pequena-empresa/`.
+Este guia concentra, **na mesma URL**, o que é o PGR, como montá-lo e um **modelo de estrutura para pequena empresa**, inclusive o tratamento diferenciado do **item 1.8** da NR-1 para MEI, ME e EPP.
 
 O GRO, com os riscos psicossociais, permanece obrigatório desde 26/05/2026 (Portaria MTE nº 765, de 15/05/2025). A ADPF 1.316 suspendeu, por mais 90 dias a contar da decisão de 24/09/2026, sem data-calendário no despacho (estimativa de termo em 23/12/2026, salvo novo ato), a eficácia punitiva de cinco itens da NR-1 — isso não elimina a obrigação de gerenciar o risco. A decisão de 13/10/2026, nas ADPFs 1.316, 1.333 e 1.340, suspendeu os processos por 60 dias contados da publicação e manteve a cautelar já deferida; a Sejan (AGU) é etapa complementar ao Nusol (STF). O detalhe está em [NR-1 depois da ADPF 1.316](/blog/nr-1-pequenas-empresas/).
 

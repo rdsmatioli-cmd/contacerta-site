@@ -41,7 +41,7 @@ O eixo prático para a pequena empresa permanece o do despacho de 24/09: sançõ
 ## O que a pequena empresa continua obrigada a fazer
 
 1. **Manter o GRO.** O gerenciamento de riscos ocupacionais não foi revogado. Pequena empresa não é sinônimo de dispensa geral.
-2. **Tratar riscos psicossociais no programa.** A [calculadora e o guia de riscos psicossociais da NR-1](/nr1-riscos-psicossociais/) organizam o levantamento inicial. O texto de apoio está também no guia do blog, quando houver, em `/blog/nr1-riscos-psicossociais-2026/`.
+2. **Tratar riscos psicossociais no programa.** A [calculadora e o guia de riscos psicossociais da NR-1](/nr1-riscos-psicossociais/) organizam o levantamento inicial. O texto de apoio está também no [guia do blog](/blog/nr1-riscos-psicossociais-2026/).
 3. **Documentar o que couber no PGR**, salvo as dispensas específicas do item 1.8 da NR-1 (MEI, ME e EPP em graus de risco 1 e 2, nas hipóteses da norma). O detalhe do item 1.8 e um modelo de estrutura estão no guia [PGR: o que é, como fazer e modelo de estrutura para pequena empresa](/blog/gro-pgr-nr-1/).
 4. **Não confundir “sem multa neste intervalo” com “sem obrigação”.** A suspensão é da eficácia punitiva dos cinco itens. A obrigação de gerenciar o risco permanece.
 
