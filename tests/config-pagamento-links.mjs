@@ -10,14 +10,17 @@
 // PR-S0 (DEC CEO 11/11/2026 19h17): venda fechada. Os Payment Links LIVE do Radar (KE, KI) e da Montagem (K1) foram
 // desativados na Stripe em 11/11 19h03 e 19h05; os 3 slots ficam vazios e a página mostra só "Em breve", sem link.
 // Reabrir a venda = novo PR que preenche os slots, com QA APTO e GO do CEO (tests/pagamento-links.test.mjs trava).
+// PR-S1: reabertura só do Radar (radarMensal = KE plink_1UYxKE1UAEXO9bvFta1lo0FO, radarAnual = KI plink_1UYxKI1UAEXO9bvFvyfFaswn).
+// montagemSinal e montagemEntrega continuam vazios (Montagem fora do escopo). VENDA_LICITACOES = 'aberta'.
 export const LINKS_PAGAMENTO = {
-  radarMensal: '', // R$ 197 por mês
-  radarAnual: '', // R$ 1.970 por ano
+  radarMensal: 'https://buy.stripe.com/00w9AM9B2a7Y2Spfkd5gc03', // R$ 197 por mês
+  radarAnual: 'https://buy.stripe.com/dRmeV68wYa7Y50xeg95gc04', // R$ 1.970 por ano
   montagemSinal: '', // R$ 495 no aceite (50% de R$ 990)
   montagemEntrega: '', // R$ 495 na entrega (saldo), só pelo atendimento
 };
 // 'fechada' = nenhum slot preenchido e nenhuma página de licitacoes/ com buy.stripe.com (teste e build do Pages barram).
-export const VENDA_LICITACOES = 'fechada';
+// 'aberta' = só radarMensal e radarAnual preenchidos; no _site, buy.stripe.com só em /licitacoes/assinar/.
+export const VENDA_LICITACOES = 'aberta';
 // ===== fim do slot =====
 export const ROTULOS = {
   radarMensal: 'Assinar o Radar mensal (R$ 197 por mês)',

@@ -80,28 +80,45 @@ test('repositório: nenhuma URL de sandbox na config nem nas páginas', () => {
   for (const [k, u] of Object.entries(LINKS_PAGAMENTO)) assert.ok(!u.includes('/test_'), k);
   for (const p of [PAGINA_ASSINAR, PAGINA_OBRIGADO, 'licitacoes/cobranca/index.html', 'licitacoes/index.html']) assert.doesNotMatch(ler(p), /buy\.stripe\.com\/test_|7Re0[0-9]/, p);
 });
-// PR-S0 (DEC CEO 11/11/2026 19h17): venda fechada; links LIVE desativados na Stripe (19h03 e 19h05). Substitui o teste
-// S-PL1 (3 URLs LIVE). Os 3 produtos mostram só 'Em breve', não clicável (span aria-disabled, sem <a>/href).
-test('PR-S0: venda fechada, slots vazios; Pages renderiza "Em breve" nos 3 produtos, sem link', () => {
-  assert.equal(VENDA_LICITACOES, 'fechada');
-  for (const [k, u] of Object.entries(LINKS_PAGAMENTO)) assert.equal(u, '', k);
-  const h = render(ler(PAGINA_ASSINAR));
-  assert.equal(h, ler(PAGINA_ASSINAR), 'build do Pages não muda assinar/ com a venda fechada');
+// PR-S1: venda aberta só do Radar (KE, KI). Montagem continua fora do escopo (slots vazios).
+// O HTML do repositório permanece 'Em breve'; o build do Pages injeta os 2 hrefs só em assinar/.
+test('PR-S1: venda aberta, só Radar preenchido (KE, KI); Montagem vazia; sem /test_', () => {
+  assert.equal(VENDA_LICITACOES, 'aberta');
+  assert.equal(LINKS_PAGAMENTO.radarMensal, 'https://buy.stripe.com/00w9AM9B2a7Y2Spfkd5gc03');
+  assert.equal(LINKS_PAGAMENTO.radarAnual, 'https://buy.stripe.com/dRmeV68wYa7Y50xeg95gc04');
+  assert.equal(LINKS_PAGAMENTO.montagemSinal, '');
+  assert.equal(LINKS_PAGAMENTO.montagemEntrega, '');
+  for (const [k, u] of Object.entries(LINKS_PAGAMENTO)) assert.ok(!u.includes('/test_'), k);
+});
+test('PR-S1: repositório de assinar/ permanece "Em breve"; o render do build coloca 2 hrefs só do Radar', () => {
+  assert.equal(VENDA_LICITACOES, 'aberta');
+  const repo = ler(PAGINA_ASSINAR);
+  assert.doesNotMatch(repo, /buy\.stripe\.com/);
   for (const k of NA_PAGINA) {
     assert.equal(EM_BREVE[k], 'Em breve', k);
-    const bloco = (h.match(new RegExp(`<p class="compra" data-produto="${k}">[\\s\\S]*?</p>`)) || [])[0];
+    const bloco = (repo.match(new RegExp(`<p class="compra" data-produto="${k}">[\\s\\S]*?</p>`)) || [])[0];
     assert.equal(bloco, `<p class="compra" data-produto="${k}"><span class="btn" aria-disabled="true">Em breve</span></p>`, k);
   }
-  for (const r of Object.values(ROTULOS)) assert.ok(!h.includes(r), r);
+  const h = render(repo);
+  assert.deepEqual(hrefsStripe(h), [LINKS_PAGAMENTO.radarMensal, LINKS_PAGAMENTO.radarAnual]);
+  const blocoM = (h.match(new RegExp(`<p class="compra" data-produto="montagemSinal">[\\s\\S]*?</p>`)) || [])[0];
+  assert.equal(blocoM, `<p class="compra" data-produto="montagemSinal"><span class="btn" aria-disabled="true">Em breve</span></p>`);
+  for (const r of [ROTULOS.radarMensal, ROTULOS.radarAnual]) assert.ok(h.includes(r), r);
+  assert.ok(!h.includes(ROTULOS.montagemSinal), ROTULOS.montagemSinal);
 });
-test('PR-S0: com a venda fechada, nenhuma página de licitacoes/ aponta para buy.stripe.com (repositório e build)', () => {
-  assert.equal(VENDA_LICITACOES, 'fechada');
+test('PR-S1: buy.stripe.com só em assinar/ no build; repositório e demais páginas de licitacoes/ têm 0', () => {
+  assert.equal(VENDA_LICITACOES, 'aberta');
   assert.deepEqual(paginasComStripe(fileURLToPath(new URL('../', import.meta.url))), []);
-  assert.doesNotMatch(render(ler(PAGINA_ASSINAR)), /buy\.stripe\.com/);
-  const tmp = mkdtempSync(join(tmpdir(), 'pr-s0-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'pr-s1-'));
+  mkdirSync(join(tmp, 'licitacoes', 'assinar'), { recursive: true });
   mkdirSync(join(tmp, 'licitacoes', 'x'), { recursive: true });
+  writeFileSync(join(tmp, 'licitacoes', 'assinar', 'index.html'), render(ler(PAGINA_ASSINAR)));
+  writeFileSync(join(tmp, 'licitacoes', 'x', 'a.html'), '<p>sem stripe</p>');
+  const soAssinar = paginasComStripe(tmp);
+  assert.equal(soAssinar.length, 1);
+  assert.ok(soAssinar[0].endsWith('licitacoes/assinar/index.html'));
   writeFileSync(join(tmp, 'licitacoes', 'x', 'a.html'), '<a href="https://buy.stripe.com/abc">x</a>');
-  assert.equal(paginasComStripe(tmp).length, 1, 'autoteste: a varredura acha o link');
+  assert.equal(paginasComStripe(tmp).length, 2, 'autoteste: a varredura acha link fora de assinar/');
 });
 // Guarda de deploy: link de sandbox (test_) nunca vai ao ar.
 test('DEPLOY=1 / build do Pages: nenhuma URL de Payment Link de sandbox (/test_)', { skip: process.env.DEPLOY !== '1' && process.env.LINKS_PAGAMENTO_PRODUCAO !== '1' && 'só com DEPLOY=1 ou no build do Pages' }, () => {
