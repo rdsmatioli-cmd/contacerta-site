@@ -2,21 +2,26 @@
 slug: escala-5x2-como-montar
 titulo: Escala 5x2: como montar, com modelos de folgas alternadas
 h1: Escala 5x2: como montar (modelos com 8h, 8h24 e folgas alternadas)
-descricao: Como montar a escala 5x2 exigida pela EC 141/2026: modelos de 8h e 8h24, folgas alternadas para quem abre 6 ou 7 dias e quantos funcionários são precisos.
+descricao: Como montar a escala 5x2 exigida pela EC 141/2026: modelos de 8h e 8h24, folgas alternadas para quem abre 6 ou 7 dias e quantos funcionários entram.
+resumo: Como montar a escala 5x2: modelos de 8h e 8h24, folgas alternadas para quem abre 6 ou 7 dias e quantos funcionários entram na conta.
 categoria: Trabalho e salário
 ordem: 3
-relacionadas: /horas-extras/|Horas extras: valor da hora extra a 50% e 100% com DSR ;; /custo-funcionario/|Custo de funcionário: quanto um empregado CLT custa em 2026 ;; /adicional-noturno/|Adicional noturno: 20% com a hora reduzida e o reflexo no DSR
+relacionadas: /horas-extras/|Horas extras: valor da hora extra a 50% e 100% com DSR ;; /custo-funcionario/|Custo de funcionário: quanto um empregado CLT custa em 2026 ;; /adicional-noturno/|Adicional noturno: 20% com a hora reduzida e o reflexo no DSR ;; /empregador-em-dia/|Empregador em Dia: jornada de 42 h e dois repousos
+publicado: 2026-11-12
+modificado: 2026-11-14
 ---
 ## Resposta direta
 
-Na escala 5x2, cada empregado trabalha 5 dias e folga 2 por semana. Com 8 horas por dia, são 40 horas semanais, o modelo que já atende as duas etapas da EC 141/2026 (42 horas a partir de 16/12/2026 e 40 horas a partir de 16/12/2027). A versão com 8h24 por dia fecha 42 horas, mas só vale com acordo ou convenção coletiva e só até 15/12/2027. Quem abre 6 ou 7 dias por semana monta a 5x2 com **folgas alternadas**: as 2 folgas de cada pessoa mudam de dia, e a equipe se reveza para cobrir a operação.
+
+**Atualizado em 14 de novembro de 2026.**
+Na escala 5x2, cada empregado trabalha 5 dias e folga 2 por semana. Com 8 horas por dia, são 40 horas semanais, o modelo que já atende as duas etapas da EC 141/2026 (42 horas a partir de 17/12/2026, pela contagem do art. 8º, § 1º, da LC 95/1998, após decorridos 2 meses da publicação no DOU de 16/10/2026 (Edição extra), nos termos dos arts. 6º, I, e 10, I, da EC 141/2026 e 40 horas a partir de 17/12/2027). A versão com 8h24 por dia fecha 42 horas, mas só vale com acordo ou convenção coletiva e só até 16 de dezembro de 2027. Quem abre 6 ou 7 dias por semana monta a 5x2 com **folgas alternadas**: as 2 folgas de cada pessoa mudam de dia, e a equipe se reveza para cobrir a operação.
 
 ## Os três modelos de 5x2
 
 | Modelo | Exemplo de horário | Horas na semana | Quando usar |
 |---|---|---|---|
 | 5x2 fixa de 8 horas | Segunda a sexta, 8h às 17h, 1h de almoço | 40 h | Escritórios e operações que fecham no fim de semana |
-| 5x2 de 8h24 | Segunda a sexta, 8h às 17h24, 1h de almoço | 42 h | Só com acordo ou convenção coletiva, até 15/12/2027 |
+| 5x2 de 8h24 | Segunda a sexta, 8h às 17h24, 1h de almoço | 42 h | Só com acordo ou convenção coletiva, até 16 de dezembro de 2027 |
 | 5x2 com folgas alternadas | 8 horas por dia, folgas em dias diferentes para cada pessoa | 40 h | Comércio, restaurantes e serviços abertos 6 ou 7 dias |
 
 A emenda manda que uma das folgas seja, de preferência, no domingo. No comércio, a Lei 10.101/2000 exige que o repouso caia no domingo pelo menos uma vez a cada três semanas.
@@ -61,7 +66,7 @@ Em todas as semanas há 2 pessoas de domingo a sexta e 3 no sábado. Esse rodíz
 
 - **Intervalo para almoço:** pelo menos 1 hora em jornadas acima de 6 horas (CLT, art. 71). Acordo ou convenção coletiva pode reduzir para 30 minutos (art. 611-A, III).
 - **Descanso entre jornadas:** pelo menos 11 horas entre o fim de um dia e o início do outro (art. 66).
-- **Domingo ou feriado trabalhado sem folga compensatória:** pago em dobro (Lei 605/1949, art. 9º, e Súmula 146 do TST).
+- **Domingo ou feriado trabalhado sem folga compensatória:** pago em dobro — o domingo, pela Súmula nº 146 do TST, «sem prejuízo da remuneração relativa ao repouso semanal»; o feriado civil ou religioso, pelo art. 9º da Lei 605/1949 e pela mesma súmula.
 - **Jornada diária:** acima de 8 horas, só com acordo ou convenção coletiva; o que passar do horário combinado é hora extra.
 
 ## Se a operação precisa de semanas com 6 dias
@@ -76,13 +81,13 @@ A emenda aceita, como exceção, um regime de compensação definido em convenç
 4. Confira domingos, intervalos e descanso de 11 horas.
 5. Formalize a nova jornada em termo aditivo e atualize o ponto e o eSocial.
 
-O checklist completo está em [fim da escala 6x1: o que o empregador precisa fazer até 16/12](/blog/fim-da-escala-6x1-empregador/).
+O checklist completo está em [fim da escala 6x1: o que o empregador precisa fazer na primeira etapa da EC 141](/blog/fim-da-escala-6x1-empregador/).
 
 ## Perguntas frequentes
 
 ### Posso fazer 5x2 com sábado de meio período?
 
-Não. Trabalhar de segunda a sábado, mesmo com meio expediente no sábado, são 6 dias de trabalho e só 1 de folga. A partir de 16/12/2026, isso só é possível dentro de um regime de compensação previsto em convenção ou acordo coletivo.
+Não. Trabalhar de segunda a sábado, mesmo com meio expediente no sábado, são 6 dias de trabalho e só 1 de folga. A partir de 17/12/2026, isso só é possível dentro de um regime de compensação previsto em convenção ou acordo coletivo.
 
 ### As duas folgas precisam ser seguidas?
 
@@ -94,11 +99,13 @@ Sim, até 2 horas por dia, com acordo (CLT, art. 59). Cada hora extra custa no m
 
 ### A escala 5x2 de 8h24 continua valendo depois de 2027?
 
-Não. Em 16/12/2027 o limite passa a 40 horas semanais e a jornada de 8h24 em cinco dias, que soma 42 horas, deixa de caber.
+Não. Em 17/12/2027 o limite passa a 40 horas semanais e a jornada de 8h24 em cinco dias, que soma 42 horas, deixa de caber.
 
 ### Preciso mudar o salário de quem passa da 6x1 para a 5x2?
 
 Não pode haver redução. A EC 141/2026 proíbe reduzir o salário, nominal ou proporcionalmente, de quem tem a jornada diminuída.
+
+Para organizar a escala com o teto de 42 horas e os dois repousos semanais, use também o [Empregador em Dia](/empregador-em-dia/) e o [simulador de jornada 42 h](/empregador-em-dia/jornada-42h/).
 
 ## Fontes oficiais
 

@@ -1,19 +1,24 @@
 ---
 slug: fim-da-escala-6x1-empregador
-titulo: Fim da escala 6x1: checklist do empregador até 16/12
-h1: Fim da escala 6x1: o que o empregador precisa fazer até 16/12 (checklist)
-descricao: Checklist para o empregador se adaptar à EC 141/2026 até 16/12/2026: nova escala com 2 folgas, contrato, ponto, folha, eSocial e convenção coletiva.
+titulo: Fim da escala 6x1: checklist do empregador na EC 141
+h1: Fim da escala 6x1: o que o empregador precisa fazer na primeira etapa da EC 141 (checklist)
+descricao: Checklist do empregador para a EC 141/2026: escala com 2 folgas, contrato, ponto, folha e eSocial a partir de 17/12/2026 (LC 95/1998, art. 8º, § 1º).
+resumo: Checklist para o empregador se adaptar à primeira etapa da EC 141/2026: nova escala com 2 folgas, contrato, ponto, folha, eSocial e convenção coletiva.
 categoria: Trabalho e salário
 ordem: 2
-relacionadas: /horas-extras/|Horas extras: valor da hora extra a 50% e 100% com DSR ;; /custo-funcionario/|Custo de funcionário: quanto um empregado CLT custa em 2026 ;; /adicional-noturno/|Adicional noturno: 20% com a hora reduzida e o reflexo no DSR
+relacionadas: /horas-extras/|Horas extras: valor da hora extra a 50% e 100% com DSR ;; /custo-funcionario/|Custo de funcionário: quanto um empregado CLT custa em 2026 ;; /adicional-noturno/|Adicional noturno: 20% com a hora reduzida e o reflexo no DSR ;; /empregador-em-dia/|Empregador em Dia: jornada de 42 h e dois repousos
+publicado: 2026-11-12
+modificado: 2026-11-14
 ---
 ## Resposta direta
 
-Até 16/12/2026, quem tem empregado em escala 6x1 ou com mais de 42 horas semanais precisa montar uma escala com **2 folgas por semana**, formalizar a mudança no contrato, ajustar o controle de ponto, recalcular o valor da hora na folha e informar a nova jornada no eSocial. É o que exige a Emenda Constitucional nº 141/2026, que acabou com a escala 6x1. O salário não pode ser reduzido, e as cláusulas da convenção coletiva que contrariem a emenda perdem efeito na mesma data.
 
-## O que muda em 16/12/2026
+**Atualizado em 14 de novembro de 2026.**
+Até 17/12/2026, pela contagem do art. 8º, § 1º, da LC 95/1998, após decorridos 2 meses da publicação no DOU de 16/10/2026 (Edição extra), nos termos dos arts. 6º, I, e 10, I, da EC 141/2026, quem tem empregado em escala 6x1 ou com mais de 42 horas semanais precisa montar uma escala com **2 folgas por semana**, formalizar a mudança no contrato, ajustar o controle de ponto, recalcular o valor da hora na folha e informar a nova jornada no eSocial. É o que exige a Emenda Constitucional nº 141/2026, que acabou com a escala 6x1. O salário não pode ser reduzido, e as cláusulas da convenção coletiva que contrariem a emenda perdem efeito na mesma data.
 
-| Regra | Até 15/12/2026 | A partir de 16/12/2026 | A partir de 16/12/2027 |
+## O que muda em 17/12/2026
+
+| Regra | Até 16 de dezembro de 2026 | A partir de 17/12/2026 | A partir de 17/12/2027 |
 |---|---|---|---|
 | Jornada semanal máxima | 44 horas | 42 horas | 40 horas |
 | Jornada diária máxima | 8 horas | 8 horas (mais, só por acordo ou convenção coletiva) | 8 horas |
@@ -32,14 +37,14 @@ Separe ainda quem tem diploma de nível superior e salário de pelo menos 2,5 ve
 
 ### 2. Leia a convenção coletiva da categoria
 
-Procure cláusulas de jornada, escala, compensação, banco de horas e folgas. As que forem incompatíveis com a emenda deixam de valer em 16/12/2026 (art. 3º). Pergunte ao sindicato patronal se há negociação em curso: durante o ano de transição, só o acordo ou a convenção coletiva pode ampliar a jornada diária para distribuir as 42 horas na semana (art. 7º).
+Procure cláusulas de jornada, escala, compensação, banco de horas e folgas. As que forem incompatíveis com a emenda deixam de valer em 17/12/2026 (art. 3º). Pergunte ao sindicato patronal se há negociação em curso: durante o ano de transição, só o acordo ou a convenção coletiva pode ampliar a jornada diária para distribuir as 42 horas na semana (art. 7º).
 
 ### 3. Escolha o modelo de jornada
 
 | Modelo | Horas por dia | Horas na semana | Observação |
 |---|---|---|---|
 | 5x2 de 8 horas | 8h | 40 h | Não depende de norma coletiva e já atende a regra de 2027 |
-| 5x2 de 8h24 | 8h24 | 42 h | Só com acordo ou convenção coletiva, e só até 15/12/2027 |
+| 5x2 de 8h24 | 8h24 | 42 h | Só com acordo ou convenção coletiva, e só até 16 de dezembro de 2027 |
 | Compensação de folgas no mês | Varia | Até 42 h, depois 40 h | Só por norma coletiva: média de 2 folgas por semana no mês e pelo menos 1 folga em cada semana |
 
 O modelo de 8 horas evita refazer a escala em dezembro de 2027. Escalas especiais, como a 12x36, não são citadas pela emenda: confira com o sindicato e o contador como ficam na sua categoria.
@@ -88,15 +93,17 @@ A CLT permite até 2 horas extras por dia, com acordo (art. 59), mas cada hora a
 
 ### A emenda vale para a empregada doméstica?
 
-Sim. Os incisos XIII e XV do artigo 7º, alterados pela emenda, valem para os empregados domésticos (Constituição, art. 7º, parágrafo único). A jornada de 44 horas da Lei Complementar 150/2015 fica incompatível a partir de 16/12/2026.
+Sim. Os incisos XIII e XV do artigo 7º, alterados pela emenda, valem para os empregados domésticos (Constituição, art. 7º, parágrafo único). A jornada de 44 horas da Lei Complementar 150/2015 fica incompatível a partir de 17/12/2026.
 
-### O que acontece se a empresa não se adaptar até 16/12?
+### O que acontece se a empresa não se adaptar na primeira etapa da EC 141?
 
 As horas acima do novo limite passam a ser devidas como extras, com o adicional, e a empresa fica sujeita à fiscalização do trabalho. Cláusulas coletivas incompatíveis não servem de defesa, porque perdem efeito na mesma data.
 
 ### Posso reduzir o salário de quem passou a trabalhar menos?
 
 Não. A emenda proíbe qualquer redução salarial, nominal ou proporcional, inclusive dos pisos da categoria.
+
+Para organizar a escala com o teto de 42 horas e os dois repousos semanais, use também o [Empregador em Dia](/empregador-em-dia/) e o [simulador de jornada 42 h](/empregador-em-dia/jornada-42h/).
 
 ## Fontes oficiais
 

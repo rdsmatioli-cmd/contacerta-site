@@ -2,18 +2,23 @@
 slug: o-que-e-escala-6x1
 titulo: O que é escala 6x1, como funciona e o que muda com a EC 141
 h1: O que é escala 6x1, como funciona e o que muda com a EC 141/2026
-descricao: Escala 6x1 é trabalhar 6 dias e folgar 1. Veja como ela funciona até 15/12/2026, as regras de domingo e intervalo e o que a EC 141/2026 mudou.
+descricao: Escala 6x1 é trabalhar 6 dias e folgar 1. Veja as regras de domingo e intervalo e o que a EC 141/2026 altera a partir de 17/12/2026 (LC 95/1998).
+resumo: O que é a escala 6x1, como ela funciona até a véspera da primeira etapa da EC 141/2026 e o que a emenda muda depois disso.
 categoria: Trabalho e salário
 ordem: 4
-relacionadas: /horas-extras/|Horas extras: valor da hora extra a 50% e 100% com DSR ;; /salario-liquido/|Salário líquido: descontos de INSS e IR no salário de 2026 ;; /custo-funcionario/|Custo de funcionário: quanto um empregado CLT custa em 2026
+relacionadas: /horas-extras/|Horas extras: valor da hora extra a 50% e 100% com DSR ;; /salario-liquido/|Salário líquido: descontos de INSS e IR no salário de 2026 ;; /custo-funcionario/|Custo de funcionário: quanto um empregado CLT custa em 2026 ;; /empregador-em-dia/|Empregador em Dia: jornada de 42 h e dois repousos
+publicado: 2026-11-12
+modificado: 2026-11-14
 ---
 ## Resposta direta
 
-Escala 6x1 é a jornada em que o empregado trabalha **6 dias seguidos e folga 1** por semana. Ela foi permitida pela regra de 44 horas semanais com um dia de repouso, mas a **Emenda Constitucional 141/2026** garante 2 dias de repouso por semana a partir de **16/12/2026**. Daí em diante, a 6x1 só pode aparecer em semanas isoladas, dentro de um regime de compensação previsto em convenção ou acordo coletivo.
+
+**Atualizado em 14 de novembro de 2026.**
+Escala 6x1 é a jornada em que o empregado trabalha **6 dias seguidos e folga 1** por semana. Ela foi permitida pela regra de 44 horas semanais com um dia de repouso, mas a **Emenda Constitucional 141/2026** garante 2 dias de repouso por semana a partir de **17/12/2026, pela contagem do art. 8º, § 1º, da LC 95/1998, após decorridos 2 meses da publicação no DOU de 16/10/2026 (Edição extra), nos termos dos arts. 6º, I, e 10, I, da EC 141/2026**. Daí em diante, a 6x1 só pode aparecer em semanas isoladas, dentro de um regime de compensação previsto em convenção ou acordo coletivo.
 
 ## Como a escala 6x1 funciona hoje
 
-Até 15/12/2026, valem três limites: 8 horas por dia, 44 horas por semana e 1 dia de repouso semanal remunerado de 24 horas seguidas, de preferência no domingo (Constituição, art. 7º, XIII e XV; CLT, art. 67). Na 6x1, as 44 horas se dividem em seis dias.
+Até 16 de dezembro de 2026, valem três limites: 8 horas por dia, 44 horas por semana e 1 dia de repouso semanal remunerado de 24 horas seguidas, de preferência no domingo (Constituição, art. 7º, XIII e XV; CLT, art. 67). Na 6x1, as 44 horas se dividem em seis dias.
 
 | Formato | Horas por dia | Total na semana |
 |---|---|---|
@@ -32,11 +37,11 @@ A escala aparece em atividades que abrem seis ou sete dias por semana: comércio
 - **Intervalo para refeição:** pelo menos 1 hora em jornadas acima de 6 horas, e 15 minutos entre 4 e 6 horas (CLT, art. 71).
 - **Descanso entre jornadas:** pelo menos 11 horas seguidas (art. 66).
 - **Repouso semanal:** 24 horas seguidas, somadas às 11 horas de descanso entre jornadas (Súmula 110 do TST).
-- **Domingo ou feriado trabalhado sem folga compensatória:** pago em dobro (Lei 605/1949, art. 9º, e Súmula 146 do TST).
+- **Domingo ou feriado trabalhado sem folga compensatória:** pago em dobro — o domingo, pela Súmula nº 146 do TST, «sem prejuízo da remuneração relativa ao repouso semanal»; o feriado civil ou religioso, pelo art. 9º da Lei 605/1949 e pela mesma súmula.
 
 ## O que a EC 141/2026 mudou
 
-| Regra | Até 15/12/2026 | De 16/12/2026 a 15/12/2027 | A partir de 16/12/2027 |
+| Regra | Até 16 de dezembro de 2026 | De 17/12/2026 a 16 de dezembro de 2027 | A partir de 17/12/2027 |
 |---|---|---|---|
 | Repouso semanal remunerado | 1 dia | 2 dias | 2 dias |
 | Jornada semanal máxima | 44 h | 42 h | 40 h |
@@ -64,11 +69,11 @@ O salário mensal fica igual, e a hora fica 10% mais cara. Para calcular o seu c
 
 ### A escala 6x1 é ilegal?
 
-Até 15/12/2026, não, desde que respeite 44 horas semanais e o repouso semanal. A partir de 16/12/2026, a 6x1 como escala fixa fica incompatível com os 2 repousos garantidos pela Constituição, salvo semanas isoladas em regime de compensação previsto em norma coletiva.
+Até 16 de dezembro de 2026, não, desde que respeite 44 horas semanais e o repouso semanal. A partir de 17/12/2026, a 6x1 como escala fixa fica incompatível com os 2 repousos garantidos pela Constituição, salvo semanas isoladas em regime de compensação previsto em norma coletiva.
 
 ### Trabalhar de segunda a sábado com sábado meio período é 6x1?
 
-Sim. São 6 dias de trabalho e 1 de folga, mesmo que o sábado seja curto. A partir de 16/12/2026, esse formato precisa virar 5x2, com 2 folgas na semana.
+Sim. São 6 dias de trabalho e 1 de folga, mesmo que o sábado seja curto. A partir de 17/12/2026, esse formato precisa virar 5x2, com 2 folgas na semana.
 
 ### Quem trabalha 6x1 tem direito a folgar no domingo?
 
@@ -77,6 +82,8 @@ O repouso é de preferência no domingo. No comércio, a folga precisa coincidir
 ### O salário diminui quando a escala muda para 5x2?
 
 Não. A emenda proíbe qualquer redução salarial por causa da jornada menor.
+
+Para organizar a escala com o teto de 42 horas e os dois repousos semanais, use também o [Empregador em Dia](/empregador-em-dia/) e o [simulador de jornada 42 h](/empregador-em-dia/jornada-42h/).
 
 ## Fontes oficiais
 

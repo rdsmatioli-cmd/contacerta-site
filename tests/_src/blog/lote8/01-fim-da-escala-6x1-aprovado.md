@@ -1,15 +1,20 @@
 ---
 slug: fim-da-escala-6x1-aprovado
 titulo: Fim da escala 6x1 foi aprovado? O que vale e quando
-h1: Fim da escala 6x1 foi aprovado? O que a EC 141/2026 decidiu e quando vale
-descricao: Sim: a EC 141/2026 acabou com a escala 6x1. Veja as datas (42 h em 16/12/2026 e 40 h em 16/12/2027), o salário e as exceções da emenda.
+h1: Fim da escala 6x1 foi aprovado? O que a EC 141/2026 decidiu e quando passa a valer
+descricao: A EC 141/2026 encerrou a escala 6x1. A jornada de 42 h vale a partir de 17/12/2026 (LC 95/1998, art. 8º, § 1º); as 40 h, a partir de 17/12/2027.
+resumo: A EC 141/2026 encerrou a escala 6x1. Veja as datas das duas etapas, o salário e as exceções da emenda.
 categoria: Trabalho e salário
 ordem: 1
-relacionadas: /horas-extras/|Horas extras: valor da hora extra a 50% e 100% com DSR ;; /adicional-noturno/|Adicional noturno: 20% com a hora reduzida e o reflexo no DSR ;; /custo-funcionario/|Custo de funcionário: quanto um empregado CLT custa em 2026
+relacionadas: /horas-extras/|Horas extras: valor da hora extra a 50% e 100% com DSR ;; /adicional-noturno/|Adicional noturno: 20% com a hora reduzida e o reflexo no DSR ;; /custo-funcionario/|Custo de funcionário: quanto um empregado CLT custa em 2026 ;; /empregador-em-dia/|Empregador em Dia: jornada de 42 h e dois repousos
+publicado: 2026-11-12
+modificado: 2026-11-14
 ---
 ## Resposta direta
 
-Sim. O fim da escala 6x1 foi aprovado pelo Congresso e virou a **Emenda Constitucional nº 141/2026**, promulgada e publicada em 16/10/2026. A partir de **16/12/2026**, a jornada normal fica limitada a 42 horas por semana e todo empregado passa a ter **2 dias de repouso semanal remunerado**, um deles de preferência no domingo. Em **16/12/2027**, o limite cai para 40 horas. A emenda proíbe qualquer redução de salário.
+
+**Atualizado em 14 de novembro de 2026.**
+Sim. O fim da escala 6x1 foi aprovado pelo Congresso e virou a **Emenda Constitucional nº 141/2026**, promulgada e publicada em 16/10/2026. A partir de **17/12/2026**, a jornada normal fica limitada a 42 horas por semana e todo empregado passa a ter **2 dias de repouso semanal remunerado**, um deles de preferência no domingo. Em **17/12/2027**, o limite cai para 40 horas. A emenda proíbe qualquer redução de salário.
 
 ## Linha do tempo da aprovação
 
@@ -18,11 +23,11 @@ Sim. O fim da escala 6x1 foi aprovado pelo Congresso e virou a **Emenda Constitu
 | Maio de 2026 | A Câmara aprova em dois turnos a PEC 221/2019, que reuniu as propostas sobre o fim da escala 6x1 |
 | 14/10/2026 | O Senado aprova o texto da Câmara sem mudanças |
 | 16/10/2026 | O Congresso promulga a EC 141/2026, publicada no Diário Oficial no mesmo dia (edição extra) |
-| 16/12/2026 | Começa o limite de 42 horas semanais e valem os 2 repousos semanais remunerados |
+| 17/12/2026 | Começa o limite de 42 horas semanais e valem os 2 repousos semanais remunerados |
 | 16/10/2027 | Prazo final para aditar os contratos com a administração pública que envolvem mão de obra |
-| 16/12/2027 | O limite passa a 40 horas semanais |
+| 17/12/2027 | O limite passa a 40 horas semanais |
 
-A emenda conta as etapas a partir da publicação: a primeira vale "dois meses após" 16/10/2026. Alguns guias falam em 17/12; para não correr risco, organize a escala nova para valer já em 16/12/2026.
+A primeira etapa vale a partir de 17/12/2026, pela contagem do art. 8º, § 1º, da LC 95/1998, após decorridos 2 meses da publicação no DOU de 16/10/2026 (Edição extra), nos termos dos arts. 6º, I, e 10, I, da EC 141/2026. A etapa de 40 horas vale a partir de 17/12/2027 (art. 6º, II).
 
 ## O que mudou na Constituição
 
@@ -41,7 +46,7 @@ Exemplo com salário de R$ 2.400,00:
 
 | Jornada | Divisor mensal | Valor da hora |
 |---|---|---|
-| 44 horas (até 15/12/2026) | 220 | R$ 10,91 |
+| 44 horas (até 16 de dezembro de 2026) | 220 | R$ 10,91 |
 | 42 horas por norma coletiva | 210 | R$ 11,43 |
 | 5 dias de 8 horas (40 horas efetivas) | 200 | R$ 12,00 |
 
@@ -62,22 +67,22 @@ Dois meses depois da publicação, as cláusulas de convenções e acordos colet
 ## O que o empregador precisa fazer agora
 
 1. Listar quem trabalha em 6x1 ou mais de 40 horas por semana.
-2. Montar a nova escala com 2 folgas por semana para valer em 16/12/2026.
+2. Montar a nova escala com 2 folgas por semana para valer em 17/12/2026.
 3. Conferir a convenção coletiva da categoria e o que o sindicato está negociando.
 4. Recalcular o valor da hora na folha (divisor 200 ou 210).
 5. Registrar a alteração no contrato e no eSocial.
 
-O passo a passo completo está no [checklist do empregador para o fim da escala 6x1](/blog/fim-da-escala-6x1-empregador/). Para ver o novo valor da hora extra, use a [calculadora de horas extras](/horas-extras/), que já aplica o divisor de 16/12/2026.
+O passo a passo completo está no [checklist do empregador para o fim da escala 6x1](/blog/fim-da-escala-6x1-empregador/). Para ver o novo valor da hora extra, use a [calculadora de horas extras](/horas-extras/), que aplica o divisor conforme a competência informada. A vigência da EC 141 neste guia segue o parecer jurídico (17/12/2026, LC 95/1998); as calculadoras do site ainda usam o padrão de sistema descrito na página de cada ferramenta.
 
 ## Perguntas frequentes
 
 ### A escala 6x1 acabou de vez?
 
-Como regra geral, sim. A partir de 16/12/2026 todo empregado tem direito a 2 dias de repouso semanal remunerado, o que impede trabalhar seis dias seguidos com uma folga. Regimes especiais, como a 12x36, dependem de acordo ou convenção coletiva.
+Como regra geral, sim. A partir de 17/12/2026 todo empregado tem direito a 2 dias de repouso semanal remunerado, o que impede trabalhar seis dias seguidos com uma folga. Regimes especiais, como a 12x36, dependem de acordo ou convenção coletiva.
 
 ### Quando o fim da escala 6x1 começa a valer?
 
-Em 16/12/2026, dois meses depois da publicação da EC 141/2026, com limite de 42 horas semanais. O limite de 40 horas vale a partir de 16/12/2027.
+Em 17/12/2026, dois meses depois da publicação da EC 141/2026, com limite de 42 horas semanais. O limite de 40 horas vale a partir de 17/12/2027.
 
 ### O salário vai diminuir com a jornada menor?
 
@@ -90,6 +95,8 @@ Sim, quando prevista em acordo ou convenção coletiva e respeitados os novos li
 ### MEI e pequena empresa têm prazo maior?
 
 Por enquanto não. A emenda permite que uma lei complementar crie medidas transitórias para MEI, microempresas e empresas de pequeno porte, mas até essa lei existir valem as mesmas datas para todos.
+
+Para organizar a escala com o teto de 42 horas e os dois repousos semanais, use também o [Empregador em Dia](/empregador-em-dia/) e o [simulador de jornada 42 h](/empregador-em-dia/jornada-42h/).
 
 ## Fontes oficiais
 
