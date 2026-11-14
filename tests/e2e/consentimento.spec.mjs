@@ -274,10 +274,12 @@ const rolagemParada = (page) => page.evaluate(() => new Promise((ok) => {
   };
   requestAnimationFrame(passo);
 }));
-async function tabsComAviso(page, url, n = 40) {
+// `preparar` roda com o aviso aberto, antes da conferência do espaço e dos Tabs (abrir a nota, por exemplo).
+async function tabsComAviso(page, url, preparar = async () => {}, n = 40) {
   await page.goto(url);
   await expect(banner(page)).toBeVisible();
   await assentar(page);
+  await preparar(page);
   const espaco = await page.evaluate(() => [parseFloat(getComputedStyle(document.body).paddingBottom), document.getElementById('lcm-consent').getBoundingClientRect().height]);
   expect(espaco[0], 'o body ganha embaixo pelo menos a altura do aviso').toBeGreaterThanOrEqual(espaco[1]);
   await vigiarFoco(page);
@@ -316,6 +318,62 @@ for (const url of ['/blog/pro-labore/', '/blog/decimo-terceiro-2026/']) {
     });
   }
 }
+// CC-SITE-09 com o aviso 1.1 (PR #68): acima de 720 px de largura o lcm-consent.css não limitava a altura do aviso (442
+// px, 543 com a nota de aceite incompleto ou com Configurar aberto). No celular deitado e em tela baixa, o topo dele e o
+// título "Cookies de medição" ficavam acima da tela, sem como rolar (844x390: -68 px; 740x360: -143 px; 853x480, que é
+// 1280x720 com zoom de 150%, com a nota: -79 px), e o aviso cobria a tela inteira: os 25 primeiros Tabs fora dele
+// ficavam inteiramente atrás dele. O aviso cabe na tela, com Aceitar e Recusar dentro dele, e o título está à vista ou,
+// com a nota (o componente rola o texto até a caixa de transferência), volta a ela rolando o texto até o começo.
+async function avisoNaTela(page, quando) {
+  const av = banner(page);
+  const caixa = await av.evaluate((el) => { const r = el.getBoundingClientRect(); return { topo: Math.round(r.top), base: Math.round(innerHeight - r.bottom) }; });
+  expect(caixa.topo, `topo do aviso dentro da tela ${quando}`).toBeGreaterThanOrEqual(0);
+  expect(caixa.base, `base do aviso dentro da tela ${quando}`).toBeGreaterThanOrEqual(0);
+  for (const b of ['aceitar', 'recusar']) await expect(av.locator(`[data-lcmc="${b}"]`), `${b} inteiro à vista ${quando}`).toBeInViewport({ ratio: 1 });
+  await av.evaluate((el) => { el.scrollTop = 0; el.querySelector('.lcmc-scroll').scrollTop = 0; });
+  await expect(av.locator('#lcmc-titulo'), `título do aviso à vista ${quando}`).toBeInViewport({ ratio: 1 });
+}
+// Abre a nota (Aceitar medição sem a caixa de transferência) e leva o foco para fora do aviso, que é o último elemento
+// da página: o Tab seguinte começa do topo, como na primeira visita.
+async function abrirNota(page) {
+  await banner(page).locator('[data-lcmc="aceitar"]').click();
+  await expect(banner(page).locator('#lcmc-nota')).toBeVisible();
+  await avisoNaTela(page, 'com a nota aberta');
+  for (let i = 0; i < 10 && await page.evaluate(() => document.getElementById('lcm-consent').contains(document.activeElement)); i++) await page.keyboard.press('Tab');
+  expect(await page.evaluate(() => document.activeElement === document.body), 'o foco saiu do aviso').toBe(true);
+}
+const TELAS_BAIXAS = [
+  { projeto: '390px', largura: 844, altura: 390, nome: 'celular deitado' },
+  { projeto: '390px', largura: 915, altura: 412, nome: 'celular deitado' },
+  { projeto: '390px', largura: 740, altura: 360, nome: 'celular deitado' },
+  { projeto: '1280px', largura: 853, altura: 480, nome: '1280x720 com zoom de 150%' },
+];
+for (const t of TELAS_BAIXAS) {
+  test(`aviso em ${t.largura}x${t.altura} (${t.nome}): cabe na tela, com o título à vista, ao abrir, com a nota e com Configurar aberto`, async ({ page }, info) => {
+    test.skip(info.project.name !== t.projeto, `tela de ${t.nome}: só no projeto ${t.projeto}`);
+    await page.setViewportSize({ width: t.largura, height: t.altura });
+    await page.goto('/salario-liquido/');
+    await expect(banner(page)).toBeVisible();
+    await assentar(page);
+    await avisoNaTela(page, 'ao abrir');
+    await banner(page).locator('[data-lcmc="aceitar"]').click();
+    await expect(banner(page).locator('#lcmc-nota')).toBeVisible();
+    await avisoNaTela(page, 'com a nota aberta');
+    await banner(page).locator('[data-lcmc="configurar"]').click();
+    await expect(banner(page).locator('#lcmc-prefs')).toBeVisible();
+    await avisoNaTela(page, 'com Configurar aberto');
+    for (const sel of ['[data-lcmc-medicao]', '[data-lcmc="salvar"]', '[data-lcmc="recusar-medicao"]']) {
+      await expect(banner(page).locator(sel), `${sel} da camada de preferências ao alcance`).toBeInViewport({ ratio: 1 });
+    }
+  });
+  test(`/salario-liquido/ em ${t.largura}x${t.altura} (${t.nome})${t.projeto === '1280px' ? ', com a nota aberta' : ''}: o foco do teclado nunca fica atrás do aviso (40 Tabs)`, async ({ page }, info) => {
+    test.skip(info.project.name !== t.projeto, `tela de ${t.nome}: só no projeto ${t.projeto}`);
+    test.setTimeout(60_000);
+    await page.setViewportSize({ width: t.largura, height: t.altura });
+    await tabsComAviso(page, '/salario-liquido/', t.projeto === '1280px' ? abrirNota : (p) => avisoNaTela(p, 'ao abrir'));
+  });
+}
+
 // Rolagem da própria pessoa logo depois do Tab (dentro de 1 s): a conferência do medicao.js não a desfaz. Antes, Tab,
 // 200 ms e PageUp levavam a página de 2278 para 1652 e ela voltava sozinha para 2278; com a seta para cima, o mesmo.
 for (const [tecla, minimo] of [['PageUp', 200], ['ArrowUp', 20]]) {

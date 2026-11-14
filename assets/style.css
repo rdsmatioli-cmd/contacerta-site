@@ -446,6 +446,18 @@ input,select,textarea{max-width:100%;box-sizing:border-box}
 /* CC-SITE-09: com o aviso de cookies aberto (classe posta pelo assets/js/medicao.js), o sumário dos posts deixa de ser
    sticky. Preso na tela, ele não sai de trás do aviso quando a página rola, e os últimos itens ficavam cobertos pelo Tab. */
 @media (min-width:1024px){html.cc-aviso-aberto .post-grade .sumario{position:static}}
+/* CC-SITE-09 com o aviso 1.1: o lcm-consent.css só limita a altura do aviso até 720 px de largura. Acima disso ele tinha
+   442 px (543 com a nota ou com Configurar aberto), sem rolagem: no celular deitado e em tela baixa o topo e o título
+   ficavam acima da tela e o aviso cobria todo o foco (WCAG 1.4.10 e 2.4.11). Aqui a altura fica limitada em toda largura
+   e, até 640 px de altura, vale o arranjo do celular do componente: o texto rola e a nota, os botões e a camada de
+   preferências ficam fora dessa rolagem. O componente (assets/lcm-consent.*) fica intacto; até 720 px valem as regras dele,
+   que vêm depois desta folha. Texto, ordem e paridade de Aceitar medição e Recusar não mudam (G-06). */
+.lcmc{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-x:hidden;overflow-y:auto}
+@media (max-height:640px){
+  .lcmc{display:flex;flex-direction:column}
+  .lcmc-scroll{overflow-y:auto;min-height:0;max-height:22vh;-webkit-overflow-scrolling:touch}
+  .lcmc-fixo{flex:none;background:var(--lcmc-bg,#ffffff);padding-top:8px}
+}
 
 /* Guia completo nas calculadoras: um card só (post do blog), na largura do texto. */
 .relacionadas.guia-completo .cards{grid-template-columns:1fr;max-width:780px}
